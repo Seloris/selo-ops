@@ -3,6 +3,7 @@ import type { Database } from "./db/client.js";
 import { healthRoutes } from "./features/health/health.routes.js";
 import { createDesktopSessionReader } from "./features/sessions/sessions.desktop.js";
 import { createOpsExportReader } from "./features/sessions/sessions.export.js";
+import { createInstalledPluginReader } from "./features/sessions/sessions.plugins.js";
 import { createOutsideSessionReader } from "./features/sessions/sessions.outside.js";
 import { createDesktopSessionLinkRepository, createSessionArchiveRepository } from "./features/sessions/sessions.repository.js";
 import { sessionsRoutes } from "./features/sessions/sessions.routes.js";
@@ -19,10 +20,12 @@ export interface AppContext {
   claudeSessionsDir: string;
   // Claude Code's transcripts, read for the sessions outside selo only, never written.
   claudeProjectsDir: string;
+  // Claude Code's list of installed plugins, read on each list for the selo plugins' versions, never written.
+  claudePluginsFile: string;
 }
 
 // No sign-in: a local dashboard of the developer's own sessions, every route is public.
-export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjectsDir }: AppContext) {
+export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile }: AppContext) {
   const app = express();
   app.use(express.json());
   app.use(healthRoutes({ clock }));
@@ -32,6 +35,7 @@ export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjects
     archives: createSessionArchiveRepository(db),
     desktopSessions: createDesktopSessionReader(claudeSessionsDir),
     desktopLinks: createDesktopSessionLinkRepository(db),
+    installedPlugins: createInstalledPluginReader(claudePluginsFile),
     clock,
   });
   app.use(sessionsRoutes({ sessions }));

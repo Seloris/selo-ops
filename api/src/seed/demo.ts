@@ -1,5 +1,5 @@
 import { mkdirSync, utimesSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import type { Database } from "../db/client.js";
 import type { ExportRun, ExportRunUsage, ExportUsage, ProjectFile, SessionFile } from "../features/sessions/sessions.export.js";
 import { normRoot, type RunningStatusFile } from "../features/sessions/sessions.outside.js";
@@ -301,6 +301,8 @@ export interface DemoFolders {
   // Claude Code's status files and transcripts the demo writes, for the sessions outside selo.
   claudeSessionsDir: string;
   claudeProjectsDir: string;
+  // Claude Code's list of installed plugins the demo writes: selo at two versions across projects.
+  claudePluginsFile: string;
   // The projects' folders, real ones: a session outside selo finds its repository from its folder.
   codeDir: string;
   // A folder in no repository.
@@ -356,12 +358,34 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
       touchedFiles: s.files ?? [], close: { ok: s.blockers.length === 0, blockers: s.blockers },
       runs: [...subagents, current], current,
     };
+    // A session with usage was written by a recent export, one without by an export older than the field.
+    if (usage) file.writtenBy = DEMO_SELO_OPS_VERSION;
     if (usage) file.usage = sumUsage([current, ...subagents].flatMap((r) => (r.usage ? [r.usage] : [])));
     writeJson(join(opsDir, "sessions"), `${s.id}.json`, file);
     if (s.permission !== undefined) seedPermissionWait(folders, file, s.permission, now - s.age * 1000);
     if (s.archivedAge !== undefined) await archives.save({ sessionId: s.id, runId: current.id, archivedAt: new Date(now - s.archivedAge * 1000) });
   }
   seedOutside(folders, ROOT, now);
+  seedInstalledPlugins(folders.claudePluginsFile, ROOT);
+}
+
+const DEMO_SELO_OPS_VERSION = "2.2.1";
+
+function seedInstalledPlugins(file: string, root: string) {
+  const entry = (version: string, projectPath?: string) => ({
+    scope: projectPath ? "project" : "user",
+    ...(projectPath ? { projectPath } : {}),
+    installPath: `${root}/.plugins/${version}`,
+    version,
+  });
+  const [first, second] = Object.keys(PROJECTS);
+  writeJson(dirname(file), basename(file), {
+    version: 2,
+    plugins: {
+      "selo@selo": [entry("2.2.0", `${root}/${first}`), entry("2.1.0", `${root}/${second}`)],
+      "selo-ops@selo": [entry(DEMO_SELO_OPS_VERSION)],
+    },
+  });
 }
 
 // A running process of the export's session that waits on a permission dialog since `since`: its status file (the demo's

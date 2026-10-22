@@ -36,7 +36,7 @@ describe("sessions routes", () => {
       const body = await list();
 
       // Assert
-      expect(body).toEqual({ sessions: [], projects: [] });
+      expect(body).toEqual({ sessions: [], projects: [], plugins: [] });
     });
 
     it.each([

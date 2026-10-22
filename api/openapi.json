@@ -217,6 +217,12 @@
           "isOutsideSelo": {
             "type": "boolean"
           },
+          "writtenBy": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -259,6 +265,7 @@
           "touchedFiles",
           "desktopLink",
           "isOutsideSelo",
+          "writtenBy",
           "createdAt",
           "updatedAt"
         ]
@@ -496,6 +503,29 @@
           "changedCount"
         ]
       },
+      "InstalledPlugin": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "selo",
+              "selo-ops"
+            ]
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "name",
+          "versions"
+        ]
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -589,11 +619,18 @@
                       "items": {
                         "$ref": "#/components/schemas/Project"
                       }
+                    },
+                    "plugins": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InstalledPlugin"
+                      }
                     }
                   },
                   "required": [
                     "sessions",
-                    "projects"
+                    "projects",
+                    "plugins"
                   ]
                 }
               }

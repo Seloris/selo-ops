@@ -2,6 +2,7 @@ import { NotFoundError } from "../../shared/errors.js";
 import type { Clock } from "../../shared/clock.js";
 import { desktopSessionIdOf, toDesktopLink, type DesktopSessionReader } from "./sessions.desktop.js";
 import type { ExportRun, ExportUsage, OpsExportReader, ProjectFile, SessionFile } from "./sessions.export.js";
+import type { InstalledPluginReader } from "./sessions.plugins.js";
 import type { GitPlace, OutsideSession, OutsideSessionReader, PermissionWait } from "./sessions.outside.js";
 import type { DesktopSessionLinkRepository, SessionArchiveRepository } from "./sessions.repository.js";
 import type { SessionArchive } from "./sessions.table.js";
@@ -140,6 +141,7 @@ function toSession(
     touchedFiles: file.touchedFiles ?? [],
     desktopLink: toDesktopLink(desktopSessionId),
     isOutsideSelo: false,
+    writtenBy: file.writtenBy ?? null,
     createdAt: new Date(createdAt).toISOString(),
     updatedAt: new Date(file.writtenAt).toISOString(),
   };
@@ -194,6 +196,7 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     // Computed from the status file on each read, never stored: the link table keeps the export's sessions only.
     desktopLink: toDesktopLink(desktopSessionIdOf(status) ?? undefined),
     isOutsideSelo: true,
+    writtenBy: null,
     createdAt: new Date(transcript?.startedAt ?? status.startedAt).toISOString(),
     updatedAt: new Date(updatedAt).toISOString(),
   };
@@ -205,6 +208,7 @@ export function createSessionService({
   archives,
   desktopSessions,
   desktopLinks,
+  installedPlugins,
   clock,
 }: {
   opsExport: OpsExportReader;
@@ -212,6 +216,7 @@ export function createSessionService({
   archives: SessionArchiveRepository;
   desktopSessions: DesktopSessionReader;
   desktopLinks: DesktopSessionLinkRepository;
+  installedPlugins: InstalledPluginReader;
   clock: Clock;
 }) {
   // `session` BR-11: a link seen in a status file is kept, the file goes when the process ends.
@@ -274,6 +279,7 @@ export function createSessionService({
           ...outside.map((o) => toOutsideSession(o, byId.get(o.status.sessionId))),
         ],
         projects: projectsOf([...exportIds, ...outside.map(projectIdOfOutside)], projects, outsideGit),
+        plugins: installedPlugins.read(),
       };
     },
 

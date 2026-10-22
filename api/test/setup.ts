@@ -109,6 +109,12 @@ function createCodeDir() {
   return { dir, folder, repo, worktree, clear };
 }
 
+// Claude Code's list of installed plugins: a file in another temporary folder, removed by reset().
+function createPluginsFile() {
+  const file = join(mkdtempSync(join(tmpdir(), "selo-ops-plugins-")), "installed_plugins.json");
+  return { file, write: (content: string) => writeFileSync(file, content), clear: () => rmSync(file, { force: true }) };
+}
+
 export async function createTestContext() {
   const db: Database = openDatabase();
   await migrateDatabase(db);
@@ -117,8 +123,23 @@ export async function createTestContext() {
   const statuses = createStatusDir();
   const transcripts = createClaudeProjectsDir();
   const code = createCodeDir();
-  const app = createApp({ db, clock, opsDir: ops.dir, claudeSessionsDir: statuses.dir, claudeProjectsDir: transcripts.dir });
-  const seed = { ...ops.seed, status: statuses.status, rawStatus: statuses.raw, running: statuses.running, transcript: transcripts.transcript };
+  const plugins = createPluginsFile();
+  const app = createApp({
+    db,
+    clock,
+    opsDir: ops.dir,
+    claudeSessionsDir: statuses.dir,
+    claudeProjectsDir: transcripts.dir,
+    claudePluginsFile: plugins.file,
+  });
+  const seed = {
+    ...ops.seed,
+    status: statuses.status,
+    rawStatus: statuses.raw,
+    running: statuses.running,
+    transcript: transcripts.transcript,
+    plugins: plugins.write,
+  };
   const reset = async () => {
     const tables = await db.execute<{ table_name: string }>(sql`
       select table_name from information_schema.tables
@@ -131,6 +152,7 @@ export async function createTestContext() {
     statuses.clear();
     transcripts.clear();
     code.clear();
+    plugins.clear();
     clock.set(EPOCH);
   };
   return { app, db, clock, seed, code, reset, clearStatus: statuses.clear };

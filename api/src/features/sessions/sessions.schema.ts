@@ -98,6 +98,8 @@ export const sessionSchema = z
     // A running Claude Code process with no file in the ops export (`session` BR-12): its lane is `outside`, and it has no
     // recap, commits, blockers, subagents, files touched, effort nor permissions, which only the export gives.
     isOutsideSelo: z.boolean(),
+    // The version of the selo-ops plugin that wrote the session's export file; null outside selo or in an older export.
+    writtenBy: z.string().nullable(),
     // `session` BR-15: the first dated line of its transcript, else its oldest run kept, else its process's start.
     createdAt: z.iso.datetime(),
     updatedAt: z.iso.datetime(),
@@ -114,15 +116,24 @@ export const projectSchema = z
   })
   .meta({ id: "Project" });
 
+// `session` BR-01: a selo plugin Claude Code lists as installed, its distinct versions highest first (several for a
+// plugin installed per project at different versions).
+export const installedPluginSchema = z
+  .object({ name: z.enum(["selo", "selo-ops"]), versions: z.array(z.string()).min(1) })
+  .meta({ id: "InstalledPlugin" });
+
 export const sessionsResponseSchema = z.object({
   sessions: z.array(sessionSchema),
   projects: z.array(projectSchema),
+  // Empty when Claude Code's list of installed plugins is missing or unreadable.
+  plugins: z.array(installedPluginSchema),
 });
 
 export const sessionParamsSchema = z.object({ id: z.string().min(1) });
 
 export type Session = z.infer<typeof sessionSchema>;
 export type Project = z.infer<typeof projectSchema>;
+export type InstalledPlugin = z.infer<typeof installedPluginSchema>;
 export type SessionsResponse = z.infer<typeof sessionsResponseSchema>;
 export type SessionState = z.infer<typeof sessionStateSchema>;
 export type CloseBlocker = z.infer<typeof closeBlockerSchema>;

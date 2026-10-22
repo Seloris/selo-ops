@@ -15,6 +15,7 @@ async function demoApp() {
     opsDir: join(dir, "selo"),
     claudeSessionsDir: join(dir, "claude", "sessions"),
     claudeProjectsDir: join(dir, "claude", "projects"),
+    claudePluginsFile: join(dir, "claude", "plugins", "installed_plugins.json"),
     codeDir: join(dir, "code"),
     scratchDir: join(dir, "scratch"),
   };
@@ -58,5 +59,23 @@ describe("demo", () => {
     expect(sessions.some((s) => s.usage === null)).toBe(true);
     // The session whose export model is null takes its run's.
     expect(sessions.find((s) => s.id === "d3b16f74-e0a9-4c25-87d1-4f9e2b6c0a58")?.model).toBe("claude-sonnet-5-5");
+  });
+
+  it("lists sessions with and without a writer version, and selo installed at two versions", async () => {
+    // Arrange
+    const app = await demoApp();
+
+    // Act
+    const res = await request(app).get("/v1/sessions");
+
+    // Assert
+    const { sessions, plugins } = sessionsResponseSchema.parse(res.body);
+    const exported = sessions.filter((s) => !s.isOutsideSelo);
+    expect(exported.some((s) => s.writtenBy !== null)).toBe(true);
+    expect(exported.some((s) => s.writtenBy === null)).toBe(true);
+    expect(plugins).toEqual([
+      { name: "selo", versions: ["2.2.0", "2.1.0"] },
+      { name: "selo-ops", versions: ["2.2.1"] },
+    ]);
   });
 });

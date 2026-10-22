@@ -12,6 +12,7 @@ createApp({
   opsDir: config.opsDir,
   claudeSessionsDir: config.claudeSessionsDir,
   claudeProjectsDir: config.claudeProjectsDir,
+  claudePluginsFile: config.claudePluginsFile,
 }).listen(config.PORT, () => {
   console.log(`api listening on http://localhost:${config.PORT}, reading ${config.opsDir}`);
 });

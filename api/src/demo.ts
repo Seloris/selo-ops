@@ -16,13 +16,14 @@ const folders = {
   opsDir: join(demoDir, "selo"),
   claudeSessionsDir: join(demoDir, "claude", "sessions"),
   claudeProjectsDir: join(demoDir, "claude", "projects"),
+  claudePluginsFile: join(demoDir, "claude", "plugins", "installed_plugins.json"),
   codeDir: join(demoDir, "code"),
   scratchDir: join(demoDir, "scratch"),
 };
 const db = openDatabase();
 await migrateDatabase(db);
 await seedDemo(db, systemClock, folders);
-const { opsDir, claudeSessionsDir, claudeProjectsDir } = folders;
-createApp({ db, clock: systemClock, opsDir, claudeSessionsDir, claudeProjectsDir }).listen(port, () => {
+const { opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile } = folders;
+createApp({ db, clock: systemClock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile }).listen(port, () => {
   console.log(`api demo listening on http://localhost:${port}, reading ${demoDir}`);
 });
