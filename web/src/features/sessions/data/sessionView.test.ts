@@ -49,6 +49,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     touchedFiles: [],
     desktopLink: null,
     isOutsideSelo: false,
+    createdAt: ago(60),
     updatedAt: ago(1),
     ...overrides,
   };

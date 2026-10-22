@@ -9,6 +9,15 @@ const units = () => ({ s: t("app.age.s"), min: t("app.age.min"), h: t("app.age.h
 
 export const age = (ms: number) => formatAge(ms, units());
 
+// sessions-live FR-19: the day and time the session was created, with its year only when it is not the current one.
+export function createdText(iso: string, now: number): string {
+  const at = new Date(iso);
+  const isThisYear = at.getFullYear() === new Date(now).getFullYear();
+  const day = at.toLocaleDateString("fr-FR", { day: "numeric", month: "short", ...(isThisYear ? {} : { year: "numeric" }) });
+  const time = at.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  return t("sessions.detail.created", { day, time });
+}
+
 export const stateLabel = (s: Session) => t(`sessions.state.${s.state}` as MessageKey);
 
 export const laneLabel = (lane: string) => (lane === "free" ? t("sessions.lane.free") : lane);

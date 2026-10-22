@@ -9,6 +9,7 @@ import {
   calmText,
   changedText,
   closeText,
+  createdText,
   desktopLinkOf,
   laneTone,
   modelText,
@@ -52,10 +53,35 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     touchedFiles: [],
     desktopLink: null,
     isOutsideSelo: false,
+    createdAt: ago(60),
     updatedAt: ago(1),
     ...overrides,
   };
 }
+
+describe("createdText", () => {
+  it("gives the day and time of a session created this year", () => {
+    // Arrange
+    const created = new Date(2026, 9, 22, 7, 5).toISOString();
+
+    // Act
+    const text = createdText(created, NOW);
+
+    // Assert
+    expect(text).toBe("créée le 22 oct. à 07:05");
+  });
+
+  it("adds the year of a session created an earlier year", () => {
+    // Arrange
+    const created = new Date(2025, 11, 3, 17, 41).toISOString();
+
+    // Act
+    const text = createdText(created, NOW);
+
+    // Assert
+    expect(text).toBe("créée le 3 déc. 2025 à 17:41");
+  });
+});
 
 describe("ageDisplay", () => {
   it("shows the plain age of a fresh open session", () => {

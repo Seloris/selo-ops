@@ -139,6 +139,7 @@
   "sessions.detail.closeHint": "Fermer (Échap)",
   "sessions.detail.resize": "Glisser pour régler la largeur du détail (flèches ← →, double-clic : largeur par défaut)",
   "sessions.detail.updated": "mis à jour il y a {age}",
+  "sessions.detail.created": "créée le {day} à {time}",
   "sessions.detail.awaited": "Ce qui est attendu",
   "sessions.detail.canClose": "Peut-on fermer la session ?",
   "sessions.detail.recap": "Récap et commits",

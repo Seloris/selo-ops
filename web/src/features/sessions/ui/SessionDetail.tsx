@@ -10,7 +10,7 @@ import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
 import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, requestText, shownBlockers, stateLabel } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, shownBlockers, stateLabel } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 
 // sessions-live FR-19 to FR-23: everything the export knows of one session, and its actions. A session outside selo
@@ -62,6 +62,7 @@ export function SessionDetail({
             </span>
           )}
           <span className={styles.mono}><LaneLabel session={s} /></span>
+          <span>{createdText(s.createdAt, now)}</span>
           <span>{t("sessions.detail.updated", { age: age(ageMs({ ...s, isArchived: false }, now)) })}</span>
         </div>
         <div className={styles.actions}>

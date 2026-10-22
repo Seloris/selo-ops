@@ -204,6 +204,8 @@ export interface components {
             desktopLink: string | null;
             isOutsideSelo: boolean;
             /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
             updatedAt: string;
         };
         /** @enum {string} */
