@@ -174,7 +174,56 @@ describe("sessions usage", () => {
       const session = await only();
 
       // Assert
-      expect(session).toMatchObject({ isOutsideSelo: true, model: SONNET, usage: null, runUsage: null });
+      expect(session).toMatchObject({ isOutsideSelo: true, model: SONNET, usage: null, runUsage: null, runs: [], isRunListCut: false });
+    });
+
+    it("lists every main run of the session, oldest first, with its cleaned request and usage, never a subagent", async () => {
+      // Arrange
+      const tokens = buildTokens({ output: 7 });
+      const runUsage = buildRunUsage({ calls: 3, tokens, byModel: [{ model: SONNET, calls: 3, tokens }] });
+      const first = buildRun({ since: "2026-01-01T08:00:00.000Z", request: "<ide_selection>x</ide_selection>Why one prompt?", usage: runUsage });
+      const unreadable = buildRun({ since: "2026-01-01T08:30:00.000Z", request: null, usage: null });
+      const current = buildRun({ since: "2026-01-01T09:00:00.000Z", request: "x".repeat(200), usage: runUsage });
+      const agent = buildRun({ agentId: "a-1", request: "selo:runner", since: "2026-01-01T09:01:00.000Z", usage: runUsage });
+      ctx.seed.session(buildSessionFile({ current, runs: [agent, current, unreadable, first] }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.runs).toEqual([
+        { since: "2026-01-01T08:00:00.000Z", request: "Why one prompt?", isRequestCut: false, usage: { calls: 3, tokens, byModel: [{ model: SONNET, calls: 3, tokens }] } },
+        { since: "2026-01-01T08:30:00.000Z", request: "", isRequestCut: false, usage: null },
+        { since: "2026-01-01T09:00:00.000Z", request: "x".repeat(200), isRequestCut: true, usage: { calls: 3, tokens, byModel: [{ model: SONNET, calls: 3, tokens }] } },
+      ]);
+      expect(session.isRunListCut).toBe(false);
+    });
+
+    it("says the run list is cut once the export holds its 100 runs, subagents included", async () => {
+      // Arrange
+      const current = buildRun({ since: "2026-01-01T09:00:00.000Z" });
+      const agents = Array.from({ length: 99 }, (_, i) => buildRun({ agentId: `a-${i}`, since: "2026-01-01T09:01:00.000Z" }));
+      ctx.seed.session(buildSessionFile({ current, runs: [current, ...agents] }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.runs).toHaveLength(1);
+      expect(session.isRunListCut).toBe(true);
+    });
+
+    it("does not say the run list is cut while the export holds fewer than 100 runs", async () => {
+      // Arrange
+      const current = buildRun({ since: "2026-01-01T09:00:00.000Z" });
+      const agents = Array.from({ length: 98 }, (_, i) => buildRun({ agentId: `a-${i}`, since: "2026-01-01T09:01:00.000Z" }));
+      ctx.seed.session(buildSessionFile({ current, runs: [current, ...agents] }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.isRunListCut).toBe(false);
     });
   });
 });

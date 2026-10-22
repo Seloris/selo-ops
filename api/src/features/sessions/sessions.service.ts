@@ -56,6 +56,9 @@ function projectsOf(ids: string[], projectFiles: ProjectFile[], outsideGit: Map<
   });
 }
 
+// The export keeps a session's latest 100 runs, subagents included.
+const EXPORT_MAX_RUNS = 100;
+
 const BLOCKERS = new Set<string>(closeBlockerSchema.options);
 
 // The `Usage` part of a run's usage: a subagent's tools, skills and prompts stay off the 5 s poll.
@@ -138,6 +141,14 @@ function toSession(
     })),
     usage: usageOf(file.usage),
     runUsage: current.usage ?? null,
+    runs: file.runs
+      .filter((r) => !r.agentId)
+      .sort((a, b) => Date.parse(a.since) - Date.parse(b.since))
+      .map((r) => {
+        const request = cleanRequest(r.request ?? "");
+        return { since: r.since, request: request.text, isRequestCut: request.isCut, usage: usageOf(r.usage) };
+      }),
+    isRunListCut: file.runs.length >= EXPORT_MAX_RUNS,
     touchedFiles: file.touchedFiles ?? [],
     desktopLink: toDesktopLink(desktopSessionId),
     isOutsideSelo: false,
@@ -192,6 +203,8 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     // `session` BR-18: only the export gives usage.
     usage: null,
     runUsage: null,
+    runs: [],
+    isRunListCut: false,
     touchedFiles: [],
     // Computed from the status file on each read, never stored: the link table keeps the export's sessions only.
     desktopLink: toDesktopLink(desktopSessionIdOf(status) ?? undefined),

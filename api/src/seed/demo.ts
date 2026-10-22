@@ -39,6 +39,8 @@ interface DemoSession {
   archivedAge?: number;
   // The shell command its running process waits on a permission dialog to run (`session` BR-16), since `age`.
   permission?: string;
+  // Earlier free prompts, each a main run of its own before the current one (sessions-live FR-36); null when unreadable.
+  earlier?: (string | null)[];
 }
 
 const PROJECTS: Record<string, { branch: string; changed: number }> = {
@@ -117,6 +119,7 @@ const SESSIONS: DemoSession[] = [
     commits: [{ sha: "c7d21f0", subject: "fix(catalog): keep size filter on back navigation" }],
     files: ["web/src/features/catalog/ui/SizeFilter.tsx", ".planning/pages/catalog.md"] },
   { id: "d3b16f74-e0a9-4c25-87d1-4f9e2b6c0a58", project: "selo-ops", lane: "free", phase: "job-done", age: 7500,
+    earlier: ["Pourquoi cette session n’a qu’une demande ?", null, "fait un .bat stp"],
     request: "Ajouter un script npm run app:demo à la racine", model: null, effort: "low", perms: "acceptEdits", blockers: ["dirty-files"],
     recap: "Script app:demo ajouté : il lance l’API et le web en démo, sur le créneau du worktree.",
     commits: [{ sha: "9b0e4d3", subject: "tools(tooling): add app:demo script" }], files: ["package.json", "selo-run.mjs"] },
@@ -351,16 +354,22 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
         ...(usage ? { usage: agentModel ? agentUsageOf(agentModel, 180_000 - i * 70_000) : null } : {}),
       };
     });
+    const earlier: ExportRun[] = (s.earlier ?? []).map((request, i, all) => ({
+      ...current, id: `${s.id}:0-${i}`, request, phase: "job-done", blueprint: null, pendingCommit: null, question: null, error: null,
+      recap: null, commits: [], resumePrompt: null,
+      since: at(s.age + 600 + (all.length - i) * 900), updatedAt: at(s.age + 540 + (all.length - i) * 900),
+      ...(usage ? { usage: agentUsageOf(usage.model, 60_000 + i * 25_000) } : {}),
+    }));
     const root = rootOf(s);
     const file: SessionFile = {
       schemaVersion: 1, writtenAt: at(s.age), sessionId: s.id, root, rootKey: keyOf(root), repo: repoOf(s.project),
       status: s.isClosed ? "ended" : "live", model: s.model, permissionMode: s.perms, effort: s.effort,
       touchedFiles: s.files ?? [], close: { ok: s.blockers.length === 0, blockers: s.blockers },
-      runs: [...subagents, current], current,
+      runs: [...subagents, current, ...[...earlier].reverse()], current,
     };
     // A session with usage was written by a recent export, one without by an export older than the field.
     if (usage) file.writtenBy = DEMO_SELO_OPS_VERSION;
-    if (usage) file.usage = sumUsage([current, ...subagents].flatMap((r) => (r.usage ? [r.usage] : [])));
+    if (usage) file.usage = sumUsage([current, ...subagents, ...earlier].flatMap((r) => (r.usage ? [r.usage] : [])));
     writeJson(join(opsDir, "sessions"), `${s.id}.json`, file);
     if (s.permission !== undefined) seedPermissionWait(folders, file, s.permission, now - s.age * 1000);
     if (s.archivedAge !== undefined) await archives.save({ sessionId: s.id, runId: current.id, archivedAt: new Date(now - s.archivedAge * 1000) });

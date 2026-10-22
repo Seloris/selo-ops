@@ -91,6 +91,11 @@ export const sessionSchema = z
     // export wrote before 2.2.0.
     usage: usageSchema.nullable(),
     runUsage: runUsageSchema.nullable(),
+    // Every main run the export keeps, oldest first: its request, cleaned (`session` BR-10), "" when unreadable, and its
+    // usage, null before its first stop or in an export older than 2.2.0. Empty for a session outside selo.
+    runs: z.array(z.object({ since: z.iso.datetime(), request: z.string(), isRequestCut: z.boolean(), usage: usageSchema.nullable() })),
+    // True once the export holds its 100 runs, subagents included: the oldest ones may be gone.
+    isRunListCut: z.boolean(),
     touchedFiles: z.array(z.string()),
     // `claude://claude.ai/epitaxy/local_{uuid}`, opening the session in the Claude desktop app; null for a session
     // the desktop app did not start, or that Selo Ops never saw running (`session` BR-11).

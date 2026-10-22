@@ -202,6 +202,36 @@
           "runUsage": {
             "$ref": "#/components/schemas/RunUsage"
           },
+          "runs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "since": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "isRequestCut": {
+                  "type": "boolean"
+                },
+                "usage": {
+                  "$ref": "#/components/schemas/Usage"
+                }
+              },
+              "required": [
+                "since",
+                "request",
+                "isRequestCut",
+                "usage"
+              ]
+            }
+          },
+          "isRunListCut": {
+            "type": "boolean"
+          },
           "touchedFiles": {
             "type": "array",
             "items": {
@@ -262,6 +292,8 @@
           "subagents",
           "usage",
           "runUsage",
+          "runs",
+          "isRunListCut",
           "touchedFiles",
           "desktopLink",
           "isOutsideSelo",
