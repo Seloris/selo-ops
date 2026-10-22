@@ -1,12 +1,13 @@
-import { t } from "../../../shared/lib/i18n/index.ts";
+import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
-import { ArchiveIcon, BranchIcon, CheckIcon, CloseIcon, OpenIcon, PromptIcon, UnarchiveIcon } from "../../../shared/ui/icons.tsx";
+import { ArchiveIcon, BranchIcon, CheckIcon, CloseIcon, OpenIcon, PromptIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import { AwaitedIcon, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { age, ageDisplay, awaitedOf, blockerLabel, calmText, laneLabel, requestText, stateLabel } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, laneLabel, requestText, stateLabel } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 
 // sessions-live FR-19 to FR-23: everything the export knows of one session, and its actions.
@@ -98,20 +99,28 @@ export function SessionDetail({
         <section className={styles.section}>
           <h3>{t("sessions.detail.canClose")}</h3>
           {s.blockers.length === 0 ? (
-            <span className={styles.yes}>
+            <div className={`${styles.verdict} ${styles.neutral}`}>
               <CheckIcon />
-              {t("sessions.close.yes")}
-            </span>
+              <b>{t("sessions.close.yes")}</b>
+            </div>
           ) : (
             <>
-              <p>{t("sessions.close.notYet")}</p>
-              <div className={styles.chips}>
-                {s.blockers.map((b) => (
-                  <span key={b} className={styles.chip}>
-                    {blockerLabel(b)}
-                  </span>
-                ))}
+              <div className={`${styles.verdict} ${styles.neutral}`}>
+                <WarningIcon />
+                <b>{t("sessions.close.notYet")}</b>
+                <span className={styles.muted}>{tn("sessions.close.count", s.blockers.length)}</span>
               </div>
+              <ul className={styles.blockers}>
+                {s.blockers.map((b) => (
+                  <li key={b}>
+                    <StatusDot tone={blockerTone(b)} />
+                    <div>
+                      <b>{blockerLabel(b)}</b>
+                      <p className={styles.muted}>{blockerHint(b)}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </>
           )}
         </section>

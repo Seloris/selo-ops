@@ -15,6 +15,15 @@ export const laneLabel = (lane: string) => (lane === "free" ? t("sessions.lane.f
 
 export const blockerLabel = (b: Session["blockers"][number]) => t(`sessions.blocker.${b}` as MessageKey);
 
+// sessions-live FR-28: what clears a blocker; amber only for those that wait on the person.
+export const blockerHint = (b: Session["blockers"][number]) => t(`sessions.blocker.hint.${b}` as MessageKey);
+
+export function blockerTone(b: Session["blockers"][number]): DotTone {
+  if (b === "question" || b === "pending-commit") return "warn";
+  if (b === "background-tasks" || b === "subagents") return "pulse";
+  return "idle";
+}
+
 // sessions-live FR-10: colour only on sessions to handle.
 export function toneOf(s: Session): DotTone {
   if (isTodo(s)) return s.state === "stopped" ? "danger" : "warn";

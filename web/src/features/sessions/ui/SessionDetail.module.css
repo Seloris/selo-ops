@@ -117,29 +117,52 @@
   overflow-wrap: anywhere;
 }
 
-.yes {
-  display: inline-flex;
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-control);
+}
+
+.verdict b {
   font-weight: 500;
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
+.verdict svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  height: 26px;
-  padding: 0 10px;
-  font-size: 0.83em;
-  background: var(--surface-2);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-pill);
+.blockers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 0 0 0 4px;
+  list-style: none;
+}
+
+.blockers li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  line-height: 1.45;
+}
+
+.blockers li > span:first-child {
+  margin-top: 0.42em;
+}
+
+.blockers b {
+  font-weight: 500;
+}
+
+.section .blockers p {
+  margin-top: 2px;
+  font-size: 0.9em;
 }
 
 .lines {

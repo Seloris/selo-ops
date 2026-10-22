@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/sessionView.ts";
-import { ageDisplay, awaitedOf, calmText, desktopLinkOf, requestText, toneOf } from "./sessionText.ts";
+import { ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, desktopLinkOf, requestText, toneOf } from "./sessionText.ts";
 
 const NOW = Date.parse("2026-10-22T12:00:00.000Z");
 const ago = (minutes: number) => new Date(NOW - minutes * 60_000).toISOString();
@@ -146,5 +146,20 @@ describe("desktopLinkOf", () => {
     ["a trailing path", `${link}/../x`],
   ])("gives null for %s", (_case, desktopLink) => {
     expect(desktopLinkOf(buildSession({ desktopLink }))).toBeNull();
+  });
+});
+
+describe("blockers", () => {
+  it.each([
+    ["not-done", "idle"],
+    ["pending-commit", "warn"],
+    ["question", "warn"],
+    ["dirty-files", "idle"],
+    ["background-tasks", "pulse"],
+    ["subagents", "pulse"],
+  ] as const)("gives %s a label, a hint and the %s tone", (blocker, tone) => {
+    expect(blockerLabel(blocker)).toBeTruthy();
+    expect(blockerHint(blocker)).toBeTruthy();
+    expect(blockerTone(blocker)).toBe(tone);
   });
 });
