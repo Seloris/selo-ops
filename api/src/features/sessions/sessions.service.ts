@@ -66,6 +66,7 @@ function toSession(
   desktopSessionId: string | undefined,
   transcriptStart: number | undefined,
   permissionWait: PermissionWait | undefined,
+  isAnswerWait: boolean,
 ): Session {
   // An archive covers the run it was made on: a new run brings the session back (`session` BR-09).
   const isArchived = archive !== undefined && archive.runId === current.id;
@@ -77,8 +78,10 @@ function toSession(
   // A turn that ends with subagents in the background has not finished its work (`session` BR-02).
   const isCalm = current.phase === "turn-ended" || current.phase === "job-done";
   const phase = !isClosed && isCalm && subagents.some((r) => r.phase === "working") ? "working" : current.phase;
-  // A permission dialog holds the run whatever its phase (`session` BR-16).
-  const state = permissionWait ? "awaiting-permission" : phase;
+  // A permission dialog holds the run whatever its phase (`session` BR-16); a question the export missed holds a
+  // working one (`session` BR-17).
+  const isMissedQuestion = !permissionWait && isAnswerWait && phase === "working";
+  const state = permissionWait ? "awaiting-permission" : isMissedQuestion ? "awaiting-answer" : phase;
   // The export keeps the latest runs only: a long session's first run may be gone, its transcript is not.
   const createdAt = transcriptStart ?? Math.min(...file.runs.map((r) => Date.parse(r.since)), since);
   return {
@@ -97,7 +100,8 @@ function toSession(
     isArchived,
     archivedAt: isArchived ? archive.archivedAt.toISOString() : null,
     canArchive: !isArchived,
-    question: current.question ?? null,
+    // The export holds no text for a question it missed; one it kept is an earlier question's.
+    question: isMissedQuestion ? null : (current.question ?? null),
     permissionTool: permissionWait?.tool ?? null,
     pendingCommit: current.pendingCommit ? { subject: current.pendingCommit.subject, body: current.pendingCommit.body ?? "" } : null,
     error: current.error ?? null,
@@ -220,7 +224,7 @@ export function createSessionService({
       });
       // Every file of the export, run or not, keeps its session out of those outside selo (`session` BR-12).
       const open = withRun.filter(({ file }) => file.status !== "ended").map(({ file: { sessionId, root, rootKey } }) => ({ sessionId, root, rootKey }));
-      const { outside, permissionWaits } = outsideSessions.read({ exported: exportedIds(sessions, deletedSessionIds), open, now: clock.now().getTime() });
+      const { outside, permissionWaits, answerWaits } = outsideSessions.read({ exported: exportedIds(sessions, deletedSessionIds), open, now: clock.now().getTime() });
       const byId = new Map((await archives.list()).map((a) => [a.sessionId, a]));
       const desktopIds = await desktopSessionIds(new Set(withRun.map(({ file }) => file.sessionId)));
       const exportIds = withRun.map(({ file }) => projectIdOf(file, projects));
@@ -237,6 +241,7 @@ export function createSessionService({
               desktopIds.get(file.sessionId),
               transcriptStarts.get(file.sessionId),
               permissionWaits.get(file.sessionId),
+              answerWaits.has(file.sessionId),
             ),
           ),
           ...outside.map((o) => toOutsideSession(o, byId.get(o.status.sessionId))),

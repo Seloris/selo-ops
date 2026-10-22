@@ -5,8 +5,8 @@ import { sessionsResponseSchema, type Session } from "../../src/features/session
 import { buildRun, buildRunningStatusFile, buildSessionFile, transcriptFolderOf } from "../factories.js";
 import { createTestContext } from "../setup.js";
 
-// A session waiting on a permission dialog (`session` BR-16): Claude Code's status file of its running process says so,
-// its transcript names the tool to allow.
+// A session waiting on a permission dialog (`session` BR-16), or on an answer the export missed (`session` BR-17):
+// Claude Code's status file of its running process says so, its transcript names the tool to allow.
 
 const EPOCH = Date.parse("2026-01-01T00:00:00.000Z");
 const at = (ms: number) => new Date(EPOCH + ms).toISOString();
@@ -24,7 +24,7 @@ const toolResult = (id: string) => ({
   message: { role: "user", content: [{ type: "tool_result", tool_use_id: id, content: "ok" }] },
 });
 
-describe("sessions waiting on a permission", () => {
+describe("sessions waiting on a permission or an answer", () => {
   let ctx: Awaited<ReturnType<typeof createTestContext>>;
 
   beforeAll(async () => {
@@ -117,6 +117,89 @@ describe("sessions waiting on a permission", () => {
 
       // Assert
       expect(session.state).toBe(state);
+    });
+
+    // `session` BR-17: the export misses a question asked through Claude Code's dialog; the status file does not.
+    it.each([
+      ["input needed", "awaiting-answer"],
+      ["permission prompt", "working"],
+      ["sandbox request", "working"],
+      ["worker request", "working"],
+      ["goal proposal", "working"],
+      [null, "working"],
+    ] as const)("gives a working run whose process waits on %s the state %s at once", async (waitingFor, state) => {
+      // Arrange
+      exported({ phase: "working", waitingFor });
+      ctx.clock.set(at(0));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session).toMatchObject({ state, permissionTool: null });
+    });
+
+    it("gives no text to a question the export missed, not even an earlier one it kept", async () => {
+      // Arrange
+      exported({ waitingFor: "input needed" }, undefined, buildSessionFile({ current: buildRun({ phase: "working", question: "A or B?" }) }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session).toMatchObject({ state: "awaiting-answer", question: null });
+    });
+
+    it("gives a run kept working by its subagents « awaiting-answer » while the process waits on an answer", async () => {
+      // Arrange
+      const main = buildRun({ phase: "turn-ended", since: at(0) });
+      const file = buildSessionFile({ current: main, runs: [main, buildRun({ agentId: "a-1", phase: "working", since: at(1) })] });
+      exported({ waitingFor: "input needed" }, undefined, file);
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("awaiting-answer");
+    });
+
+    it.each([["awaiting-commit"], ["stopped"], ["turn-ended"], ["job-done"]] as const)(
+      "keeps the export's phase %s while the process waits on an answer",
+      async (phase) => {
+        // Arrange
+        exported({ phase, waitingFor: "input needed" });
+        ctx.clock.set(at(60_000));
+
+        // Act
+        const session = await only();
+
+        // Assert
+        expect(session.state).toBe(phase);
+      },
+    );
+
+    it.each([["busy"], ["idle"]] as const)("keeps a working run « working » while the process is %s", async (status) => {
+      // Arrange
+      exported({ phase: "working", status, waitingFor: "input needed" });
+      ctx.clock.set(at(60_000));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("working");
+    });
+
+    it("keeps a closed session's phase whatever its process waits on", async () => {
+      // Arrange
+      exported({ waitingFor: "input needed" }, undefined, buildSessionFile({ status: "ended", current: buildRun({ phase: "working" }) }));
+      ctx.clock.set(at(60_000));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("working");
     });
 
     it("dates a wait whose status file gives no wait date by its last update", async () => {
