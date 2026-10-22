@@ -6,6 +6,7 @@ import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
 import { AgeLabel, AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { awaitedOf, calmText, closeText, modelText, requestText } from "./sessionText.ts";
+import { exactTokens, totalTokens } from "./usage.ts";
 import styles from "./SessionCards.module.css";
 
 // sessions-live FR-13: a grid of cards with every detail.
@@ -57,7 +58,9 @@ export function SessionCards({
               )}
               <span className={styles.facts}>
                 <span>{t("sessions.facts.model")}</span>
-                <span className={styles.value}>{modelText(s)}</span>
+                <span className={styles.value} title={s.usage ? t("sessions.usage.exact", { count: exactTokens(totalTokens(s.usage.tokens)) }) : undefined}>
+                  {modelText(s)}
+                </span>
                 <span>{t("sessions.facts.permissions")}</span>
                 <span className={styles.value}>{s.permissionMode ?? t("sessions.facts.unknown")}</span>
                 <span>{t("sessions.facts.close")}</span>

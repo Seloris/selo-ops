@@ -2,12 +2,14 @@ import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { useId, type ReactNode } from "react";
-import { ArchiveIcon, BranchIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, CloseIcon, CommitIcon, DoorIcon, FolderIcon, HourglassIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { ArchiveIcon, BranchIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, CloseIcon, CommitIcon, DoorIcon, FolderIcon, GaugeIcon, HourglassIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
+import { totalTokens } from "./usage.ts";
+import { RunUsageView, TokenCount, UsageTable } from "./UsageParts.tsx";
 import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, shownBlockers, stateLabel } from "./sessionText.ts";
@@ -164,7 +166,10 @@ export function SessionDetail({
                   <li key={i}>
                     <span className={styles.hash}>{a.type}</span>
                     <span className={styles.line}>{a.task ?? ""}</span>
-                    <span className={styles.status}>{stateLabel({ ...s, state: a.state })}</span>
+                    <span className={styles.status}>
+                      {stateLabel({ ...s, state: a.state })} · {a.model ?? unknown} ·{" "}
+                      {a.usage ? <TokenCount count={totalTokens(a.usage.tokens)} /> : unknown}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -173,6 +178,14 @@ export function SessionDetail({
             )}
           </Section>
         )}
+
+        <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.usage")} {...fold("usage")}>
+          {s.usage ? <UsageTable usage={s.usage} /> : <p className={styles.muted}>{unknown}</p>}
+        </Section>
+
+        <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.runUsage")} {...fold("runUsage")}>
+          {s.runUsage ? <RunUsageView run={s.runUsage} /> : <p className={styles.muted}>{unknown}</p>}
+        </Section>
 
         {!s.isOutsideSelo && (
           <Section icon={<FolderIcon />} hue="files" count={s.touchedFiles.length} title={t("sessions.detail.files")} {...fold("files")}>
@@ -217,6 +230,7 @@ const HUES = {
   recap: styles.hueRecap,
   agents: styles.hueAgents,
   files: styles.hueFiles,
+  usage: styles.hueUsage,
 };
 
 // A section: its heading (the icon in the section's own hue, the title and, for a list, how many it holds)

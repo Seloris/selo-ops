@@ -1,0 +1,126 @@
+.run {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* A narrow detail scrolls the table, never the panel. */
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: 3px 0 3px 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table th:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.table thead th {
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.table tbody th {
+  font-weight: 400;
+}
+
+.total th,
+.total td {
+  font-weight: 600;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.93em;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 16px;
+}
+
+.subtitle {
+  margin: 0 0 4px;
+  font-size: 0.83em;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.87em;
+}
+
+.list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  overflow-wrap: anywhere;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.87em;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle svg {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+}
+
+.count {
+  padding: 0 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  margin: 6px 0 4px;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}

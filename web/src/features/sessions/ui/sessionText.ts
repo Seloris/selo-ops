@@ -2,6 +2,7 @@ import { formatAge } from "../../../shared/lib/formatAge.ts";
 import { t, tn, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import type { DotTone } from "../../../shared/ui/StatusDot.tsx";
 import { ageMs, bucketOf, isStale, isTodo, type Project, type Session } from "../data/sessionView.ts";
+import { formatTokens, totalTokens } from "./usage.ts";
 
 // The words and tones a session shows, shared by its row, its card and its detail.
 
@@ -141,8 +142,10 @@ const DESKTOP_LINK = /^claude:\/\/claude\.ai\/epitaxy\/local_[0-9a-f]{8}-[0-9a-f
 
 export const desktopLinkOf = (s: Session): string | null => (s.desktopLink && DESKTOP_LINK.test(s.desktopLink) ? s.desktopLink : null);
 
+// sessions-live FR-13: the model with the session's total tokens (`session` BR-18, « — » with no usage), then the effort.
 export function modelText(s: Session): string {
-  const model = s.model ?? t("sessions.facts.unknown");
+  const tokens = s.usage ? formatTokens(totalTokens(s.usage.tokens)) : t("sessions.facts.unknown");
+  const model = t("sessions.facts.modelTokens", { model: s.model ?? t("sessions.facts.unknown"), tokens });
   // sessions-live FR-30: only the export gives the effort.
   const effort = s.effort ?? (s.isOutsideSelo ? t("sessions.facts.unknown") : null);
   return effort ? t("sessions.facts.modelEffort", { model, effort }) : model;

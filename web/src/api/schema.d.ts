@@ -200,7 +200,11 @@ export interface components {
                 type: string;
                 task: string | null;
                 state: components["schemas"]["SessionState"];
+                model: string | null;
+                usage: components["schemas"]["Usage"];
             }[];
+            usage: components["schemas"]["Usage"];
+            runUsage: components["schemas"]["RunUsage"];
             touchedFiles: string[];
             desktopLink: string | null;
             isOutsideSelo: boolean;
@@ -213,6 +217,46 @@ export interface components {
         SessionState: "awaiting-answer" | "awaiting-permission" | "awaiting-commit" | "stopped" | "working" | "turn-ended" | "job-done";
         /** @enum {string} */
         CloseBlocker: "not-done" | "pending-commit" | "question" | "dirty-files" | "background-tasks" | "subagents";
+        Usage: {
+            calls: number;
+            tokens: components["schemas"]["Tokens"];
+            byModel: {
+                model: string;
+                calls: number;
+                tokens: components["schemas"]["Tokens"];
+            }[];
+        } | null;
+        Tokens: {
+            input: number;
+            cacheRead: number;
+            cacheWrite: number;
+            output: number;
+        };
+        RunUsage: {
+            calls: number;
+            tokens: components["schemas"]["Tokens"];
+            byModel: {
+                model: string;
+                calls: number;
+                tokens: components["schemas"]["Tokens"];
+            }[];
+            tools: {
+                name: string;
+                count: number;
+            }[];
+            skills: {
+                name: string;
+                count: number;
+                how: string;
+            }[];
+            prompts: {
+                at: string | null;
+                calls: number;
+                tokens: components["schemas"]["Tokens"];
+            }[];
+            settled: boolean;
+            partial: boolean;
+        } | null;
         Project: {
             id: string;
             name: string;

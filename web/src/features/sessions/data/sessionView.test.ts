@@ -47,6 +47,8 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     permissionMode: null,
     blockers: [],
     subagents: [],
+    usage: null,
+    runUsage: null,
     touchedFiles: [],
     desktopLink: null,
     isOutsideSelo: false,

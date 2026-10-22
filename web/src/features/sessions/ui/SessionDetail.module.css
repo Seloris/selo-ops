@@ -145,6 +145,7 @@
 .hueRecap { --hue: var(--hue-recap); }
 .hueAgents { --hue: var(--hue-agents); }
 .hueFiles { --hue: var(--hue-files); }
+.hueUsage { --hue: var(--hue-usage); }
 
 .count {
   padding: 0 7px;

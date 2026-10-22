@@ -6,6 +6,10 @@ describe("parseFoldedSections", () => {
     expect(parseFoldedSections(["files", "agents", "files"])).toEqual(["files", "agents"]);
   });
 
+  it("keeps the usage sections", () => {
+    expect(parseFoldedSections(["runUsage", "usage"])).toEqual(["runUsage", "usage"]);
+  });
+
   it("drops what is not a known section", () => {
     expect(parseFoldedSections(["files", "nope", 3, null])).toEqual(["files"]);
   });

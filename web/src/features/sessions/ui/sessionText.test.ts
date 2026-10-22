@@ -51,6 +51,8 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     permissionMode: null,
     blockers: [],
     subagents: [],
+    usage: null,
+    runUsage: null,
     touchedFiles: [],
     desktopLink: null,
     isOutsideSelo: false,
@@ -273,8 +275,14 @@ describe("sessions outside selo", () => {
   });
 
   it("reads their unknown effort as « — »", () => {
-    expect(modelText(outside({ model: "claude-opus-5-5" }))).toBe("claude-opus-5-5 · effort —");
-    expect(modelText(buildSession({ model: "claude-opus-5-5" }))).toBe("claude-opus-5-5");
+    expect(modelText(outside({ model: "claude-opus-5-5" }))).toBe("claude-opus-5-5 · — tokens · effort —");
+    expect(modelText(buildSession({ model: "claude-opus-5-5" }))).toBe("claude-opus-5-5 · — tokens");
+  });
+
+  it("puts the session's total tokens, the four kinds summed, next to the model", () => {
+    const tokens = { input: 1000, cacheRead: 1_200_000, cacheWrite: 30_000, output: 4567 };
+    const s = buildSession({ model: "claude-opus-5-5", effort: "high", usage: { calls: 3, tokens, byModel: [] } });
+    expect(modelText(s)).toBe("claude-opus-5-5 · 1,2 M tokens · effort high");
   });
 
   it("shows a question whose text is unknown as an answer awaited in the session", () => {

@@ -252,6 +252,16 @@ export function RobotIcon() {
   );
 }
 
+export function GaugeIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 18a8 8 0 1 1 16 0" />
+      <path d="M12 18l4-6" />
+      <circle cx="12" cy="18" r="1" />
+    </svg>
+  );
+}
+
 export function FolderIcon() {
   return (
     <svg {...iconProps}>
