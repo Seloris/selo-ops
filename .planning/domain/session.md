@@ -15,6 +15,9 @@ What holds for a Claude Code session on every page: its terms and its rules, as 
 | `ce qui empêche de fermer` | `blockers` | The reasons the export gives why the session cannot be closed yet. |
 | `archive` | `SessionArchive` | Selo Ops' own mark that takes a session that waits on nobody out of the list. |
 | `projet` | `Project` | The repository a session works in, worktrees included. |
+| `consommation` | `usage` | What a run or the whole session consumed: API calls and tokens by kind, and their split per model. |
+| `tokens` | `Tokens` | The four kinds of tokens: « Entrée », « Cache lu », « Cache écrit », « Sortie ». |
+| `modèle réel` | `byModel[0].model` | The model a subagent actually ran on: the top model of its own usage. |
 
 ## Business rules
 
@@ -35,5 +38,8 @@ What holds for a Claude Code session on every page: its terms and its rules, as 
 - **BR-15** — A session was created when Claude Code wrote the first dated line of its transcript; with no such line, at its oldest run the export still keeps (which may be later, the export keeping only the latest runs), or, for a session outside selo, when its process started.
 - **BR-16** — An open session, selo or outside selo, whose running process Claude Code says has waited on a permission dialog for at least 15 s is « Attend ta permission », whatever its run's phase, until that wait ends; a shorter wait (auto mode's checks) leaves its state as it was.
 - **BR-17** — An open selo session whose run is « En cours » while Claude Code says its running process awaits an answer (any wait but a permission dialog, a worker request or a goal proposal) is « Attend ta réponse » until that wait ends, so that a question asked through Claude Code's dialog, which the export does not record, shows at once; any other phase stays as the export gives it.
+- **BR-18** — A session's and a run's usage (API calls, tokens by kind: « Entrée », « Cache lu », « Cache écrit », « Sortie », and their split per model) are read from the export only, never counted by Selo Ops; a session outside selo (BR-12), a session written by an export older than 2.2.0, a run before its first stop, a subagent still working and a subagent stopped by Échap have none and show « — ».
+- **BR-19** — A run whose figures the export has not settled yet shows them tagged « provisoire », since they may still grow; a run whose figures cover only the end of an oversized transcript shows them tagged « partiel : 32 derniers Mo ».
+- **BR-20** — A session's model is the export's, else the top model of its latest main run that has usage, so that the list, the card and the detail agree; a subagent's model is the top model of its own usage (its real model).
 
 Retired:
