@@ -347,9 +347,11 @@ export function createOutsideSessionReader(statusDir: string, projectsDir: strin
     read: ({ exported, open = [], now }) => {
       // A crash leaves its file behind: only a live process counts. Two live files of one session (a resumed process):
       // the latest wins.
+      // A closed session of the export is never checked: its process is not even tested.
+      const openIds = new Set(open.map((session) => session.sessionId));
       const bySession = new Map<string, RunningStatusFile>();
       for (const status of readStatusFiles(statusDir)) {
-        if (!isPidAlive(status.pid)) continue;
+        if ((exported.has(status.sessionId) && !openIds.has(status.sessionId)) || !isPidAlive(status.pid)) continue;
         const other = bySession.get(status.sessionId);
         if (other === undefined || updatedAtOf(status) > updatedAtOf(other)) bySession.set(status.sessionId, status);
       }

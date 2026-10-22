@@ -119,6 +119,30 @@ describe("sessions waiting on a permission", () => {
       expect(session.state).toBe(state);
     });
 
+    it("dates a wait whose status file gives no wait date by its last update", async () => {
+      // Arrange
+      exported({ statusUpdatedAt: null, updatedAt: EPOCH + 50_000 });
+      ctx.clock.set(at(60_000));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("working");
+    });
+
+    it("dates a wait whose status file gives no date but its start by that start", async () => {
+      // Arrange
+      exported({ statusUpdatedAt: null, updatedAt: null });
+      ctx.clock.set(at(60_000));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("awaiting-permission");
+    });
+
     it.each([["busy"], ["idle"]] as const)("keeps the run's phase while the process is %s", async (status) => {
       // Arrange
       exported({ phase: "turn-ended", status });
@@ -208,6 +232,12 @@ describe("sessions waiting on a permission", () => {
       ["an open subagent", [toolUse("t1", "Bash", { command: "ls" }), toolResult("t1"), toolUse("t2", "Agent", { prompt: "Go" })], null],
       ["an open task", [toolUse("t2", "Task", { prompt: "Go" })], null],
       ["no transcript line", [], null],
+      ["an empty shell command", [toolUse("t1", "Bash", { command: " " })], "Bash"],
+      [
+        "a subagent's call in the main transcript",
+        [toolUse("t1", "Edit", { file_path: "a.ts" }), { ...toolUse("t2", "Bash", { command: "ls" }), isSidechain: true }],
+        "Edit",
+      ],
     ] as const)("names the tool to allow for %s", async (_case, lines, tool) => {
       // Arrange
       exported({}, [prompt("Fix the build"), ...lines]);
