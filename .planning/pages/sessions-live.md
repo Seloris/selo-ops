@@ -21,14 +21,14 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 ## Sessions
 
 - **FR-09** — Sessions sort by state (`session` BR-02), then the most recently updated first; by project, the project holding the most urgent session comes first.
-- **FR-10** — Only sessions « à traiter » are coloured: an amber row for « Attend ta réponse » and « Commit à valider », a rose one for « Arrêtée »; « En cours » has a pulsing neutral dot, the others a grey one.
+- **FR-10** — Only sessions « à traiter » are coloured: an amber row for « Attend ta réponse », « Attend ta permission » and « Commit à valider », a rose one for « Arrêtée »; « En cours » has a pulsing neutral dot, the others a grey one.
 - **FR-11** — A row shows the state, the project (unless grouped by project), the type of work (« libre », « hors selo » for a session outside selo (`session` BR-12), fastlane, blueprint, build, autopilot…), the cut request, what is awaited when the session is « à traiter », the age and an « Ouvrir dans Claude Code » icon button.
 - **FR-29** — The type of work has its own colour for « libre » (sky), fastlane (lime) and autopilot (violet), in the row, the card and the detail; the other types stay neutral.
 - **FR-12** — A project block's header shows its name, its branch, its count of uncommitted files (none for a project only sessions outside selo show), its count « à traiter » and its count of sessions.
 - **FR-13** — A card adds the whole request, what is awaited (or what the session does when nothing is), the model and effort, the permission mode, whether it can be closed, and the « Ouvrir », « Action suivante » and « Archiver » buttons.
 - **FR-30** — Wherever a session outside selo (`session` BR-12) shows, its effort and permissions read « — » and its recap, commits, subagents, files touched and blueprint are left out, since only the export gives them.
 - **FR-14** — The age is the time since the session's last update; after 30 min without update, whatever the state, the tag « Sans nouvelles depuis X » replaces it and the state stays; a closed row shows « Fermée · {âge} », an archived one « Archivée · {âge} ».
-- **FR-15** — What is awaited is the question (« Claude attend ta réponse dans la session » for a session outside selo, whose question Claude Code does not give), the proposed commit's subject or the error; an « Arrêtée » session with no error shows « Interrompue, sans message d'erreur ».
+- **FR-15** — What is awaited is the question (« Claude attend ta réponse dans la session » for a session outside selo, whose question Claude Code does not give), the tool to allow (« Autoriser : {commande} » for a shell command, else « Autoriser : {outil} », « Claude attend ta permission dans la session » when the transcript names none), the proposed commit's subject or the error; an « Arrêtée » session with no error shows « Interrompue, sans message d'erreur ».
 - **FR-24** — A request of which the export holds no readable text shows « Demande non lisible dans l'export ».
 - **FR-16** — An empty list says why: no project checked, no session matching the search, or no open session.
 - **FR-17** — « Archivées » is a folded section at the bottom with its count; opened, it lists the archived sessions in the current view.
