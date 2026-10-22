@@ -1,4 +1,4 @@
-import { ClockIcon, CommitIcon, QuestionIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { ClockIcon, CommitIcon, QuestionIcon, ShieldIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { isTodo, type Session } from "../data/sessionView.ts";
@@ -32,7 +32,7 @@ export function AgeLabel({ session, now }: { session: Session; now: number }) {
 export function AwaitedIcon({ kind, isMuted = false }: { kind: AwaitedKind; isMuted?: boolean }) {
   return (
     <span className={`${styles.icon} ${isMuted ? styles.muted : kind === "error" ? styles.danger : styles.warn}`}>
-      {kind === "question" ? <QuestionIcon /> : kind === "commit" ? <CommitIcon /> : <WarningIcon />}
+      {kind === "question" ? <QuestionIcon /> : kind === "permission" ? <ShieldIcon /> : kind === "commit" ? <CommitIcon /> : <WarningIcon />}
     </span>
   );
 }

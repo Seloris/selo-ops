@@ -57,7 +57,7 @@ export function toneOf(s: Session): DotTone {
   return s.state === "job-done" ? "hollow" : "idle";
 }
 
-export type AwaitedKind = "question" | "commit" | "error";
+export type AwaitedKind = "question" | "permission" | "commit" | "error";
 
 export interface Awaited {
   kind: AwaitedKind;
@@ -77,6 +77,12 @@ export function awaitedOf(s: Session): Awaited | null {
     // A session outside selo never gives its question's text: Claude Code only says it awaits an answer.
     const text = s.question ?? (s.isOutsideSelo ? t("sessions.awaited.outsideQuestion") : "");
     return { kind: "question", key: t("sessions.awaited.questionKey"), label: t("sessions.awaited.question"), text, full: text, isCode: false };
+  }
+  if (s.state === "awaiting-permission") {
+    // The transcript names no tool when it is a subagent's, or when its call left the tail.
+    const tool = s.permissionTool;
+    const text = tool === null ? t("sessions.awaited.permissionUnknown") : t("sessions.awaited.permissionTool", { tool });
+    return { kind: "permission", key: t("sessions.awaited.permissionKey"), label: t("sessions.awaited.permission"), text, full: text, isCode: tool !== null };
   }
   if (s.state === "awaiting-commit") {
     const subject = s.pendingCommit?.subject ?? "";

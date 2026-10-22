@@ -36,6 +36,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     archivedAt: null,
     canArchive: false,
     question: null,
+    permissionTool: null,
     pendingCommit: null,
     error: null,
     recap: null,
@@ -68,16 +69,17 @@ describe("sortSessions", () => {
     const done = buildSession({ id: "done", state: "job-done", updatedAt: ago(1) });
     const askOld = buildSession({ id: "ask-old", state: "awaiting-answer", updatedAt: ago(50) });
     const askNew = buildSession({ id: "ask-new", state: "awaiting-answer", updatedAt: ago(2) });
+    const permission = buildSession({ id: "permission", state: "awaiting-permission", updatedAt: ago(1) });
     const commit = buildSession({ id: "commit", state: "awaiting-commit" });
     const stopped = buildSession({ id: "stopped", state: "stopped" });
     const working = buildSession({ id: "working", state: "working" });
     const turn = buildSession({ id: "turn", state: "turn-ended" });
 
     // Act
-    const sorted = sortSessions([done, turn, working, stopped, commit, askOld, askNew]);
+    const sorted = sortSessions([done, turn, working, stopped, commit, permission, askOld, askNew]);
 
     // Assert
-    expect(ids(sorted)).toEqual(["ask-new", "ask-old", "commit", "stopped", "working", "turn", "done"]);
+    expect(ids(sorted)).toEqual(["ask-new", "ask-old", "permission", "commit", "stopped", "working", "turn", "done"]);
   });
 });
 
@@ -87,6 +89,7 @@ describe("countsOf", () => {
     const sessions = [
       buildSession({ state: "awaiting-answer" }),
       buildSession({ state: "stopped", projectId: "p-harbor" }),
+      buildSession({ state: "awaiting-permission" }),
       buildSession({ state: "working" }),
       buildSession({ state: "stopped", isClosed: true, projectId: "p-other" }),
       buildSession({ state: "job-done", isArchived: true, projectId: "p-third" }),
@@ -96,7 +99,7 @@ describe("countsOf", () => {
     const counts = countsOf(sessions);
 
     // Assert
-    expect(counts).toEqual({ open: 3, projects: 2, todo: 2 });
+    expect(counts).toEqual({ open: 4, projects: 2, todo: 3 });
   });
 });
 
@@ -176,6 +179,7 @@ describe("groupSessions", () => {
       buildSession({ id: "done", state: "job-done" }),
       buildSession({ id: "turn", state: "turn-ended" }),
       buildSession({ id: "stopped", state: "stopped" }),
+      buildSession({ id: "permission", state: "awaiting-permission" }),
     ];
 
     // Act
@@ -183,7 +187,7 @@ describe("groupSessions", () => {
 
     // Assert
     expect(blocks.map((b) => [b.key, ids(b.sessions)])).toEqual([
-      ["todo", ["stopped"]],
+      ["todo", ["permission", "stopped"]],
       ["rest", ["turn", "done"]],
     ]);
   });

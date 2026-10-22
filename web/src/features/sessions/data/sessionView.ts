@@ -11,15 +11,17 @@ export type Grouping = "project" | "status" | "none";
 // `session` BR-02: the order of urgency.
 export const STATE_ORDER: Record<SessionState, number> = {
   "awaiting-answer": 1,
-  "awaiting-commit": 2,
-  stopped: 3,
-  working: 4,
-  "turn-ended": 5,
-  "job-done": 6,
+  "awaiting-permission": 2,
+  "awaiting-commit": 3,
+  stopped: 4,
+  working: 5,
+  "turn-ended": 6,
+  "job-done": 7,
 };
 
 const BUCKET: Record<SessionState, Bucket> = {
   "awaiting-answer": "todo",
+  "awaiting-permission": "todo",
   "awaiting-commit": "todo",
   stopped: "todo",
   working: "run",

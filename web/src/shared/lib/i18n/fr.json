@@ -56,6 +56,7 @@
   "sessions.columns.age": "Depuis",
 
   "sessions.state.awaiting-answer": "Attend ta réponse",
+  "sessions.state.awaiting-permission": "Attend ta permission",
   "sessions.state.awaiting-commit": "Commit à valider",
   "sessions.state.stopped": "Arrêtée",
   "sessions.state.working": "En cours",
@@ -83,9 +84,13 @@
   "sessions.empty.none": "Aucune session ouverte.",
 
   "sessions.awaited.questionKey": "Question",
+  "sessions.awaited.permissionKey": "Permission",
   "sessions.awaited.commitKey": "Commit",
   "sessions.awaited.errorKey": "Erreur",
   "sessions.awaited.question": "Question posée",
+  "sessions.awaited.permission": "Permission demandée",
+  "sessions.awaited.permissionTool": "Autoriser : {tool}",
+  "sessions.awaited.permissionUnknown": "Claude attend ta permission dans la session",
   "sessions.awaited.commit": "Commit proposé",
   "sessions.awaited.error": "Erreur",
   "sessions.awaited.interrupted": "Interrompue, sans message d’erreur",

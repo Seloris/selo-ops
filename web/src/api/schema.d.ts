@@ -180,6 +180,7 @@ export interface components {
             archivedAt: string | null;
             canArchive: boolean;
             question: string | null;
+            permissionTool: string | null;
             pendingCommit: {
                 subject: string;
                 body: string;
@@ -209,7 +210,7 @@ export interface components {
             updatedAt: string;
         };
         /** @enum {string} */
-        SessionState: "awaiting-answer" | "awaiting-commit" | "stopped" | "working" | "turn-ended" | "job-done";
+        SessionState: "awaiting-answer" | "awaiting-permission" | "awaiting-commit" | "stopped" | "working" | "turn-ended" | "job-done";
         /** @enum {string} */
         CloseBlocker: "not-done" | "pending-commit" | "question" | "dirty-files" | "background-tasks" | "subagents";
         Project: {

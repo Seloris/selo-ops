@@ -40,6 +40,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     archivedAt: null,
     canArchive: false,
     question: null,
+    permissionTool: null,
     pendingCommit: null,
     error: null,
     recap: null,
@@ -137,6 +138,22 @@ describe("awaitedOf", () => {
     expect(awaited).toMatchObject({ kind: "commit", text: "fix(a): b", full: "fix(a): b\n\nSpec: none", isCode: true });
   });
 
+  it("gives the tool to allow of a session awaiting a permission", () => {
+    // Act
+    const awaited = awaitedOf(buildSession({ state: "awaiting-permission", permissionTool: "npm run build && npm test" }));
+
+    // Assert
+    expect(awaited).toMatchObject({ kind: "permission", key: "Permission", label: "Permission demandée", text: "Autoriser : npm run build && npm test", full: "Autoriser : npm run build && npm test", isCode: true });
+  });
+
+  it("says Claude awaits a permission when the transcript names no tool", () => {
+    // Act
+    const awaited = awaitedOf(buildSession({ state: "awaiting-permission", permissionTool: null }));
+
+    // Assert
+    expect(awaited).toMatchObject({ kind: "permission", text: "Claude attend ta permission dans la session", isCode: false });
+  });
+
   it("says « Interrompue » for a stopped session with no error", () => {
     // Act
     const awaited = awaitedOf(buildSession({ state: "stopped", error: null }));
@@ -155,6 +172,8 @@ describe("awaitedOf", () => {
 describe("toneOf", () => {
   it.each([
     [{ state: "awaiting-answer" }, "warn"],
+    [{ state: "awaiting-permission" }, "warn"],
+    [{ state: "awaiting-permission", isClosed: true }, "idle"],
     [{ state: "awaiting-commit" }, "warn"],
     [{ state: "stopped" }, "danger"],
     [{ state: "stopped", isClosed: true }, "idle"],

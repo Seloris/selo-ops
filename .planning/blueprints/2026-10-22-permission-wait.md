@@ -31,7 +31,10 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 - One read of the status files per list → the outside sessions' reader also returns the export's open sessions' waits, the 15 s rule beside BR-13's `stateOf` (the folder is read once, as the defaults ask)
 - Subagent lines (`isSidechain`) of the main transcript → skipped when looking for the open call (their calls are not the main thread's)
 - A shell call with an empty command → the tool's name (nothing else to show)
+- Several open calls of one answer → the last one is named (Claude Code's order of dialogs is not known; a known limit)
 - Demo session → `harbor-mobile`, fastlane, started by the desktop app, waiting 4 min on a `run_in_terminal` command (a project that had no waiting session)
+- Web icon of the awaited permission → a shield, amber like the question's (a new `ShieldIcon` in shared icons)
+- « Autoriser : … » in the mono font, the fallback text not (a command, as commit subjects are)
 
 ## Stages
 1. api — `feat(permission-wait): api — sessions waiting on a permission dialog`
@@ -44,7 +47,7 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 
 ## Progress
 - [x] Stage 1 — api
-- [ ] Stage 2 — web
-- [ ] Review
-- [ ] Browser test
+- [x] Stage 2 — web
+- [x] Review
+- [x] Browser test
 - [ ] Spec merged
