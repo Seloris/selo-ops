@@ -185,6 +185,12 @@
               "type": "string"
             }
           },
+          "desktopLink": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "updatedAt": {
             "type": "string",
             "format": "date-time"
@@ -218,6 +224,7 @@
           "blockers",
           "subagents",
           "touchedFiles",
+          "desktopLink",
           "updatedAt"
         ]
       },

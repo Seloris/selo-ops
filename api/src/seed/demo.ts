@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Database } from "../db/client.js";
 import type { ExportRun, ProjectFile, SessionFile } from "../features/sessions/sessions.export.js";
-import { createSessionArchiveRepository } from "../features/sessions/sessions.repository.js";
+import { createDesktopSessionLinkRepository, createSessionArchiveRepository } from "../features/sessions/sessions.repository.js";
 import type { Clock } from "../shared/clock.js";
 
 // The demo's data, inserted at each start of `npm run demo`: each feature adds the rows its browser
@@ -154,6 +154,10 @@ function writeJson(dir: string, name: string, data: unknown) {
   writeFileSync(join(dir, name), JSON.stringify(data, null, 2) + "\n");
 }
 
+// Sessions started in the terminal: no desktop link, « Ouvrir » copies the resume command. The others were started
+// by the desktop app, their desktop id derived from their id.
+const CLI_SESSIONS = new Set(["5a6e3d92-81bf-4c07-9e2a-d4f1b0c87e36", "e47c1a08-9d35-4b62-8f0e-1c5a7b93d2f4"]);
+
 export async function seedDemo(db: Database, clock: Clock, { opsDir }: { opsDir: string }): Promise<void> {
   const now = clock.now().getTime();
   const at = (secondsAgo: number) => new Date(now - secondsAgo * 1000).toISOString();
@@ -169,6 +173,9 @@ export async function seedDemo(db: Database, clock: Clock, { opsDir }: { opsDir:
   for (const p of projectFiles) writeJson(join(opsDir, "projects"), `${keyOf(p.root)}.json`, p);
 
   const archives = createSessionArchiveRepository(db);
+  await createDesktopSessionLinkRepository(db).saveMany(
+    SESSIONS.filter((s) => !CLI_SESSIONS.has(s.id)).map((s) => ({ sessionId: s.id, desktopSessionId: `local_${s.id}` })),
+  );
   for (const s of SESSIONS) {
     const since = at(s.age + 600);
     const current: ExportRun = {

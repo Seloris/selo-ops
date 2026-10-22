@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
-import { sessionArchives, type SessionArchive } from "./sessions.table.js";
+import { desktopSessionLinks, sessionArchives, type DesktopSessionLink, type SessionArchive } from "./sessions.table.js";
 
 export interface SessionArchiveRepository {
   list(): Promise<SessionArchive[]>;
@@ -19,6 +19,24 @@ export function createSessionArchiveRepository(db: Database): SessionArchiveRepo
     },
     remove: async (sessionId) => {
       await db.delete(sessionArchives).where(eq(sessionArchives.sessionId, sessionId));
+    },
+  };
+}
+
+export interface DesktopSessionLinkRepository {
+  list(): Promise<DesktopSessionLink[]>;
+  saveMany(links: DesktopSessionLink[]): Promise<void>;
+}
+
+export function createDesktopSessionLinkRepository(db: Database): DesktopSessionLinkRepository {
+  return {
+    list: () => db.select().from(desktopSessionLinks),
+    saveMany: async (links) => {
+      if (links.length === 0) return;
+      await db
+        .insert(desktopSessionLinks)
+        .values(links)
+        .onConflictDoUpdate({ target: desktopSessionLinks.sessionId, set: { desktopSessionId: sql`excluded.desktop_session_id` } });
     },
   };
 }

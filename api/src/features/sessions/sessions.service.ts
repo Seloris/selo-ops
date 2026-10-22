@@ -1,7 +1,8 @@
 import { BusinessRuleError, NotFoundError } from "../../shared/errors.js";
 import type { Clock } from "../../shared/clock.js";
+import { toDesktopLink, type DesktopSessionReader } from "./sessions.desktop.js";
 import type { ExportRun, OpsExportReader, ProjectFile, SessionFile } from "./sessions.export.js";
-import type { SessionArchiveRepository } from "./sessions.repository.js";
+import type { DesktopSessionLinkRepository, SessionArchiveRepository } from "./sessions.repository.js";
 import type { SessionArchive } from "./sessions.table.js";
 import { closeBlockerSchema, type CloseBlocker, type Project, type Session, type SessionsResponse } from "./sessions.schema.js";
 
@@ -53,7 +54,13 @@ function projectsOf(sessions: SessionFile[], projectFiles: ProjectFile[]): Proje
 
 const BLOCKERS = new Set<string>(closeBlockerSchema.options);
 
-function toSession(file: SessionFile, current: ExportRun, archive: SessionArchive | undefined, projectFiles: ProjectFile[]): Session {
+function toSession(
+  file: SessionFile,
+  current: ExportRun,
+  archive: SessionArchive | undefined,
+  projectFiles: ProjectFile[],
+  desktopSessionId: string | undefined,
+): Session {
   // An archive covers the run it was made on: a new run brings the session back (`session` BR-09).
   const isArchived = archive !== undefined && archive.runId === current.id;
   const ownProject = projectFiles.find((p) => norm(p.root) === norm(file.root));
@@ -89,11 +96,34 @@ function toSession(file: SessionFile, current: ExportRun, archive: SessionArchiv
       .filter((r) => r.agentId && Date.parse(r.since) >= since)
       .map((r) => ({ type: r.request ?? "", task: r.task ?? null, state: r.phase })),
     touchedFiles: file.touchedFiles ?? [],
+    desktopLink: toDesktopLink(desktopSessionId),
     updatedAt: new Date(file.writtenAt).toISOString(),
   };
 }
 
-export function createSessionService({ opsExport, archives, clock }: { opsExport: OpsExportReader; archives: SessionArchiveRepository; clock: Clock }) {
+export function createSessionService({
+  opsExport,
+  archives,
+  desktopSessions,
+  desktopLinks,
+  clock,
+}: {
+  opsExport: OpsExportReader;
+  archives: SessionArchiveRepository;
+  desktopSessions: DesktopSessionReader;
+  desktopLinks: DesktopSessionLinkRepository;
+  clock: Clock;
+}) {
+  // `session` BR-11: a link seen in a status file is kept, the file goes when the process ends.
+  // Only the export's sessions are kept: a desktop session outside selo never reaches the table.
+  const desktopSessionIds = async (exported: Set<string>) => {
+    const stored = new Map((await desktopLinks.list()).map((l) => [l.sessionId, l.desktopSessionId]));
+    const seen = [...desktopSessions.read()].filter(([sessionId, id]) => exported.has(sessionId) && stored.get(sessionId) !== id);
+    await desktopLinks.saveMany(seen.map(([sessionId, desktopSessionId]) => ({ sessionId, desktopSessionId })));
+    for (const [sessionId, id] of seen) stored.set(sessionId, id);
+    return stored;
+  };
+
   const currentOf = (file: SessionFile) => file.current ?? file.runs.find((r) => !r.agentId) ?? null;
 
   const findSession = (id: string) => {
@@ -112,8 +142,11 @@ export function createSessionService({ opsExport, archives, clock }: { opsExport
         return current ? [{ file, current }] : [];
       });
       const byId = new Map((await archives.list()).map((a) => [a.sessionId, a]));
+      const desktopIds = await desktopSessionIds(new Set(withRun.map(({ file }) => file.sessionId)));
       return {
-        sessions: withRun.map(({ file, current }) => toSession(file, current, byId.get(file.sessionId), projects)),
+        sessions: withRun.map(({ file, current }) =>
+          toSession(file, current, byId.get(file.sessionId), projects, desktopIds.get(file.sessionId)),
+        ),
         projects: projectsOf(
           withRun.map(({ file }) => file),
           projects,

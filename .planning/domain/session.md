@@ -17,7 +17,7 @@ What holds for a Claude Code session on every page: its terms and its rules, as 
 
 ## Business rules
 
-- **BR-01** — Selo Ops reads the selo ops export (one file per session, one per project folder) and never writes to it; its own data (archives) lives apart.
+- **BR-01** — Selo Ops reads the selo ops export (one file per session, one per project folder) and never writes to it; its own data (archives, desktop links) lives apart.
 - **BR-02** — A session's state is the phase of its current run: « Attend ta réponse » (question asked), « Commit à valider » (commit proposed), « Arrêtée » (error or interruption), « En cours » (Claude works), « Tour terminé » (turn ended with no question nor commit), « Terminé » (JOB DONE footer), in that order of urgency.
 - **BR-03** — A session is closed once the export marks it ended in Claude Code; it is open otherwise.
 - **BR-04** — A session is « à traiter » when it is open, not archived, and « Attend ta réponse », « Commit à valider » or « Arrêtée ».
@@ -27,5 +27,6 @@ What holds for a Claude Code session on every page: its terms and its rules, as 
 - **BR-08** — An archive is kept until the person unarchives the session; nothing is archived on its own.
 - **BR-09** — An archive covers the run it was made on: a new run of the session brings it back to the list of open sessions.
 - **BR-10** — A session's request is shown without the wrapper tags at its start (pasted content, view context) and ends with « … » when the export cut it.
+- **BR-11** — A session started by the Claude desktop app opens in the app once Selo Ops has seen it running (Claude Code names the app's session only while the process runs); Selo Ops keeps that link afterwards, process ended or not. A session started elsewhere, or never seen running, has no link.
 
 Retired:

@@ -11,9 +11,11 @@ import { systemClock } from "./shared/clock.js";
 // data are never touched: the ops export it reads is a fresh temporary folder, never ~/.claude/selo.
 const port = Number(process.env.PORT ?? "3101");
 const opsDir = mkdtempSync(join(tmpdir(), "selo-ops-demo-"));
+// Empty: the demo's desktop links are seeded in the database, never read from the developer's running sessions.
+const claudeSessionsDir = mkdtempSync(join(tmpdir(), "selo-ops-demo-status-"));
 const db = openDatabase();
 await migrateDatabase(db);
 await seedDemo(db, systemClock, { opsDir });
-createApp({ db, clock: systemClock, opsDir }).listen(port, () => {
+createApp({ db, clock: systemClock, opsDir, claudeSessionsDir }).listen(port, () => {
   console.log(`api demo listening on http://localhost:${port}, reading ${opsDir}`);
 });

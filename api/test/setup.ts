@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { sql } from "drizzle-orm";
 import { createApp } from "../src/app.js";
 import { migrateDatabase, openDatabase, type Database } from "../src/db/client.js";
+import type { ClaudeStatusFile } from "../src/features/sessions/sessions.desktop.js";
 import type { ProjectFile, SessionFile } from "../src/features/sessions/sessions.export.js";
 import type { Clock } from "../src/shared/clock.js";
 import { rootKeyOf } from "./factories.js";
@@ -43,13 +44,25 @@ function createOpsDir() {
   return { dir, seed, clear };
 }
 
+// Claude Code's status files of running processes: another temporary folder, emptied by reset().
+function createStatusDir() {
+  const dir = mkdtempSync(join(tmpdir(), "selo-ops-status-"));
+  const raw = (name: string, content: string) => writeFileSync(join(dir, name), content);
+  const clear = () => {
+    rmSync(dir, { recursive: true, force: true });
+    mkdirSync(dir);
+  };
+  return { dir, raw, status: (file: ClaudeStatusFile) => raw(`${file.sessionId}.json`, JSON.stringify(file)), clear };
+}
+
 export async function createTestContext() {
   const db: Database = openDatabase();
   await migrateDatabase(db);
   const clock = createTestClock();
   const ops = createOpsDir();
-  const app = createApp({ db, clock, opsDir: ops.dir });
-  const seed = ops.seed;
+  const statuses = createStatusDir();
+  const app = createApp({ db, clock, opsDir: ops.dir, claudeSessionsDir: statuses.dir });
+  const seed = { ...ops.seed, status: statuses.status, rawStatus: statuses.raw };
   const reset = async () => {
     const tables = await db.execute<{ table_name: string }>(sql`
       select table_name from information_schema.tables
@@ -59,7 +72,8 @@ export async function createTestContext() {
       await db.execute(sql.raw(`truncate table "${table_name}" cascade`));
     }
     ops.clear();
+    statuses.clear();
     clock.set(EPOCH);
   };
-  return { app, db, clock, seed, reset };
+  return { app, db, clock, seed, reset, clearStatus: statuses.clear };
 }

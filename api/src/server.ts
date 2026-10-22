@@ -6,6 +6,6 @@ import { systemClock } from "./shared/clock.js";
 const config = readConfig();
 const db = openDatabase(config.PGLITE_DIR);
 await migrateDatabase(db);
-createApp({ db, clock: systemClock, opsDir: config.opsDir }).listen(config.PORT, () => {
+createApp({ db, clock: systemClock, opsDir: config.opsDir, claudeSessionsDir: config.claudeSessionsDir }).listen(config.PORT, () => {
   console.log(`api listening on http://localhost:${config.PORT}, reading ${config.opsDir}`);
 });

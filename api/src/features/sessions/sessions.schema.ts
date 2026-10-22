@@ -40,6 +40,9 @@ export const sessionSchema = z
     blockers: z.array(closeBlockerSchema),
     subagents: z.array(z.object({ type: z.string(), task: z.string().nullable(), state: sessionStateSchema })),
     touchedFiles: z.array(z.string()),
+    // `claude://claude.ai/epitaxy/local_{uuid}`, opening the session in the Claude desktop app; null for a session
+    // the desktop app did not start, or that Selo Ops never saw running (`session` BR-11).
+    desktopLink: z.string().nullable(),
     updatedAt: z.iso.datetime(),
   })
   .meta({ id: "Session" });

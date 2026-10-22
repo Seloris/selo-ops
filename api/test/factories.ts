@@ -1,3 +1,4 @@
+import type { ClaudeStatusFile } from "../src/features/sessions/sessions.desktop.js";
 import type { ExportRun, ProjectFile, SessionFile } from "../src/features/sessions/sessions.export.js";
 
 // One `build{Entity}(overrides)` per entity: the only way a test builds a row.
@@ -64,6 +65,17 @@ export function buildProjectFile(overrides: Partial<ProjectFile> = {}): ProjectF
     branch: "main",
     changedCount: 0,
     manifest: { name: "ledger-api" },
+    ...overrides,
+  };
+}
+
+// A status file Claude Code writes for a running process, as the desktop app starts it.
+export function buildStatusFile(overrides: Partial<ClaudeStatusFile> = {}): ClaudeStatusFile {
+  counter += 1;
+  return {
+    sessionId: `00000000-0000-4000-8000-${String(counter).padStart(12, "0")}`,
+    entrypoint: "claude-desktop",
+    hostSessionId: null,
     ...overrides,
   };
 }

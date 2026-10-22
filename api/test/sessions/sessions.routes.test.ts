@@ -1,10 +1,12 @@
 import request from "supertest";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { sessionArchives } from "../../src/features/sessions/sessions.table.js";
+import { desktopSessionLinks, sessionArchives } from "../../src/features/sessions/sessions.table.js";
 import { sessionsResponseSchema, type Session } from "../../src/features/sessions/sessions.schema.js";
 import type { ProblemDetails } from "../../src/shared/errors.js";
-import { buildProjectFile, buildRun, buildSessionFile } from "../factories.js";
+import { buildProjectFile, buildRun, buildSessionFile, buildStatusFile } from "../factories.js";
 import { createTestContext } from "../setup.js";
+
+const DESKTOP_ID = "local_62342b42-d46b-4dbb-84d3-5d68c3e1f7e9";
 
 describe("sessions routes", () => {
   let ctx: Awaited<ReturnType<typeof createTestContext>>;
@@ -268,6 +270,81 @@ describe("sessions routes", () => {
       // Assert
       const can = Object.fromEntries(sessions.map((s) => [s.id, s.canArchive]));
       expect(can).toEqual({ done: true, turn: false });
+    });
+
+    it("links a running desktop-app session to the desktop app", async () => {
+      // Arrange
+      const file = buildSessionFile();
+      ctx.seed.session(file);
+      ctx.seed.status(buildStatusFile({ sessionId: file.sessionId, hostSessionId: DESKTOP_ID }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.desktopLink).toBe(`claude://claude.ai/epitaxy/${DESKTOP_ID}`);
+      const [stored] = await ctx.db.select().from(desktopSessionLinks);
+      expect(stored).toEqual({ sessionId: file.sessionId, desktopSessionId: DESKTOP_ID });
+    });
+
+    it("keeps the desktop link once the session's process has ended", async () => {
+      // Arrange
+      const file = buildSessionFile();
+      ctx.seed.session(file);
+      ctx.seed.status(buildStatusFile({ sessionId: file.sessionId, hostSessionId: DESKTOP_ID }));
+      await list();
+      ctx.clearStatus();
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.desktopLink).toBe(`claude://claude.ai/epitaxy/${DESKTOP_ID}`);
+    });
+
+    it.each([
+      ["a CLI session", { entrypoint: "cli" }],
+      ["a malformed desktop id", { hostSessionId: "local_../../evil" }],
+      ["no desktop id", { hostSessionId: null }],
+    ])("gives no desktop link for %s", async (_case, overrides) => {
+      // Arrange
+      const file = buildSessionFile();
+      ctx.seed.session(file);
+      ctx.seed.status(buildStatusFile({ sessionId: file.sessionId, hostSessionId: DESKTOP_ID, ...overrides }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.desktopLink).toBeNull();
+      expect(await ctx.db.select().from(desktopSessionLinks)).toEqual([]);
+    });
+
+    it("gives no desktop link to a session no status file names, and reads the status files beside an unreadable one", async () => {
+      // Arrange
+      const linked = buildSessionFile({ sessionId: "linked" });
+      ctx.seed.session(linked);
+      ctx.seed.session(buildSessionFile({ sessionId: "unnamed" }));
+      ctx.seed.rawStatus("123.json", "{ not json");
+      ctx.seed.status(buildStatusFile({ sessionId: "linked", hostSessionId: DESKTOP_ID }));
+
+      // Act
+      const { sessions } = await list();
+
+      // Assert
+      const links = Object.fromEntries(sessions.map((s) => [s.id, s.desktopLink]));
+      expect(links).toEqual({ linked: `claude://claude.ai/epitaxy/${DESKTOP_ID}`, unnamed: null });
+    });
+
+    it("keeps no desktop link of a session outside the export", async () => {
+      // Arrange
+      ctx.seed.status(buildStatusFile({ sessionId: "elsewhere", hostSessionId: DESKTOP_ID }));
+
+      // Act
+      await list();
+
+      // Assert
+      expect(await ctx.db.select().from(desktopSessionLinks)).toEqual([]);
     });
   });
 
