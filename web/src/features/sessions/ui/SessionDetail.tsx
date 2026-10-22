@@ -67,7 +67,7 @@ export function SessionDetail({
             </Button>
           )}
           {s.canArchive && (
-            <Button size="sm" onClick={() => actions.onArchive(s.id)}>
+            <Button size="sm" onClick={() => actions.onArchive(s)}>
               <ArchiveIcon />
               {t("sessions.actions.archive")}
             </Button>

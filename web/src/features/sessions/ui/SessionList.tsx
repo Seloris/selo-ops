@@ -11,7 +11,7 @@ export interface SessionActions {
   onResume: (session: Session) => void;
   onToggleNext: (id: string) => void;
   onCopyNext: (session: Session) => void;
-  onArchive: (id: string) => void;
+  onArchive: (session: Session) => void;
   onUnarchive: (id: string) => void;
 }
 

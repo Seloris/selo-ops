@@ -82,7 +82,7 @@ export function SessionCards({
               )}
               {s.canArchive && (
                 <span className={styles.push}>
-                  <Button size="sm" onClick={() => actions.onArchive(s.id)}>
+                  <Button size="sm" onClick={() => actions.onArchive(s)}>
                     <ArchiveIcon />
                     {t("sessions.actions.archive")}
                   </Button>

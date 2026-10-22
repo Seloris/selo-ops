@@ -31,6 +31,8 @@ export const BUCKETS: Bucket[] = ["todo", "run", "rest"];
 export const STALE_AFTER_MS = 30 * 60_000;
 
 export const bucketOf = (state: SessionState): Bucket => BUCKET[state];
+// `session` BR-07: only a run that waits on nobody is archived without a question.
+export const isFinished = (s: Session) => bucketOf(s.state) === "rest";
 export const isOpen = (s: Session) => !s.isClosed && !s.isArchived;
 // `session` BR-04.
 export const isTodo = (s: Session) => isOpen(s) && bucketOf(s.state) === "todo";

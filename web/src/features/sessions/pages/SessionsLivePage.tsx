@@ -5,6 +5,7 @@ import { t } from "../../../shared/lib/i18n/index.ts";
 import { readStored, writeStored } from "../../../shared/lib/storage.ts";
 import { useNow } from "../../../shared/lib/useNow.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
+import { ConfirmDialog } from "../../../shared/ui/ConfirmDialog.tsx";
 import { Drawer, type DrawerResize } from "../../../shared/ui/Drawer.tsx";
 import { EmptyState } from "../../../shared/ui/EmptyState.tsx";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage.tsx";
@@ -16,6 +17,7 @@ import {
   closedSessions,
   countsOf,
   groupSessions,
+  isFinished,
   openCountByProject,
   type Block,
   type Filters,
@@ -34,7 +36,7 @@ import { ColumnHead, SessionList, type SessionActions } from "../ui/SessionList.
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
 import { SettingsBar, type View } from "../ui/SettingsBar.tsx";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../ui/panelWidth.ts";
-import { desktopLinkOf, laneLabel, resumeCommand } from "../ui/sessionText.ts";
+import { desktopLinkOf, laneLabel, resumeCommand, stateLabel } from "../ui/sessionText.ts";
 import styles from "./SessionsLivePage.module.css";
 
 // sessions-live FR-08 and FR-27: the view, the grouping and the detail's width are remembered in the browser.
@@ -83,6 +85,8 @@ export function SessionsLivePage() {
   const [isArchivedOpen, setArchivedOpen] = useState(false);
   const [nextShown, setNextShown] = useState<Set<string>>(() => new Set());
   const [toast, setToast] = useState<ToastState | null>(null);
+  // sessions-live FR-28: the session whose archive waits for the person's confirmation.
+  const [archiveAsked, setArchiveAsked] = useState<Session | null>(null);
 
   const [isResizing, setResizing] = useState(false);
 
@@ -152,6 +156,15 @@ export function SessionsLivePage() {
 
   const failed = (error: Error) => showToast({ title: t("sessions.toast.failed"), hint: error.message || t("sessions.toast.failedUnknown"), tone: "danger" });
 
+  const archiveNow = (id: string) =>
+    archive.mutate(id, {
+      onSuccess: () => {
+        setArchiveAsked(null);
+        showToast({ title: t("sessions.toast.archived"), hint: t("sessions.toast.archivedHint") });
+      },
+      onError: failed,
+    });
+
   const actions: SessionActions = {
     onOpen: (id) => {
       setProjectsOpen(false);
@@ -182,8 +195,10 @@ export function SessionsLivePage() {
       }),
     onCopyNext: (s) =>
       void copy(s.nextAction ?? "", t("sessions.toast.nextCopied"), t("sessions.toast.nextHint", { project: projectName(s.projectId), lane: laneLabel(s.lane) })),
-    onArchive: (id) =>
-      archive.mutate(id, { onSuccess: () => showToast({ title: t("sessions.toast.archived"), hint: t("sessions.toast.archivedHint") }), onError: failed }),
+    onArchive: (s) => {
+      if (isFinished(s)) archiveNow(s.id);
+      else setArchiveAsked(s);
+    },
     onUnarchive: (id) =>
       unarchive.mutate(id, { onSuccess: () => showToast({ title: t("sessions.toast.unarchived"), hint: t("sessions.toast.unarchivedHint") }), onError: failed }),
   };
@@ -301,6 +316,20 @@ export function SessionsLivePage() {
           )}
         </Drawer>
       </div>
+      <ConfirmDialog
+        isOpen={archiveAsked !== null}
+        title={t("sessions.archiveConfirm.title")}
+        message={archiveAsked ? t("sessions.archiveConfirm.message", { state: stateLabel(archiveAsked) }) : ""}
+        confirmLabel={t("sessions.archiveConfirm.confirm")}
+        cancelLabel={t("sessions.archiveConfirm.cancel")}
+        isPending={archive.isPending}
+        error={archive.isError ? archive.error.message || t("sessions.toast.failedUnknown") : null}
+        onConfirm={() => archiveAsked && archiveNow(archiveAsked.id)}
+        onCancel={() => {
+          archive.reset();
+          setArchiveAsked(null);
+        }}
+      />
       {toast && (
         <Toast
           key={toast.id}

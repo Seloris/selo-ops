@@ -4,6 +4,7 @@ import {
   closedSessions,
   countsOf,
   groupSessions,
+  isFinished,
   isStale,
   matches,
   openCountByProject,
@@ -295,5 +296,18 @@ describe("sessions outside selo", () => {
     expect(matches(session, { projectIds: new Set(["p-notes"]), search: "json" }, byId)).toBe(true);
     expect(matches(session, { projectIds: new Set(["p-ledger"]), search: "" }, byId)).toBe(false);
     expect(matches(session, { projectIds: null, search: "promo" }, byId)).toBe(false);
+  });
+});
+
+describe("isFinished", () => {
+  it("holds for a done session or a turn end, not for one that waits or works", () => {
+    // Arrange
+    const states = ["job-done", "turn-ended", "working", "awaiting-answer", "awaiting-commit", "stopped"] as const;
+
+    // Act
+    const finished = states.map((state) => isFinished(buildSession({ state })));
+
+    // Assert
+    expect(finished).toEqual([true, true, false, false, false, false]);
   });
 });

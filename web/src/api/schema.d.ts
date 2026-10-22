@@ -92,7 +92,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Archive a session whose current run is done or whose turn ended */
+        /** Archive a session, whatever its state */
         put: {
             parameters: {
                 query?: never;
@@ -113,15 +113,6 @@ export interface paths {
                 };
                 /** @description The session is neither in the export nor running outside selo */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description The session's current run is neither done nor at a turn end (code session_not_done) */
-                422: {
                     headers: {
                         [name: string]: unknown;
                     };
