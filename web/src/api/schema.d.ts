@@ -92,7 +92,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Archive a session whose current run is done */
+        /** Archive a session whose current run is done or whose turn ended */
         put: {
             parameters: {
                 query?: never;
@@ -120,7 +120,7 @@ export interface paths {
                         "application/problem+json": components["schemas"]["ProblemDetails"];
                     };
                 };
-                /** @description The session's current run is not done (code session_not_done) */
+                /** @description The session's current run is neither done nor at a turn end (code session_not_done) */
                 422: {
                     headers: {
                         [name: string]: unknown;

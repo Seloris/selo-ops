@@ -67,7 +67,7 @@
   "sessions.group.clean": "rien à commiter",
   "sessions.group.noBranch": "branche inconnue",
   "sessions.group.closed": "Fermées",
-  "sessions.group.closedHint": "· fermées dans Claude Code ; seules celles finies par un JOB DONE s’archivent",
+  "sessions.group.closedHint": "· fermées dans Claude Code ; seules celles terminées ou au tour terminé s’archivent",
   "sessions.group.archived": "Archivées",
 
   "sessions.empty.noProject": "Aucun projet coché : coche au moins un projet dans « Projets ».",
