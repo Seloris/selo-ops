@@ -259,17 +259,18 @@ describe("sessions routes", () => {
       expect(sessions.map((s) => s.id)).toEqual([good.sessionId]);
     });
 
-    it("offers the archive only on a session whose current run is done", async () => {
+    it("offers the archive only on a session whose current run is done or whose turn ended", async () => {
       // Arrange
       ctx.seed.session(buildSessionFile({ sessionId: "done", current: buildRun({ phase: "job-done" }) }));
       ctx.seed.session(buildSessionFile({ sessionId: "turn", current: buildRun({ phase: "turn-ended" }) }));
+      ctx.seed.session(buildSessionFile({ sessionId: "asking", current: buildRun({ phase: "awaiting-answer" }) }));
 
       // Act
       const { sessions } = await list();
 
       // Assert
       const can = Object.fromEntries(sessions.map((s) => [s.id, s.canArchive]));
-      expect(can).toEqual({ done: true, turn: false });
+      expect(can).toEqual({ done: true, turn: true, asking: false });
     });
 
     it("links a running desktop-app session to the desktop app", async () => {
@@ -349,6 +350,23 @@ describe("sessions routes", () => {
   });
 
   describe("PUT /v1/sessions/:id/archive", () => {
+    it("archives an open session whose turn ended", async () => {
+      // Arrange
+      ctx.clock.set("2026-03-01T08:00:00.000Z");
+      const run = buildRun({ phase: "turn-ended" });
+      ctx.seed.session(buildSessionFile({ sessionId: "s1", current: run }));
+
+      // Act
+      const res = await request(ctx.app).put("/v1/sessions/s1/archive");
+
+      // Assert
+      expect(res.status).toBe(204);
+      expect(await ctx.db.select().from(sessionArchives)).toEqual([
+        { sessionId: "s1", runId: run.id, archivedAt: new Date("2026-03-01T08:00:00.000Z") },
+      ]);
+      expect(await only()).toMatchObject({ isArchived: true, canArchive: false });
+    });
+
     it("archives a session whose current run is done, closed or not", async () => {
       // Arrange
       ctx.clock.set("2026-03-01T08:00:00.000Z");
@@ -366,7 +384,7 @@ describe("sessions routes", () => {
       expect(await only()).toMatchObject({ isArchived: true, archivedAt: "2026-03-01T08:00:00.000Z", canArchive: false });
     });
 
-    it.each([["awaiting-answer"], ["awaiting-commit"], ["stopped"], ["working"], ["turn-ended"]] as const)(
+    it.each([["awaiting-answer"], ["awaiting-commit"], ["stopped"], ["working"]] as const)(
       "refuses to archive a session in state %s",
       async (phase) => {
         // Arrange

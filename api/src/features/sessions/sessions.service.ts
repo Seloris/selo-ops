@@ -53,6 +53,8 @@ function projectsOf(sessions: SessionFile[], projectFiles: ProjectFile[]): Proje
 }
 
 const BLOCKERS = new Set<string>(closeBlockerSchema.options);
+// `session` BR-07: a run that waits on nobody can be archived.
+const ARCHIVABLE = new Set<string>(["job-done", "turn-ended"]);
 
 function toSession(
   file: SessionFile,
@@ -81,7 +83,7 @@ function toSession(
     isClosed: file.status === "ended",
     isArchived,
     archivedAt: isArchived ? archive.archivedAt.toISOString() : null,
-    canArchive: current.phase === "job-done" && !isArchived,
+    canArchive: ARCHIVABLE.has(current.phase) && !isArchived,
     question: current.question ?? null,
     pendingCommit: current.pendingCommit ? { subject: current.pendingCommit.subject, body: current.pendingCommit.body ?? "" } : null,
     error: current.error ?? null,
@@ -156,8 +158,7 @@ export function createSessionService({
 
     async archive(id: string): Promise<void> {
       const { current } = findSession(id);
-      // `session` BR-07: only a finished run is archived.
-      if (current.phase !== "job-done") throw new BusinessRuleError("session_not_done", `Session ${id} is not done`);
+      if (!ARCHIVABLE.has(current.phase)) throw new BusinessRuleError("session_not_done", `Session ${id} is neither done nor at a turn end`);
       await archives.save({ sessionId: id, runId: current.id, archivedAt: clock.now() });
     },
 

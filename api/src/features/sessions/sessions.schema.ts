@@ -85,12 +85,12 @@ registry.registerPath({
 registry.registerPath({
   method: "put",
   path: "/v1/sessions/{id}/archive",
-  summary: "Archive a session whose current run is done",
+  summary: "Archive a session whose current run is done or whose turn ended",
   request: { params: sessionParamsSchema },
   responses: {
     204: { description: "Archived" },
     404: problem("The session is not in the export"),
-    422: problem("The session's current run is not done (code session_not_done)"),
+    422: problem("The session's current run is neither done nor at a turn end (code session_not_done)"),
   },
 });
 
