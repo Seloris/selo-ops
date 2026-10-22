@@ -74,8 +74,8 @@ export interface Awaited {
 export function awaitedOf(s: Session): Awaited | null {
   if (bucketOf(s.state) !== "todo") return null;
   if (s.state === "awaiting-answer") {
-    // A session outside selo never gives its question's text: Claude Code only says it awaits an answer.
-    const text = s.question ?? (s.isOutsideSelo ? t("sessions.awaited.outsideQuestion") : "");
+    // A session outside selo, or a question the export missed, gives no text: Claude Code only says it awaits an answer.
+    const text = s.question ?? t("sessions.awaited.outsideQuestion");
     return { kind: "question", key: t("sessions.awaited.questionKey"), label: t("sessions.awaited.question"), text, full: text, isCode: false };
   }
   if (s.state === "awaiting-permission") {

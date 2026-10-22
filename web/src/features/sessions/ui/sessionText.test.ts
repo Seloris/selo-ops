@@ -122,6 +122,14 @@ describe("ageDisplay", () => {
 });
 
 describe("awaitedOf", () => {
+  it("shows a selo session's question the export missed as an answer awaited in the session", () => {
+    // Act
+    const awaited = awaitedOf(buildSession({ state: "awaiting-answer", question: null }));
+
+    // Assert
+    expect(awaited).toMatchObject({ kind: "question", text: "Claude attend ta réponse dans la session" });
+  });
+
   it("gives the question of a session awaiting an answer", () => {
     // Act
     const awaited = awaitedOf(buildSession({ state: "awaiting-answer", question: "A or B?" }));
