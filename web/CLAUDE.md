@@ -3,7 +3,7 @@
 ```component
 kind: front
 stack: react-express
-skin: pro
+skin: aurora
 layers: [data, pages, ui]
 commands:
   build: npm run build
