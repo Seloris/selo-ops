@@ -96,6 +96,8 @@ export interface Skill {
   when: MessageKey;
   prompt: MessageKey;
   options: MessageKey[];
+  // help FR-11: the skill that runs a lane wears its colour (build runs the blueprint lane).
+  lane?: LaneId;
 }
 
 // help FR-06: one card per skill.
@@ -105,6 +107,7 @@ export const skills: Skill[] = [
     what: "help.skills.fastlane.what",
     when: "help.skills.fastlane.when",
     prompt: "help.skills.fastlane.prompt",
+    lane: "fastlane",
     options: ["help.options.noBrowser", "help.options.autonomous"],
   },
   {
@@ -112,6 +115,7 @@ export const skills: Skill[] = [
     what: "help.skills.blueprint.what",
     when: "help.skills.blueprint.when",
     prompt: "help.skills.blueprint.prompt",
+    lane: "blueprint",
     options: ["help.options.blueprintRevise", "help.options.autonomous"],
   },
   {
@@ -119,6 +123,7 @@ export const skills: Skill[] = [
     what: "help.skills.build.what",
     when: "help.skills.build.when",
     prompt: "help.skills.build.prompt",
+    lane: "blueprint",
     options: ["help.options.stage", "help.options.noBrowser", "help.options.autonomous"],
   },
   {
@@ -126,6 +131,7 @@ export const skills: Skill[] = [
     what: "help.skills.autopilot.what",
     when: "help.skills.autopilot.when",
     prompt: "help.skills.autopilot.prompt",
+    lane: "autopilot",
     options: ["help.options.fastlane", "help.options.blueprint", "help.options.untilBlueprint", "help.options.noBrowser"],
   },
   {

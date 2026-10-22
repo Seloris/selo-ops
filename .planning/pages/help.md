@@ -31,6 +31,7 @@ A static page that explains how selo works, so that a person picks a lane and re
 
 - **FR-09** — The page reads no data: it shows the same content with the API down.
 - **FR-10** — « Aide » in the header of any other page opens the same content in a popup over that page, which stays as it was; Échap, « Fermer » or a click outside the popup closes it.
+- **FR-11** — Each lane wears its own colour: fastlane lime and autopilot violet (the colours of `sessions-live` FR-29), blueprint teal; on its lane card, its name in the decision guide, its tags in the lifecycle and the cards of the skills that run it (build with blueprint), so that a lane is told at a glance.
 
 ## Non-goals
 

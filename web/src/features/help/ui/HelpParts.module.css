@@ -12,6 +12,8 @@
 
 .tocTitle,
 .sectionTitle {
+  display: grid;
+  gap: 10px;
   margin: 0;
   font-family: var(--font-display);
   font-size: 1.45em;
@@ -19,11 +21,22 @@
   line-height: 1.2;
 }
 
+/* Under each title, a short rule in the three lane colours. */
+.tocTitle::after,
+.sectionTitle::after {
+  content: "";
+  width: 48px;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--lane-fastlane), var(--lane-blueprint), var(--lane-autopilot));
+}
+
 .tocList {
   margin: 0;
   padding-left: 1.4em;
   display: grid;
-  gap: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 24px;
 }
 
 .tocLink {
@@ -117,9 +130,88 @@
   font-weight: 500;
 }
 
-.numbered::before {
-  content: counter(step) ". ";
-  color: var(--text-muted);
+/* Numbered steps: a round counter on the left, joined to the next one by a thin line. */
+.steps > .cell {
+  position: relative;
+  padding-left: 40px;
+}
+
+.steps > .cell::before {
+  content: counter(step);
+  position: absolute;
+  top: 12px;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 0.85em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-pill);
+}
+
+.steps > .cell:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 44px;
+  bottom: -8px;
+  left: 14px;
+  width: var(--border-width);
+  background: var(--border);
+}
+
+/* help FR-11: each lane sets --lane; its card gets a coloured top edge and a soft glow of that colour. */
+.lane-fastlane {
+  --lane: var(--lane-fastlane);
+}
+
+.lane-blueprint {
+  --lane: var(--lane-blueprint);
+}
+
+.lane-autopilot {
+  --lane: var(--lane-autopilot);
+}
+
+.laneCell {
+  position: relative;
+  border-radius: var(--item-radius);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--lane) 16%, transparent), transparent 65%);
+}
+
+.laneCell::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 3px;
+  border-radius: 0 0 var(--radius-pill) var(--radius-pill);
+  background: var(--lane);
+}
+
+.laneTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--lane);
+}
+
+.dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--lane);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lane) 22%, transparent);
+}
+
+.laneName {
+  color: var(--lane);
 }
 
 .stepHead {
@@ -154,6 +246,10 @@
 }
 
 @media (max-width: 640px) {
+  .tocList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .cards {
     grid-template-columns: minmax(0, 1fr);
   }

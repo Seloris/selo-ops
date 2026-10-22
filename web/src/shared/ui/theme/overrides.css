@@ -5,6 +5,7 @@
    --warn, --warn-soft   amber, the second state colour the skin lacks (rose is its --danger)
    --font-mono           commands, branches, commit subjects
    --lane-free, --lane-fastlane, --lane-autopilot   the type of work: sky, lime, violet (sessions-live FR-29)
+   --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
 
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
    of that scheme, so the choice wins over the system's prefers-color-scheme. */
@@ -15,6 +16,7 @@
   --lane-free: #0284c7;
   --lane-fastlane: #4d7c0f;
   --lane-autopilot: #7c3aed;
+  --lane-blueprint: #0f766e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,6 +26,7 @@
     --lane-free: #7dd3fc;
     --lane-fastlane: #a3e635;
     --lane-autopilot: #c4b5fd;
+    --lane-blueprint: #2dd4bf;
   }
 }
 
@@ -52,6 +55,7 @@
   --lane-free: #0284c7;
   --lane-fastlane: #4d7c0f;
   --lane-autopilot: #7c3aed;
+  --lane-blueprint: #0f766e;
   color-scheme: light;
 }
 
@@ -80,5 +84,6 @@
   --lane-free: #7dd3fc;
   --lane-fastlane: #a3e635;
   --lane-autopilot: #c4b5fd;
+  --lane-blueprint: #2dd4bf;
   color-scheme: dark;
 }

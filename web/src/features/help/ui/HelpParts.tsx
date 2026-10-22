@@ -5,6 +5,13 @@ import { Tag } from "../../../shared/ui/Tag.tsx";
 import type { DecisionGuide, Lane, LaneId, LifecycleStep, Role, Section, Skill, Term } from "../content.ts";
 import styles from "./HelpParts.module.css";
 
+// help FR-11: a lane's class sets --lane, which its card, name and dot read.
+const laneClass = (lane: LaneId) => styles[`lane-${lane}`];
+
+function LaneName({ lane }: { lane: Lane }) {
+  return <strong className={`${styles.laneName} ${laneClass(lane.id)}`}>{t(lane.name)}</strong>;
+}
+
 function Code({ text }: { text: MessageKey }) {
   return <code className={styles.code}>{t(text)}</code>;
 }
@@ -65,9 +72,12 @@ export function LaneList({ lanes }: { lanes: Lane[] }) {
   return (
     <ul className={styles.cards}>
       {lanes.map((lane) => (
-        <li key={lane.id} className={styles.cell}>
+        <li key={lane.id} className={`${styles.cell} ${styles.laneCell} ${laneClass(lane.id)}`}>
           <Card>
-            <h3 className={styles.cardTitle}>{t(lane.name)}</h3>
+            <h3 className={`${styles.cardTitle} ${styles.laneTitle}`}>
+              <span className={styles.dot} aria-hidden="true" />
+              {t(lane.name)}
+            </h3>
             <Labelled label="help.lanes.when">{t(lane.when)}</Labelled>
             <div className={styles.codes} aria-label={t("help.lanes.prompt")}>
               {lane.prompts.map((prompt) => (
@@ -91,11 +101,11 @@ export function DecisionGuideList({ guide, lanesById }: { guide: DecisionGuide; 
             <p className={styles.numbered}>{t(step.question)}</p>
             <ul className={styles.textList}>
               <li>
-                <span className={styles.label}>{t("help.guide.yes")}</span> <strong>{t(lanesById[step.yes].name)}</strong>
+                <span className={styles.label}>{t("help.guide.yes")}</span> <LaneName lane={lanesById[step.yes]} />
               </li>
               <li>
                 <span className={styles.label}>{t("help.guide.no")}</span>{" "}
-                {index === last ? <strong>{t(lanesById[guide.otherwise].name)}</strong> : t("help.guide.next")}
+                {index === last ? <LaneName lane={lanesById[guide.otherwise]} /> : t("help.guide.next")}
               </li>
             </ul>
           </Card>
@@ -117,7 +127,9 @@ export function LifecycleList({ steps, lanes }: { steps: LifecycleStep[]; lanes:
                 {lanes
                   .filter((lane) => step.lanes.includes(lane.id))
                   .map((lane) => (
-                    <Tag key={lane.id}>{t(lane.short)}</Tag>
+                    <Tag key={lane.id} color={`var(--lane-${lane.id})`}>
+                      {t(lane.short)}
+                    </Tag>
                   ))}
               </span>
             </div>
@@ -144,9 +156,15 @@ export function SkillCards({ skills }: { skills: Skill[] }) {
   return (
     <ul className={styles.cards}>
       {skills.map((skill) => (
-        <li key={skill.name} className={styles.cell}>
+        <li
+          key={skill.name}
+          className={skill.lane ? `${styles.cell} ${styles.laneCell} ${laneClass(skill.lane)}` : styles.cell}
+        >
           <Card>
-            <h4 className={styles.cardTitle}>{t(skill.name)}</h4>
+            <h4 className={skill.lane ? `${styles.cardTitle} ${styles.laneTitle}` : styles.cardTitle}>
+              {skill.lane && <span className={styles.dot} aria-hidden="true" />}
+              {t(skill.name)}
+            </h4>
             <p className={styles.text}>{t(skill.what)}</p>
             <Labelled label="help.skills.when">{t(skill.when)}</Labelled>
             <div className={styles.codes} aria-label={t("help.skills.prompt")}>

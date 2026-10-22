@@ -1,10 +1,14 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import styles from "./Tag.module.css";
 
-// A neutral outlined pill: a fact about an item, never a call to act (the Badge is for that).
-export function Tag({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
+// An outlined pill: a fact about an item, never a call to act (the Badge is for that).
+// Neutral unless `color` (a token, e.g. var(--lane-fastlane)) tints its text, outline and fill.
+export function Tag({ icon, color, children }: { icon?: ReactNode; color?: string; children: ReactNode }) {
   return (
-    <span className={styles.tag}>
+    <span
+      className={color ? `${styles.tag} ${styles.colored}` : styles.tag}
+      style={color ? ({ "--tag-color": color } as CSSProperties) : undefined}
+    >
       {icon}
       {children}
     </span>

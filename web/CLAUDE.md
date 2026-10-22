@@ -36,7 +36,7 @@ src/
                             Panel, PageTitle, Field (label, error, the control as a render prop), TextInput, SearchInput, Select,
                             Button (variant: primary, danger, quiet, ghost), Switch, Checkbox, List (List, ListItem with isDone, ListItemText),
                             Badge, EmptyState, LoadingState, ErrorMessage (role="alert"), ConfirmDialog (a native <dialog>), icons.tsx,
-                            Segmented, NavTabs (links between pages, a page not built yet dimmed with its note), IconButton, Tag, StatusDot, Dropdown (DropdownCheck), CommandBox, Drawer (a side panel), Modal (a large native dialog, open while mounted), Toast, Card (a static block on the row tokens); Button also takes size="sm"
+                            Segmented, NavTabs (links between pages, a page not built yet dimmed with its note), IconButton, Tag (color tints it), StatusDot, Dropdown (DropdownCheck), CommandBox, Drawer (a side panel), Modal (a large native dialog, open while mounted), Toast, Card (a static block on the row tokens); Button also takes size="sm"
       theme/                fonts.ts (the skin's font imports) and skin.css (its tokens), both written by setup: never edited; base.css (the page), overrides.css (this application's values)
     lib/                    utils (formatAge, clipboard, storage, useNow), theme (data-theme on the root), i18n/ (fr.json, t and tn)
 ```
@@ -66,7 +66,7 @@ The skin named in the `component` block above: its fonts in `src/shared/ui/theme
 
 - Variables this application changes: in `src/shared/ui/theme/overrides.css`, never in `skin.css`.
 - Rules this application adds or replaces: here, one line each.
-- State colours: amber (`--warn`, `--warn-soft`, added in overrides.css) and rose (`--danger`) mark only what waits on the person; everything else stays neutral, except the lane tokens (`--lane-*`, sessions-live FR-29) that colour the type of work.
+- State colours: amber (`--warn`, `--warn-soft`, added in overrides.css) and rose (`--danger`) mark only what waits on the person; everything else stays neutral, except the lane tokens (`--lane-*`) that colour the type of work (sessions-live FR-29) and the lanes of the help (help FR-11); the help's titles carry a short rule in the three lane colours, as a decoration.
 - Mint (`--accent`) only for the active setting, checked boxes and the « Ouvrir » action.
 - Theme: Clair / Sombre chosen in the header, Sombre by default; overrides.css restates both palettes under `:root[data-theme]`, so a new token needs its light and dark values there.
 - Commands, branches and commit subjects in `--font-mono` (added in overrides.css).
