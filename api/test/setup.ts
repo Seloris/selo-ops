@@ -70,6 +70,7 @@ function createClaudeProjectsDir() {
     const path = join(dir, folderName, `${sessionId}.jsonl`);
     writeFileSync(path, lines.map((l) => (typeof l === "string" ? l : JSON.stringify(l))).join("\n") + "\n");
     if (modifiedAt) utimesSync(path, new Date(modifiedAt), new Date(modifiedAt));
+    return path;
   };
   const clear = () => {
     rmSync(dir, { recursive: true, force: true });

@@ -259,6 +259,22 @@ describe("sessions routes", () => {
       expect(sessions.map((s) => s.id)).toEqual([good.sessionId]);
     });
 
+    it("drops a session whose transcript was deleted in Claude Code, keeps one whose transcript exists or that names none", async () => {
+      // Arrange
+      const kept = buildSessionFile();
+      kept.transcriptPath = ctx.seed.transcript("C--code-ledger-api", kept.sessionId, [{ type: "user" }]);
+      const deleted = buildSessionFile();
+      deleted.transcriptPath = kept.transcriptPath.replace(kept.sessionId, deleted.sessionId);
+      const unnamed = buildSessionFile({ transcriptPath: null });
+      for (const file of [kept, deleted, unnamed]) ctx.seed.session(file);
+
+      // Act
+      const { sessions } = await list();
+
+      // Assert
+      expect(sessions.map((s) => s.id).sort()).toEqual([kept.sessionId, unnamed.sessionId].sort());
+    });
+
     it("offers the archive only on a session whose current run is done or whose turn ended", async () => {
       // Arrange
       ctx.seed.session(buildSessionFile({ sessionId: "done", current: buildRun({ phase: "job-done" }) }));
@@ -422,6 +438,20 @@ describe("sessions routes", () => {
       expect((res.body as ProblemDetails).code).toBe("not_found");
     });
 
+    it("returns 404 when the session's transcript was deleted in Claude Code", async () => {
+      // Arrange
+      const file = buildSessionFile({ current: buildRun({ phase: "turn-ended" }) });
+      file.transcriptPath = `${ctx.code.folder("gone")}/${file.sessionId}.jsonl`;
+      ctx.seed.session(file);
+
+      // Act
+      const res = await request(ctx.app).put(`/v1/sessions/${file.sessionId}/archive`);
+
+      // Assert
+      expect(res.status).toBe(404);
+      expect(await ctx.db.select().from(sessionArchives)).toEqual([]);
+    });
+
     it("brings the session back to the list when a new run starts after the archive", async () => {
       // Arrange
       ctx.seed.session(buildSessionFile({ sessionId: "s1", current: buildRun({ id: "s1:1", phase: "job-done" }) }));
@@ -467,6 +497,19 @@ describe("sessions routes", () => {
     it("returns 404 when the session is not in the export", async () => {
       // Act
       const res = await request(ctx.app).delete("/v1/sessions/missing/archive");
+
+      // Assert
+      expect(res.status).toBe(404);
+    });
+
+    it("returns 404 when the session's transcript was deleted in Claude Code", async () => {
+      // Arrange
+      const file = buildSessionFile({ current: buildRun({ phase: "job-done" }) });
+      file.transcriptPath = `${ctx.code.folder("gone")}/${file.sessionId}.jsonl`;
+      ctx.seed.session(file);
+
+      // Act
+      const res = await request(ctx.app).delete(`/v1/sessions/${file.sessionId}/archive`);
 
       // Assert
       expect(res.status).toBe(404);

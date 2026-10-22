@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 
@@ -37,6 +37,7 @@ export const sessionFileSchema = z.object({
   rootKey: z.string(),
   repo: z.string().nullish(),
   status: z.string(),
+  transcriptPath: z.string().nullish(),
   model: z.string().nullish(),
   permissionMode: z.string().nullish(),
   effort: z.string().nullish(),
@@ -62,6 +63,8 @@ export type ProjectFile = z.infer<typeof projectFileSchema>;
 export interface OpsExport {
   sessions: SessionFile[];
   projects: ProjectFile[];
+  // Sessions whose file stays but whose transcript is gone: out of `sessions`, yet still the export's (`session` BR-14).
+  deletedSessionIds: Set<string>;
 }
 
 export interface OpsExportReader {
@@ -88,11 +91,20 @@ function readFolder<T>(dir: string, schema: z.ZodType<T>): T[] {
   return files;
 }
 
+// `session` BR-14: deleting a session in Claude Code, or its cleanup of old transcripts, removes the transcript
+// but runs no hook, so the file stays as it was; a file that names no transcript is kept.
+const isTranscriptGone = (file: SessionFile) => file.transcriptPath != null && !existsSync(file.transcriptPath);
+
 export function createOpsExportReader(opsDir: string): OpsExportReader {
   return {
-    read: () => ({
-      sessions: readFolder(join(opsDir, "sessions"), sessionFileSchema),
-      projects: readFolder(join(opsDir, "projects"), projectFileSchema),
-    }),
+    read: () => {
+      const files = readFolder(join(opsDir, "sessions"), sessionFileSchema);
+      const deleted = files.filter(isTranscriptGone);
+      return {
+        sessions: files.filter((file) => !deleted.includes(file)),
+        projects: readFolder(join(opsDir, "projects"), projectFileSchema),
+        deletedSessionIds: new Set(deleted.map((file) => file.sessionId)),
+      };
+    },
   };
 }

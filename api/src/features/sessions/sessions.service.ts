@@ -184,27 +184,30 @@ export function createSessionService({
 
   const currentOf = (file: SessionFile) => file.current ?? file.runs.find((r) => !r.agentId) ?? null;
 
+  // A session deleted in Claude Code is still the export's: never shown as outside selo (`session` BR-12, BR-14).
+  const exportedIds = (files: SessionFile[], deleted: Set<string>) => new Set([...files.map((s) => s.sessionId), ...deleted]);
+
   // The run and state of a session of the export, else of a running session outside selo; gone from both: 404.
   const findRun = (id: string): { runId: string; state: ExportRun["phase"] } => {
-    const files = opsExport.read().sessions;
+    const { sessions: files, deletedSessionIds } = opsExport.read();
     const file = files.find((s) => s.sessionId === id);
     const current = file && currentOf(file);
     if (current) return { runId: current.id, state: current.phase };
-    const outside = outsideSessions.read(new Set(files.map((s) => s.sessionId))).find((o) => o.status.sessionId === id);
+    const outside = outsideSessions.read(exportedIds(files, deletedSessionIds)).find((o) => o.status.sessionId === id);
     if (outside) return { runId: runIdOf(outside), state: outside.state };
     throw new NotFoundError("Session", id);
   };
 
   return {
     async list(): Promise<SessionsResponse> {
-      const { sessions, projects } = opsExport.read();
+      const { sessions, projects, deletedSessionIds } = opsExport.read();
       // A session with no run yet holds no request: nothing to show.
       const withRun = sessions.flatMap((file) => {
         const current = currentOf(file);
         return current ? [{ file, current }] : [];
       });
       // Every file of the export, run or not, keeps its session out of those outside selo (`session` BR-12).
-      const outside = outsideSessions.read(new Set(sessions.map((s) => s.sessionId)));
+      const outside = outsideSessions.read(exportedIds(sessions, deletedSessionIds));
       const byId = new Map((await archives.list()).map((a) => [a.sessionId, a]));
       const desktopIds = await desktopSessionIds(new Set(withRun.map(({ file }) => file.sessionId)));
       const exportIds = withRun.map(({ file }) => projectIdOf(file, projects));

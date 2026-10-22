@@ -31,5 +31,6 @@ What holds for a Claude Code session on every page: its terms and its rules, as 
 - **BR-11** — A session started by the Claude desktop app opens in the app once Selo Ops has seen it running (Claude Code names the app's session only while the process runs); Selo Ops keeps that link afterwards, process ended or not. A session started elsewhere, or never seen running, has no link.
 - **BR-12** — A session outside selo is a running Claude Code process whose session has no file in the export (a workspace without the plugin, a session the plugin never exported); it is listed only while its process runs, is never closed, and leaves the list with no history when the process ends.
 - **BR-13** — A session outside selo is « En cours » while Claude works, « Attend ta réponse » when Claude Code says it awaits an answer, and « Tour terminé » when it is idle; never « Commit à valider », « Terminé » nor « Arrêtée », which only the plugin knows.
+- **BR-14** — A session whose transcript is gone, whatever removed it (deleted from the desktop app or the terminal, or cleaned up by Claude Code after its retention period), leaves Selo Ops: it is no longer listed, never shown as outside selo, and can be neither archived nor unarchived, whatever its export file still says.
 
 Retired:

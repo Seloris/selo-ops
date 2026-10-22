@@ -55,6 +55,20 @@ describe("sessions outside selo", () => {
   };
 
   describe("GET /v1/sessions", () => {
+    it("never lists as outside selo a running session whose export file names a transcript that is gone", async () => {
+      // Arrange
+      const cwd = ctx.code.folder("scratch");
+      const status = buildRunningStatusFile({ cwd });
+      ctx.seed.running(status);
+      ctx.seed.session(buildSessionFile({ sessionId: status.sessionId, root: cwd, transcriptPath: `${cwd}/${status.sessionId}.jsonl` }));
+
+      // Act
+      const { sessions } = await list();
+
+      // Assert
+      expect(sessions).toEqual([]);
+    });
+
     it("lists a running session that has no export file, outside selo", async () => {
       // Arrange
       const status = running({ statusUpdatedAt: Date.parse("2026-01-01T09:00:00.000Z") });
