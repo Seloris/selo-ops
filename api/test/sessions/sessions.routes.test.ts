@@ -183,7 +183,7 @@ describe("sessions routes", () => {
       const session = await only();
 
       // Assert
-      expect(session.subagents).toEqual([{ type: "selo:runner", task: "api tests", state: "working" }]);
+      expect(session.subagents).toEqual([{ type: "selo:runner", task: "api tests", state: "working", model: null, usage: null }]);
     });
 
     it.each(["turn-ended", "job-done"] as const)("shows a session as working while a subagent of its current run works after %s", async (phase) => {

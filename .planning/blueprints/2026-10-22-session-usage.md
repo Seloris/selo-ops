@@ -31,6 +31,11 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 - Glossary at the merge → `consommation` / `usage`, `tokens` / `Tokens` (four kinds), `modèle réel` (the delta grammar has no glossary line)
 - Demo and API fixtures → a 2.2.0 session with usage, a run `settled: false`, a run `partial: true`, a prompt with `at: null`, a subagent with usage null, a 1.0.0 session with no `usage` key, a session with `model: null` using the fallback; a run with over 50 prompts in the demo
 
+### Decided during build
+- A subagent's `usage` in the contract → `Usage` (calls, tokens, byModel), not `RunUsage` (its tools and skills are not shown; keeps the 5 s poll small)
+- "Latest" main run for the model fallback → the one with the latest `since`, whatever the export's order of `runs` (order-independent)
+- Demo run "over 50 prompts" → 50 prompts listed (the most the export keeps), the run's calls and tokens above their sum (the export cannot hold more)
+
 ## Stages
 1. api — `feat(session-usage): api — session, run and subagent usage from the export`
 2. web — `feat(session-usage): web — usage sections in the detail, total tokens on the card`
@@ -41,7 +46,7 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 - browser: demo at 1280×800 and 390 wide: card total next to the model, detail session and run usage, tags « provisoire » / « partiel », prompts folded then opened with the over-50 note, subagent with « — », 1.0.0 session « — »
 
 ## Progress
-- [ ] Stage 1 — api
+- [x] Stage 1 — api
 - [ ] Stage 2 — web
 - [ ] Review
 - [ ] Browser test

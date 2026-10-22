@@ -1,7 +1,7 @@
 import { mkdirSync, utimesSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Database } from "../db/client.js";
-import type { ExportRun, ProjectFile, SessionFile } from "../features/sessions/sessions.export.js";
+import type { ExportRun, ExportRunUsage, ExportUsage, ProjectFile, SessionFile } from "../features/sessions/sessions.export.js";
 import { normRoot, type RunningStatusFile } from "../features/sessions/sessions.outside.js";
 import { createDesktopSessionLinkRepository, createSessionArchiveRepository } from "../features/sessions/sessions.repository.js";
 import type { Clock } from "../shared/clock.js";
@@ -152,6 +152,100 @@ const SESSIONS: DemoSession[] = [
     recap: "Icône sombre ajoutée pour iOS et Android.", commits: [{ sha: "0a9f3e4", subject: "feat(app): dark app icon" }] },
 ];
 
+// What the sessions written by the plugin's 2.2.0 consumed (`session` BR-18 to BR-20); every other session is a 1.0.0
+// file, with no `usage` key. `scale`: the current run's total tokens; `model`: the one its usage names (the session's
+// export model may be null); `prompts`: how many the run lists, 50 being the most the export keeps; `agents`: the real
+// model of each subagent, null for one stopped by Esc (no usage).
+interface DemoUsage {
+  scale: number;
+  model: string;
+  prompts: number;
+  isProvisional?: boolean;
+  isPartial?: boolean;
+  hasUntimedPrompt?: boolean;
+  agents?: (string | null)[];
+}
+
+const HAIKU = "claude-haiku-5-5";
+
+const USAGE: Record<string, DemoUsage> = {
+  "7c3a9e51-0f2b-4d84-a6e7-b19d4c2f8a03": { scale: 1_234_567, model: OPUS, prompts: 6, isProvisional: true, agents: [HAIKU, OPUS] },
+  "3f9c2a71-5b0e-4d8a-9c1f-a2e7b6d40c13": { scale: 4_800_000, model: OPUS, prompts: 50, agents: [HAIKU] },
+  "5a6e3d92-81bf-4c07-9e2a-d4f1b0c87e36": { scale: 2_600_000, model: OPUS, prompts: 3, isPartial: true, agents: [null] },
+  "a9c7e215-3f8b-4d06-b2e4-61d0f5a8c793": { scale: 34_000, model: SONNET, prompts: 2, hasUntimedPrompt: true },
+  "d3b16f74-e0a9-4c25-87d1-4f9e2b6c0a58": { scale: 999, model: SONNET, prompts: 1 },
+};
+
+const TOOLS = ["Read", "Edit", "Bash", "Grep", "advisor", "Write", "Glob"];
+const SKILLS: { name: string; how: string }[] = [
+  { name: "selo:build", how: "command" },
+  { name: "write-api-tests", how: "tool" },
+  { name: "caveman", how: "preloaded" },
+  { name: "drizzle-migrations", how: "tool" },
+  { name: "selo:review", how: "command" },
+  { name: "artifact-design", how: "tool" },
+  { name: "dataviz", how: "tool" },
+];
+
+type Tokens = ExportUsage["tokens"];
+const KINDS = ["input", "cacheRead", "cacheWrite", "output"] as const;
+// Cache reads dominate a long run, as in a real transcript.
+const tokensOf = (total: number): Tokens => {
+  const input = Math.round(total * 0.01);
+  const cacheWrite = Math.round(total * 0.09);
+  const output = Math.round(total * 0.04);
+  return { input, cacheRead: total - input - cacheWrite - output, cacheWrite, output };
+};
+const plus = (a: Tokens, b: Tokens): Tokens => ({
+  input: a.input + b.input, cacheRead: a.cacheRead + b.cacheRead, cacheWrite: a.cacheWrite + b.cacheWrite, output: a.output + b.output,
+});
+const totalOf = (t: Tokens) => KINDS.reduce((n, k) => n + t[k], 0);
+
+// The export sums every run into the session's totals, per model too.
+function sumUsage(usages: ExportUsage[]): ExportUsage {
+  const byModel = new Map<string, ExportUsage["byModel"][number]>();
+  let tokens = tokensOf(0);
+  let calls = 0;
+  for (const u of usages) {
+    calls += u.calls;
+    tokens = plus(tokens, u.tokens);
+    for (const m of u.byModel) {
+      const cur = byModel.get(m.model) ?? { model: m.model, calls: 0, tokens: tokensOf(0) };
+      byModel.set(m.model, { model: m.model, calls: cur.calls + m.calls, tokens: plus(cur.tokens, m.tokens) });
+    }
+  }
+  return { calls, tokens, byModel: [...byModel.values()].sort((a, b) => totalOf(b.tokens) - totalOf(a.tokens)) };
+}
+
+// A main run's usage, its prompts sharing its calls; a run listing 50 prompts had more, its totals counting them all.
+function runUsageOf(u: DemoUsage, at: (secondsAgo: number) => string, age: number): ExportRunUsage {
+  const isCut = u.prompts >= 50;
+  const promptCalls = 3;
+  const calls = u.prompts * promptCalls + (isCut ? 40 : 0);
+  const tokens = tokensOf(u.scale);
+  const promptTokens = tokensOf(Math.round(u.scale / (u.prompts + (isCut ? 13 : 0))));
+  const prompts = Array.from({ length: u.prompts }, (_, i) => ({
+    at: u.hasUntimedPrompt && i === 0 ? null : at(age + 600 - i * Math.floor(540 / u.prompts)),
+    calls: promptCalls,
+    tokens: promptTokens,
+  }));
+  return {
+    calls, tokens,
+    byModel: [{ model: u.model, calls, tokens }],
+    tools: TOOLS.map((name, i) => ({ name, count: Math.max(1, Math.round(calls / (i + 2))) })),
+    skills: SKILLS.slice(0, u.prompts > 2 ? SKILLS.length : 2).map((s, i) => ({ ...s, count: Math.max(1, 4 - i) })),
+    prompts, settled: !u.isProvisional, partial: u.isPartial ?? false,
+  };
+}
+
+function agentUsageOf(model: string, scale: number): ExportRunUsage {
+  const tokens = tokensOf(scale);
+  return {
+    calls: 9, tokens, byModel: [{ model, calls: 9, tokens }], tools: [{ name: "Bash", count: 6 }, { name: "Read", count: 3 }],
+    skills: [], prompts: [], settled: true, partial: false,
+  };
+}
+
 // Sessions outside selo (`session` BR-12): Claude Code's status files (the demo's own pid, so they count as alive) and
 // transcripts. `folder`: a selo project's (joins its block), a worktree of one (through a `.git` file), a repository
 // without selo, or a folder in no repository.
@@ -245,10 +339,16 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
       recap: s.recap ? { text: s.recap, commits: s.commits ?? [] } : null, commits: s.commits ?? [],
       resumePrompt: s.next ?? null, since, updatedAt: at(s.age),
     };
-    const subagents: ExportRun[] = (s.subagents ?? []).map((a, i) => ({
-      ...current, id: `${s.id}:agent-${i}`, agentId: `agent-${i}`, lane: "free", request: a.type, task: a.task, phase: a.phase,
-      blueprint: null, pendingCommit: null, question: null, error: null, recap: null, commits: [], resumePrompt: null, since: at(s.age + 300 - i),
-    }));
+    const usage = USAGE[s.id];
+    if (usage) current.usage = runUsageOf(usage, at, s.age);
+    const subagents: ExportRun[] = (s.subagents ?? []).map((a, i) => {
+      const agentModel = usage?.agents?.[i];
+      return {
+        ...current, id: `${s.id}:agent-${i}`, agentId: `agent-${i}`, lane: "free", request: a.type, task: a.task, phase: a.phase,
+        blueprint: null, pendingCommit: null, question: null, error: null, recap: null, commits: [], resumePrompt: null, since: at(s.age + 300 - i),
+        ...(usage ? { usage: agentModel ? agentUsageOf(agentModel, 180_000 - i * 70_000) : null } : {}),
+      };
+    });
     const root = rootOf(s);
     const file: SessionFile = {
       schemaVersion: 1, writtenAt: at(s.age), sessionId: s.id, root, rootKey: keyOf(root), repo: repoOf(s.project),
@@ -256,6 +356,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
       touchedFiles: s.files ?? [], close: { ok: s.blockers.length === 0, blockers: s.blockers },
       runs: [...subagents, current], current,
     };
+    if (usage) file.usage = sumUsage([current, ...subagents].flatMap((r) => (r.usage ? [r.usage] : [])));
     writeJson(join(opsDir, "sessions"), `${s.id}.json`, file);
     if (s.permission !== undefined) seedPermissionWait(folders, file, s.permission, now - s.age * 1000);
     if (s.archivedAge !== undefined) await archives.save({ sessionId: s.id, runId: current.id, archivedAt: new Date(now - s.archivedAge * 1000) });

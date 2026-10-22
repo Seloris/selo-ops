@@ -1,11 +1,11 @@
 import { NotFoundError } from "../../shared/errors.js";
 import type { Clock } from "../../shared/clock.js";
 import { desktopSessionIdOf, toDesktopLink, type DesktopSessionReader } from "./sessions.desktop.js";
-import type { ExportRun, OpsExportReader, ProjectFile, SessionFile } from "./sessions.export.js";
+import type { ExportRun, ExportUsage, OpsExportReader, ProjectFile, SessionFile } from "./sessions.export.js";
 import type { GitPlace, OutsideSession, OutsideSessionReader, PermissionWait } from "./sessions.outside.js";
 import type { DesktopSessionLinkRepository, SessionArchiveRepository } from "./sessions.repository.js";
 import type { SessionArchive } from "./sessions.table.js";
-import { closeBlockerSchema, type CloseBlocker, type Project, type Session, type SessionsResponse } from "./sessions.schema.js";
+import { closeBlockerSchema, type CloseBlocker, type Project, type Session, type SessionsResponse, type Usage } from "./sessions.schema.js";
 
 // The plugin cuts a run's request at this length.
 const REQUEST_LIMIT = 200;
@@ -56,6 +56,22 @@ function projectsOf(ids: string[], projectFiles: ProjectFile[], outsideGit: Map<
 }
 
 const BLOCKERS = new Set<string>(closeBlockerSchema.options);
+
+// The `Usage` part of a run's usage: a subagent's tools, skills and prompts stay off the 5 s poll.
+const usageOf = (usage: ExportUsage | null | undefined): Usage | null =>
+  usage ? { calls: usage.calls, tokens: usage.tokens, byModel: usage.byModel } : null;
+
+const topModelOf = (run: ExportRun) => run.usage?.byModel[0]?.model ?? null;
+
+// `session` BR-20: the export's model is null before its first Stop; the latest main run that has usage then tells it,
+// never a subagent's, which may run on another model.
+function modelOf(file: SessionFile): string | null {
+  if (file.model) return file.model;
+  const latest = file.runs
+    .filter((r) => !r.agentId && topModelOf(r) !== null)
+    .sort((a, b) => Date.parse(b.since) - Date.parse(a.since))[0];
+  return latest ? topModelOf(latest) : null;
+}
 export const OUTSIDE_LANE = "outside";
 
 function toSession(
@@ -108,11 +124,19 @@ function toSession(
     recap: current.recap?.text ?? null,
     commits: (current.commits ?? []).map(({ sha, subject }) => ({ sha, subject })),
     nextAction: current.resumePrompt ?? null,
-    model: file.model ?? null,
+    model: modelOf(file),
     effort: file.effort ?? null,
     permissionMode: file.permissionMode ?? null,
     blockers: (file.close?.blockers ?? []).filter((b): b is CloseBlocker => BLOCKERS.has(b)),
-    subagents: subagents.map((r) => ({ type: r.request ?? "", task: r.task ?? null, state: r.phase })),
+    subagents: subagents.map((r) => ({
+      type: r.request ?? "",
+      task: r.task ?? null,
+      state: r.phase,
+      model: topModelOf(r),
+      usage: usageOf(r.usage),
+    })),
+    usage: usageOf(file.usage),
+    runUsage: current.usage ?? null,
     touchedFiles: file.touchedFiles ?? [],
     desktopLink: toDesktopLink(desktopSessionId),
     isOutsideSelo: false,
@@ -163,6 +187,9 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     permissionMode: null,
     blockers: [],
     subagents: [],
+    // `session` BR-18: only the export gives usage.
+    usage: null,
+    runUsage: null,
     touchedFiles: [],
     // Computed from the status file on each read, never stored: the link table keeps the export's sessions only.
     desktopLink: toDesktopLink(desktopSessionIdOf(status) ?? undefined),

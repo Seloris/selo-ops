@@ -176,14 +176,31 @@
                 },
                 "state": {
                   "$ref": "#/components/schemas/SessionState"
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "usage": {
+                  "$ref": "#/components/schemas/Usage"
                 }
               },
               "required": [
                 "type",
                 "task",
-                "state"
+                "state",
+                "model",
+                "usage"
               ]
             }
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          },
+          "runUsage": {
+            "$ref": "#/components/schemas/RunUsage"
           },
           "touchedFiles": {
             "type": "array",
@@ -237,6 +254,8 @@
           "permissionMode",
           "blockers",
           "subagents",
+          "usage",
+          "runUsage",
           "touchedFiles",
           "desktopLink",
           "isOutsideSelo",
@@ -265,6 +284,187 @@
           "dirty-files",
           "background-tasks",
           "subagents"
+        ]
+      },
+      "Usage": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "calls": {
+            "type": "integer"
+          },
+          "tokens": {
+            "$ref": "#/components/schemas/Tokens"
+          },
+          "byModel": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string"
+                },
+                "calls": {
+                  "type": "integer"
+                },
+                "tokens": {
+                  "$ref": "#/components/schemas/Tokens"
+                }
+              },
+              "required": [
+                "model",
+                "calls",
+                "tokens"
+              ]
+            }
+          }
+        },
+        "required": [
+          "calls",
+          "tokens",
+          "byModel"
+        ]
+      },
+      "Tokens": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "integer"
+          },
+          "cacheRead": {
+            "type": "integer"
+          },
+          "cacheWrite": {
+            "type": "integer"
+          },
+          "output": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "input",
+          "cacheRead",
+          "cacheWrite",
+          "output"
+        ]
+      },
+      "RunUsage": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "calls": {
+            "type": "integer"
+          },
+          "tokens": {
+            "$ref": "#/components/schemas/Tokens"
+          },
+          "byModel": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string"
+                },
+                "calls": {
+                  "type": "integer"
+                },
+                "tokens": {
+                  "$ref": "#/components/schemas/Tokens"
+                }
+              },
+              "required": [
+                "model",
+                "calls",
+                "tokens"
+              ]
+            }
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "name",
+                "count"
+              ]
+            }
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                },
+                "how": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "count",
+                "how"
+              ]
+            }
+          },
+          "prompts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "calls": {
+                  "type": "integer"
+                },
+                "tokens": {
+                  "$ref": "#/components/schemas/Tokens"
+                }
+              },
+              "required": [
+                "at",
+                "calls",
+                "tokens"
+              ]
+            }
+          },
+          "settled": {
+            "type": "boolean"
+          },
+          "partial": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "calls",
+          "tokens",
+          "byModel",
+          "tools",
+          "skills",
+          "prompts",
+          "settled",
+          "partial"
         ]
       },
       "Project": {

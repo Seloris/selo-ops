@@ -1,5 +1,5 @@
 import type { ClaudeStatusFile } from "../src/features/sessions/sessions.desktop.js";
-import type { ExportRun, ProjectFile, SessionFile } from "../src/features/sessions/sessions.export.js";
+import type { ExportRun, ExportRunUsage, ExportUsage, ProjectFile, SessionFile } from "../src/features/sessions/sessions.export.js";
 import type { RunningStatusFile } from "../src/features/sessions/sessions.outside.js";
 
 // One `build{Entity}(overrides)` per entity: the only way a test builds a row.
@@ -54,6 +54,32 @@ export function buildSessionFile(overrides: Partial<SessionFile> = {}): SessionF
     runs: current ? [current] : [],
     ...overrides,
     current,
+  };
+}
+
+export function buildTokens(overrides: Partial<ExportRunUsage["tokens"]> = {}): ExportRunUsage["tokens"] {
+  return { input: 1200, cacheRead: 340000, cacheWrite: 21000, output: 8800, ...overrides };
+}
+
+// A session's totals, as the export sums them over every run.
+export function buildUsage(overrides: Partial<ExportUsage> = {}): ExportUsage {
+  const tokens = overrides.tokens ?? buildTokens();
+  return { calls: 42, tokens, byModel: [{ model: "claude-opus-5-5", calls: 42, tokens }], ...overrides };
+}
+
+// A run's usage, settled and read whole, with one prompt.
+export function buildRunUsage(overrides: Partial<ExportRunUsage> = {}): ExportRunUsage {
+  const tokens = overrides.tokens ?? buildTokens();
+  return {
+    calls: 12,
+    tokens,
+    byModel: [{ model: "claude-opus-5-5", calls: 12, tokens }],
+    tools: [{ name: "Read", count: 9 }, { name: "advisor", count: 1 }],
+    skills: [{ name: "selo:build", count: 1, how: "command" }],
+    prompts: [{ at: EPOCH, calls: 12, tokens }],
+    settled: true,
+    partial: false,
+    ...overrides,
   };
 }
 

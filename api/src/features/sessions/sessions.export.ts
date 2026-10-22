@@ -10,6 +10,25 @@ export const PHASES = ["awaiting-answer", "awaiting-commit", "stopped", "working
 
 const commitSchema = z.object({ sha: z.string(), subject: z.string() });
 
+// Since the plugin's 2.2.0 (`session` BR-18): what a run, or the whole session, consumed. Read leniently: a usage that
+// does not match becomes null, never a reason to skip the file; a file written by 1.0.0 has no `usage` key at all.
+const tokensSchema = z.object({ input: z.number(), cacheRead: z.number(), cacheWrite: z.number(), output: z.number() });
+const usageFields = {
+  calls: z.number(),
+  tokens: tokensSchema,
+  byModel: z.array(z.object({ model: z.string(), calls: z.number(), tokens: tokensSchema })),
+};
+const usageSchema = z.object(usageFields);
+const runUsageSchema = z.object({
+  ...usageFields,
+  tools: z.array(z.object({ name: z.string(), count: z.number() })),
+  // `how` kept as any string: a way of loading a later export adds stays readable.
+  skills: z.array(z.object({ name: z.string(), count: z.number(), how: z.string() })),
+  prompts: z.array(z.object({ at: z.string().nullable(), calls: z.number(), tokens: tokensSchema })),
+  settled: z.boolean(),
+  partial: z.boolean(),
+});
+
 const runSchema = z.object({
   id: z.string(),
   agentId: z.string().nullish(),
@@ -26,6 +45,7 @@ const runSchema = z.object({
   recap: z.object({ text: z.string().nullish(), commits: z.array(commitSchema).nullish() }).nullish(),
   commits: z.array(commitSchema).nullish(),
   resumePrompt: z.string().nullish(),
+  usage: runUsageSchema.nullish().catch(null),
   since: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -46,6 +66,8 @@ export const sessionFileSchema = z.object({
   close: z.object({ ok: z.boolean(), blockers: z.array(z.string()) }).nullish(),
   runs: z.array(runSchema),
   current: runSchema.nullish(),
+  // Every run summed, subagents and runs the export dropped included.
+  usage: usageSchema.nullish().catch(null),
 });
 
 export const projectFileSchema = z.object({
@@ -58,6 +80,8 @@ export const projectFileSchema = z.object({
 });
 
 export type ExportRun = z.infer<typeof runSchema>;
+export type ExportUsage = z.infer<typeof usageSchema>;
+export type ExportRunUsage = z.infer<typeof runUsageSchema>;
 export type SessionFile = z.infer<typeof sessionFileSchema>;
 export type ProjectFile = z.infer<typeof projectFileSchema>;
 

@@ -24,6 +24,35 @@ export const closeBlockerSchema = z
 
 const commitSchema = z.object({ sha: z.string(), subject: z.string() });
 
+// `session` BR-18: what the export says a session or a run consumed; Selo Ops never counts it.
+export const tokensSchema = z
+  .object({ input: z.number().int(), cacheRead: z.number().int(), cacheWrite: z.number().int(), output: z.number().int() })
+  .meta({ id: "Tokens" });
+
+const usageFields = {
+  calls: z.number().int(),
+  tokens: tokensSchema,
+  // Most tokens first; calls with no model count in the totals only.
+  byModel: z.array(z.object({ model: z.string(), calls: z.number().int(), tokens: tokensSchema })),
+};
+
+export const usageSchema = z.object(usageFields).meta({ id: "Usage" });
+
+export const runUsageSchema = z
+  .object({
+    ...usageFields,
+    // Most called first; the advisor as `advisor`.
+    tools: z.array(z.object({ name: z.string(), count: z.number().int() })),
+    // `how`: `tool`, `command` or `preloaded`, any other value a later export may add kept as is.
+    skills: z.array(z.object({ name: z.string(), count: z.number().int(), how: z.string() })),
+    // The latest 50 prompts of the run, oldest first; `at` null when the transcript gives no time.
+    prompts: z.array(z.object({ at: z.string().nullable(), calls: z.number().int(), tokens: tokensSchema })),
+    // `session` BR-19: false while the figures may still grow; true when they cover only the transcript's last 32 MB.
+    settled: z.boolean(),
+    partial: z.boolean(),
+  })
+  .meta({ id: "RunUsage" });
+
 export const sessionSchema = z
   .object({
     id: z.string(),
@@ -49,11 +78,19 @@ export const sessionSchema = z
     recap: z.string().nullable(),
     commits: z.array(commitSchema),
     nextAction: z.string().nullable(),
+    // `session` BR-20: the export's, else the top model of its latest main run with usage.
     model: z.string().nullable(),
     effort: z.string().nullable(),
     permissionMode: z.string().nullable(),
     blockers: z.array(closeBlockerSchema),
-    subagents: z.array(z.object({ type: z.string(), task: z.string().nullable(), state: sessionStateSchema })),
+    // `model`: the subagent's real model, the top one of its own usage (`session` BR-20); null with no usage (stopped by Esc).
+    subagents: z.array(
+      z.object({ type: z.string(), task: z.string().nullable(), state: sessionStateSchema, model: z.string().nullable(), usage: usageSchema.nullable() }),
+    ),
+    // `session` BR-18: the session's totals, and its current main run's; null for a session outside selo or one the
+    // export wrote before 2.2.0.
+    usage: usageSchema.nullable(),
+    runUsage: runUsageSchema.nullable(),
     touchedFiles: z.array(z.string()),
     // `claude://claude.ai/epitaxy/local_{uuid}`, opening the session in the Claude desktop app; null for a session
     // the desktop app did not start, or that Selo Ops never saw running (`session` BR-11).
@@ -89,6 +126,7 @@ export type Project = z.infer<typeof projectSchema>;
 export type SessionsResponse = z.infer<typeof sessionsResponseSchema>;
 export type SessionState = z.infer<typeof sessionStateSchema>;
 export type CloseBlocker = z.infer<typeof closeBlockerSchema>;
+export type Usage = z.infer<typeof usageSchema>;
 
 const problem = (description: string) => ({
   description,
