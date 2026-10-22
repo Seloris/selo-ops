@@ -76,6 +76,12 @@
               "null"
             ]
           },
+          "permissionTool": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "pendingCommit": {
             "type": [
               "object",
@@ -220,6 +226,7 @@
           "archivedAt",
           "canArchive",
           "question",
+          "permissionTool",
           "pendingCommit",
           "error",
           "recap",
@@ -241,6 +248,7 @@
         "type": "string",
         "enum": [
           "awaiting-answer",
+          "awaiting-permission",
           "awaiting-commit",
           "stopped",
           "working",

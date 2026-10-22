@@ -1,9 +1,22 @@
 import { z } from "zod";
 import { problemDetailsSchema } from "../../shared/errors.js";
 import { registry } from "../../shared/openapi.js";
-import { PHASES } from "./sessions.export.js";
+import type { ExportRun } from "./sessions.export.js";
 
-export const sessionStateSchema = z.enum(PHASES).meta({ id: "SessionState" });
+type Phase = ExportRun["phase"];
+
+// The export's phases, plus a wait on a permission dialog, which only Claude Code's status file tells (`session` BR-16).
+export const SESSION_STATES = [
+  "awaiting-answer",
+  "awaiting-permission",
+  "awaiting-commit",
+  "stopped",
+  "working",
+  "turn-ended",
+  "job-done",
+] as const satisfies readonly (Phase | "awaiting-permission")[];
+
+export const sessionStateSchema = z.enum(SESSION_STATES).meta({ id: "SessionState" });
 
 export const closeBlockerSchema = z
   .enum(["not-done", "pending-commit", "question", "dirty-files", "background-tasks", "subagents"])
@@ -29,6 +42,8 @@ export const sessionSchema = z
     archivedAt: z.iso.datetime().nullable(),
     canArchive: z.boolean(),
     question: z.string().nullable(),
+    // `awaiting-permission` only: the shell command to allow, else the tool's name; null when the transcript names none.
+    permissionTool: z.string().nullable(),
     pendingCommit: z.object({ subject: z.string(), body: z.string() }).nullable(),
     error: z.string().nullable(),
     recap: z.string().nullable(),
@@ -72,6 +87,7 @@ export const sessionParamsSchema = z.object({ id: z.string().min(1) });
 export type Session = z.infer<typeof sessionSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type SessionsResponse = z.infer<typeof sessionsResponseSchema>;
+export type SessionState = z.infer<typeof sessionStateSchema>;
 export type CloseBlocker = z.infer<typeof closeBlockerSchema>;
 
 const problem = (description: string) => ({

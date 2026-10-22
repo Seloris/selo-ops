@@ -48,17 +48,39 @@ export interface Transcript {
   startedAt: number | null;
 }
 
+// A wait on a permission dialog held long enough to be the person's (`session` BR-16).
+export interface PermissionWait {
+  // The shell command to allow, else the tool's name; null when the transcript names none.
+  tool: string | null;
+}
+
 export interface OutsideSession {
   status: RunningStatusFile;
   folder: string;
   state: ExportRun["phase"];
+  permissionWait: PermissionWait | null;
   git: GitPlace | null;
   transcript: Transcript | null;
 }
 
+// An open session of the export, whose running process may wait on a permission dialog.
+export interface OpenExportSession {
+  sessionId: string;
+  root: string;
+  // The folder Claude Code names its transcripts after, as the export gives it.
+  rootKey: string;
+}
+
+export interface ClaudeSessionsRead {
+  outside: OutsideSession[];
+  // By session id: the open sessions of the export that wait on a permission.
+  permissionWaits: Map<string, PermissionWait>;
+}
+
 export interface OutsideSessionReader {
-  // `exported`: the session ids of every export file, which are never sessions outside selo.
-  read(exported: Set<string>): OutsideSession[];
+  // `exported`: the session ids of every export file, which are never sessions outside selo. `open`: the export's open
+  // sessions, checked for a permission wait. `now`: epoch milliseconds, from the service's clock.
+  read(query: { exported: Set<string>; open?: OpenExportSession[]; now: number }): ClaudeSessionsRead;
 }
 
 // As the selo plugin writes paths in the export (its slots.mjs normRoot): forward slashes, upper-case drive letter.
@@ -68,9 +90,13 @@ const rootKey = (path: string) => normRoot(path).replace(/[^A-Za-z0-9]/g, "-");
 
 const TAIL_BYTES = 256 * 1024;
 
-// What Claude Code files as a wait on a permission dialog cannot be told from a tool that runs; a wait that declares no
-// reason is one too. Any other wait is a question to the person.
+// What Claude Code files as a wait on a dialog cannot be told from a tool that runs; a wait that declares no reason is one
+// too. Any other wait is a question to the person.
 const PERMISSION_WAITS = new Set(["permission prompt", "sandbox request", "worker request", "goal proposal"]);
+// The dialogs the person must allow (`session` BR-16); a worker request or a goal proposal asks nobody.
+const PERMISSION_DIALOGS = new Set(["permission prompt", "sandbox request"]);
+// Auto mode's own checks open the dialog for a moment: only a longer wait is the person's.
+const PERMISSION_HOLD_MS = 15_000;
 
 // `session` BR-13. A status Claude Code may add later says nothing about a wait: the process lives, so it works.
 export function stateOf(status: RunningStatusFile): ExportRun["phase"] {
@@ -252,28 +278,102 @@ export function readTranscript(path: string, transcriptStartOf: TranscriptStartR
 
 const updatedAtOf = (status: RunningStatusFile) => status.updatedAt ?? status.statusUpdatedAt ?? status.startedAt;
 
+// `session` BR-16: `statusUpdatedAt` is when the process started to wait; with none, its last update.
+export function isPermissionWait(status: RunningStatusFile, now: number): boolean {
+  if (status.status !== "waiting" || !PERMISSION_DIALOGS.has(status.waitingFor ?? "")) return false;
+  return now - (status.statusUpdatedAt ?? updatedAtOf(status)) >= PERMISSION_HOLD_MS;
+}
+
+const SHELL_TOOLS = new Set(["Bash", "mcp__terminal__run_in_terminal"]);
+// A subagent's own call is in its own transcript, not in the main one: the tool it waits on is unknown.
+const SUBAGENT_TOOLS = new Set(["Agent", "Task"]);
+
+const blocksSchema = z.array(z.looseObject({ type: z.string(), tool_use_id: z.string().optional() }));
+const toolLineSchema = z.looseObject({
+  type: z.enum(["assistant", "user"]),
+  isSidechain: z.boolean().optional(),
+  message: z.looseObject({ content: z.unknown() }),
+});
+const toolUseSchema = z.looseObject({ id: z.string(), name: z.string(), input: z.looseObject({ command: z.unknown().optional() }).optional() });
+
+// The tool the dialog asks for: the main thread's last call with no result after it.
+export function permissionToolOf(path: string): string | null {
+  const { lines } = readTail(path);
+  const open = new Map<string, z.infer<typeof toolUseSchema>>();
+  for (const line of lines) {
+    let value: unknown;
+    try {
+      value = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    const parsed = toolLineSchema.safeParse(value);
+    if (!parsed.success || parsed.data.isSidechain === true) continue;
+    const blocks = blocksSchema.safeParse(parsed.data.message.content);
+    if (!blocks.success) continue;
+    for (const block of blocks.data) {
+      if (block.type === "tool_result" && block.tool_use_id !== undefined) open.delete(block.tool_use_id);
+      if (block.type !== "tool_use") continue;
+      const use = toolUseSchema.safeParse(block);
+      if (use.success) open.set(use.data.id, use.data);
+    }
+  }
+  const last = [...open.values()].pop();
+  if (last === undefined || SUBAGENT_TOOLS.has(last.name)) return null;
+  const command = last.input?.command;
+  return SHELL_TOOLS.has(last.name) && typeof command === "string" && command.trim() !== "" ? command : last.name;
+}
+
+function permissionWaitOf(status: RunningStatusFile, now: number, transcriptPath: () => string | null): PermissionWait | null {
+  if (!isPermissionWait(status, now)) return null;
+  try {
+    const path = transcriptPath();
+    return { tool: path === null ? null : permissionToolOf(path) };
+  } catch {
+    // gone or locked between the lookup and the read: the wait shows without its tool until the next read
+    return { tool: null };
+  }
+}
+
+// An export session's transcript sits in the folder the export names, else in another case of it (`findTranscript`).
+function exportTranscriptOf(projectsDir: string, session: OpenExportSession): string | null {
+  const own = join(projectsDir, session.rootKey, `${session.sessionId}.jsonl`);
+  return existsSync(own) ? own : findTranscript(projectsDir, session.root, session.sessionId);
+}
+
 export function createOutsideSessionReader(statusDir: string, projectsDir: string): OutsideSessionReader {
   const transcriptStartOf = createTranscriptStartReader();
   return {
-    read: (exported) => {
+    read: ({ exported, open = [], now }) => {
       // A crash leaves its file behind: only a live process counts. Two live files of one session (a resumed process):
       // the latest wins.
       const bySession = new Map<string, RunningStatusFile>();
       for (const status of readStatusFiles(statusDir)) {
-        if (exported.has(status.sessionId) || !isPidAlive(status.pid)) continue;
+        if (!isPidAlive(status.pid)) continue;
         const other = bySession.get(status.sessionId);
         if (other === undefined || updatedAtOf(status) > updatedAtOf(other)) bySession.set(status.sessionId, status);
       }
-      return [...bySession.values()].map((status) => {
-        const path = findTranscript(projectsDir, status.cwd, status.sessionId);
-        let transcript: Transcript | null = null;
-        try {
-          transcript = path === null ? null : readTranscript(path, transcriptStartOf);
-        } catch {
-          // gone or locked between the lookup and the read: the session shows without it until the next read
-        }
-        return { status, folder: normRoot(status.cwd), state: stateOf(status), git: gitPlaceOf(status.cwd), transcript };
-      });
+      const outside = [...bySession.values()]
+        .filter((status) => !exported.has(status.sessionId))
+        .map((status) => {
+          const path = findTranscript(projectsDir, status.cwd, status.sessionId);
+          let transcript: Transcript | null = null;
+          try {
+            transcript = path === null ? null : readTranscript(path, transcriptStartOf);
+          } catch {
+            // gone or locked between the lookup and the read: the session shows without it until the next read
+          }
+          const permissionWait = permissionWaitOf(status, now, () => path);
+          return { status, folder: normRoot(status.cwd), state: stateOf(status), permissionWait, git: gitPlaceOf(status.cwd), transcript };
+        });
+      // `session` BR-16: the export's open sessions, by the same status files; a closed one is never asked for.
+      const permissionWaits = new Map<string, PermissionWait>();
+      for (const session of open) {
+        const status = bySession.get(session.sessionId);
+        const wait = status === undefined ? null : permissionWaitOf(status, now, () => exportTranscriptOf(projectsDir, session));
+        if (wait !== null) permissionWaits.set(session.sessionId, wait);
+      }
+      return { outside, permissionWaits };
     },
   };
 }

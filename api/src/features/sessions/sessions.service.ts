@@ -2,7 +2,7 @@ import { NotFoundError } from "../../shared/errors.js";
 import type { Clock } from "../../shared/clock.js";
 import { desktopSessionIdOf, toDesktopLink, type DesktopSessionReader } from "./sessions.desktop.js";
 import type { ExportRun, OpsExportReader, ProjectFile, SessionFile } from "./sessions.export.js";
-import type { GitPlace, OutsideSession, OutsideSessionReader } from "./sessions.outside.js";
+import type { GitPlace, OutsideSession, OutsideSessionReader, PermissionWait } from "./sessions.outside.js";
 import type { DesktopSessionLinkRepository, SessionArchiveRepository } from "./sessions.repository.js";
 import type { SessionArchive } from "./sessions.table.js";
 import { closeBlockerSchema, type CloseBlocker, type Project, type Session, type SessionsResponse } from "./sessions.schema.js";
@@ -65,6 +65,7 @@ function toSession(
   projectFiles: ProjectFile[],
   desktopSessionId: string | undefined,
   transcriptStart: number | undefined,
+  permissionWait: PermissionWait | undefined,
 ): Session {
   // An archive covers the run it was made on: a new run brings the session back (`session` BR-09).
   const isArchived = archive !== undefined && archive.runId === current.id;
@@ -75,7 +76,9 @@ function toSession(
   const isClosed = file.status === "ended";
   // A turn that ends with subagents in the background has not finished its work (`session` BR-02).
   const isCalm = current.phase === "turn-ended" || current.phase === "job-done";
-  const state = !isClosed && isCalm && subagents.some((r) => r.phase === "working") ? "working" : current.phase;
+  const phase = !isClosed && isCalm && subagents.some((r) => r.phase === "working") ? "working" : current.phase;
+  // A permission dialog holds the run whatever its phase (`session` BR-16).
+  const state = permissionWait ? "awaiting-permission" : phase;
   // The export keeps the latest runs only: a long session's first run may be gone, its transcript is not.
   const createdAt = transcriptStart ?? Math.min(...file.runs.map((r) => Date.parse(r.since)), since);
   return {
@@ -95,6 +98,7 @@ function toSession(
     archivedAt: isArchived ? archive.archivedAt.toISOString() : null,
     canArchive: !isArchived,
     question: current.question ?? null,
+    permissionTool: permissionWait?.tool ?? null,
     pendingCommit: current.pendingCommit ? { subject: current.pendingCommit.subject, body: current.pendingCommit.body ?? "" } : null,
     error: current.error ?? null,
     recap: current.recap?.text ?? null,
@@ -138,12 +142,13 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     blueprint: null,
     step: null,
     substep: null,
-    state: outside.state,
+    state: outside.permissionWait ? "awaiting-permission" : outside.state,
     isClosed: false,
     isArchived,
     archivedAt: isArchived ? archive.archivedAt.toISOString() : null,
     canArchive: !isArchived,
     question: null,
+    permissionTool: outside.permissionWait?.tool ?? null,
     pendingCommit: null,
     error: null,
     recap: null,
@@ -199,7 +204,8 @@ export function createSessionService({
     const file = files.find((s) => s.sessionId === id);
     const current = file && currentOf(file);
     if (current) return current.id;
-    const outside = outsideSessions.read(exportedIds(files, deletedSessionIds)).find((o) => o.status.sessionId === id);
+    const { outside: running } = outsideSessions.read({ exported: exportedIds(files, deletedSessionIds), now: clock.now().getTime() });
+    const outside = running.find((o) => o.status.sessionId === id);
     if (outside) return runIdOf(outside);
     throw new NotFoundError("Session", id);
   };
@@ -213,7 +219,8 @@ export function createSessionService({
         return current ? [{ file, current }] : [];
       });
       // Every file of the export, run or not, keeps its session out of those outside selo (`session` BR-12).
-      const outside = outsideSessions.read(exportedIds(sessions, deletedSessionIds));
+      const open = withRun.filter(({ file }) => file.status !== "ended").map(({ file: { sessionId, root, rootKey } }) => ({ sessionId, root, rootKey }));
+      const { outside, permissionWaits } = outsideSessions.read({ exported: exportedIds(sessions, deletedSessionIds), open, now: clock.now().getTime() });
       const byId = new Map((await archives.list()).map((a) => [a.sessionId, a]));
       const desktopIds = await desktopSessionIds(new Set(withRun.map(({ file }) => file.sessionId)));
       const exportIds = withRun.map(({ file }) => projectIdOf(file, projects));
@@ -222,7 +229,15 @@ export function createSessionService({
       return {
         sessions: [
           ...withRun.map(({ file, current }) =>
-            toSession(file, current, byId.get(file.sessionId), projects, desktopIds.get(file.sessionId), transcriptStarts.get(file.sessionId)),
+            toSession(
+              file,
+              current,
+              byId.get(file.sessionId),
+              projects,
+              desktopIds.get(file.sessionId),
+              transcriptStarts.get(file.sessionId),
+              permissionWaits.get(file.sessionId),
+            ),
           ),
           ...outside.map((o) => toOutsideSession(o, byId.get(o.status.sessionId))),
         ],

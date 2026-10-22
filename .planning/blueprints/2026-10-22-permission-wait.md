@@ -26,6 +26,13 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 - Demo → one export session in phase `working` (fastlane) with a status file (the demo's pid, `waiting` on « permission prompt », 4 min old) and a transcript holding an answered tool then an open `run_in_terminal`; the outside « input needed » one stays the question case
 - Glossary at the merge → `état` lists « Attend ta permission » after « Attend ta réponse » (the delta grammar has no glossary line)
 
+### Decided during build
+- Status file with no `statusUpdatedAt` → the wait is dated by its last update (`updatedAt`, else `startedAt`) (a missing date must not hide a long dialog)
+- One read of the status files per list → the outside sessions' reader also returns the export's open sessions' waits, the 15 s rule beside BR-13's `stateOf` (the folder is read once, as the defaults ask)
+- Subagent lines (`isSidechain`) of the main transcript → skipped when looking for the open call (their calls are not the main thread's)
+- A shell call with an empty command → the tool's name (nothing else to show)
+- Demo session → `harbor-mobile`, fastlane, started by the desktop app, waiting 4 min on a `run_in_terminal` command (a project that had no waiting session)
+
 ## Stages
 1. api — `feat(permission-wait): api — sessions waiting on a permission dialog`
 2. web — `feat(permission-wait): web — « Attend ta permission » state and the tool to allow`
@@ -36,7 +43,7 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 - browser: demo at 1280×800 and 390 wide: the permission row amber in À traiter with « Autoriser : … », its card and detail with the whole command
 
 ## Progress
-- [ ] Stage 1 — api
+- [x] Stage 1 — api
 - [ ] Stage 2 — web
 - [ ] Review
 - [ ] Browser test

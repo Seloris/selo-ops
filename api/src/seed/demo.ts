@@ -37,6 +37,8 @@ interface DemoSession {
   commits?: { sha: string; subject: string }[];
   isClosed?: boolean;
   archivedAge?: number;
+  // The shell command its running process waits on a permission dialog to run (`session` BR-16), since `age`.
+  permission?: string;
 }
 
 const PROJECTS: Record<string, { branch: string; changed: number }> = {
@@ -78,6 +80,11 @@ const SESSIONS: DemoSession[] = [
     commit: { subject: "fix(invoices): round VAT per line, not per total", body: "Spec: invoice ~BR-04" },
     model: SONNET, effort: "medium", perms: "acceptEdits", blockers: ["not-done", "pending-commit", "dirty-files"],
     files: ["api/src/invoices/vat.ts", "api/src/invoices/vat.test.ts", ".planning/domain/invoice.md"] },
+  { id: "6d1f8b3a-4c27-4e95-a0b6-3e9c5d2f7a18", project: "harbor-mobile", lane: "fastlane", phase: "working", age: 240,
+    request: "Purger le cache des photos de tournée au démarrage quand il dépasse 200 Mo", substep: "code",
+    permission: "rm -rf android/app/build/intermediates/photo-cache && npx react-native run-android --variant=debug",
+    model: OPUS, effort: "medium", perms: "default", blockers: ["not-done", "dirty-files"],
+    files: ["src/features/rounds/data/photoCache.ts", "src/features/rounds/data/photoCache.test.ts"] },
   { id: "7c3a9e51-0f2b-4d84-a6e7-b19d4c2f8a03", project: "selo-ops", lane: "build", phase: "working", age: 4,
     request: ".planning/blueprints/2026-10-22-sessions-live.md", blueprint: "2026-10-22-sessions-live", step: "stage:2", substep: "code",
     model: OPUS, effort: "high", perms: "auto", blockers: ["not-done", "dirty-files", "background-tasks", "subagents"],
@@ -250,9 +257,38 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
       runs: [...subagents, current], current,
     };
     writeJson(join(opsDir, "sessions"), `${s.id}.json`, file);
+    if (s.permission !== undefined) seedPermissionWait(folders, file, s.permission, now - s.age * 1000);
     if (s.archivedAge !== undefined) await archives.save({ sessionId: s.id, runId: current.id, archivedAt: new Date(now - s.archivedAge * 1000) });
   }
   seedOutside(folders, ROOT, now);
+}
+
+// A running process of the export's session that waits on a permission dialog since `since`: its status file (the demo's
+// pid, so it counts as alive) and its transcript, an answered call then the open one the dialog asks for.
+function seedPermissionWait(folders: DemoFolders, file: SessionFile, command: string, since: number) {
+  const status: RunningStatusFile = {
+    pid: process.pid, sessionId: file.sessionId, cwd: file.root, startedAt: since - 1_800_000, entrypoint: "claude-desktop",
+    hostSessionId: `local_${file.sessionId}`, name: null, status: "waiting", waitingFor: "permission prompt", statusUpdatedAt: since,
+    updatedAt: since,
+  };
+  writeJson(folders.claudeSessionsDir, `${file.sessionId}.json`, status);
+  const toolUse = (id: string, command: string) => ({
+    type: "assistant", sessionId: file.sessionId,
+    message: { id: `${id}:msg`, model: file.model, role: "assistant",
+      content: [{ type: "tool_use", id, name: "mcp__terminal__run_in_terminal", input: { command } }] },
+  });
+  const lines = [
+    { type: "user", uuid: `${file.sessionId}:prompt`, sessionId: file.sessionId, message: { role: "user", content: file.current?.request } },
+    toolUse("toolu_status", "git status --short"),
+    { type: "user", uuid: `${file.sessionId}:result`, sessionId: file.sessionId,
+      message: { role: "user", content: [{ type: "tool_result", tool_use_id: "toolu_status", content: " M src/features/rounds/data/photoCache.ts" }] } },
+    toolUse("toolu_purge", command),
+  ];
+  const transcriptDir = join(folders.claudeProjectsDir, file.rootKey);
+  mkdirSync(transcriptDir, { recursive: true });
+  const transcript = join(transcriptDir, `${file.sessionId}.jsonl`);
+  writeFileSync(transcript, lines.map((l) => JSON.stringify(l)).join("\n") + "\n");
+  utimesSync(transcript, new Date(since), new Date(since));
 }
 
 function seedOutside(folders: DemoFolders, root: string, now: number) {
