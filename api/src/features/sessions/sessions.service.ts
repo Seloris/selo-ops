@@ -64,6 +64,7 @@ function toSession(
   archive: SessionArchive | undefined,
   projectFiles: ProjectFile[],
   desktopSessionId: string | undefined,
+  transcriptStart: number | undefined,
 ): Session {
   // An archive covers the run it was made on: a new run brings the session back (`session` BR-09).
   const isArchived = archive !== undefined && archive.runId === current.id;
@@ -75,6 +76,8 @@ function toSession(
   // A turn that ends with subagents in the background has not finished its work (`session` BR-02).
   const isCalm = current.phase === "turn-ended" || current.phase === "job-done";
   const state = !isClosed && isCalm && subagents.some((r) => r.phase === "working") ? "working" : current.phase;
+  // The export keeps the latest runs only: a long session's first run may be gone, its transcript is not.
+  const createdAt = transcriptStart ?? Math.min(...file.runs.map((r) => Date.parse(r.since)), since);
   return {
     id: file.sessionId,
     projectId: projectIdOf(file, projectFiles),
@@ -105,6 +108,7 @@ function toSession(
     touchedFiles: file.touchedFiles ?? [],
     desktopLink: toDesktopLink(desktopSessionId),
     isOutsideSelo: false,
+    createdAt: new Date(createdAt).toISOString(),
     updatedAt: new Date(file.writtenAt).toISOString(),
   };
 }
@@ -154,6 +158,7 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     // Computed from the status file on each read, never stored: the link table keeps the export's sessions only.
     desktopLink: toDesktopLink(desktopSessionIdOf(status) ?? undefined),
     isOutsideSelo: true,
+    createdAt: new Date(transcript?.startedAt ?? status.startedAt).toISOString(),
     updatedAt: new Date(updatedAt).toISOString(),
   };
 }
@@ -201,7 +206,7 @@ export function createSessionService({
 
   return {
     async list(): Promise<SessionsResponse> {
-      const { sessions, projects, deletedSessionIds } = opsExport.read();
+      const { sessions, projects, deletedSessionIds, transcriptStarts } = opsExport.read();
       // A session with no run yet holds no request: nothing to show.
       const withRun = sessions.flatMap((file) => {
         const current = currentOf(file);
@@ -216,7 +221,9 @@ export function createSessionService({
       const outsideGit = new Map(outside.filter((o) => !exportProjects.has(projectIdOfOutside(o))).map((o) => [projectIdOfOutside(o), o.git]));
       return {
         sessions: [
-          ...withRun.map(({ file, current }) => toSession(file, current, byId.get(file.sessionId), projects, desktopIds.get(file.sessionId))),
+          ...withRun.map(({ file, current }) =>
+            toSession(file, current, byId.get(file.sessionId), projects, desktopIds.get(file.sessionId), transcriptStarts.get(file.sessionId)),
+          ),
           ...outside.map((o) => toOutsideSession(o, byId.get(o.status.sessionId))),
         ],
         projects: projectsOf([...exportIds, ...outside.map(projectIdOfOutside)], projects, outsideGit),

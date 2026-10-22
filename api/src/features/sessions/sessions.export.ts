@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
+import { createTranscriptStartReader } from "./sessions.transcript.js";
 
 // The files the selo plugin's hooks write (its scripts/ops.mjs, schema version 1). Only the fields this
 // application reads are declared; a file that does not match is skipped, never fatal.
@@ -65,6 +66,8 @@ export interface OpsExport {
   projects: ProjectFile[];
   // Sessions whose file stays but whose transcript is gone: out of `sessions`, yet still the export's (`session` BR-14).
   deletedSessionIds: Set<string>;
+  // When each session's transcript starts, by session id: only the sessions whose transcript gives a date.
+  transcriptStarts: Map<string, number>;
 }
 
 export interface OpsExportReader {
@@ -96,14 +99,22 @@ function readFolder<T>(dir: string, schema: z.ZodType<T>): T[] {
 const isTranscriptGone = (file: SessionFile) => file.transcriptPath != null && !existsSync(file.transcriptPath);
 
 export function createOpsExportReader(opsDir: string): OpsExportReader {
+  const transcriptStartOf = createTranscriptStartReader();
   return {
     read: () => {
       const files = readFolder(join(opsDir, "sessions"), sessionFileSchema);
       const deleted = files.filter(isTranscriptGone);
+      const sessions = files.filter((file) => !deleted.includes(file));
+      const transcriptStarts = new Map<string, number>();
+      for (const file of sessions) {
+        const start = file.transcriptPath == null ? null : transcriptStartOf(file.transcriptPath);
+        if (start !== null) transcriptStarts.set(file.sessionId, start);
+      }
       return {
-        sessions: files.filter((file) => !deleted.includes(file)),
+        sessions,
         projects: readFolder(join(opsDir, "projects"), projectFileSchema),
         deletedSessionIds: new Set(deleted.map((file) => file.sessionId)),
+        transcriptStarts,
       };
     },
   };

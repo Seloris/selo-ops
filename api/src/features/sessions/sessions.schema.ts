@@ -46,6 +46,8 @@ export const sessionSchema = z
     // A running Claude Code process with no file in the ops export (`session` BR-12): its lane is `outside`, and it has no
     // recap, commits, blockers, subagents, files touched, effort nor permissions, which only the export gives.
     isOutsideSelo: z.boolean(),
+    // `session` BR-15: the first dated line of its transcript, else its oldest run kept, else its process's start.
+    createdAt: z.iso.datetime(),
     updatedAt: z.iso.datetime(),
   })
   .meta({ id: "Session" });

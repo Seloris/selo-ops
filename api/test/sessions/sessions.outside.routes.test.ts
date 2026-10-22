@@ -361,6 +361,31 @@ describe("sessions outside selo", () => {
       expect(session.updatedAt).toBe("2026-01-01T09:00:00.000Z");
     });
 
+    it("dates the creation of a session outside selo by the first dated line of its transcript", async () => {
+      // Arrange
+      running({ startedAt: Date.parse("2026-01-01T09:00:00.000Z") }, [
+        { type: "queue-operation", timestamp: "2026-01-01T06:45:00.000Z" },
+        prompt("Go"),
+      ]);
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.createdAt).toBe("2026-01-01T06:45:00.000Z");
+    });
+
+    it("dates the creation of a session outside selo by its process's start when its transcript gives no date", async () => {
+      // Arrange
+      running({ startedAt: Date.parse("2026-01-01T09:00:00.000Z") }, [prompt("Go")]);
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.createdAt).toBe("2026-01-01T09:00:00.000Z");
+    });
+
     it("links a desktop-app session to the desktop app without keeping the link", async () => {
       // Arrange
       running({ entrypoint: "claude-desktop", hostSessionId: DESKTOP_ID });

@@ -194,6 +194,10 @@
           "isOutsideSelo": {
             "type": "boolean"
           },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "updatedAt": {
             "type": "string",
             "format": "date-time"
@@ -229,6 +233,7 @@
           "touchedFiles",
           "desktopLink",
           "isOutsideSelo",
+          "createdAt",
           "updatedAt"
         ]
       },

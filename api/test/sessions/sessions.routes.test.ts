@@ -116,6 +116,51 @@ describe("sessions routes", () => {
       });
     });
 
+    it("dates the session's creation by the first dated line of its transcript", async () => {
+      // Arrange
+      const transcriptPath = ctx.seed.transcript("C--code-ledger-api", "s-created", [
+        "not json",
+        { type: "summary", summary: "No date here" },
+        { type: "queue-operation", timestamp: "2026-01-01T07:15:00.000Z" },
+        { type: "user", timestamp: "2026-01-01T07:16:00.000Z", message: { role: "user", content: "Go" } },
+      ]);
+      ctx.seed.session(buildSessionFile({ transcriptPath, current: buildRun({ since: "2026-01-01T09:00:00.000Z" }) }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.createdAt).toBe("2026-01-01T07:15:00.000Z");
+    });
+
+    it("dates the session's creation by its oldest run when its transcript gives no date", async () => {
+      // Arrange
+      const transcriptPath = ctx.seed.transcript("C--code-ledger-api", "s-undated", [{ type: "summary", summary: "No date" }]);
+      const main = buildRun({ since: "2026-01-01T09:00:00.000Z" });
+      const first = buildRun({ since: "2026-01-01T08:00:00.000Z" });
+      const runner = buildRun({ agentId: "a1", since: "2026-01-01T09:05:00.000Z" });
+      ctx.seed.session(buildSessionFile({ transcriptPath, current: main, runs: [runner, main, first] }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.createdAt).toBe("2026-01-01T08:00:00.000Z");
+    });
+
+    it("dates the session's creation by its oldest run when the export names no transcript", async () => {
+      // Arrange
+      const main = buildRun({ since: "2026-01-01T09:00:00.000Z" });
+      const first = buildRun({ since: "2026-01-01T08:30:00.000Z" });
+      ctx.seed.session(buildSessionFile({ current: main, runs: [main, first] }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.createdAt).toBe("2026-01-01T08:30:00.000Z");
+    });
+
     it("returns the recap of a finished run", async () => {
       // Arrange
       ctx.seed.session(buildSessionFile({ current: buildRun({ phase: "job-done", recap: { text: "Filter kept.", commits: [] } }) }));

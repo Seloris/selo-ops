@@ -3,6 +3,7 @@ import { dirname, join, resolve } from "node:path";
 import { z } from "zod";
 import type { ExportRun } from "./sessions.export.js";
 import { cleanRequest } from "./sessions.service.js";
+import { createTranscriptStartReader, type TranscriptStartReader } from "./sessions.transcript.js";
 
 // The sessions outside selo (`session` BR-12): a running Claude Code process whose session has no file in the ops export.
 // Only what Claude Code itself writes is read: its status file of the process (`{config dir}/sessions/*.json`) and the
@@ -43,6 +44,8 @@ export interface Transcript {
   // The last person prompt, by its uuid, else by its text when it left the tail: a new prompt is a new run (`session` BR-09).
   runKey: string | null;
   modifiedAt: number;
+  // When its first dated line was written, null when its head holds no date.
+  startedAt: number | null;
 }
 
 export interface OutsideSession {
@@ -208,8 +211,9 @@ function promptOf(value: unknown): { text: string; uuid: string | null } | null 
   return cleanRequest(text).text === "" ? null : { text, uuid: user.data.uuid ?? null };
 }
 
-export function readTranscript(path: string): Transcript {
+export function readTranscript(path: string, transcriptStartOf: TranscriptStartReader): Transcript {
   const { lines, modifiedAt } = readTail(path);
+  const startedAt = transcriptStartOf(path);
   let lastPrompt: string | null = null;
   let prompt: { text: string; uuid: string | null } | null = null;
   let model: string | null = null;
@@ -234,18 +238,22 @@ export function readTranscript(path: string): Transcript {
     prompt = promptOf(value) ?? prompt;
   }
   // The prompt in the tail is whole; Claude Code cuts `lastPrompt` at 200 characters and an ellipsis.
-  if (prompt !== null) return { request: prompt.text, isRequestCut: false, model, runKey: prompt.uuid ?? `prompt:${prompt.text}`, modifiedAt };
+  if (prompt !== null) {
+    return { request: prompt.text, isRequestCut: false, model, runKey: prompt.uuid ?? `prompt:${prompt.text}`, modifiedAt, startedAt };
+  }
   if (lastPrompt !== null) {
     const isCut = lastPrompt.endsWith("…");
     // A turn longer than the tail pushed its prompt out: its text still tells this run from the next one.
-    return { request: isCut ? lastPrompt.slice(0, -1) : lastPrompt, isRequestCut: isCut, model, runKey: `prompt:${lastPrompt}`, modifiedAt };
+    const request = isCut ? lastPrompt.slice(0, -1) : lastPrompt;
+    return { request, isRequestCut: isCut, model, runKey: `prompt:${lastPrompt}`, modifiedAt, startedAt };
   }
-  return { request: null, isRequestCut: false, model, runKey: null, modifiedAt };
+  return { request: null, isRequestCut: false, model, runKey: null, modifiedAt, startedAt };
 }
 
 const updatedAtOf = (status: RunningStatusFile) => status.updatedAt ?? status.statusUpdatedAt ?? status.startedAt;
 
 export function createOutsideSessionReader(statusDir: string, projectsDir: string): OutsideSessionReader {
+  const transcriptStartOf = createTranscriptStartReader();
   return {
     read: (exported) => {
       // A crash leaves its file behind: only a live process counts. Two live files of one session (a resumed process):
@@ -260,7 +268,7 @@ export function createOutsideSessionReader(statusDir: string, projectsDir: strin
         const path = findTranscript(projectsDir, status.cwd, status.sessionId);
         let transcript: Transcript | null = null;
         try {
-          transcript = path === null ? null : readTranscript(path);
+          transcript = path === null ? null : readTranscript(path, transcriptStartOf);
         } catch {
           // gone or locked between the lookup and the read: the session shows without it until the next read
         }
