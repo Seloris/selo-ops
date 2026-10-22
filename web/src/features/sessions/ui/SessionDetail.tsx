@@ -2,7 +2,7 @@ import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { useId, type ReactNode } from "react";
-import { ArchiveIcon, BranchIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, CloseIcon, CommitIcon, DoorIcon, FolderIcon, GaugeIcon, HourglassIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { ArchiveIcon, BranchIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
@@ -24,7 +24,9 @@ export function SessionDetail({
   isNextOpen,
   foldedSections,
   actions,
+  isFullscreen,
   onClose,
+  onToggleFullscreen,
   onToggleSection,
 }: {
   session: Session;
@@ -33,7 +35,9 @@ export function SessionDetail({
   isNextOpen: boolean;
   foldedSections: readonly DetailSection[];
   actions: SessionActions;
+  isFullscreen: boolean;
   onClose: () => void;
+  onToggleFullscreen: () => void;
   onToggleSection: (section: DetailSection) => void;
 }) {
   const awaited = awaitedOf(s);
@@ -49,10 +53,18 @@ export function SessionDetail({
             <StateLabel session={s} />
             {tag.isTag && <Tag>{tag.text}</Tag>}
           </span>
-          <Button size="sm" title={t("sessions.detail.closeHint")} onClick={onClose}>
-            <CloseIcon />
-            {t("sessions.detail.close")}
-          </Button>
+          <span className={styles.headButtons}>
+            <span className={styles.fullscreen}>
+              <Button size="sm" aria-pressed={isFullscreen} title={isFullscreen ? t("sessions.detail.exitFullscreenHint") : t("sessions.detail.fullscreenHint")} onClick={onToggleFullscreen}>
+                {isFullscreen ? <CollapseIcon /> : <ExpandIcon />}
+                {isFullscreen ? t("sessions.detail.exitFullscreen") : t("sessions.detail.fullscreen")}
+              </Button>
+            </span>
+            <Button size="sm" title={t("sessions.detail.closeHint")} onClick={onClose}>
+              <CloseIcon />
+              {t("sessions.detail.close")}
+            </Button>
+          </span>
         </div>
         <h2 className={styles.title}>{requestText(s)}</h2>
         <div className={styles.meta}>

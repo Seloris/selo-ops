@@ -12,6 +12,18 @@
   gap: 8px;
 }
 
+.headButtons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Below 900px the detail already covers the screen. */
+@media (max-width: 900px) {
+  .fullscreen {
+    display: none;
+  }
+}
+
 .state {
   display: flex;
   flex: 1;

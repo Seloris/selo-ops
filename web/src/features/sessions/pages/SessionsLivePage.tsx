@@ -93,6 +93,8 @@ export function SessionsLivePage() {
   const [archiveAsked, setArchiveAsked] = useState<Session | null>(null);
 
   const [isResizing, setResizing] = useState(false);
+  // sessions-live FR-37: the detail over the whole page; not remembered.
+  const [isFullscreen, setFullscreen] = useState(false);
 
   const updateSettings = (patch: Partial<Settings>) => {
     const next = { ...settings, ...patch };
@@ -129,6 +131,7 @@ export function SessionsLivePage() {
   const selected = sessions.find((s) => s.id === selectedId) ?? null;
 
   const closeDetail = useCallback(() => {
+    setFullscreen(false);
     setParams((p) => {
       const next = new URLSearchParams(p);
       next.delete("session");
@@ -136,16 +139,17 @@ export function SessionsLivePage() {
     });
   }, [setParams]);
 
-  // Échap closes the projects' list first, then the detail.
+  // Échap closes the projects' list first, then leaves the full screen, then closes the detail.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       if (isProjectsOpen) setProjectsOpen(false);
+      else if (isFullscreen) setFullscreen(false);
       else if (selectedId) closeDetail();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isProjectsOpen, selectedId, closeDetail]);
+  }, [isProjectsOpen, isFullscreen, selectedId, closeDetail]);
 
   const toastId = useRef(0);
   const showToast = useCallback((next: Omit<ToastState, "id">) => {
@@ -250,7 +254,7 @@ export function SessionsLivePage() {
   return (
     <div
       ref={appRef}
-      className={`${styles.app} ${isPanelOpen ? styles.withPanel : ""} ${settings.panelWidth !== null || isResizing ? styles.sized : ""} ${isResizing ? styles.resizing : ""}`}
+      className={`${styles.app} ${isPanelOpen ? styles.withPanel : ""} ${isPanelOpen && isFullscreen ? styles.fullscreen : ""} ${settings.panelWidth !== null || isResizing ? styles.sized : ""} ${isResizing ? styles.resizing : ""}`}
       style={settings.panelWidth !== null ? ({ "--drawer-chosen-w": `${settings.panelWidth}px` } as CSSProperties) : undefined}
     >
       <SessionsHeader
@@ -312,7 +316,7 @@ export function SessionsLivePage() {
             </>
           )}
         </main>
-        <Drawer isOpen={isPanelOpen} label={t("sessions.detail.label")} resize={panelResize}>
+        <Drawer isOpen={isPanelOpen} label={t("sessions.detail.label")} resize={isFullscreen ? undefined : panelResize}>
           {selected && (
             <SessionDetail
               session={selected}
@@ -321,7 +325,9 @@ export function SessionsLivePage() {
               isNextOpen={nextShown.has(selected.id)}
               foldedSections={settings.foldedSections}
               actions={actions}
+              isFullscreen={isFullscreen}
               onClose={closeDetail}
+              onToggleFullscreen={() => setFullscreen((f) => !f)}
               onToggleSection={(section) => updateSettings({ foldedSections: toggleSection(settings.foldedSections, section) })}
             />
           )}

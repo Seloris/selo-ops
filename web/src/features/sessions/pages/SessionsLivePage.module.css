@@ -39,6 +39,16 @@
   --drawer-w: clamp(360px, var(--drawer-chosen-w), calc(100vw - 560px));
 }
 
+/* FR-37: the detail takes the whole page; the list stays mounted beneath, hidden. */
+.fullscreen,
+.fullscreen.sized {
+  --drawer-w: 100%;
+}
+
+.fullscreen .content {
+  visibility: hidden;
+}
+
 /* While the edge moves, the list follows it at once. */
 .resizing .content {
   transition: none;
