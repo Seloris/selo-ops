@@ -1,7 +1,7 @@
 import { formatAge } from "../../../shared/lib/formatAge.ts";
 import { t, tn, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import type { DotTone } from "../../../shared/ui/StatusDot.tsx";
-import { ageMs, bucketOf, isStale, isTodo, type Project, type Session } from "../data/sessionView.ts";
+import { ageMs, bucketOf, isStale, isTodo, type InstalledPlugin, type Project, type Session } from "../data/sessionView.ts";
 import { formatTokens, totalTokens } from "./usage.ts";
 
 // The words and tones a session shows, shared by its row, its card and its detail.
@@ -141,6 +141,16 @@ export const resumeCommand = (s: Session) => `claude --resume ${s.id}`;
 const DESKTOP_LINK = /^claude:\/\/claude\.ai\/epitaxy\/local_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 export const desktopLinkOf = (s: Session): string | null => (s.desktopLink && DESKTOP_LINK.test(s.desktopLink) ? s.desktopLink : null);
+
+// sessions-live FR-19: the version of the plugin that wrote the session's export file.
+export const writtenByText = (s: Session) =>
+  s.writtenBy ? t("sessions.detail.writtenByValue", { version: s.writtenBy }) : t("sessions.facts.unknown");
+
+// sessions-live FR-02: the selo plugins Claude Code lists as installed, every version of one installed at several.
+export function pluginsText(plugins: InstalledPlugin[]): string | null {
+  if (!plugins.length) return null;
+  return plugins.map((p) => `${p.name} ${p.versions.join(" / ")}`).join(" · ");
+}
 
 // sessions-live FR-13: the model with the session's total tokens (`session` BR-18, « — » with no usage), then the effort.
 export function modelText(s: Session): string {

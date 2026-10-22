@@ -49,6 +49,13 @@
   color: var(--text-muted);
 }
 
+.plugins {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
 .updated svg {
   display: block;
   width: 14px;

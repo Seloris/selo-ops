@@ -12,7 +12,7 @@ import { totalTokens } from "./usage.ts";
 import { RunUsageView, TokenCount, UsageTable } from "./UsageParts.tsx";
 import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, shownBlockers, stateLabel } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 
 // sessions-live FR-19 to FR-23: everything the export knows of one session, and its actions. A session outside selo
@@ -215,6 +215,8 @@ export function SessionDetail({
             <span className={styles.mono}>{s.folder}</span>
             <span className={styles.key}>{t("sessions.detail.session")}</span>
             <span className={styles.mono}>{s.id}</span>
+            <span className={styles.key}>{t("sessions.detail.writtenBy")}</span>
+            <span className={styles.mono}>{writtenByText(s)}</span>
           </div>
         </Section>
       </div>

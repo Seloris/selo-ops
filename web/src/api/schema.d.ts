@@ -71,6 +71,7 @@ export interface paths {
                         "application/json": {
                             sessions: components["schemas"]["Session"][];
                             projects: components["schemas"]["Project"][];
+                            plugins: components["schemas"]["InstalledPlugin"][];
                         };
                     };
                 };
@@ -208,6 +209,7 @@ export interface components {
             touchedFiles: string[];
             desktopLink: string | null;
             isOutsideSelo: boolean;
+            writtenBy: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -262,6 +264,11 @@ export interface components {
             name: string;
             branch: string | null;
             changedCount: number | null;
+        };
+        InstalledPlugin: {
+            /** @enum {string} */
+            name: "selo" | "selo-ops";
+            versions: string[];
         };
         ProblemDetails: {
             type: string;

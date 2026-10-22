@@ -28,6 +28,7 @@
   "sessions.subtitle.projects_other": "{count} projets",
   "sessions.subtitle.todo": "{count} à traiter",
   "sessions.updated.text": "Mis à jour il y a {seconds} s",
+  "sessions.updated.plugins": "Versions installées des plugins selo",
 
   "sessions.settings.view": "Affichage",
   "sessions.settings.viewList": "Liste",
@@ -158,6 +159,8 @@
   "sessions.detail.blueprint": "Blueprint",
   "sessions.detail.folder": "Dossier",
   "sessions.detail.session": "Session",
+  "sessions.detail.writtenBy": "Écrit par",
+  "sessions.detail.writtenByValue": "selo-ops {version}",
   "sessions.detail.usage": "Consommation de la session",
   "sessions.detail.runUsage": "Consommation du tour",
   "sessions.facts.modelTokens": "{model} · {tokens} tokens",

@@ -10,10 +10,13 @@ export function SessionsHeader({
   counts,
   updatedSeconds,
   isRefreshing,
+  plugins,
 }: {
   counts: Counts | null;
   updatedSeconds: number | null;
   isRefreshing: boolean;
+  // The installed selo plugins' versions, already worded; null when unknown.
+  plugins: string | null;
 }) {
   return (
     <div className={styles.top}>
@@ -32,6 +35,11 @@ export function SessionsHeader({
         )}
       </div>
       <span className={styles.grow} />
+      {plugins && (
+        <span className={styles.plugins} title={t("sessions.updated.plugins")}>
+          {plugins}
+        </span>
+      )}
       {updatedSeconds !== null && (
         <span className={styles.updated}>
           <span className={isRefreshing ? styles.spin : ""}>

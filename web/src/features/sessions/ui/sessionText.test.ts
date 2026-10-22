@@ -13,10 +13,12 @@ import {
   desktopLinkOf,
   laneTone,
   modelText,
+  pluginsText,
   requestText,
   sessionLaneLabel,
   shownBlockers,
   toneOf,
+  writtenByText,
 } from "./sessionText.ts";
 
 const NOW = Date.parse("2026-10-22T12:00:00.000Z");
@@ -56,6 +58,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     touchedFiles: [],
     desktopLink: null,
     isOutsideSelo: false,
+    writtenBy: null,
     createdAt: ago(60),
     updatedAt: ago(1),
     ...overrides,
@@ -300,5 +303,34 @@ describe("changedText", () => {
 
   it("hides an unknown count", () => {
     expect(changedText(project(null))).toBeNull();
+  });
+});
+
+describe("writtenByText", () => {
+  it("names the plugin version that wrote the session", () => {
+    expect(writtenByText(buildSession({ writtenBy: "2.2.1" }))).toBe("selo-ops 2.2.1");
+  });
+
+  it("reads « — » when the export gives no version", () => {
+    expect(writtenByText(buildSession())).toBe("—");
+  });
+});
+
+describe("pluginsText", () => {
+  it("names each installed plugin with its version", () => {
+    expect(
+      pluginsText([
+        { name: "selo", versions: ["2.2.0"] },
+        { name: "selo-ops", versions: ["2.2.1"] },
+      ]),
+    ).toBe("selo 2.2.0 · selo-ops 2.2.1");
+  });
+
+  it("lists every version of a plugin installed at several", () => {
+    expect(pluginsText([{ name: "selo", versions: ["2.2.0", "2.1.0"] }])).toBe("selo 2.2.0 / 2.1.0");
+  });
+
+  it("gives nothing when no plugin is known", () => {
+    expect(pluginsText([])).toBeNull();
   });
 });

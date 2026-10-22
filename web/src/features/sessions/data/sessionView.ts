@@ -4,6 +4,7 @@ import type { components } from "../../../api/schema.d.ts";
 
 export type Session = components["schemas"]["Session"];
 export type Project = components["schemas"]["Project"];
+export type InstalledPlugin = components["schemas"]["InstalledPlugin"];
 export type SessionState = components["schemas"]["SessionState"];
 export type Bucket = "todo" | "run" | "rest";
 export type Grouping = "project" | "status" | "none";
