@@ -34,14 +34,15 @@
   }
 }
 
-/* The left edge, a strip wider than the border so it is easy to catch. */
+/* The grip sits in the middle of the gap between the page's content (32px of padding) and the panel,
+   a strip wider than the bar so it is easy to catch. */
 .handle {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: -5px;
+  left: -28px;
   z-index: 1;
-  width: 10px;
+  width: 24px;
   cursor: col-resize;
   touch-action: none;
   outline: none;
@@ -50,16 +51,19 @@
 .handle::after {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 4px;
-  width: 2px;
-  background: transparent;
-  transition: background 0.15s ease;
+  top: 50%;
+  left: 10px;
+  width: 4px;
+  height: 56px;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-muted) 35%, transparent);
+  transition: background 0.15s ease, height 0.15s ease;
 }
 
 .handle:hover::after,
 .handle:active::after {
+  height: 80px;
   background: var(--text-muted);
 }
 
