@@ -210,6 +210,7 @@ export interface components {
                 state: components["schemas"]["SessionState"];
             }[];
             touchedFiles: string[];
+            desktopLink: string | null;
             /** Format: date-time */
             updatedAt: string;
         };

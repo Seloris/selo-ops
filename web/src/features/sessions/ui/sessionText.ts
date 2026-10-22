@@ -93,6 +93,12 @@ export function requestText(s: Session): string {
 
 export const resumeCommand = (s: Session) => `claude --resume ${s.id}`;
 
+// The page navigates to no other address from the api than this exact shape, the desktop app's link of a session
+// (sessions-live FR-20): anything else (a `javascript:` URL, another host, an extra path) is dropped.
+const DESKTOP_LINK = /^claude:\/\/claude\.ai\/epitaxy\/local_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+export const desktopLinkOf = (s: Session): string | null => (s.desktopLink && DESKTOP_LINK.test(s.desktopLink) ? s.desktopLink : null);
+
 export function modelText(s: Session): string {
   const model = s.model ?? t("sessions.facts.unknown");
   return s.effort ? t("sessions.facts.modelEffort", { model, effort: s.effort }) : model;

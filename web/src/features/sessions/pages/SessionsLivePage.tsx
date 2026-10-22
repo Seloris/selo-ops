@@ -34,7 +34,7 @@ import { ColumnHead, SessionList, type SessionActions } from "../ui/SessionList.
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
 import { SettingsBar, type View } from "../ui/SettingsBar.tsx";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../ui/panelWidth.ts";
-import { laneLabel, resumeCommand } from "../ui/sessionText.ts";
+import { desktopLinkOf, laneLabel, resumeCommand } from "../ui/sessionText.ts";
 import styles from "./SessionsLivePage.module.css";
 
 // sessions-live FR-08 and FR-27: the view, the grouping and the detail's width are remembered in the browser.
@@ -159,7 +159,19 @@ export function SessionsLivePage() {
         return next;
       });
     },
-    onResume: (s) => void copy(resumeCommand(s), t("sessions.toast.resumeCopied"), t("sessions.toast.resumeHint", { folder: s.folder })),
+    onResume: (s) => {
+      // sessions-live FR-20: a desktop-app session opens in the app, any other gets its resume command.
+      const link = desktopLinkOf(s);
+      if (!link) {
+        void copy(resumeCommand(s), t("sessions.toast.resumeCopied"), t("sessions.toast.resumeHint", { folder: s.folder }));
+        return;
+      }
+      // A link click, not a page navigation: a browser with no handler for `claude://` keeps the dashboard.
+      const anchor = document.createElement("a");
+      anchor.href = link;
+      anchor.click();
+      showToast({ title: t("sessions.toast.desktopOpening"), hint: t("sessions.toast.desktopHint") });
+    },
     onToggleNext: (id) =>
       setNextShown((shown) => {
         const next = new Set(shown);

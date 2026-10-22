@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/sessionView.ts";
-import { ageDisplay, awaitedOf, calmText, requestText, toneOf } from "./sessionText.ts";
+import { ageDisplay, awaitedOf, calmText, desktopLinkOf, requestText, toneOf } from "./sessionText.ts";
 
 const NOW = Date.parse("2026-10-22T12:00:00.000Z");
 const ago = (minutes: number) => new Date(NOW - minutes * 60_000).toISOString();
@@ -34,6 +34,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     blockers: [],
     subagents: [],
     touchedFiles: [],
+    desktopLink: null,
     updatedAt: ago(1),
     ...overrides,
   };
@@ -128,5 +129,22 @@ describe("requestText", () => {
     // Act, Assert
     expect(requestText(buildSession({ request: "Refais le header", isRequestCut: true }))).toBe("Refais le header…");
     expect(requestText(buildSession({ request: "" }))).toBe("Demande non lisible dans l’export");
+  });
+});
+
+describe("desktopLinkOf", () => {
+  const link = "claude://claude.ai/epitaxy/local_62342b42-d46b-4dbb-84d3-5d68c3e1f7e9";
+
+  it("gives the desktop app's link of a desktop-app session", () => {
+    expect(desktopLinkOf(buildSession({ desktopLink: link }))).toBe(link);
+  });
+
+  it.each([
+    ["no link", null],
+    ["a javascript: URL", "javascript:alert(1)"],
+    ["another host", "claude://evil.example/epitaxy/local_62342b42-d46b-4dbb-84d3-5d68c3e1f7e9"],
+    ["a trailing path", `${link}/../x`],
+  ])("gives null for %s", (_case, desktopLink) => {
+    expect(desktopLinkOf(buildSession({ desktopLink }))).toBeNull();
   });
 });

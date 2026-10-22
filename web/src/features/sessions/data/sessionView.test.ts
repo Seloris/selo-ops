@@ -46,6 +46,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     blockers: [],
     subagents: [],
     touchedFiles: [],
+    desktopLink: null,
     updatedAt: ago(1),
     ...overrides,
   };

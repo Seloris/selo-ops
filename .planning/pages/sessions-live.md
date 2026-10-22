@@ -40,7 +40,7 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 
 ## Actions
 
-- **FR-20** — « Ouvrir dans Claude Code » copies `claude --resume {id}` and a toast reminds to run it in the session's folder, named; when the copy is refused, the toast shows the command selected for a manual copy.
+- **FR-20** — « Ouvrir dans Claude Code » opens a session the desktop app started directly in the Claude app (`session` BR-11), with a toast saying what to check when nothing opens; any other session gets `claude --resume {id}` copied and a toast reminding to run it in the session's folder, named; when the copy is refused, the toast shows the command selected for a manual copy.
 - **FR-21** — « Action suivante », shown only when the export proposes a selo command, displays it in full and copies it on « Copier »; nothing is run.
 - **FR-26** — An archived session offers no « Action suivante ».
 - **FR-22** — « Archiver », offered only on sessions that can be archived (`session` BR-07), moves the session to « Archivées » with a toast saying where to find it.
@@ -48,7 +48,7 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 
 ## Non-goals
 
-- Acting on a session: the page only copies commands and archives.
+- Acting on a session: the page only copies commands, opens a session in the Claude app and archives.
 - Copying the transcript's path, useful only for debugging.
 - A coloured chip per project: the project's name is enough.
 
