@@ -275,7 +275,7 @@ describe("sessions routes", () => {
       expect(sessions.map((s) => s.id).sort()).toEqual([kept.sessionId, unnamed.sessionId].sort());
     });
 
-    it("offers the archive only on a session whose current run is done or whose turn ended", async () => {
+    it("offers the archive on every session not archived yet", async () => {
       // Arrange
       ctx.seed.session(buildSessionFile({ sessionId: "done", current: buildRun({ phase: "job-done" }) }));
       ctx.seed.session(buildSessionFile({ sessionId: "turn", current: buildRun({ phase: "turn-ended" }) }));
@@ -286,7 +286,7 @@ describe("sessions routes", () => {
 
       // Assert
       const can = Object.fromEntries(sessions.map((s) => [s.id, s.canArchive]));
-      expect(can).toEqual({ done: true, turn: true, asking: false });
+      expect(can).toEqual({ done: true, turn: true, asking: true });
     });
 
     it("links a running desktop-app session to the desktop app", async () => {
@@ -401,18 +401,21 @@ describe("sessions routes", () => {
     });
 
     it.each([["awaiting-answer"], ["awaiting-commit"], ["stopped"], ["working"]] as const)(
-      "refuses to archive a session in state %s",
+      "archives a session in state %s",
       async (phase) => {
         // Arrange
-        ctx.seed.session(buildSessionFile({ sessionId: "s1", current: buildRun({ phase }) }));
+        ctx.clock.set("2026-03-01T08:00:00.000Z");
+        const run = buildRun({ phase });
+        ctx.seed.session(buildSessionFile({ sessionId: "s1", current: run }));
 
         // Act
         const res = await request(ctx.app).put("/v1/sessions/s1/archive");
 
         // Assert
-        expect(res.status).toBe(422);
-        expect((res.body as ProblemDetails).code).toBe("session_not_done");
-        expect(await ctx.db.select().from(sessionArchives)).toEqual([]);
+        expect(res.status).toBe(204);
+        expect(await ctx.db.select().from(sessionArchives)).toEqual([
+          { sessionId: "s1", runId: run.id, archivedAt: new Date("2026-03-01T08:00:00.000Z") },
+        ]);
       },
     );
 

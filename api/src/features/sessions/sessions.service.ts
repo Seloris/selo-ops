@@ -1,4 +1,4 @@
-import { BusinessRuleError, NotFoundError } from "../../shared/errors.js";
+import { NotFoundError } from "../../shared/errors.js";
 import type { Clock } from "../../shared/clock.js";
 import { desktopSessionIdOf, toDesktopLink, type DesktopSessionReader } from "./sessions.desktop.js";
 import type { ExportRun, OpsExportReader, ProjectFile, SessionFile } from "./sessions.export.js";
@@ -57,8 +57,6 @@ function projectsOf(ids: string[], projectFiles: ProjectFile[], outsideGit: Map<
 
 const BLOCKERS = new Set<string>(closeBlockerSchema.options);
 export const OUTSIDE_LANE = "outside";
-// `session` BR-07: a run that waits on nobody can be archived.
-const ARCHIVABLE = new Set<string>(["job-done", "turn-ended"]);
 
 function toSession(
   file: SessionFile,
@@ -87,7 +85,7 @@ function toSession(
     isClosed: file.status === "ended",
     isArchived,
     archivedAt: isArchived ? archive.archivedAt.toISOString() : null,
-    canArchive: ARCHIVABLE.has(current.phase) && !isArchived,
+    canArchive: !isArchived,
     question: current.question ?? null,
     pendingCommit: current.pendingCommit ? { subject: current.pendingCommit.subject, body: current.pendingCommit.body ?? "" } : null,
     error: current.error ?? null,
@@ -137,7 +135,7 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     isClosed: false,
     isArchived,
     archivedAt: isArchived ? archive.archivedAt.toISOString() : null,
-    canArchive: ARCHIVABLE.has(outside.state) && !isArchived,
+    canArchive: !isArchived,
     question: null,
     pendingCommit: null,
     error: null,
@@ -187,14 +185,14 @@ export function createSessionService({
   // A session deleted in Claude Code is still the export's: never shown as outside selo (`session` BR-12, BR-14).
   const exportedIds = (files: SessionFile[], deleted: Set<string>) => new Set([...files.map((s) => s.sessionId), ...deleted]);
 
-  // The run and state of a session of the export, else of a running session outside selo; gone from both: 404.
-  const findRun = (id: string): { runId: string; state: ExportRun["phase"] } => {
+  // The run of a session of the export, else of a running session outside selo; gone from both: 404.
+  const findRun = (id: string): string => {
     const { sessions: files, deletedSessionIds } = opsExport.read();
     const file = files.find((s) => s.sessionId === id);
     const current = file && currentOf(file);
-    if (current) return { runId: current.id, state: current.phase };
+    if (current) return current.id;
     const outside = outsideSessions.read(exportedIds(files, deletedSessionIds)).find((o) => o.status.sessionId === id);
-    if (outside) return { runId: runIdOf(outside), state: outside.state };
+    if (outside) return runIdOf(outside);
     throw new NotFoundError("Session", id);
   };
 
@@ -223,8 +221,7 @@ export function createSessionService({
     },
 
     async archive(id: string): Promise<void> {
-      const { runId, state } = findRun(id);
-      if (!ARCHIVABLE.has(state)) throw new BusinessRuleError("session_not_done", `Session ${id} is neither done nor at a turn end`);
+      const runId = findRun(id);
       await archives.save({ sessionId: id, runId, archivedAt: clock.now() });
     },
 

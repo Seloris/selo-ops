@@ -3,7 +3,6 @@ import request from "supertest";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { desktopSessionLinks, sessionArchives } from "../../src/features/sessions/sessions.table.js";
 import { sessionsResponseSchema, type Session } from "../../src/features/sessions/sessions.schema.js";
-import type { ProblemDetails } from "../../src/shared/errors.js";
 import { buildProjectFile, buildRunningStatusFile, buildSessionFile, transcriptFolderOf } from "../factories.js";
 import { createTestContext } from "../setup.js";
 
@@ -374,7 +373,7 @@ describe("sessions outside selo", () => {
       expect(await ctx.db.select().from(desktopSessionLinks)).toEqual([]);
     });
 
-    it("offers the archive only at a turn end", async () => {
+    it("offers the archive whatever the turn", async () => {
       // Arrange
       running({ sessionId: "idle", status: "idle" });
       running({ sessionId: "busy", status: "busy" });
@@ -383,7 +382,7 @@ describe("sessions outside selo", () => {
       const { sessions } = await list();
 
       // Assert
-      expect(Object.fromEntries(sessions.map((s) => [s.id, s.canArchive]))).toEqual({ idle: true, busy: false });
+      expect(Object.fromEntries(sessions.map((s) => [s.id, s.canArchive]))).toEqual({ idle: true, busy: true });
     });
   });
 
@@ -404,17 +403,19 @@ describe("sessions outside selo", () => {
       expect(await only()).toMatchObject({ isArchived: true, canArchive: false, archivedAt: "2026-03-01T08:00:00.000Z" });
     });
 
-    it("refuses to archive a session outside selo while Claude works", async () => {
+    it("archives a session outside selo while Claude works", async () => {
       // Arrange
-      running({ sessionId: "s1", status: "busy" });
+      ctx.clock.set("2026-03-01T08:00:00.000Z");
+      running({ sessionId: "s1", status: "busy" }, [prompt("Go", "prompt-1")]);
 
       // Act
       const res = await request(ctx.app).put("/v1/sessions/s1/archive");
 
       // Assert
-      expect(res.status).toBe(422);
-      expect((res.body as ProblemDetails).code).toBe("session_not_done");
-      expect(await ctx.db.select().from(sessionArchives)).toEqual([]);
+      expect(res.status).toBe(204);
+      expect(await ctx.db.select().from(sessionArchives)).toEqual([
+        { sessionId: "s1", runId: "prompt-1", archivedAt: new Date("2026-03-01T08:00:00.000Z") },
+      ]);
     });
 
     it("returns 404 once the process is gone", async () => {
