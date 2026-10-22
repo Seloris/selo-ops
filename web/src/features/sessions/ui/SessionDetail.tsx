@@ -16,7 +16,7 @@ import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, cal
 import styles from "./SessionDetail.module.css";
 
 // sessions-live FR-19 to FR-23: everything the export knows of one session, and its actions. A session outside selo
-// (sessions-live FR-30) shows no recap, commits, subagents, files touched nor blueprint: only the export gives them.
+// (sessions-live FR-30) shows no recap, commits, subagents, files modified nor blueprint: only the export gives them.
 export function SessionDetail({
   session: s,
   projectName,
@@ -45,6 +45,132 @@ export function SessionDetail({
   const tag = ageDisplay(s, now);
   const unknown = t("sessions.facts.unknown");
   const fold = (section: DetailSection) => ({ isFolded: foldedSections.includes(section), onToggle: () => onToggleSection(section) });
+  const awaitedSection = (
+    <Section icon={<HourglassIcon />} hue={!awaited || !isTodo(s) ? "muted" : awaited.kind === "error" ? "danger" : "warn"} title={t("sessions.detail.awaited")} {...fold("awaited")}>
+      {awaited ? (
+        <div className={`${styles.ask} ${!isTodo(s) ? styles.neutral : awaited.kind === "error" ? styles.danger : styles.warn}`}>
+          <AwaitedIcon kind={awaited.kind} isMuted={!isTodo(s)} />
+          <div>
+            <b>{awaited.label}</b>
+            <p className={`${styles.pre} ${awaited.isCode ? styles.mono : ""}`}>{awaited.full}</p>
+          </div>
+        </div>
+      ) : (
+        <p className={styles.muted}>{calmText(s)}</p>
+      )}
+    </Section>
+  );
+  const closeSection = (
+    <Section icon={<DoorIcon />} hue="close" title={t("sessions.detail.canClose")} {...fold("close")}>
+      {s.isOutsideSelo ? (
+        <div className={`${styles.verdict} ${styles.neutral}`}>
+          <WarningIcon />
+          <b>{closeText(s)}</b>
+        </div>
+      ) : s.blockers.length === 0 ? (
+        <div className={`${styles.verdict} ${styles.neutral}`}>
+          <CheckIcon />
+          <b>{t("sessions.close.yes")}</b>
+        </div>
+      ) : (
+        <>
+          <div className={`${styles.verdict} ${styles.neutral}`}>
+            <WarningIcon />
+            <b>{t("sessions.close.notYet")}</b>
+            <span className={styles.muted}>{tn("sessions.close.count", blockers.length)}</span>
+          </div>
+          <ul className={styles.blockers}>
+            {blockers.map((b) => (
+              <li key={b}>
+                <StatusDot tone={blockerTone(b)} />
+                <div>
+                  <b>{blockerLabel(b)}</b>
+                  <p className={styles.muted}>{blockerHint(b)}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </Section>
+  );
+  const recapSection = !s.isOutsideSelo && (s.recap || s.commits.length > 0) && (
+    <Section icon={<CommitIcon />} hue="recap" title={t("sessions.detail.recap")} {...fold("recap")}>
+      {s.recap && <p>{s.recap}</p>}
+      {s.commits.length > 0 && (
+        <ul className={styles.lines}>
+          {s.commits.map((c) => (
+            <li key={c.sha}>
+              <span className={styles.hash}>{c.sha}</span>
+              <span className={styles.line}>{c.subject}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  );
+  const agentsSection = !s.isOutsideSelo && (
+    <Section icon={<RobotIcon />} hue="agents" count={s.subagents.length} title={t("sessions.detail.subagents")} {...fold("agents")}>
+      {s.subagents.length ? (
+        <ul className={styles.lines}>
+          {s.subagents.map((a, i) => (
+            <li key={i}>
+              <span className={styles.hash}>{a.type}</span>
+              <span className={styles.line}>{a.task ?? ""}</span>
+              <span className={styles.status}>
+                {stateLabel({ ...s, state: a.state })} · {a.model ?? unknown} ·{" "}
+                {a.usage ? <TokenCount count={totalTokens(a.usage.tokens)} /> : unknown}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className={styles.muted}>{t("sessions.detail.none")}</p>
+      )}
+    </Section>
+  );
+  const usageSection = (
+    <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.usage")} {...fold("usage")}>
+      {s.usage || s.runs.length > 0 || s.runUsage ? (
+        <UsageDashboard usage={s.usage} runs={s.runs} isRunListCut={s.isRunListCut} runUsage={s.runUsage} now={now} />
+      ) : (
+        <p className={styles.muted}>{unknown}</p>
+      )}
+    </Section>
+  );
+  const filesSection = !s.isOutsideSelo && (
+    <Section icon={<FolderIcon />} hue="files" count={s.touchedFiles.length} title={t("sessions.detail.files")} {...fold("files")}>
+      {s.touchedFiles.length ? (
+        <FileTree paths={s.touchedFiles} />
+      ) : (
+        <p className={styles.muted}>{t("sessions.detail.none")}</p>
+      )}
+    </Section>
+  );
+  const settingsSection = (
+    <Section icon={<SlidersIcon />} hue="muted" title={t("sessions.detail.settings")} {...fold("settings")}>
+      <div className={styles.kv}>
+        <span className={styles.key}>{t("sessions.detail.model")}</span>
+        <span>{s.model ?? unknown}</span>
+        <span className={styles.key}>{t("sessions.detail.effort")}</span>
+        <span>{s.effort ?? unknown}</span>
+        <span className={styles.key}>{t("sessions.detail.permissions")}</span>
+        <span>{s.permissionMode ?? unknown}</span>
+        {!s.isOutsideSelo && (
+          <>
+            <span className={styles.key}>{t("sessions.detail.blueprint")}</span>
+            <span className={styles.mono}>{s.blueprint ?? unknown}</span>
+          </>
+        )}
+        <span className={styles.key}>{t("sessions.detail.folder")}</span>
+        <span className={styles.mono}>{s.folder}</span>
+        <span className={styles.key}>{t("sessions.detail.session")}</span>
+        <span className={styles.mono}>{s.id}</span>
+        <span className={styles.key}>{t("sessions.detail.writtenBy")}</span>
+        <span className={styles.mono}>{writtenByText(s)}</span>
+      </div>
+    </Section>
+  );
   return (
     <>
       <div className={styles.head}>
@@ -106,132 +232,33 @@ export function SessionDetail({
         {isNextOpen && s.nextAction && !s.isArchived && <CommandBox command={s.nextAction} copyLabel={t("sessions.actions.copy")} onCopy={() => actions.onCopyNext(s)} />}
       </div>
 
-      <div className={styles.body}>
-        <Section icon={<HourglassIcon />} hue={!awaited || !isTodo(s) ? "muted" : awaited.kind === "error" ? "danger" : "warn"} title={t("sessions.detail.awaited")} {...fold("awaited")}>
-          {awaited ? (
-            <div className={`${styles.ask} ${!isTodo(s) ? styles.neutral : awaited.kind === "error" ? styles.danger : styles.warn}`}>
-              <AwaitedIcon kind={awaited.kind} isMuted={!isTodo(s)} />
-              <div>
-                <b>{awaited.label}</b>
-                <p className={`${styles.pre} ${awaited.isCode ? styles.mono : ""}`}>{awaited.full}</p>
-              </div>
-            </div>
-          ) : (
-            <p className={styles.muted}>{calmText(s)}</p>
-          )}
-        </Section>
-
-        <Section icon={<DoorIcon />} hue="close" title={t("sessions.detail.canClose")} {...fold("close")}>
-          {s.isOutsideSelo ? (
-            <div className={`${styles.verdict} ${styles.neutral}`}>
-              <WarningIcon />
-              <b>{closeText(s)}</b>
-            </div>
-          ) : s.blockers.length === 0 ? (
-            <div className={`${styles.verdict} ${styles.neutral}`}>
-              <CheckIcon />
-              <b>{t("sessions.close.yes")}</b>
-            </div>
-          ) : (
-            <>
-              <div className={`${styles.verdict} ${styles.neutral}`}>
-                <WarningIcon />
-                <b>{t("sessions.close.notYet")}</b>
-                <span className={styles.muted}>{tn("sessions.close.count", blockers.length)}</span>
-              </div>
-              <ul className={styles.blockers}>
-                {blockers.map((b) => (
-                  <li key={b}>
-                    <StatusDot tone={blockerTone(b)} />
-                    <div>
-                      <b>{blockerLabel(b)}</b>
-                      <p className={styles.muted}>{blockerHint(b)}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </Section>
-
-        {!s.isOutsideSelo && (s.recap || s.commits.length > 0) && (
-          <Section icon={<CommitIcon />} hue="recap" title={t("sessions.detail.recap")} {...fold("recap")}>
-            {s.recap && <p>{s.recap}</p>}
-            {s.commits.length > 0 && (
-              <ul className={styles.lines}>
-                {s.commits.map((c) => (
-                  <li key={c.sha}>
-                    <span className={styles.hash}>{c.sha}</span>
-                    <span className={styles.line}>{c.subject}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Section>
-        )}
-
-        {!s.isOutsideSelo && (
-          <Section icon={<RobotIcon />} hue="agents" count={s.subagents.length} title={t("sessions.detail.subagents")} {...fold("agents")}>
-            {s.subagents.length ? (
-              <ul className={styles.lines}>
-                {s.subagents.map((a, i) => (
-                  <li key={i}>
-                    <span className={styles.hash}>{a.type}</span>
-                    <span className={styles.line}>{a.task ?? ""}</span>
-                    <span className={styles.status}>
-                      {stateLabel({ ...s, state: a.state })} · {a.model ?? unknown} ·{" "}
-                      {a.usage ? <TokenCount count={totalTokens(a.usage.tokens)} /> : unknown}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className={styles.muted}>{t("sessions.detail.none")}</p>
-            )}
-          </Section>
-        )}
-
-        <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.usage")} {...fold("usage")}>
-          {s.usage || s.runs.length > 0 || s.runUsage ? (
-            <UsageDashboard usage={s.usage} runs={s.runs} isRunListCut={s.isRunListCut} runUsage={s.runUsage} now={now} />
-          ) : (
-            <p className={styles.muted}>{unknown}</p>
-          )}
-        </Section>
-
-        {!s.isOutsideSelo && (
-          <Section icon={<FolderIcon />} hue="files" count={s.touchedFiles.length} title={t("sessions.detail.files")} {...fold("files")}>
-            {s.touchedFiles.length ? (
-              <FileTree paths={s.touchedFiles} />
-            ) : (
-              <p className={styles.muted}>{t("sessions.detail.none")}</p>
-            )}
-          </Section>
-        )}
-
-        <Section icon={<SlidersIcon />} hue="muted" title={t("sessions.detail.settings")} {...fold("settings")}>
-          <div className={styles.kv}>
-            <span className={styles.key}>{t("sessions.detail.model")}</span>
-            <span>{s.model ?? unknown}</span>
-            <span className={styles.key}>{t("sessions.detail.effort")}</span>
-            <span>{s.effort ?? unknown}</span>
-            <span className={styles.key}>{t("sessions.detail.permissions")}</span>
-            <span>{s.permissionMode ?? unknown}</span>
-            {!s.isOutsideSelo && (
-              <>
-                <span className={styles.key}>{t("sessions.detail.blueprint")}</span>
-                <span className={styles.mono}>{s.blueprint ?? unknown}</span>
-              </>
-            )}
-            <span className={styles.key}>{t("sessions.detail.folder")}</span>
-            <span className={styles.mono}>{s.folder}</span>
-            <span className={styles.key}>{t("sessions.detail.session")}</span>
-            <span className={styles.mono}>{s.id}</span>
-            <span className={styles.key}>{t("sessions.detail.writtenBy")}</span>
-            <span className={styles.mono}>{writtenByText(s)}</span>
+      {isFullscreen ? (
+        // Full screen only: the sections become cards in two stacks, the narrow one with the state of the session,
+        // the wide one with the usage and the files.
+        <div className={`${styles.body} ${styles.cards}`}>
+          <div className={styles.stack}>
+            {awaitedSection}
+            {closeSection}
+            {recapSection}
+            {agentsSection}
+            {settingsSection}
           </div>
-        </Section>
-      </div>
+          <div className={styles.stack}>
+            {usageSection}
+            {filesSection}
+          </div>
+        </div>
+      ) : (
+        <div className={styles.body}>
+          {awaitedSection}
+          {closeSection}
+          {recapSection}
+          {agentsSection}
+          {usageSection}
+          {filesSection}
+          {settingsSection}
+        </div>
+      )}
     </>
   );
 }

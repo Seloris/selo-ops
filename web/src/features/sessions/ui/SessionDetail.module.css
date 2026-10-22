@@ -311,3 +311,28 @@
 .key {
   color: var(--text-muted);
 }
+
+/* Full screen only (sessions-live FR-37): the sections become cards in two stacks side by side, each stack as tall
+   as its own cards; the wide stack holds the usage and the files. A folded card shrinks to its title. */
+.cards {
+  display: grid;
+  grid-template-columns: minmax(340px, 1fr) minmax(0, 2fr);
+  align-items: start;
+  gap: 16px;
+  padding: 16px 20px 24px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.cards .section,
+.cards .section:last-child {
+  padding: var(--item-pad);
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--item-radius);
+}
