@@ -14,6 +14,7 @@ import {
   modelText,
   requestText,
   sessionLaneLabel,
+  shownBlockers,
   toneOf,
 } from "./sessionText.ts";
 
@@ -177,6 +178,16 @@ describe("blockers", () => {
     expect(blockerLabel(blocker)).toBeTruthy();
     expect(blockerHint(blocker)).toBeTruthy();
     expect(blockerTone(blocker)).toBe(tone);
+  });
+
+  it("drops the unfinished work and uncommitted files a pending commit implies, keeping the export's order", () => {
+    const s = buildSession({ blockers: ["not-done", "pending-commit", "dirty-files", "subagents"] });
+    expect(shownBlockers(s)).toEqual(["pending-commit", "subagents"]);
+    expect(closeText(s)).toBe("Pas encore — Commit en attente · Sous-agents actifs");
+  });
+
+  it("keeps every blocker when no commit is pending", () => {
+    expect(shownBlockers(buildSession({ blockers: ["not-done", "dirty-files"] }))).toEqual(["not-done", "dirty-files"]);
   });
 });
 

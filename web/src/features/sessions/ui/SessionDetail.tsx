@@ -7,7 +7,7 @@ import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, requestText, stateLabel } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, requestText, shownBlockers, stateLabel } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 
 // sessions-live FR-19 to FR-23: everything the export knows of one session, and its actions. A session outside selo
@@ -28,6 +28,7 @@ export function SessionDetail({
   onClose: () => void;
 }) {
   const awaited = awaitedOf(s);
+  const blockers = shownBlockers(s);
   const tag = ageDisplay(s, now);
   const unknown = t("sessions.facts.unknown");
   return (
@@ -114,10 +115,10 @@ export function SessionDetail({
               <div className={`${styles.verdict} ${styles.neutral}`}>
                 <WarningIcon />
                 <b>{t("sessions.close.notYet")}</b>
-                <span className={styles.muted}>{tn("sessions.close.count", s.blockers.length)}</span>
+                <span className={styles.muted}>{tn("sessions.close.count", blockers.length)}</span>
               </div>
               <ul className={styles.blockers}>
-                {s.blockers.map((b) => (
+                {blockers.map((b) => (
                   <li key={b}>
                     <StatusDot tone={blockerTone(b)} />
                     <div>

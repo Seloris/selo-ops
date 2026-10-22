@@ -28,6 +28,13 @@ export const blockerLabel = (b: Session["blockers"][number]) => t(`sessions.bloc
 // sessions-live FR-28: what clears a blocker; amber only for those that wait on the person.
 export const blockerHint = (b: Session["blockers"][number]) => t(`sessions.blocker.hint.${b}` as MessageKey);
 
+// sessions-live FR-28: a pending commit already says the work is not done and its files are not committed.
+const IMPLIED_BY_COMMIT: ReadonlySet<Session["blockers"][number]> = new Set(["not-done", "dirty-files"]);
+
+export function shownBlockers(s: Session): Session["blockers"] {
+  return s.blockers.includes("pending-commit") ? s.blockers.filter((b) => !IMPLIED_BY_COMMIT.has(b)) : s.blockers;
+}
+
 export function blockerTone(b: Session["blockers"][number]): DotTone {
   if (b === "question" || b === "pending-commit") return "warn";
   if (b === "background-tasks" || b === "subagents") return "pulse";
@@ -129,7 +136,8 @@ export function modelText(s: Session): string {
 // sessions-live FR-19: whether a session outside selo can be closed is unknown, its empty blockers say nothing.
 export function closeText(s: Session): string {
   if (s.isOutsideSelo) return t("sessions.close.outside");
-  return s.blockers.length ? t("sessions.close.short", { reasons: s.blockers.map(blockerLabel).join(" · ") }) : t("sessions.close.yes");
+  const blockers = shownBlockers(s);
+  return blockers.length ? t("sessions.close.short", { reasons: blockers.map(blockerLabel).join(" · ") }) : t("sessions.close.yes");
 }
 
 // sessions-live FR-12: a project only sessions outside selo show has no count of uncommitted files.
