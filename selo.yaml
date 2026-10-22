@@ -1,0 +1,14 @@
+selo: 2.0.0
+name: selo-ops
+base_branch: main
+language:
+  chat: fr
+  repo: en
+models: standard
+components:
+  - name: api
+    path: api
+    handoff: api/openapi.json
+  - name: web
+    path: web
+    needs: [api]
