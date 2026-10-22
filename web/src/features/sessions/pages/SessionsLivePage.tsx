@@ -93,7 +93,8 @@ export function SessionsLivePage() {
   const [archiveAsked, setArchiveAsked] = useState<Session | null>(null);
 
   const [isResizing, setResizing] = useState(false);
-  // sessions-live FR-37: the detail over the whole page; not remembered.
+  // sessions-live FR-37: the detail alone on the screen, header and settings hidden, the browser in full screen
+  // when it allows it; not remembered.
   const [isFullscreen, setFullscreen] = useState(false);
 
   const updateSettings = (patch: Partial<Settings>) => {
@@ -138,6 +139,24 @@ export function SessionsLivePage() {
       return next;
     });
   }, [setParams]);
+
+  // The browser's own Échap leaves its full screen: the page follows. And the other way round.
+  useEffect(() => {
+    const onChange = () => {
+      if (!document.fullscreenElement) setFullscreen(false);
+    };
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+  useEffect(() => {
+    if (!isFullscreen && document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+  }, [isFullscreen]);
+  const toggleFullscreen = () => {
+    if (isFullscreen) return setFullscreen(false);
+    setFullscreen(true);
+    // Refused (or unsupported): the page still hides its header and settings.
+    void appRef.current?.requestFullscreen?.().catch(() => undefined);
+  };
 
   // Échap closes the projects' list first, then leaves the full screen, then closes the detail.
   useEffect(() => {
@@ -249,21 +268,24 @@ export function SessionsLivePage() {
         ? t("sessions.empty.noMatch", { search: search.trim() })
         : t("sessions.empty.none");
 
+  const isOnlyDetail = isPanelOpen && isFullscreen;
   const updatedSeconds = query.dataUpdatedAt ? Math.max(0, Math.floor((now - query.dataUpdatedAt) / 1000)) : null;
 
   return (
     <div
       ref={appRef}
-      className={`${styles.app} ${isPanelOpen ? styles.withPanel : ""} ${isPanelOpen && isFullscreen ? styles.fullscreen : ""} ${settings.panelWidth !== null || isResizing ? styles.sized : ""} ${isResizing ? styles.resizing : ""}`}
+      className={`${styles.app} ${isPanelOpen ? styles.withPanel : ""} ${isOnlyDetail ? styles.fullscreen : ""} ${settings.panelWidth !== null || isResizing ? styles.sized : ""} ${isResizing ? styles.resizing : ""}`}
       style={settings.panelWidth !== null ? ({ "--drawer-chosen-w": `${settings.panelWidth}px` } as CSSProperties) : undefined}
     >
-      <SessionsHeader
-        counts={counts}
-        updatedSeconds={updatedSeconds}
-        isRefreshing={query.isFetching}
-        plugins={pluginsText(query.data?.plugins ?? [])}
-      />
-      <SettingsBar
+      {!isOnlyDetail && (
+        <SessionsHeader
+          counts={counts}
+          updatedSeconds={updatedSeconds}
+          isRefreshing={query.isFetching}
+          plugins={pluginsText(query.data?.plugins ?? [])}
+        />
+      )}
+      {!isOnlyDetail && <SettingsBar
         view={settings.view}
         onView={(view) => updateSettings({ view })}
         grouping={settings.grouping}
@@ -280,7 +302,7 @@ export function SessionsLivePage() {
         onShowClosed={setShowClosed}
         search={search}
         onSearch={setSearch}
-      />
+      />}
       <div className={styles.body}>
         <main className={styles.content}>
           {query.isPending ? (
@@ -327,7 +349,7 @@ export function SessionsLivePage() {
               actions={actions}
               isFullscreen={isFullscreen}
               onClose={closeDetail}
-              onToggleFullscreen={() => setFullscreen((f) => !f)}
+              onToggleFullscreen={toggleFullscreen}
               onToggleSection={(section) => updateSettings({ foldedSections: toggleSection(settings.foldedSections, section) })}
             />
           )}

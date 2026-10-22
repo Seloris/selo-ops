@@ -43,6 +43,11 @@
 .fullscreen,
 .fullscreen.sized {
   --drawer-w: 100%;
+  /* The browser's full screen puts this element alone on the screen: it brings the page's background. */
+  height: 100vh;
+  min-height: 0;
+  background-color: var(--bg);
+  background-image: var(--bg-image);
 }
 
 .fullscreen .content {
