@@ -154,7 +154,7 @@
   "sessions.detail.canClose": "Peut-on fermer la session ?",
   "sessions.detail.recap": "Récap et commits",
   "sessions.detail.subagents": "Sous-agents",
-  "sessions.detail.files": "Fichiers touchés",
+  "sessions.detail.files": "Fichiers modifiés",
   "sessions.detail.settings": "Modèle et permissions",
   "sessions.detail.none": "Aucun",
   "sessions.detail.model": "Modèle",

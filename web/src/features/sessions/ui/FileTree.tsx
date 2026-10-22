@@ -1,9 +1,47 @@
-import { useMemo, useState } from "react";
-import { ChevronDownIcon, ChevronRightIcon, FileIcon, FolderIcon } from "../../../shared/ui/icons.tsx";
+import { useMemo, useState, type ComponentType } from "react";
+import {
+  BracesIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CodeIcon,
+  FileIcon,
+  FolderIcon,
+  HashIcon,
+  ImageIcon,
+  IndentIcon,
+  JavaScriptIcon,
+  MarkdownIcon,
+  ReactIcon,
+  TerminalIcon,
+  TextFileIcon,
+  TypeScriptIcon,
+} from "../../../shared/ui/icons.tsx";
+import { fileKind, type FileKind } from "./fileKind.ts";
 import { buildFileTree, type FileNode } from "./fileTree.ts";
 import styles from "./FileTree.module.css";
 
-// The files a session touched, browsed folder by folder (sessions-live FR-19): every folder starts open.
+const iconByKind: Record<FileKind, ComponentType> = {
+  markdown: MarkdownIcon,
+  typescript: TypeScriptIcon,
+  react: ReactIcon,
+  javascript: JavaScriptIcon,
+  json: BracesIcon,
+  style: HashIcon,
+  html: CodeIcon,
+  yaml: IndentIcon,
+  image: ImageIcon,
+  shell: TerminalIcon,
+  text: TextFileIcon,
+  file: FileIcon,
+};
+
+function FileKindIcon({ path }: { path: string }) {
+  const Icon = iconByKind[fileKind(path)];
+  return <Icon />;
+}
+
+// The files a session modified, browsed folder by folder (sessions-live FR-19): every folder starts open,
+// each file with the icon of its type.
 export function FileTree({ paths }: { paths: string[] }) {
   const tree = useMemo(() => buildFileTree(paths), [paths]);
   const [closed, setClosed] = useState<ReadonlySet<string>>(new Set());
@@ -22,7 +60,7 @@ function Nodes({ nodes, closed, onToggle, isRoot = false }: { nodes: FileNode[];
       {nodes.map((n) =>
         n.kind === "file" ? (
           <li key={`file:${n.path}`} className={styles.file} title={n.path}>
-            <FileIcon />
+            <FileKindIcon path={n.path} />
             <span className={styles.name}>{n.name}</span>
           </li>
         ) : (

@@ -301,6 +301,108 @@ export function FileIcon() {
   );
 }
 
+// File-type icons, drawn in strokes like the others so they stay legible at 14 px.
+export function MarkdownIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <path d="M6 15V9l3 3 3-3v6" />
+      <path d="M17 9v6M15 13l2 2 2-2" />
+    </svg>
+  );
+}
+
+export function TypeScriptIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <path d="M6 9h6M9 9v9" />
+      <path d="M18 10c-.6-.7-1.4-1-2.3-1-1.3 0-2.2.8-2.2 2 0 2.6 4.5 1.6 4.5 4.3 0 1.3-1 2.2-2.4 2.2-1 0-1.9-.4-2.4-1.1" />
+    </svg>
+  );
+}
+
+export function JavaScriptIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <path d="M11 9v6.5a2.5 2.5 0 0 1-5 0" />
+      <path d="M18 10c-.6-.7-1.4-1-2.3-1-1.3 0-2.2.8-2.2 2 0 2.6 4.5 1.6 4.5 4.3 0 1.3-1 2.2-2.4 2.2-1 0-1.9-.4-2.4-1.1" />
+    </svg>
+  );
+}
+
+export function ReactIcon() {
+  return (
+    <svg {...iconProps}>
+      <circle cx="12" cy="12" r="1" />
+      <ellipse cx="12" cy="12" rx="10" ry="4" />
+      <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" />
+      <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" />
+    </svg>
+  );
+}
+
+export function BracesIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M8 4H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1" />
+      <path d="M16 4h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1" />
+    </svg>
+  );
+}
+
+export function HashIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18" />
+    </svg>
+  );
+}
+
+export function CodeIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" />
+    </svg>
+  );
+}
+
+export function IndentIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 5h9M8 10h12M8 15h9M4 20h7" />
+    </svg>
+  );
+}
+
+export function ImageIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="8.5" cy="9.5" r="1.5" />
+      <path d="m21 15-5-5L5 20" />
+    </svg>
+  );
+}
+
+export function TerminalIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="m4 17 6-5-6-5M12 19h8" />
+    </svg>
+  );
+}
+
+export function TextFileIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+      <path d="M14 3v5h5M9 13h6M9 17h6" />
+    </svg>
+  );
+}
+
 export function SlidersIcon() {
   return (
     <svg {...iconProps}>

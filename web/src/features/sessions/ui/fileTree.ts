@@ -1,4 +1,4 @@
-// The files a session touched, as a tree of folders to browse (sessions-live FR-19). The export gives paths
+// The files a session modified, as a tree of folders to browse (sessions-live FR-19). The export gives paths
 // relative to the repository; `.` and empty segments are dropped, and an entry ending with a slash names no file.
 
 export type FileNode =
