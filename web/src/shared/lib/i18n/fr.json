@@ -137,8 +137,7 @@
 
   "sessions.toast.resumeCopied": "Commande copiée",
   "sessions.toast.resumeHint": "Lance-la dans un terminal, dans le dossier de la session : {folder}",
-  "sessions.toast.desktopOpening": "Ouverture dans l’app Claude",
-  "sessions.toast.desktopHint": "Rien ne s’ouvre ? L’app Claude n’est pas installée sur ce poste, ou la session y a été supprimée.",
+  "sessions.toast.desktopOpening": "Ouvert dans Claude",
   "sessions.toast.nextCopied": "Action suivante copiée",
   "sessions.toast.nextHint": "Rien n’est lancé : colle-la dans la session {project} ({lane}).",
   "sessions.toast.copyBlocked": "Copie refusée par le navigateur : la commande est sélectionnée, copie-la avec Ctrl+C.",

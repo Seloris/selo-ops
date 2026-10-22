@@ -170,7 +170,7 @@ export function SessionsLivePage() {
       const anchor = document.createElement("a");
       anchor.href = link;
       anchor.click();
-      showToast({ title: t("sessions.toast.desktopOpening"), hint: t("sessions.toast.desktopHint") });
+      showToast({ title: t("sessions.toast.desktopOpening") });
     },
     onToggleNext: (id) =>
       setNextShown((shown) => {
