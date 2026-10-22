@@ -7,6 +7,7 @@ skin: aurora
 layers: [data, pages, ui]
 commands:
   build: npm run build
+  test: npx vitest run
   lint: npx eslint {files}
   prepare: npx openapi-typescript ../api/openapi.json --output src/api/schema.d.ts
   serve: npm run dev
@@ -15,7 +16,7 @@ port: 5173
 demo_port: 5181
 ```
 
-All commands run from this component's path. The front has no unit tests of its components: never create a `*.test.tsx`. A pure `.ts` module (no React, no DOM: a formatter, a reducer, a date rule) may get a Vitest `*.test.ts` beside it, once the front declares `test: npx vitest run`. Lint only the files a stage changed, never the whole app.
+All commands run from this component's path. The front has no unit tests of its components: never create a `*.test.tsx`. A pure `.ts` module (no React, no DOM: a formatter, a reducer, a date rule) gets a Vitest `*.test.ts` beside it. Lint only the files a stage changed, never the whole app.
 
 ## Structure
 
@@ -34,9 +35,10 @@ src/
     ui/                     shared components, one {Name}.tsx and its {Name}.module.css per element of the skin's recipes; labels are props, no className prop, no feature word
                             Panel, PageTitle, Field (label, error, the control as a render prop), TextInput, SearchInput, Select,
                             Button (variant: primary, danger, quiet, ghost), Switch, Checkbox, List (List, ListItem with isDone, ListItemText),
-                            Badge, EmptyState, LoadingState, ErrorMessage (role="alert"), ConfirmDialog (a native <dialog>), icons.tsx (SearchIcon, TrashIcon)
+                            Badge, EmptyState, LoadingState, ErrorMessage (role="alert"), ConfirmDialog (a native <dialog>), icons.tsx,
+                            Segmented, IconButton, Tag, StatusDot, Dropdown (DropdownCheck), CommandBox, Drawer (a side panel), Toast; Button also takes size="sm"
       theme/                fonts.ts (the skin's font imports) and skin.css (its tokens), both written by setup: never edited; base.css (the page), overrides.css (this application's values)
-    lib/                    utils, i18n
+    lib/                    utils (formatAge, clipboard, storage, useNow), theme (data-theme on the root), i18n/ (fr.json, t and tn)
 ```
 
 ## Package scripts
@@ -64,10 +66,14 @@ The skin named in the `component` block above: its fonts in `src/shared/ui/theme
 
 - Variables this application changes: in `src/shared/ui/theme/overrides.css`, never in `skin.css`.
 - Rules this application adds or replaces: here, one line each.
+- State colours: amber (`--warn`, `--warn-soft`, added in overrides.css) and rose (`--danger`) mark only what waits on the person; everything else stays neutral.
+- Mint (`--accent`) only for the active setting, checked boxes and the « Ouvrir » action.
+- Theme: Clair / Sombre chosen in the header, Sombre by default; overrides.css restates both palettes under `:root[data-theme]`, so a new token needs its light and dark values there.
+- Commands, branches and commit subjects in `--font-mono` (added in overrides.css).
 
 ## Testing
 
-- No unit tests on the front: the `try` skill checks a change in the real app, on this worktree's slot.
+- No unit tests of components: the `try` skill checks a change in the real app, on this worktree's slot. Pure `.ts` modules (sorting, grouping, formatting) have Vitest tests beside them (`npx vitest run`).
 
 ## Local run
 

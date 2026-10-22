@@ -1,0 +1,32 @@
+.dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.warn {
+  background: var(--warn);
+}
+
+.danger {
+  background: var(--danger);
+}
+
+.pulse {
+  background: var(--text);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.idle {
+  background: var(--text-muted);
+}
+
+.hollow {
+  box-shadow: inset 0 0 0 1.5px var(--text-muted);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.7); }
+}

@@ -1,0 +1,30 @@
+.icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: calc(var(--control-h) - 8px);
+  height: calc(var(--control-h) - 8px);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--radius-control) - 3px);
+  cursor: pointer;
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.muted:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.accent:hover {
+  background: var(--accent-soft);
+}

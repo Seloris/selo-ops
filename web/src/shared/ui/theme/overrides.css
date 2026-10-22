@@ -1,3 +1,71 @@
 /* This application's own values for the skin's variables, loaded after skin.css (the selo plugin's
-   skins/README.md lists them). Empty: the skin applies as is. A dark-only value goes in a
-   @media (prefers-color-scheme: dark) { :root { ... } } block. */
+   skins/README.md lists them). A dark-only value goes in a @media (prefers-color-scheme: dark) block.
+
+   Added tokens:
+   --warn, --warn-soft   amber, the second state colour the skin lacks (rose is its --danger)
+   --font-mono           commands, branches, commit subjects
+
+   The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
+   of that scheme, so the choice wins over the system's prefers-color-scheme. */
+:root {
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+  --warn: #d97706;
+  --warn-soft: rgba(217,119,6,.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --warn: #fbbf24;
+    --warn-soft: rgba(251,191,36,.16);
+  }
+}
+
+:root[data-theme="light"] {
+  --bg: #eef3f4;
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(20,184,166,.28), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.20), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.20), transparent 70%);
+  --surface: rgba(255,255,255,.62);
+  --surface-2: rgba(255,255,255,.8);
+  --border: rgba(15,23,42,.09);
+  --text: #0f172a;
+  --text-muted: #55627a;
+  --accent: #0f9488;
+  --accent-text: #ffffff;
+  --accent-soft: rgba(15,148,136,.12);
+  --accent-soft-text: #0b6b62;
+  --danger: #e11d48;
+  --danger-soft: rgba(225,29,72,.1);
+  --danger-text: #ffffff;
+  --control-bg: rgba(255,255,255,.7);
+  --item-bg: rgba(255,255,255,.55);
+  --pop-bg: rgba(255,255,255,.95);
+  --scrim: rgba(15,17,22,.45);
+  --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
+  --warn: #d97706;
+  --warn-soft: rgba(217,119,6,.15);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #070b14;
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(45,212,191,.32), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.18), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.28), transparent 70%);
+  --surface: rgba(255,255,255,.06);
+  --surface-2: rgba(255,255,255,.1);
+  --border: rgba(255,255,255,.14);
+  --text: #eef2ff;
+  --text-muted: #a5adc8;
+  --accent: #5eead4;
+  --accent-text: #04201b;
+  --accent-soft: rgba(94,234,212,.14);
+  --accent-soft-text: #a7f3e4;
+  --danger: #fb7185;
+  --danger-soft: rgba(251,113,133,.14);
+  --danger-text: #2a0710;
+  --control-bg: rgba(0,0,0,.25);
+  --item-bg: rgba(255,255,255,.04);
+  --pop-bg: rgba(17,22,36,.92);
+  --scrim: rgba(3,6,12,.55);
+  --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+  --warn: #fbbf24;
+  --warn-soft: rgba(251,191,36,.16);
+  color-scheme: dark;
+}

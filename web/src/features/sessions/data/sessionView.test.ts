@@ -1,0 +1,247 @@
+import { describe, expect, it } from "vitest";
+import {
+  archivedSessions,
+  closedSessions,
+  countsOf,
+  groupSessions,
+  isStale,
+  matches,
+  openCountByProject,
+  sortSessions,
+  type Project,
+  type Session,
+} from "./sessionView.ts";
+
+const NOW = Date.parse("2026-10-22T12:00:00.000Z");
+const ago = (minutes: number) => new Date(NOW - minutes * 60_000).toISOString();
+
+let counter = 0;
+function buildSession(overrides: Partial<Session> = {}): Session {
+  counter += 1;
+  return {
+    id: `s${counter}`,
+    projectId: "p-ledger",
+    branch: "main",
+    folder: "~/code/ledger-api",
+    lane: "free",
+    request: "Fix the build",
+    isRequestCut: false,
+    blueprint: null,
+    step: null,
+    substep: null,
+    state: "working",
+    isClosed: false,
+    isArchived: false,
+    archivedAt: null,
+    canArchive: false,
+    question: null,
+    pendingCommit: null,
+    error: null,
+    recap: null,
+    commits: [],
+    nextAction: null,
+    model: null,
+    effort: null,
+    permissionMode: null,
+    blockers: [],
+    subagents: [],
+    touchedFiles: [],
+    updatedAt: ago(1),
+    ...overrides,
+  };
+}
+
+const projects: Project[] = [
+  { id: "p-ledger", name: "ledger-api", branch: "main", changedCount: 2 },
+  { id: "p-harbor", name: "harbor-mobile", branch: "develop", changedCount: 0 },
+];
+const byId = new Map(projects.map((p) => [p.id, p]));
+const ids = (list: Session[]) => list.map((s) => s.id);
+
+describe("sortSessions", () => {
+  it("puts the most urgent state first, then the most recently updated", () => {
+    // Arrange
+    const done = buildSession({ id: "done", state: "job-done", updatedAt: ago(1) });
+    const askOld = buildSession({ id: "ask-old", state: "awaiting-answer", updatedAt: ago(50) });
+    const askNew = buildSession({ id: "ask-new", state: "awaiting-answer", updatedAt: ago(2) });
+    const commit = buildSession({ id: "commit", state: "awaiting-commit" });
+    const stopped = buildSession({ id: "stopped", state: "stopped" });
+    const working = buildSession({ id: "working", state: "working" });
+    const turn = buildSession({ id: "turn", state: "turn-ended" });
+
+    // Act
+    const sorted = sortSessions([done, turn, working, stopped, commit, askOld, askNew]);
+
+    // Assert
+    expect(ids(sorted)).toEqual(["ask-new", "ask-old", "commit", "stopped", "working", "turn", "done"]);
+  });
+});
+
+describe("countsOf", () => {
+  it("counts the open sessions, their projects and those to handle, closed and archived ones aside", () => {
+    // Arrange
+    const sessions = [
+      buildSession({ state: "awaiting-answer" }),
+      buildSession({ state: "stopped", projectId: "p-harbor" }),
+      buildSession({ state: "working" }),
+      buildSession({ state: "stopped", isClosed: true, projectId: "p-other" }),
+      buildSession({ state: "job-done", isArchived: true, projectId: "p-third" }),
+    ];
+
+    // Act
+    const counts = countsOf(sessions);
+
+    // Assert
+    expect(counts).toEqual({ open: 3, projects: 2, todo: 2 });
+  });
+});
+
+describe("openCountByProject", () => {
+  it("counts each project's open sessions", () => {
+    // Arrange
+    const sessions = [buildSession(), buildSession(), buildSession({ projectId: "p-harbor", isClosed: true })];
+
+    // Act
+    const counts = openCountByProject(sessions);
+
+    // Assert
+    expect(Object.fromEntries(counts)).toEqual({ "p-ledger": 2 });
+  });
+});
+
+describe("matches", () => {
+  it.each([
+    ["the request", "promo"],
+    ["the blueprint", "monthly-balance"],
+    ["the branch", "claude/live"],
+    ["the project's name", "LEDGER"],
+  ])("finds a session by %s, ignoring case", (_what, search) => {
+    // Arrange
+    const session = buildSession({ request: "Keep the promo code", blueprint: ".planning/blueprints/2026-10-20-monthly-balance.md", branch: "claude/live" });
+
+    // Act
+    const found = matches(session, { projectIds: null, search }, byId);
+
+    // Assert
+    expect(found).toBe(true);
+  });
+
+  it("leaves out a session whose project is not checked", () => {
+    // Arrange
+    const session = buildSession({ projectId: "p-harbor" });
+
+    // Act
+    const found = matches(session, { projectIds: new Set(["p-ledger"]), search: "" }, byId);
+
+    // Assert
+    expect(found).toBe(false);
+  });
+
+  it("leaves out a session the search does not match", () => {
+    // Act
+    const found = matches(buildSession(), { projectIds: null, search: "nothing like it" }, byId);
+
+    // Assert
+    expect(found).toBe(false);
+  });
+});
+
+describe("groupSessions", () => {
+  it("by project, puts first the project holding the most urgent session", () => {
+    // Arrange
+    const sessions = [
+      buildSession({ id: "l1", projectId: "p-ledger", state: "working" }),
+      buildSession({ id: "h1", projectId: "p-harbor", state: "awaiting-commit" }),
+      buildSession({ id: "l2", projectId: "p-ledger", state: "awaiting-answer" }),
+      buildSession({ id: "closed", projectId: "p-harbor", isClosed: true }),
+    ];
+
+    // Act
+    const blocks = groupSessions(sessions, "project", { projectIds: null, search: "" }, byId);
+
+    // Assert
+    expect(blocks.map((b) => [b.key, ids(b.sessions), b.todoCount])).toEqual([
+      ["p-ledger", ["l2", "l1"], 1],
+      ["p-harbor", ["h1"], 1],
+    ]);
+  });
+
+  it("by status, gives the non-empty blocks À traiter, En cours and Au repos in that order", () => {
+    // Arrange
+    const sessions = [
+      buildSession({ id: "done", state: "job-done" }),
+      buildSession({ id: "turn", state: "turn-ended" }),
+      buildSession({ id: "stopped", state: "stopped" }),
+    ];
+
+    // Act
+    const blocks = groupSessions(sessions, "status", { projectIds: null, search: "" }, byId);
+
+    // Assert
+    expect(blocks.map((b) => [b.key, ids(b.sessions)])).toEqual([
+      ["todo", ["stopped"]],
+      ["rest", ["turn", "done"]],
+    ]);
+  });
+
+  it("with no grouping, gives one sorted block, or none when nothing matches", () => {
+    // Arrange
+    const sessions = [buildSession({ id: "w", state: "working" }), buildSession({ id: "a", state: "awaiting-answer" })];
+
+    // Act
+    const all = groupSessions(sessions, "none", { projectIds: null, search: "" }, byId);
+    const none = groupSessions(sessions, "none", { projectIds: null, search: "zzz" }, byId);
+
+    // Assert
+    expect(all.map((b) => ids(b.sessions))).toEqual([["a", "w"]]);
+    expect(none).toEqual([]);
+  });
+});
+
+describe("closedSessions and archivedSessions", () => {
+  it("lists the closed sessions not archived, and the archived ones newest archive first", () => {
+    // Arrange
+    const sessions = [
+      buildSession({ id: "closed", isClosed: true, state: "stopped" }),
+      buildSession({ id: "closed-archived", isClosed: true, isArchived: true, archivedAt: ago(30), state: "job-done" }),
+      buildSession({ id: "archived", isArchived: true, archivedAt: ago(5), state: "job-done" }),
+      buildSession({ id: "open" }),
+    ];
+    const filters = { projectIds: null, search: "" };
+
+    // Act
+    const closed = closedSessions(sessions, filters, byId);
+    const archived = archivedSessions(sessions, filters, byId);
+
+    // Assert
+    expect(ids(closed)).toEqual(["closed"]);
+    expect(ids(archived)).toEqual(["archived", "closed-archived"]);
+  });
+});
+
+describe("isStale", () => {
+  it.each([
+    ["working", 30, true],
+    ["job-done", 31, true],
+    ["awaiting-commit", 29, false],
+  ] as const)("a %s session updated %i min ago is stale: %s", (state, minutes, expected) => {
+    // Arrange
+    const session = buildSession({ state, updatedAt: ago(minutes) });
+
+    // Act
+    const stale = isStale(session, NOW);
+
+    // Assert
+    expect(stale).toBe(expected);
+  });
+
+  it("never marks a closed or archived session stale", () => {
+    // Arrange
+    const closed = buildSession({ isClosed: true, updatedAt: ago(90) });
+    const archived = buildSession({ isArchived: true, updatedAt: ago(90) });
+
+    // Act, Assert
+    expect(isStale(closed, NOW)).toBe(false);
+    expect(isStale(archived, NOW)).toBe(false);
+  });
+});

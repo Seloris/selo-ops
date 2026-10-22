@@ -3,10 +3,237 @@
  * Do not make direct changes to the file.
  */
 
-export type paths = Record<string, never>;
+export interface paths {
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liveness of the API */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The API is up */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            status: "ok";
+                            /** Format: date-time */
+                            time: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every session of the ops export, with its derived state, and their projects */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The sessions and projects */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            sessions: components["schemas"]["Session"][];
+                            projects: components["schemas"]["Project"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sessions/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Archive a session whose current run is done */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Archived */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The session is not in the export */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description The session's current run is not done (code session_not_done) */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Unarchive a session */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Back in the list */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The session is not in the export */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+}
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        Session: {
+            id: string;
+            projectId: string;
+            branch: string | null;
+            folder: string;
+            lane: string;
+            request: string;
+            isRequestCut: boolean;
+            blueprint: string | null;
+            step: string | null;
+            substep: string | null;
+            state: components["schemas"]["SessionState"];
+            isClosed: boolean;
+            isArchived: boolean;
+            /** Format: date-time */
+            archivedAt: string | null;
+            canArchive: boolean;
+            question: string | null;
+            pendingCommit: {
+                subject: string;
+                body: string;
+            } | null;
+            error: string | null;
+            recap: string | null;
+            commits: {
+                sha: string;
+                subject: string;
+            }[];
+            nextAction: string | null;
+            model: string | null;
+            effort: string | null;
+            permissionMode: string | null;
+            blockers: components["schemas"]["CloseBlocker"][];
+            subagents: {
+                type: string;
+                task: string | null;
+                state: components["schemas"]["SessionState"];
+            }[];
+            touchedFiles: string[];
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        SessionState: "awaiting-answer" | "awaiting-commit" | "stopped" | "working" | "turn-ended" | "job-done";
+        /** @enum {string} */
+        CloseBlocker: "not-done" | "pending-commit" | "question" | "dirty-files" | "background-tasks" | "subagents";
+        Project: {
+            id: string;
+            name: string;
+            branch: string | null;
+            changedCount: number;
+        };
+        ProblemDetails: {
+            type: string;
+            title: string;
+            status: number;
+            detail?: string;
+            code?: string;
+            errors?: {
+                [key: string]: string[];
+            };
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;

@@ -1,0 +1,35 @@
+.drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  width: var(--drawer-w);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--pop-bg);
+  border-left: var(--border-width) solid var(--border);
+  border-top: var(--border-width) solid var(--border);
+  border-top-left-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  transform: translateX(calc(100% + 40px));
+  transition: transform 0.22s ease;
+  outline: none;
+}
+
+.open {
+  transform: none;
+}
+
+/* Small screens: the panel covers the whole screen. */
+@media (max-width: 900px) {
+  .drawer {
+    position: fixed;
+    z-index: 40;
+    border-radius: 0;
+    border: 0;
+  }
+}

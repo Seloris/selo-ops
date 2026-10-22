@@ -1,0 +1,130 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 4px 0 2px;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--item-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.warn {
+  background: var(--warn-soft);
+  border-color: color-mix(in srgb, var(--warn) 32%, transparent);
+}
+
+.danger {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 32%, transparent);
+}
+
+.selected {
+  box-shadow: 0 0 0 1.5px var(--text-muted);
+}
+
+.dim {
+  opacity: 0.66;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  min-width: 0;
+  font-size: 0.87em;
+}
+
+.meta {
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.93em;
+}
+
+.end {
+  margin-left: auto;
+}
+
+.request {
+  font-size: 1em;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.awaited {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 0.9em;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  background: var(--surface-2);
+  border-radius: calc(var(--radius-control) - 2px);
+}
+
+.awaited > span:first-child {
+  margin-top: 2px;
+}
+
+.calm {
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 4px 12px;
+  font-size: 0.83em;
+  color: var(--text-muted);
+}
+
+.value {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.command {
+  padding: 0 12px 10px;
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: var(--border-width) solid var(--border);
+}
+
+.push {
+  margin-left: auto;
+}

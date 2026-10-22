@@ -7,7 +7,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
+import { applyTheme, readTheme } from "./shared/lib/theme.ts";
 import { router } from "./router.tsx";
+
+// Before the first paint: no flash of the other scheme.
+applyTheme(readTheme());
 
 const queryClient = new QueryClient();
 

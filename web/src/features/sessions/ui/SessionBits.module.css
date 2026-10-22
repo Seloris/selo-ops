@@ -1,0 +1,44 @@
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.calm {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.age {
+  font-size: 0.93em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.icon {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+}
+
+.icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.warn {
+  color: var(--warn);
+}
+
+.danger {
+  color: var(--danger);
+}
+
+.muted {
+  color: var(--text-muted);
+}

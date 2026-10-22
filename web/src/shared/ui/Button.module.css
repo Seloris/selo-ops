@@ -79,3 +79,16 @@
   width: 15px;
   height: 15px;
 }
+
+/* A compact button, in toolbars, cards and panels. */
+.sm {
+  height: calc(var(--control-h) - 10px);
+  padding: 0 12px;
+  gap: 7px;
+  font-size: 0.87em;
+}
+
+.sm svg {
+  width: 15px;
+  height: 15px;
+}

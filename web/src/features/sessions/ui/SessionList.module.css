@@ -1,0 +1,176 @@
+.withProject {
+  --cols: 176px 124px 84px minmax(0, 1fr) minmax(0, 1.2fr) 220px;
+  --col-gap: 16px;
+}
+
+.noProject {
+  --cols: 176px 84px minmax(0, 1fr) minmax(0, 1.2fr) 220px;
+  --col-gap: 16px;
+}
+
+.withProject.narrow {
+  --cols: 150px 108px 72px minmax(0, 1fr) minmax(0, 1.1fr) 196px;
+  --col-gap: 12px;
+}
+
+.noProject.narrow {
+  --cols: 150px 72px minmax(0, 1fr) minmax(0, 1.1fr) 196px;
+  --col-gap: 12px;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: var(--cols);
+  column-gap: var(--col-gap);
+  align-items: center;
+  height: 28px;
+  padding: 0 56px 0 22px;
+  font-size: 0.8em;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.head > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.end {
+  justify-self: end;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  border-radius: calc(var(--radius-control) - 2px);
+}
+
+.row:hover {
+  background: var(--surface-2);
+}
+
+.warn,
+.warn:hover {
+  background: var(--warn-soft);
+}
+
+.danger,
+.danger:hover {
+  background: var(--danger-soft);
+}
+
+.selected {
+  box-shadow: inset 0 0 0 1.5px var(--text-muted);
+}
+
+.dim {
+  opacity: 0.66;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: var(--cols);
+  column-gap: var(--col-gap);
+  align-items: center;
+  padding: 0 10px 0 14px;
+  font: inherit;
+  font-size: 0.9em;
+  text-align: left;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+.row > button:last-child {
+  margin: 0 4px 0 6px;
+}
+
+.state {
+  min-width: 0;
+  display: flex;
+}
+
+.muted,
+.type,
+.request,
+.text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.type {
+  font-family: var(--font-mono);
+  font-size: 0.89em;
+  color: var(--text-muted);
+}
+
+.awaited {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  font-weight: 500;
+}
+
+.key {
+  flex: none;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.age {
+  justify-self: end;
+  min-width: 0;
+}
+
+/* Narrow screens: state and age on the first line, the request below; the other columns go. */
+@media (max-width: 900px) {
+  .head {
+    display: none;
+  }
+
+  .row {
+    height: auto;
+  }
+
+  .main {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "state age" "request request";
+    row-gap: 2px;
+    padding: 8px 10px 8px 14px;
+  }
+
+  .state { grid-area: state; }
+  .age { grid-area: age; }
+  .request { grid-area: request; }
+
+  .main > .muted,
+  .main > .type,
+  .main > .awaited {
+    display: none;
+  }
+}

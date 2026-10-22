@@ -1,0 +1,78 @@
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  padding: 18px 32px 10px;
+}
+
+.brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  min-width: 0;
+}
+
+.wordmark {
+  font-size: 0.87em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.93em;
+  color: var(--text-muted);
+}
+
+.todo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.todo b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.grow {
+  flex: 1;
+}
+
+.updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.87em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.updated svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.spin {
+  animation: spin 0.9s ease-in-out 1;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .top {
+    padding: 14px 16px 8px;
+  }
+}

@@ -13,3 +13,13 @@ export interface ProblemDetails {
   code?: string;
   errors?: Record<string, string[]>;
 }
+
+// The text to show for a failed call: the problem's detail, else its title. A body that is not problem
+// details (the API down behind the proxy) gives an empty string: the caller shows its own message.
+export function problemMessage(error: unknown): string {
+  if (typeof error === "object" && error !== null) {
+    const problem = error as Partial<ProblemDetails>;
+    return problem.detail ?? problem.title ?? "";
+  }
+  return "";
+}
