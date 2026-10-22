@@ -3,7 +3,6 @@ import { useSearchParams } from "react-router";
 import { copyText } from "../../../shared/lib/clipboard.ts";
 import { t } from "../../../shared/lib/i18n/index.ts";
 import { readStored, writeStored } from "../../../shared/lib/storage.ts";
-import { useTheme } from "../../../shared/lib/theme.ts";
 import { useNow } from "../../../shared/lib/useNow.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { Drawer, type DrawerResize } from "../../../shared/ui/Drawer.tsx";
@@ -72,7 +71,6 @@ export function SessionsLivePage() {
   const query = useSessionsQuery();
   const archive = useArchiveSessionMutation();
   const unarchive = useUnarchiveSessionMutation();
-  const [theme, setTheme] = useTheme();
   const now = useNow(1000);
   const [params, setParams] = useSearchParams();
   const selectedId = params.get("session");
@@ -236,7 +234,7 @@ export function SessionsLivePage() {
       className={`${styles.app} ${isPanelOpen ? styles.withPanel : ""} ${settings.panelWidth !== null || isResizing ? styles.sized : ""} ${isResizing ? styles.resizing : ""}`}
       style={settings.panelWidth !== null ? ({ "--drawer-chosen-w": `${settings.panelWidth}px` } as CSSProperties) : undefined}
     >
-      <SessionsHeader counts={counts} updatedSeconds={updatedSeconds} isRefreshing={query.isFetching} theme={theme} onTheme={setTheme} />
+      <SessionsHeader counts={counts} updatedSeconds={updatedSeconds} isRefreshing={query.isFetching} />
       <SettingsBar
         view={settings.view}
         onView={(view) => updateSettings({ view })}

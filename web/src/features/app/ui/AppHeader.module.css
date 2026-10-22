@@ -1,0 +1,25 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+  padding: 12px 32px;
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.wordmark {
+  font-size: 0.87em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.grow {
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .bar {
+    padding: 10px 16px;
+  }
+}

@@ -14,13 +14,6 @@
   min-width: 0;
 }
 
-.wordmark {
-  font-size: 0.87em;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-}
-
 .sub {
   display: flex;
   flex-wrap: wrap;

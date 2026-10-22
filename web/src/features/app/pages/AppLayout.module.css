@@ -1,0 +1,16 @@
+/* The header stays at the top while the page scrolls under it. */
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--pop-bg);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+
+@media (max-width: 900px) {
+  /* Wrapped on several lines, it would hide too much of a small screen. */
+  .top {
+    position: static;
+  }
+}

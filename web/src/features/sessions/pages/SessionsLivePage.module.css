@@ -1,7 +1,8 @@
 .app {
   /* 600px on a large screen; narrower below, so the list keeps room for the request. */
   --drawer-w: clamp(420px, 36vw, 600px);
-  height: 100vh;
+  /* The shared header sits above: the page fills the rest of the screen. */
+  height: calc(100vh - var(--app-header-h, 0px));
   min-height: 640px;
   display: flex;
   flex-direction: column;
@@ -60,7 +61,7 @@
   .app {
     --drawer-w: 100%;
     height: auto;
-    min-height: 100vh;
+    min-height: 0;
   }
 
   .content {

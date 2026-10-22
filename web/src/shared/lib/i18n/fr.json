@@ -1,5 +1,12 @@
 {
   "app.wordmark": "SELO OPS",
+  "app.nav.label": "Navigation principale",
+  "app.nav.live": "Live",
+  "app.nav.projects": "Projets",
+  "app.nav.debug": "Debug",
+  "app.nav.soon": "Bientôt",
+  "app.nav.helpLabel": "Documentation",
+  "app.nav.help": "Aide",
   "app.theme.label": "Thème",
   "app.theme.light": "Clair",
   "app.theme.dark": "Sombre",

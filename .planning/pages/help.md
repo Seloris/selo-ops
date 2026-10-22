@@ -34,6 +34,5 @@ A static page that explains how selo works, so that a person picks a lane and re
 ## Non-goals
 
 - Content generated from the selo plugin's files: the page is written by hand and updated when selo changes.
-- A link to the page from a navigation shell: none exists yet; the page is reached by its URL.
 
 Retired:
