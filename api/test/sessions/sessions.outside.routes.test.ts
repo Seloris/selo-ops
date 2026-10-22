@@ -141,20 +141,50 @@ describe("sessions outside selo", () => {
       expect(session.state).toBe(state);
     });
 
-    it("takes the request from the last last-prompt record", async () => {
+    it("takes the whole last person prompt over Claude Code's cut last-prompt record", async () => {
+      // Arrange
+      const long = `<pasted_content>Refais le header ${"x".repeat(250)}</pasted_content>`;
+      running({}, [prompt("First"), prompt(long, "u-2"), { type: "last-prompt", lastPrompt: `${long.slice(0, 200)}…`, sessionId: "x" }]);
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.request).toBe(`Refais le header ${"x".repeat(250)}`);
+      expect(session.isRequestCut).toBe(false);
+    });
+
+    it("takes the last last-prompt record when the prompt left the transcript's tail, marked cut when Claude Code cut it", async () => {
       // Arrange
       running({}, [
-        prompt("First"),
+        toolResult(),
         { type: "last-prompt", lastPrompt: "Old prompt", sessionId: "x" },
-        prompt("Typed later"),
-        { type: "last-prompt", lastPrompt: "<pasted_content>Refais le header</pasted_content>", sessionId: "x" },
+        { type: "last-prompt", lastPrompt: `Refais le header ${"x".repeat(183)}…`, sessionId: "x" },
       ]);
 
       // Act
       const session = await only();
 
       // Assert
-      expect(session.request).toBe("Refais le header");
+      expect(session.request).toBe(`Refais le header ${"x".repeat(183)}`);
+      expect(session.isRequestCut).toBe(true);
+    });
+
+    it("skips the command, notification and compact summary lines Claude Code writes as user lines", async () => {
+      // Arrange
+      running({}, [
+        prompt("The real prompt", "u-real"),
+        prompt("<command-name>/cost</command-name>\n<command-message>cost</command-message>", "u-cmd"),
+        prompt("<local-command-stdout>Total cost: $0.12</local-command-stdout>", "u-out"),
+        prompt("<task-notification><task-id>a1</task-id></task-notification>", "u-task"),
+        { ...prompt("This session is being continued from a previous conversation…", "u-sum"), isCompactSummary: true, isVisibleInTranscriptOnly: true },
+      ]);
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.request).toBe("The real prompt");
     });
 
     it("takes the request from the last person prompt, skipping tool results and meta lines", async () => {
@@ -382,6 +412,38 @@ describe("sessions outside selo", () => {
 
       // Assert
       expect(res.status).toBe(404);
+    });
+
+    it("keeps the archive when Claude Code writes a command's output after it", async () => {
+      // Arrange
+      const status = running({ sessionId: "s1", status: "idle" }, [prompt("Go", "prompt-1")]);
+      await request(ctx.app).put("/v1/sessions/s1/archive").expect(204);
+      ctx.seed.transcript(transcriptFolderOf(status.cwd), "s1", [
+        prompt("Go", "prompt-1"),
+        prompt("<command-name>/cost</command-name>", "u-cmd"),
+        prompt("<local-command-stdout>Total cost: $0.12</local-command-stdout>", "u-out"),
+      ]);
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.isArchived).toBe(true);
+    });
+
+    it("tells the next run by its prompt's text when the prompt left the transcript's tail", async () => {
+      // Arrange
+      const status = running({ sessionId: "s1", status: "idle" }, [toolResult(), { type: "last-prompt", lastPrompt: "First turn", sessionId: "s1" }]);
+      await request(ctx.app).put("/v1/sessions/s1/archive").expect(204);
+      const archivedFirst = (await only()).isArchived;
+      ctx.seed.transcript(transcriptFolderOf(status.cwd), "s1", [toolResult(), { type: "last-prompt", lastPrompt: "Second turn", sessionId: "s1" }]);
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(archivedFirst).toBe(true);
+      expect(session).toMatchObject({ isArchived: false, request: "Second turn" });
     });
 
     it("brings the session back to the list when the person sends a new prompt", async () => {

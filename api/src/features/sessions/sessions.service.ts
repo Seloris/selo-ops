@@ -111,7 +111,7 @@ function toSession(
 // A session outside selo is known only by its project's id, its run and its state: the export's fields stay empty.
 const projectIdOfOutside = (outside: OutsideSession) => outside.git?.repo ?? outside.folder;
 // `session` BR-09: the last person prompt starts a run; before any, the process's start does.
-const runIdOf = (outside: OutsideSession) => outside.transcript?.lastPromptId ?? `started:${outside.status.startedAt}`;
+const runIdOf = (outside: OutsideSession) => outside.transcript?.runKey ?? `started:${outside.status.startedAt}`;
 
 function toOutsideSession(outside: OutsideSession, archive: SessionArchive | undefined): Session {
   const { status, transcript } = outside;
@@ -119,8 +119,9 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
   // `statusUpdatedAt` moves only when the status changes: the transcript tells a turn that keeps working.
   const statusAt = status.statusUpdatedAt ?? status.updatedAt ?? status.startedAt;
   const updatedAt = Math.max(statusAt, transcript?.modifiedAt ?? 0);
-  // The prompt is whole: never marked cut. With no readable prompt, the name Claude Code gave the session.
+  // With no readable prompt, the name Claude Code gave the session.
   const prompt = transcript?.request == null ? "" : cleanRequest(transcript.request).text;
+  const isRequestCut = prompt !== "" && (transcript?.isRequestCut ?? false);
   return {
     id: status.sessionId,
     projectId: projectIdOfOutside(outside),
@@ -128,7 +129,7 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     folder: outside.folder,
     lane: OUTSIDE_LANE,
     request: prompt || (status.name ?? "").trim(),
-    isRequestCut: false,
+    isRequestCut,
     blueprint: null,
     step: null,
     substep: null,

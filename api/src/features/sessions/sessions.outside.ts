@@ -2,6 +2,7 @@ import { closeSync, existsSync, fstatSync, openSync, readdirSync, readFileSync, 
 import { dirname, join, resolve } from "node:path";
 import { z } from "zod";
 import type { ExportRun } from "./sessions.export.js";
+import { cleanRequest } from "./sessions.service.js";
 
 // The sessions outside selo (`session` BR-12): a running Claude Code process whose session has no file in the ops export.
 // Only what Claude Code itself writes is read: its status file of the process (`{config dir}/sessions/*.json`) and the
@@ -37,9 +38,10 @@ export interface GitPlace {
 
 export interface Transcript {
   request: string | null;
+  isRequestCut: boolean;
   model: string | null;
-  // The uuid of the last person prompt: a new prompt is a new run (`session` BR-09).
-  lastPromptId: string | null;
+  // The last person prompt, by its uuid, else by its text when it left the tail: a new prompt is a new run (`session` BR-09).
+  runKey: string | null;
   modifiedAt: number;
 }
 
@@ -182,15 +184,20 @@ const userSchema = z.looseObject({
   uuid: z.string().optional(),
   isMeta: z.boolean().optional(),
   isSidechain: z.boolean().optional(),
+  isCompactSummary: z.boolean().optional(),
+  isVisibleInTranscriptOnly: z.boolean().optional(),
   message: z.looseObject({
     content: z.union([z.string(), z.array(z.looseObject({ type: z.string(), text: z.string().optional() }))]),
   }),
 });
 
-// A person's prompt: a user line of the main thread with text, not a tool result nor a line Claude Code added.
+// A person's prompt: a user line of the main thread with text, not a tool result nor a line Claude Code added (a meta
+// line, a compact summary, a command's output or a task notification, which are nothing but wrapper tags).
 function promptOf(value: unknown): { text: string; uuid: string | null } | null {
   const user = userSchema.safeParse(value);
-  if (!user.success || user.data.isMeta === true || user.data.isSidechain === true) return null;
+  if (!user.success) return null;
+  const { isMeta, isSidechain, isCompactSummary, isVisibleInTranscriptOnly } = user.data;
+  if (isMeta === true || isSidechain === true || isCompactSummary === true || isVisibleInTranscriptOnly === true) return null;
   const { content } = user.data.message;
   const text =
     typeof content === "string"
@@ -198,7 +205,7 @@ function promptOf(value: unknown): { text: string; uuid: string | null } | null 
       : content.some((block) => block.type === "tool_result")
         ? ""
         : content.flatMap((block) => (block.type === "text" && block.text !== undefined ? [block.text] : [])).join("\n");
-  return text.trim() === "" ? null : { text, uuid: user.data.uuid ?? null };
+  return cleanRequest(text).text === "" ? null : { text, uuid: user.data.uuid ?? null };
 }
 
 export function readTranscript(path: string): Transcript {
@@ -226,7 +233,14 @@ export function readTranscript(path: string): Transcript {
     }
     prompt = promptOf(value) ?? prompt;
   }
-  return { request: lastPrompt ?? prompt?.text ?? null, model, lastPromptId: prompt?.uuid ?? null, modifiedAt };
+  // The prompt in the tail is whole; Claude Code cuts `lastPrompt` at 200 characters and an ellipsis.
+  if (prompt !== null) return { request: prompt.text, isRequestCut: false, model, runKey: prompt.uuid ?? `prompt:${prompt.text}`, modifiedAt };
+  if (lastPrompt !== null) {
+    const isCut = lastPrompt.endsWith("…");
+    // A turn longer than the tail pushed its prompt out: its text still tells this run from the next one.
+    return { request: isCut ? lastPrompt.slice(0, -1) : lastPrompt, isRequestCut: isCut, model, runKey: `prompt:${lastPrompt}`, modifiedAt };
+  }
+  return { request: null, isRequestCut: false, model, runKey: null, modifiedAt };
 }
 
 const updatedAtOf = (status: RunningStatusFile) => status.updatedAt ?? status.statusUpdatedAt ?? status.startedAt;
