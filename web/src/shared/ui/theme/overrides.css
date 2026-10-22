@@ -4,6 +4,7 @@
    Added tokens:
    --warn, --warn-soft   amber, the second state colour the skin lacks (rose is its --danger)
    --font-mono           commands, branches, commit subjects
+   --lane-free, --lane-fastlane, --lane-autopilot   the type of work: sky, lime, violet (sessions-live FR-29)
 
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
    of that scheme, so the choice wins over the system's prefers-color-scheme. */
@@ -11,12 +12,18 @@
   --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
   --warn: #d97706;
   --warn-soft: rgba(217,119,6,.15);
+  --lane-free: #0284c7;
+  --lane-fastlane: #4d7c0f;
+  --lane-autopilot: #7c3aed;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --warn: #fbbf24;
     --warn-soft: rgba(251,191,36,.16);
+    --lane-free: #7dd3fc;
+    --lane-fastlane: #a3e635;
+    --lane-autopilot: #c4b5fd;
   }
 }
 
@@ -42,6 +49,9 @@
   --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
   --warn: #d97706;
   --warn-soft: rgba(217,119,6,.15);
+  --lane-free: #0284c7;
+  --lane-fastlane: #4d7c0f;
+  --lane-autopilot: #7c3aed;
   color-scheme: light;
 }
 
@@ -67,5 +77,8 @@
   --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
   --warn: #fbbf24;
   --warn-soft: rgba(251,191,36,.16);
+  --lane-free: #7dd3fc;
+  --lane-fastlane: #a3e635;
+  --lane-autopilot: #c4b5fd;
   color-scheme: dark;
 }

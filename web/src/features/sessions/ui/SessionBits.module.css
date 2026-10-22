@@ -42,3 +42,15 @@
 .muted {
   color: var(--text-muted);
 }
+
+.lane-free {
+  color: var(--lane-free);
+}
+
+.lane-fastlane {
+  color: var(--lane-fastlane);
+}
+
+.lane-autopilot {
+  color: var(--lane-autopilot);
+}

@@ -5,9 +5,9 @@ import { ArchiveIcon, BranchIcon, CheckIcon, CloseIcon, OpenIcon, PromptIcon, Un
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
-import { AwaitedIcon, StateLabel } from "./SessionBits.tsx";
+import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, laneLabel, requestText, stateLabel } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, requestText, stateLabel } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 
 // sessions-live FR-19 to FR-23: everything the export knows of one session, and its actions.
@@ -50,7 +50,7 @@ export function SessionDetail({
               <span className={styles.mono}>{s.branch}</span>
             </span>
           )}
-          <span className={styles.mono}>{laneLabel(s.lane)}</span>
+          <span className={styles.mono}><LaneLabel lane={s.lane} /></span>
           <span>{t("sessions.detail.updated", { age: age(ageMs({ ...s, isArchived: false }, now)) })}</span>
         </div>
         <div className={styles.actions}>

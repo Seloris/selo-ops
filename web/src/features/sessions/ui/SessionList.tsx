@@ -2,8 +2,8 @@ import { t } from "../../../shared/lib/i18n/index.ts";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { OpenIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
-import { AgeLabel, AwaitedIcon, StateLabel } from "./SessionBits.tsx";
-import { awaitedOf, laneLabel, requestText } from "./sessionText.ts";
+import { AgeLabel, AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
+import { awaitedOf, requestText } from "./sessionText.ts";
 import styles from "./SessionList.module.css";
 
 export interface SessionActions {
@@ -63,7 +63,7 @@ export function SessionList({
                 <StateLabel session={s} />
               </span>
               {layout.showProject && <span className={styles.muted}>{projectName(s.projectId)}</span>}
-              <span className={styles.type}>{laneLabel(s.lane)}</span>
+              <span className={styles.type}><LaneLabel lane={s.lane} /></span>
               <span className={styles.request}>{requestText(s)}</span>
               <span className={styles.awaited}>
                 {awaited && (

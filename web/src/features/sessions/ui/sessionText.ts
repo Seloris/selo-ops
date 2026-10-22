@@ -13,6 +13,13 @@ export const stateLabel = (s: Session) => t(`sessions.state.${s.state}` as Messa
 
 export const laneLabel = (lane: string) => (lane === "free" ? t("sessions.lane.free") : lane);
 
+// sessions-live FR-29: libre, fastlane and autopilot each have their colour; the other lanes stay neutral.
+export type LaneTone = "free" | "fastlane" | "autopilot";
+
+export function laneTone(lane: string): LaneTone | null {
+  return lane === "free" || lane === "fastlane" || lane === "autopilot" ? lane : null;
+}
+
 export const blockerLabel = (b: Session["blockers"][number]) => t(`sessions.blocker.${b}` as MessageKey);
 
 // sessions-live FR-28: what clears a blocker; amber only for those that wait on the person.

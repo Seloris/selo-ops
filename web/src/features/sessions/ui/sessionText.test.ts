@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/sessionView.ts";
-import { ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, desktopLinkOf, requestText, toneOf } from "./sessionText.ts";
+import { ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, desktopLinkOf, laneTone, requestText, toneOf } from "./sessionText.ts";
 
 const NOW = Date.parse("2026-10-22T12:00:00.000Z");
 const ago = (minutes: number) => new Date(NOW - minutes * 60_000).toISOString();
@@ -161,5 +161,18 @@ describe("blockers", () => {
     expect(blockerLabel(blocker)).toBeTruthy();
     expect(blockerHint(blocker)).toBeTruthy();
     expect(blockerTone(blocker)).toBe(tone);
+  });
+});
+
+describe("laneTone", () => {
+  it("gives libre, fastlane and autopilot their own colour", () => {
+    expect(laneTone("free")).toBe("free");
+    expect(laneTone("fastlane")).toBe("fastlane");
+    expect(laneTone("autopilot")).toBe("autopilot");
+  });
+
+  it("leaves the other lanes neutral", () => {
+    expect(laneTone("build")).toBeNull();
+    expect(laneTone("blueprint")).toBeNull();
   });
 });

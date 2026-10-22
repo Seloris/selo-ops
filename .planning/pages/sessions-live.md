@@ -23,6 +23,7 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 - **FR-09** — Sessions sort by state (`session` BR-02), then the most recently updated first; by project, the project holding the most urgent session comes first.
 - **FR-10** — Only sessions « à traiter » are coloured: an amber row for « Attend ta réponse » and « Commit à valider », a rose one for « Arrêtée »; « En cours » has a pulsing neutral dot, the others a grey one.
 - **FR-11** — A row shows the state, the project (unless grouped by project), the type of work (« libre », fastlane, blueprint, build, autopilot…), the cut request, what is awaited when the session is « à traiter », the age and an « Ouvrir dans Claude Code » icon button.
+- **FR-29** — The type of work has its own colour for « libre » (sky), fastlane (lime) and autopilot (violet), in the row, the card and the detail; the other types stay neutral.
 - **FR-12** — A project block's header shows its name, its branch, its count of uncommitted files, its count « à traiter » and its count of sessions.
 - **FR-13** — A card adds the whole request, what is awaited (or what the session does when nothing is), the model and effort, the permission mode, whether it can be closed, and the « Ouvrir », « Action suivante » and « Archiver » buttons.
 - **FR-14** — The age is the time since the session's last update; after 30 min without update, whatever the state, the tag « Sans nouvelles depuis X » replaces it and the state stays; a closed row shows « Fermée · {âge} », an archived one « Archivée · {âge} ».

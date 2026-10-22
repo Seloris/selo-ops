@@ -3,9 +3,9 @@ import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { ArchiveIcon, OpenIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
-import { AgeLabel, AwaitedIcon, StateLabel } from "./SessionBits.tsx";
+import { AgeLabel, AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { awaitedOf, calmText, closeText, laneLabel, modelText, requestText } from "./sessionText.ts";
+import { awaitedOf, calmText, closeText, modelText, requestText } from "./sessionText.ts";
 import styles from "./SessionCards.module.css";
 
 // sessions-live FR-13: a grid of cards with every detail.
@@ -39,7 +39,7 @@ export function SessionCards({
               <span className={styles.head}>
                 <StateLabel session={s} />
                 {showProject && <span className={styles.meta}>· {projectName(s.projectId)}</span>}
-                <span className={`${styles.meta} ${styles.mono}`}>· {laneLabel(s.lane)}</span>
+                <span className={`${styles.meta} ${styles.mono}`}>· <LaneLabel lane={s.lane} /></span>
                 <span className={styles.end}>
                   <AgeLabel session={s} now={now} />
                 </span>

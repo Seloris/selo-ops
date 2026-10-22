@@ -66,7 +66,7 @@ The skin named in the `component` block above: its fonts in `src/shared/ui/theme
 
 - Variables this application changes: in `src/shared/ui/theme/overrides.css`, never in `skin.css`.
 - Rules this application adds or replaces: here, one line each.
-- State colours: amber (`--warn`, `--warn-soft`, added in overrides.css) and rose (`--danger`) mark only what waits on the person; everything else stays neutral.
+- State colours: amber (`--warn`, `--warn-soft`, added in overrides.css) and rose (`--danger`) mark only what waits on the person; everything else stays neutral, except the lane tokens (`--lane-*`, sessions-live FR-29) that colour the type of work.
 - Mint (`--accent`) only for the active setting, checked boxes and the « Ouvrir » action.
 - Theme: Clair / Sombre chosen in the header, Sombre by default; overrides.css restates both palettes under `:root[data-theme]`, so a new token needs its light and dark values there.
 - Commands, branches and commit subjects in `--font-mono` (added in overrides.css).
