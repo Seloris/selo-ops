@@ -8,7 +8,7 @@
    --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
    --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia
 
-   --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, slate, violet, green
+   --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
    of that scheme, so the choice wins over the system's prefers-color-scheme. */
 :root {
@@ -25,7 +25,7 @@
   --hue-files: #4338ca;
   --hue-usage: #a21caf;
   --kind-input: #2563eb;
-  --kind-cache-read: #94a3b8;
+  --kind-cache-read: #a8a29e;
   --kind-cache-write: #7c3aed;
   --kind-output: #16a34a;
 }
@@ -44,7 +44,7 @@
     --hue-files: #a5b4fc;
     --hue-usage: #f0abfc;
     --kind-input: #60a5fa;
-    --kind-cache-read: #64748b;
+    --kind-cache-read: #a8a29e;
     --kind-cache-write: #a78bfa;
     --kind-output: #4ade80;
   }
@@ -82,7 +82,7 @@
   --hue-files: #4338ca;
   --hue-usage: #a21caf;
   --kind-input: #2563eb;
-  --kind-cache-read: #94a3b8;
+  --kind-cache-read: #a8a29e;
   --kind-cache-write: #7c3aed;
   --kind-output: #16a34a;
   color-scheme: light;
@@ -120,7 +120,7 @@
   --hue-files: #a5b4fc;
   --hue-usage: #f0abfc;
   --kind-input: #60a5fa;
-  --kind-cache-read: #64748b;
+  --kind-cache-read: #a8a29e;
   --kind-cache-write: #a78bfa;
   --kind-output: #4ade80;
   color-scheme: dark;

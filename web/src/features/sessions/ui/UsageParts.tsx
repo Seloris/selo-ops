@@ -18,7 +18,7 @@ export function TokenCount({ count }: { count: number }) {
 function Meter({ percent, kind }: { percent: number; kind?: keyof Tokens }) {
   return (
     <div className={styles.track} aria-hidden="true">
-      <div className={`${styles.fill} ${kind ? styles[kind] : styles.neutral}`} style={{ width: `${percent}%`, minWidth: percent > 0 ? 3 : 0 }} />
+      <div className={`${styles.fill} ${kind ? styles[kind] : styles.neutral}`} style={{ width: `${percent}%`, minWidth: percent > 0 ? 8 : 0 }} />
     </div>
   );
 }
@@ -97,7 +97,7 @@ function KindLine({ tokens }: { tokens: Tokens }) {
     <div className={styles.kindLine}>
       <div className={styles.split} aria-hidden="true">
         {kindShares(tokens).map((s) => (
-          <span key={s.kind} className={styles[s.kind]} style={{ flexGrow: s.count, minWidth: s.count > 0 ? 3 : 0 }} />
+          <span key={s.kind} className={styles[s.kind]} style={{ flexGrow: s.count, minWidth: s.count > 0 ? 4 : 0 }} />
         ))}
       </div>
       <ul className={styles.inlineLegend}>

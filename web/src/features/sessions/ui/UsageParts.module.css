@@ -34,7 +34,7 @@
 .cacheRead { background: var(--kind-cache-read); }
 .cacheWrite { background: var(--kind-cache-write); }
 .output { background: var(--kind-output); }
-.neutral { background: var(--text-muted); opacity: 0.55; }
+.neutral { background: color-mix(in srgb, var(--hue-usage) 55%, transparent); }
 
 .dot {
   flex: none;
@@ -81,7 +81,7 @@
   min-width: 0;
   height: 8px;
   border-radius: var(--radius-pill);
-  background: var(--surface-2);
+  background: var(--border);
   overflow: hidden;
 }
 
