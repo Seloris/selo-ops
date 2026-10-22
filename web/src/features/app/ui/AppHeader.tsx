@@ -6,7 +6,18 @@ import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import styles from "./AppHeader.module.css";
 
 // app FR-02 and FR-03: the header every page shares.
-export function AppHeader({ theme, onTheme }: { theme: Theme; onTheme: (theme: Theme) => void }) {
+export function AppHeader({
+  theme,
+  onTheme,
+  isHelpPage,
+  onHelp,
+}: {
+  theme: Theme;
+  onTheme: (theme: Theme) => void;
+  // On the help page itself, « Aide » is its current link, not a popup.
+  isHelpPage: boolean;
+  onHelp(): void;
+}) {
   return (
     <header className={styles.bar}>
       <span className={styles.wordmark}>{t("app.wordmark")}</span>
@@ -19,7 +30,10 @@ export function AppHeader({ theme, onTheme }: { theme: Theme; onTheme: (theme: T
         ]}
       />
       <span className={styles.grow} />
-      <NavTabs label={t("app.nav.helpLabel")} tabs={[{ label: t("app.nav.help"), to: "/help", icon: <QuestionIcon /> }]} />
+      <NavTabs
+        label={t("app.nav.helpLabel")}
+        tabs={[isHelpPage ? { label: t("app.nav.help"), to: "/help", icon: <QuestionIcon /> } : { label: t("app.nav.help"), onClick: onHelp, icon: <QuestionIcon /> }]}
+      />
       <Segmented
         label={t("app.theme.label")}
         value={theme}

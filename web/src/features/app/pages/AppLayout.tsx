@@ -1,13 +1,17 @@
-import { useLayoutEffect, useRef } from "react";
-import { Outlet, ScrollRestoration } from "react-router";
+import { useLayoutEffect, useRef, useState } from "react";
+import { Outlet, ScrollRestoration, useLocation } from "react-router";
 import { useTheme } from "../../../shared/lib/theme.ts";
+import { HelpDialog } from "../../help/ui/HelpDialog.tsx";
 import { AppHeader } from "../ui/AppHeader.tsx";
-import styles from "./AppLayout.module.css";
 
-// app FR-03: every page renders under the shared header. The window scrolls, so the keyboard scrolls every page;
-// the header's height goes to --app-header-h, for a page that fills the rest of the screen.
+// app FR-03: every page renders under the shared header, which scrolls away with the page;
+// its height goes to --app-header-h, for a page that fills the rest of the screen.
 export function AppLayout() {
   const [theme, setTheme] = useTheme();
+  const { pathname } = useLocation();
+  // The page the popup was opened on: on another page (back, forward), it is closed, never left over the new page.
+  const [helpOpenOn, setHelpOpenOn] = useState<string | null>(null);
+  const isHelpOpen = helpOpenOn === pathname;
   const shellRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
 
@@ -24,10 +28,11 @@ export function AppLayout() {
 
   return (
     <div ref={shellRef}>
-      <div ref={headerRef} className={styles.top}>
-        <AppHeader theme={theme} onTheme={setTheme} />
+      <div ref={headerRef}>
+        <AppHeader theme={theme} onTheme={setTheme} isHelpPage={pathname === "/help"} onHelp={() => setHelpOpenOn(pathname)} />
       </div>
       <Outlet />
+      {isHelpOpen && <HelpDialog onClose={() => setHelpOpenOn(null)} />}
       <ScrollRestoration />
     </div>
   );

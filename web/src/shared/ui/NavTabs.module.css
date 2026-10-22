@@ -19,20 +19,27 @@
   white-space: nowrap;
   color: var(--text-muted);
   text-decoration: none;
+  font-family: inherit;
+  background: transparent;
+  border: 0;
   border-radius: var(--radius-control);
   transition: background-color 0.12s, color 0.12s;
 }
 
-a.tab:hover {
+a.tab:hover,
+button.tab:hover {
+  cursor: pointer;
   color: var(--text);
   background: var(--surface-2);
 }
 
-a.tab:active {
+a.tab:active,
+button.tab:active {
   background: var(--control-bg);
 }
 
-a.tab:focus-visible {
+a.tab:focus-visible,
+button.tab:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--focus);
 }

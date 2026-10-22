@@ -27,7 +27,15 @@ export function TableOfContents({ title, sections }: { title: MessageKey; sectio
       <ol className={styles.tocList}>
         {sections.map((section) => (
           <li key={section.id}>
-            <a className={styles.tocLink} href={`#${section.id}`}>
+            <a
+              className={styles.tocLink}
+              href={`#${section.id}`}
+              onClick={(event) => {
+                // Scrolls to the section without touching the address: inside the popup, the page under it keeps its own.
+                event.preventDefault();
+                document.getElementById(section.id)?.scrollIntoView({ block: "start" });
+              }}
+            >
               {t(section.title)}
             </a>
           </li>

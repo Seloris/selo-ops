@@ -168,6 +168,7 @@
   "sessions.toast.failedUnknown": "L’API ne répond pas.",
 
   "help.page.title": "Aide",
+  "help.dialog.close": "Fermer",
   "help.page.intro": "Comment selo mène une demande jusqu’au commit : la voie à choisir, les étapes d’un travail, les skills et les agents, le vocabulaire des specs.",
   "help.toc.title": "Sommaire",
 

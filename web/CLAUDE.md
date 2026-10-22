@@ -36,7 +36,7 @@ src/
                             Panel, PageTitle, Field (label, error, the control as a render prop), TextInput, SearchInput, Select,
                             Button (variant: primary, danger, quiet, ghost), Switch, Checkbox, List (List, ListItem with isDone, ListItemText),
                             Badge, EmptyState, LoadingState, ErrorMessage (role="alert"), ConfirmDialog (a native <dialog>), icons.tsx,
-                            Segmented, NavTabs (links between pages, a page not built yet dimmed with its note), IconButton, Tag, StatusDot, Dropdown (DropdownCheck), CommandBox, Drawer (a side panel), Toast, Card (a static block on the row tokens); Button also takes size="sm"
+                            Segmented, NavTabs (links between pages, a page not built yet dimmed with its note), IconButton, Tag, StatusDot, Dropdown (DropdownCheck), CommandBox, Drawer (a side panel), Modal (a large native dialog, open while mounted), Toast, Card (a static block on the row tokens); Button also takes size="sm"
       theme/                fonts.ts (the skin's font imports) and skin.css (its tokens), both written by setup: never edited; base.css (the page), overrides.css (this application's values)
     lib/                    utils (formatAge, clipboard, storage, useNow), theme (data-theme on the root), i18n/ (fr.json, t and tn)
 ```

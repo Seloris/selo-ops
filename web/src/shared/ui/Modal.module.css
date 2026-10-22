@@ -1,0 +1,85 @@
+/* The dialog fills the backdrop's area; its box holds the visible window, so a click outside the box closes it. */
+.modal {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+}
+
+.modal::backdrop {
+  background: var(--scrim);
+}
+
+/* Qualified by [open]: a closed dialog stays hidden. */
+.modal[open] {
+  display: grid;
+  place-items: center;
+  animation: fade 0.15s ease-out;
+}
+
+.box {
+  width: min(880px, calc(100% - 32px));
+  /* In viewport units: a percentage of the grid cell would let the box grow with its content. */
+  max-height: calc(100dvh - 64px);
+  display: flex;
+  flex-direction: column;
+  background: var(--pop-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.3em;
+  font-weight: var(--title-weight);
+  line-height: 1.2;
+  text-transform: var(--title-transform);
+}
+
+.body {
+  min-height: 0;
+  overflow: auto;
+  /* The page under the dialog does not scroll on. */
+  overscroll-behavior: contain;
+  padding: 20px 24px 28px;
+}
+
+@media (max-width: 640px) {
+  .box {
+    width: 100%;
+    max-height: 100dvh;
+    height: 100dvh;
+    border-radius: 0;
+    border: 0;
+  }
+
+  .head,
+  .body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
