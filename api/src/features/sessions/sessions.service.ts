@@ -70,6 +70,11 @@ function toSession(
   const ownProject = projectFiles.find((p) => norm(p.root) === norm(file.root));
   const { text, isCut } = cleanRequest(current.request ?? "");
   const since = Date.parse(current.since);
+  const subagents = file.runs.filter((r) => r.agentId && Date.parse(r.since) >= since);
+  const isClosed = file.status === "ended";
+  // A turn that ends with subagents in the background has not finished its work (`session` BR-02).
+  const isCalm = current.phase === "turn-ended" || current.phase === "job-done";
+  const state = !isClosed && isCalm && subagents.some((r) => r.phase === "working") ? "working" : current.phase;
   return {
     id: file.sessionId,
     projectId: projectIdOf(file, projectFiles),
@@ -81,8 +86,8 @@ function toSession(
     blueprint: current.blueprint ? `.planning/blueprints/${current.blueprint}.md` : null,
     step: current.step ?? null,
     substep: current.substep ?? null,
-    state: current.phase,
-    isClosed: file.status === "ended",
+    state,
+    isClosed,
     isArchived,
     archivedAt: isArchived ? archive.archivedAt.toISOString() : null,
     canArchive: !isArchived,
@@ -96,9 +101,7 @@ function toSession(
     effort: file.effort ?? null,
     permissionMode: file.permissionMode ?? null,
     blockers: (file.close?.blockers ?? []).filter((b): b is CloseBlocker => BLOCKERS.has(b)),
-    subagents: file.runs
-      .filter((r) => r.agentId && Date.parse(r.since) >= since)
-      .map((r) => ({ type: r.request ?? "", task: r.task ?? null, state: r.phase })),
+    subagents: subagents.map((r) => ({ type: r.request ?? "", task: r.task ?? null, state: r.phase })),
     touchedFiles: file.touchedFiles ?? [],
     desktopLink: toDesktopLink(desktopSessionId),
     isOutsideSelo: false,

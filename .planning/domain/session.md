@@ -19,7 +19,7 @@ What holds for a Claude Code session on every page: its terms and its rules, as 
 ## Business rules
 
 - **BR-01** — Selo Ops reads the selo ops export (one file per session, one per project folder) and, for the sessions outside selo (BR-12), the status files and transcripts Claude Code writes; it never writes to any of them, and its own data (archives, desktop links) lives apart.
-- **BR-02** — A session's state is the phase of its current run: « Attend ta réponse » (question asked), « Commit à valider » (commit proposed), « Arrêtée » (error or interruption), « En cours » (Claude works), « Tour terminé » (turn ended with no question nor commit), « Terminé » (JOB DONE footer), in that order of urgency.
+- **BR-02** — A session's state is the phase of its current run: « Attend ta réponse » (question asked), « Commit à valider » (commit proposed), « Arrêtée » (error or interruption), « En cours » (Claude works), « Tour terminé » (turn ended with no question nor commit), « Terminé » (JOB DONE footer), in that order of urgency; an open session whose run ended (« Tour terminé » or « Terminé ») while a subagent of that run still works is « En cours ».
 - **BR-03** — A session is closed once the export marks it ended in Claude Code; it is open otherwise.
 - **BR-04** — A session is « à traiter » when it is open, not archived, and « Attend ta réponse », « Commit à valider » or « Arrêtée ».
 - **BR-05** — A session's project is its repository, named after its manifest, else after the repository's folder: sessions of a worktree belong to the repository's project and carry their worktree's branch; a session outside selo whose folder is in no git repository has that folder as its project.

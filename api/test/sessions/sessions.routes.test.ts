@@ -141,6 +141,59 @@ describe("sessions routes", () => {
       expect(session.subagents).toEqual([{ type: "selo:runner", task: "api tests", state: "working" }]);
     });
 
+    it.each(["turn-ended", "job-done"] as const)("shows a session as working while a subagent of its current run works after %s", async (phase) => {
+      // Arrange
+      const main = buildRun({ since: "2026-01-01T10:00:00.000Z", phase });
+      const old = buildRun({ agentId: "a-old", since: "2026-01-01T09:00:00.000Z", phase: "working" });
+      const architect = buildRun({ agentId: "a-1", request: "architect", since: "2026-01-01T10:05:00.000Z", phase: "working" });
+      ctx.seed.session(buildSessionFile({ current: main, runs: [architect, main, old] }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("working");
+    });
+
+    it("keeps the turn ended when only a subagent of an older run is marked working", async () => {
+      // Arrange
+      const main = buildRun({ since: "2026-01-01T10:00:00.000Z", phase: "turn-ended" });
+      const old = buildRun({ agentId: "a-old", since: "2026-01-01T09:00:00.000Z", phase: "working" });
+      ctx.seed.session(buildSessionFile({ current: main, runs: [main, old] }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("turn-ended");
+    });
+
+    it.each(["awaiting-answer", "awaiting-commit", "stopped"] as const)("keeps %s over a working subagent", async (phase) => {
+      // Arrange
+      const main = buildRun({ since: "2026-01-01T10:00:00.000Z", phase });
+      const runner = buildRun({ agentId: "a-1", since: "2026-01-01T10:05:00.000Z", phase: "working" });
+      ctx.seed.session(buildSessionFile({ current: main, runs: [runner, main] }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe(phase);
+    });
+
+    it("keeps the turn ended of a closed session whose subagent is still marked working", async () => {
+      // Arrange
+      const main = buildRun({ since: "2026-01-01T10:00:00.000Z", phase: "turn-ended" });
+      const runner = buildRun({ agentId: "a-1", since: "2026-01-01T10:05:00.000Z", phase: "working" });
+      ctx.seed.session(buildSessionFile({ status: "ended", current: main, runs: [runner, main] }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("turn-ended");
+    });
+
     it("removes the wrapper tags at the start of the request and marks a request cut by the export", async () => {
       // Arrange
       const pasted = `<pasted_content id="351f">\nFais une maquette ${"x".repeat(200)}`.slice(0, 200);
