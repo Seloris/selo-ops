@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/sessionView.ts";
-import { ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, desktopLinkOf, laneTone, requestText, toneOf } from "./sessionText.ts";
+import {
+  ageDisplay,
+  awaitedOf,
+  blockerHint,
+  blockerLabel,
+  blockerTone,
+  calmText,
+  changedText,
+  closeText,
+  desktopLinkOf,
+  laneTone,
+  modelText,
+  requestText,
+  sessionLaneLabel,
+  toneOf,
+} from "./sessionText.ts";
 
 const NOW = Date.parse("2026-10-22T12:00:00.000Z");
 const ago = (minutes: number) => new Date(NOW - minutes * 60_000).toISOString();
@@ -35,6 +50,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     subagents: [],
     touchedFiles: [],
     desktopLink: null,
+    isOutsideSelo: false,
     updatedAt: ago(1),
     ...overrides,
   };
@@ -174,5 +190,43 @@ describe("laneTone", () => {
   it("leaves the other lanes neutral", () => {
     expect(laneTone("build")).toBeNull();
     expect(laneTone("blueprint")).toBeNull();
+  });
+});
+
+describe("sessions outside selo", () => {
+  const outside = (overrides: Partial<Session> = {}) => buildSession({ lane: "outside", isOutsideSelo: true, ...overrides });
+
+  it("names their type of work « hors selo », neutral, and keeps the others' labels", () => {
+    expect(sessionLaneLabel(outside())).toBe("hors selo");
+    expect(laneTone(outside().lane)).toBeNull();
+    expect(sessionLaneLabel(buildSession({ lane: "free" }))).toBe("libre");
+    expect(sessionLaneLabel(buildSession({ lane: "build" }))).toBe("build");
+  });
+
+  it("says whether they can be closed is unknown, whatever their blockers", () => {
+    expect(closeText(outside())).toBe("Inconnu hors selo");
+    expect(closeText(buildSession({ blockers: [] }))).toBe("Oui, rien ne bloque");
+  });
+
+  it("reads their unknown effort as « — »", () => {
+    expect(modelText(outside({ model: "claude-opus-5-5" }))).toBe("claude-opus-5-5 · effort —");
+    expect(modelText(buildSession({ model: "claude-opus-5-5" }))).toBe("claude-opus-5-5");
+  });
+
+  it("shows a question whose text is unknown as an answer awaited in the session", () => {
+    expect(awaitedOf(outside({ state: "awaiting-answer" }))?.text).toBe("Claude attend ta réponse dans la session");
+  });
+});
+
+describe("changedText", () => {
+  const project = (changedCount: number | null) => ({ id: "p", name: "p", branch: null, changedCount });
+
+  it("counts the uncommitted files, or says there is nothing to commit", () => {
+    expect(changedText(project(2))).toBe("2 fichiers non commités");
+    expect(changedText(project(0))).toBe("rien à commiter");
+  });
+
+  it("hides an unknown count", () => {
+    expect(changedText(project(null))).toBeNull();
   });
 });

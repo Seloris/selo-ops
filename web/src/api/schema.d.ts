@@ -52,7 +52,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Every session of the ops export, with its derived state, and their projects */
+        /** Every session of the ops export and every running session outside selo, with its derived state, and their projects */
         get: {
             parameters: {
                 query?: never;
@@ -111,7 +111,7 @@ export interface paths {
                     };
                     content?: never;
                 };
-                /** @description The session is not in the export */
+                /** @description The session is neither in the export nor running outside selo */
                 404: {
                     headers: {
                         [name: string]: unknown;
@@ -151,7 +151,7 @@ export interface paths {
                     };
                     content?: never;
                 };
-                /** @description The session is not in the export */
+                /** @description The session is neither in the export nor running outside selo */
                 404: {
                     headers: {
                         [name: string]: unknown;
@@ -211,6 +211,7 @@ export interface components {
             }[];
             touchedFiles: string[];
             desktopLink: string | null;
+            isOutsideSelo: boolean;
             /** Format: date-time */
             updatedAt: string;
         };
@@ -222,7 +223,7 @@ export interface components {
             id: string;
             name: string;
             branch: string | null;
-            changedCount: number;
+            changedCount: number | null;
         };
         ProblemDetails: {
             type: string;

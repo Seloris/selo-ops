@@ -10,6 +10,8 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 - sessions-live ~ FR-11 — « A row shows the state, the project (unless grouped by project), the type of work (« libre », fastlane, blueprint, build, autopilot…), the cut request, what is awaited when the session is « à traiter », the age and an « Ouvrir dans Claude Code » icon button. » → « A row shows the state, the project (unless grouped by project), the type of work (« libre », « hors selo » for a session outside selo (`session` BR-12), fastlane, blueprint, build, autopilot…), the cut request, what is awaited when the session is « à traiter », the age and an « Ouvrir dans Claude Code » icon button. »
 - sessions-live ~ FR-19 — « … « Peut-on fermer la session ? » with « Oui, rien ne bloque » or « Pas encore » and its blockers (`session` BR-06); … » → « The detail shows the state and tag, the request, project, branch, type and age; the whole awaited text (a commit with its body); « Peut-on fermer la session ? » with « Oui, rien ne bloque » or « Pas encore » and its blockers (`session` BR-06), or « Inconnu hors selo » with no blocker for a session outside selo; the recap and commits of a finished run; the subagents of the current run (type, task, state); the files touched; the model (« — » when unknown), effort, permissions, blueprint, folder and session id. »
 - sessions-live + FR-30 — Wherever a session outside selo (`session` BR-12) shows, its effort and permissions read « — » and its recap, commits, subagents, files touched and blueprint are left out, since only the export gives them.
+- sessions-live ~ FR-15 — « What is awaited is the question, the proposed commit's subject or the error; … » → « What is awaited is the question (« Claude attend ta réponse dans la session » for a session outside selo, whose question Claude Code does not give), the proposed commit's subject or the error; an « Arrêtée » session with no error shows « Interrompue, sans message d'erreur ». »
+- sessions-live ~ FR-12 — « A project block's header shows its name, its branch, its count of uncommitted files, its count « à traiter » and its count of sessions. » → « A project block's header shows its name, its branch, its count of uncommitted files (none for a project only sessions outside selo show), its count « à traiter » and its count of sessions. »
 - sessions-live + Non-goal: « For a session outside selo: its end-of-turn phase, commits, blockers, subagents, and any history once its process ended. »
 
 ## Business decisions
@@ -17,6 +19,9 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 - A status value other than the known ones → « En cours », neither « à traiter » nor archivable (the process lives; nothing says it waits)
 - No readable prompt in the transcript → the session's name from its status file, else « Demande non lisible dans l'export » (FR-24 unchanged)
 - An idle outside session older than 30 min → « Sans nouvelles depuis X » like any session (FR-14 unchanged)
+
+### Decided during build
+- What an outside session « Attend ta réponse » shows as awaited, Claude Code giving no question text → « Claude attend ta réponse dans la session » (an empty « Question posée » says nothing; ~FR-15 added)
 
 ## Technical defaults
 - Status files → every `{config dir}/sessions/*.json` whose `sessionId` has no export file and whose `pid` still runs (a crash leaves the file), read on each list request, no copy in the database
@@ -38,6 +43,12 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 - Run identity before any prompt → `started:{startedAt}` (a stable string, unlike a bare number)
 - Model → an assistant entry whose model is `<synthetic>` skipped (Claude Code wrote it, no model answered)
 - `changedCount` null → only for a project that sessions outside selo alone show; a project of export sessions with no project file keeps 0 (unchanged behaviour)
+- Type label → keyed on `isOutsideSelo` (`LaneLabel` takes the session), neutral colour; the card's model reads « {model} · effort — » (FR-30)
+- A project only outside sessions show → its header leaves out the uncommitted-files count (`changedCount` null; ~FR-12 added, the Technical default had no delta line)
+- Request (review) → the last person prompt in the tail first, whole; else the last `last-prompt`, which Claude Code cuts at 200 characters and « … »: then marked cut, its « … » dropped (the « never marked cut » default assumed a whole `lastPrompt`); a command's output, a task notification, a compact summary or a line of wrapper tags only is no prompt, for the request and for the run
+- Run identity when the prompt left the 256 KB tail (review) → `prompt:{lastPrompt}`, so the next long turn is not taken for the archived one; `started:{startedAt}` only with no prompt at all
+- A crashed process's pid reused by another process (review, unverified) → accepted: liveness is `kill(pid, 0)` only, `procStart` not compared; such a session would stay listed until that other process ends
+- Tests line « unknown → `turn-running` » → reads `working`, after the status mapping above
 - Demo folders → the demo's projects live in real temporary folders (no more `~/code`), with a `.git` each, so its sessions outside selo find their repository and join a selo project
 
 ## Stages
@@ -51,7 +62,7 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 
 ## Progress
 - [x] Stage 1 — api
-- [ ] Stage 2 — web
-- [ ] Review
-- [ ] Browser test
+- [x] Stage 2 — web
+- [x] Review
+- [x] Browser test
 - [ ] Spec merged

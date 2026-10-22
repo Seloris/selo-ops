@@ -3,6 +3,7 @@ import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { BranchIcon, ChevronRightIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import type { Bucket, Project } from "../data/sessionView.ts";
+import { changedText } from "./sessionText.ts";
 import styles from "./SessionGroup.module.css";
 
 // A block of sessions on its glass surface; `isFlat` drops the surface (a folded section).
@@ -17,6 +18,7 @@ export function SessionGroup({ header, isFlat = false, children }: { header: Rea
 
 // sessions-live FR-12.
 export function ProjectHeader({ project, count, todoCount }: { project: Project; count: number; todoCount: number }) {
+  const changed = changedText(project);
   return (
     <div className={styles.head}>
       <span className={styles.name}>{project.name}</span>
@@ -24,7 +26,7 @@ export function ProjectHeader({ project, count, todoCount }: { project: Project;
         <BranchIcon />
         <span className={styles.mono}>{project.branch ?? t("sessions.group.noBranch")}</span>
       </span>
-      <span className={styles.meta}>· {project.changedCount ? tn("sessions.group.changed", project.changedCount) : t("sessions.group.clean")}</span>
+      {changed !== null && <span className={styles.meta}>· {changed}</span>}
       <span className={styles.count}>
         {todoCount > 0 && <b>{t("sessions.group.todo", { count: todoCount })}</b>}
         <span>{tn("sessions.group.sessions", count)}</span>

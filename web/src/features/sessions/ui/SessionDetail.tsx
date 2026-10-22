@@ -7,10 +7,11 @@ import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, requestText, stateLabel } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, requestText, stateLabel } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 
-// sessions-live FR-19 to FR-23: everything the export knows of one session, and its actions.
+// sessions-live FR-19 to FR-23: everything the export knows of one session, and its actions. A session outside selo
+// (sessions-live FR-30) shows no recap, commits, subagents, files touched nor blueprint: only the export gives them.
 export function SessionDetail({
   session: s,
   projectName,
@@ -50,7 +51,7 @@ export function SessionDetail({
               <span className={styles.mono}>{s.branch}</span>
             </span>
           )}
-          <span className={styles.mono}><LaneLabel lane={s.lane} /></span>
+          <span className={styles.mono}><LaneLabel session={s} /></span>
           <span>{t("sessions.detail.updated", { age: age(ageMs({ ...s, isArchived: false }, now)) })}</span>
         </div>
         <div className={styles.actions}>
@@ -98,7 +99,12 @@ export function SessionDetail({
 
         <section className={styles.section}>
           <h3>{t("sessions.detail.canClose")}</h3>
-          {s.blockers.length === 0 ? (
+          {s.isOutsideSelo ? (
+            <div className={`${styles.verdict} ${styles.neutral}`}>
+              <WarningIcon />
+              <b>{closeText(s)}</b>
+            </div>
+          ) : s.blockers.length === 0 ? (
             <div className={`${styles.verdict} ${styles.neutral}`}>
               <CheckIcon />
               <b>{t("sessions.close.yes")}</b>
@@ -125,7 +131,7 @@ export function SessionDetail({
           )}
         </section>
 
-        {(s.recap || s.commits.length > 0) && (
+        {!s.isOutsideSelo && (s.recap || s.commits.length > 0) && (
           <section className={styles.section}>
             <h3>{t("sessions.detail.recap")}</h3>
             {s.recap && <p>{s.recap}</p>}
@@ -142,37 +148,41 @@ export function SessionDetail({
           </section>
         )}
 
-        <section className={styles.section}>
-          <h3>{t("sessions.detail.subagents")}</h3>
-          {s.subagents.length ? (
-            <ul className={styles.lines}>
-              {s.subagents.map((a, i) => (
-                <li key={i}>
-                  <span className={styles.hash}>{a.type}</span>
-                  <span className={styles.line}>{a.task ?? ""}</span>
-                  <span className={styles.status}>{stateLabel({ ...s, state: a.state })}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className={styles.muted}>{t("sessions.detail.none")}</p>
-          )}
-        </section>
+        {!s.isOutsideSelo && (
+          <section className={styles.section}>
+            <h3>{t("sessions.detail.subagents")}</h3>
+            {s.subagents.length ? (
+              <ul className={styles.lines}>
+                {s.subagents.map((a, i) => (
+                  <li key={i}>
+                    <span className={styles.hash}>{a.type}</span>
+                    <span className={styles.line}>{a.task ?? ""}</span>
+                    <span className={styles.status}>{stateLabel({ ...s, state: a.state })}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={styles.muted}>{t("sessions.detail.none")}</p>
+            )}
+          </section>
+        )}
 
-        <section className={styles.section}>
-          <h3>{t("sessions.detail.files")}</h3>
-          {s.touchedFiles.length ? (
-            <ul className={styles.lines}>
-              {s.touchedFiles.map((f) => (
-                <li key={f}>
-                  <span className={styles.line}>{f}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className={styles.muted}>{t("sessions.detail.none")}</p>
-          )}
-        </section>
+        {!s.isOutsideSelo && (
+          <section className={styles.section}>
+            <h3>{t("sessions.detail.files")}</h3>
+            {s.touchedFiles.length ? (
+              <ul className={styles.lines}>
+                {s.touchedFiles.map((f) => (
+                  <li key={f}>
+                    <span className={styles.line}>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={styles.muted}>{t("sessions.detail.none")}</p>
+            )}
+          </section>
+        )}
 
         <section className={styles.section}>
           <h3>{t("sessions.detail.settings")}</h3>
@@ -183,8 +193,12 @@ export function SessionDetail({
             <span>{s.effort ?? unknown}</span>
             <span className={styles.key}>{t("sessions.detail.permissions")}</span>
             <span>{s.permissionMode ?? unknown}</span>
-            <span className={styles.key}>{t("sessions.detail.blueprint")}</span>
-            <span className={styles.mono}>{s.blueprint ?? unknown}</span>
+            {!s.isOutsideSelo && (
+              <>
+                <span className={styles.key}>{t("sessions.detail.blueprint")}</span>
+                <span className={styles.mono}>{s.blueprint ?? unknown}</span>
+              </>
+            )}
             <span className={styles.key}>{t("sessions.detail.folder")}</span>
             <span className={styles.mono}>{s.folder}</span>
             <span className={styles.key}>{t("sessions.detail.session")}</span>

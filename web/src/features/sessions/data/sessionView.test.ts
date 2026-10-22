@@ -47,6 +47,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     subagents: [],
     touchedFiles: [],
     desktopLink: null,
+    isOutsideSelo: false,
     updatedAt: ago(1),
     ...overrides,
   };
@@ -244,5 +245,55 @@ describe("isStale", () => {
     // Act, Assert
     expect(isStale(closed, NOW)).toBe(false);
     expect(isStale(archived, NOW)).toBe(false);
+  });
+});
+
+describe("sessions outside selo", () => {
+  // `session` BR-12: a session outside selo is a session like any other in the counts, the groups and the filters.
+  const outside = (overrides: Partial<Session> = {}) =>
+    buildSession({ lane: "outside", isOutsideSelo: true, blockers: [], effort: null, permissionMode: null, ...overrides });
+
+  it("counts open sessions outside selo, and those waiting for an answer as to handle", () => {
+    // Arrange
+    const sessions = [buildSession(), outside({ state: "awaiting-answer", projectId: "p-notes" }), outside({ state: "turn-ended" })];
+
+    // Act
+    const counts = countsOf(sessions);
+
+    // Assert
+    expect(counts).toEqual({ open: 3, projects: 2, todo: 1 });
+    expect(openCountByProject(sessions).get("p-notes")).toBe(1);
+  });
+
+  it("groups them with the selo sessions of their project, and in their state's block", () => {
+    // Arrange
+    const selo = buildSession({ state: "working" });
+    const asking = outside({ state: "awaiting-answer" });
+    const own = outside({ state: "turn-ended", projectId: "p-notes" });
+
+    // Act
+    const byProject = groupSessions([selo, asking, own], "project", { projectIds: null, search: "" }, byId);
+    const byStatus = groupSessions([selo, asking, own], "status", { projectIds: null, search: "" }, byId);
+
+    // Assert
+    expect(byProject.map((b) => [b.key, ids(b.sessions)])).toEqual([
+      ["p-ledger", [asking.id, selo.id]],
+      ["p-notes", [own.id]],
+    ]);
+    expect(byStatus.map((b) => [b.key, ids(b.sessions)])).toEqual([
+      ["todo", [asking.id]],
+      ["run", [selo.id]],
+      ["rest", [own.id]],
+    ]);
+  });
+
+  it("filters them by project and search like any session", () => {
+    // Arrange
+    const session = outside({ request: "Ajouter une option --json", projectId: "p-notes" });
+
+    // Act / Assert
+    expect(matches(session, { projectIds: new Set(["p-notes"]), search: "json" }, byId)).toBe(true);
+    expect(matches(session, { projectIds: new Set(["p-ledger"]), search: "" }, byId)).toBe(false);
+    expect(matches(session, { projectIds: null, search: "promo" }, byId)).toBe(false);
   });
 });

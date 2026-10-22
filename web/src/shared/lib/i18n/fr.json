@@ -58,6 +58,7 @@
   "sessions.bucket.run": "En cours",
   "sessions.bucket.rest": "Au repos",
   "sessions.lane.free": "libre",
+  "sessions.lane.outside": "hors selo",
 
   "sessions.group.sessions_one": "{count} session",
   "sessions.group.sessions_other": "{count} sessions",
@@ -81,6 +82,7 @@
   "sessions.awaited.commit": "Commit proposé",
   "sessions.awaited.error": "Erreur",
   "sessions.awaited.interrupted": "Interrompue, sans message d’erreur",
+  "sessions.awaited.outsideQuestion": "Claude attend ta réponse dans la session",
   "sessions.calm.working": "Rien : Claude travaille.",
   "sessions.calm.workingStep": "Rien : Claude travaille ({step}).",
   "sessions.calm.turnEnded": "Rien : le tour est fini, sans question ni commit.",
@@ -106,6 +108,7 @@
   "sessions.blocker.hint.background-tasks": "Une tâche de fond tourne encore : attends sa fin ou arrête-la.",
   "sessions.blocker.hint.subagents": "Des sous-agents travaillent encore : attends qu’ils finissent.",
   "sessions.close.yes": "Oui, rien ne bloque",
+  "sessions.close.outside": "Inconnu hors selo",
   "sessions.close.notYet": "Pas encore",
   "sessions.close.count_one": "{count} chose bloque la fermeture",
   "sessions.close.count_other": "{count} choses bloquent la fermeture",

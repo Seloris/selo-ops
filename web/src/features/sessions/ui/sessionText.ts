@@ -1,7 +1,7 @@
 import { formatAge } from "../../../shared/lib/formatAge.ts";
-import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
+import { t, tn, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import type { DotTone } from "../../../shared/ui/StatusDot.tsx";
-import { ageMs, bucketOf, isStale, isTodo, type Session } from "../data/sessionView.ts";
+import { ageMs, bucketOf, isStale, isTodo, type Project, type Session } from "../data/sessionView.ts";
 
 // The words and tones a session shows, shared by its row, its card and its detail.
 
@@ -12,6 +12,9 @@ export const age = (ms: number) => formatAge(ms, units());
 export const stateLabel = (s: Session) => t(`sessions.state.${s.state}` as MessageKey);
 
 export const laneLabel = (lane: string) => (lane === "free" ? t("sessions.lane.free") : lane);
+
+// sessions-live FR-11: a session outside selo (`session` BR-12) reads « hors selo », whatever its lane.
+export const sessionLaneLabel = (s: Session) => (s.isOutsideSelo ? t("sessions.lane.outside") : laneLabel(s.lane));
 
 // sessions-live FR-29: libre, fastlane and autopilot each have their colour; the other lanes stay neutral.
 export type LaneTone = "free" | "fastlane" | "autopilot";
@@ -55,7 +58,8 @@ export interface Awaited {
 export function awaitedOf(s: Session): Awaited | null {
   if (bucketOf(s.state) !== "todo") return null;
   if (s.state === "awaiting-answer") {
-    const text = s.question ?? "";
+    // A session outside selo never gives its question's text: Claude Code only says it awaits an answer.
+    const text = s.question ?? (s.isOutsideSelo ? t("sessions.awaited.outsideQuestion") : "");
     return { kind: "question", key: t("sessions.awaited.questionKey"), label: t("sessions.awaited.question"), text, full: text, isCode: false };
   }
   if (s.state === "awaiting-commit") {
@@ -117,9 +121,19 @@ export const desktopLinkOf = (s: Session): string | null => (s.desktopLink && DE
 
 export function modelText(s: Session): string {
   const model = s.model ?? t("sessions.facts.unknown");
-  return s.effort ? t("sessions.facts.modelEffort", { model, effort: s.effort }) : model;
+  // sessions-live FR-30: only the export gives the effort.
+  const effort = s.effort ?? (s.isOutsideSelo ? t("sessions.facts.unknown") : null);
+  return effort ? t("sessions.facts.modelEffort", { model, effort }) : model;
 }
 
+// sessions-live FR-19: whether a session outside selo can be closed is unknown, its empty blockers say nothing.
 export function closeText(s: Session): string {
+  if (s.isOutsideSelo) return t("sessions.close.outside");
   return s.blockers.length ? t("sessions.close.short", { reasons: s.blockers.map(blockerLabel).join(" · ") }) : t("sessions.close.yes");
+}
+
+// sessions-live FR-12: a project only sessions outside selo show has no count of uncommitted files.
+export function changedText(project: Project): string | null {
+  if (project.changedCount === null) return null;
+  return project.changedCount ? tn("sessions.group.changed", project.changedCount) : t("sessions.group.clean");
 }

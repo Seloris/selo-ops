@@ -63,7 +63,7 @@ export function SessionList({
                 <StateLabel session={s} />
               </span>
               {layout.showProject && <span className={styles.muted}>{projectName(s.projectId)}</span>}
-              <span className={styles.type}><LaneLabel lane={s.lane} /></span>
+              <span className={styles.type}><LaneLabel session={s} /></span>
               <span className={styles.request}>{requestText(s)}</span>
               <span className={styles.awaited}>
                 {awaited && (

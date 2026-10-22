@@ -39,7 +39,7 @@ export function SessionCards({
               <span className={styles.head}>
                 <StateLabel session={s} />
                 {showProject && <span className={styles.meta}>· {projectName(s.projectId)}</span>}
-                <span className={`${styles.meta} ${styles.mono}`}>· <LaneLabel lane={s.lane} /></span>
+                <span className={`${styles.meta} ${styles.mono}`}>· <LaneLabel session={s} /></span>
                 <span className={styles.end}>
                   <AgeLabel session={s} now={now} />
                 </span>

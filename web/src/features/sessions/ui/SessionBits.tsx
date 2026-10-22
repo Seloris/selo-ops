@@ -2,7 +2,7 @@ import { ClockIcon, CommitIcon, QuestionIcon, WarningIcon } from "../../../share
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { isTodo, type Session } from "../data/sessionView.ts";
-import { ageDisplay, laneLabel, laneTone, stateLabel, toneOf, type AwaitedKind } from "./sessionText.ts";
+import { ageDisplay, laneTone, sessionLaneLabel, stateLabel, toneOf, type AwaitedKind } from "./sessionText.ts";
 import styles from "./SessionBits.module.css";
 
 // The pieces a row, a card and the detail share.
@@ -17,9 +17,9 @@ export function StateLabel({ session }: { session: Session }) {
 }
 
 // sessions-live FR-29: the type of work, coloured for libre, fastlane and autopilot.
-export function LaneLabel({ lane }: { lane: string }) {
-  const tone = laneTone(lane);
-  return <span className={tone ? styles[`lane-${tone}`] : undefined}>{laneLabel(lane)}</span>;
+export function LaneLabel({ session }: { session: Session }) {
+  const tone = session.isOutsideSelo ? null : laneTone(session.lane);
+  return <span className={tone ? styles[`lane-${tone}`] : undefined}>{sessionLaneLabel(session)}</span>;
 }
 
 export function AgeLabel({ session, now }: { session: Session; now: number }) {
