@@ -209,3 +209,64 @@ export function CheckIcon() {
     </svg>
   );
 }
+
+export function HourglassIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M6 3h12M6 21h12" />
+      <path d="M7 3v3a5 5 0 0 0 10 0V3" />
+      <path d="M7 21v-3a5 5 0 0 1 10 0v3" />
+    </svg>
+  );
+}
+
+export function DoorIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M5 21V4a1 1 0 0 1 1-1h9v18" />
+      <path d="M15 5h3a1 1 0 0 1 1 1v15" />
+      <path d="M3 21h18" />
+      <path d="M11.5 12h.01" />
+    </svg>
+  );
+}
+
+export function RobotIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="4" y="8" width="16" height="12" rx="2" />
+      <path d="M12 8V4" />
+      <circle cx="12" cy="3.5" r="0.5" />
+      <path d="M9 13v1M15 13v1" />
+      <path d="M2 13v3M22 13v3" />
+    </svg>
+  );
+}
+
+export function FolderIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </svg>
+  );
+}
+
+export function FileIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+      <path d="M14 3v5h5" />
+    </svg>
+  );
+}
+
+export function SlidersIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12" />
+      <circle cx="16" cy="6" r="2" />
+      <circle cx="10" cy="12" r="2" />
+      <circle cx="18" cy="18" r="2" />
+    </svg>
+  );
+}

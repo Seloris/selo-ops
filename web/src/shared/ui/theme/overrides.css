@@ -6,6 +6,7 @@
    --font-mono           commands, branches, commit subjects
    --lane-free, --lane-fastlane, --lane-autopilot   the type of work: sky, lime, violet (sessions-live FR-29)
    --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
+   --hue-close, --hue-recap, --hue-agents, --hue-files   the icons of the session detail's sections: emerald, pink, cyan, indigo
 
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
    of that scheme, so the choice wins over the system's prefers-color-scheme. */
@@ -17,6 +18,10 @@
   --lane-fastlane: #4d7c0f;
   --lane-autopilot: #7c3aed;
   --lane-blueprint: #0f766e;
+  --hue-close: #047857;
+  --hue-recap: #be185d;
+  --hue-agents: #0e7490;
+  --hue-files: #4338ca;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,6 +32,10 @@
     --lane-fastlane: #a3e635;
     --lane-autopilot: #c4b5fd;
     --lane-blueprint: #2dd4bf;
+    --hue-close: #6ee7b7;
+    --hue-recap: #f9a8d4;
+    --hue-agents: #67e8f9;
+    --hue-files: #a5b4fc;
   }
 }
 
@@ -56,6 +65,10 @@
   --lane-fastlane: #4d7c0f;
   --lane-autopilot: #7c3aed;
   --lane-blueprint: #0f766e;
+  --hue-close: #047857;
+  --hue-recap: #be185d;
+  --hue-agents: #0e7490;
+  --hue-files: #4338ca;
   color-scheme: light;
 }
 
@@ -85,5 +98,9 @@
   --lane-fastlane: #a3e635;
   --lane-autopilot: #c4b5fd;
   --lane-blueprint: #2dd4bf;
+  --hue-close: #6ee7b7;
+  --hue-recap: #f9a8d4;
+  --hue-agents: #67e8f9;
+  --hue-files: #a5b4fc;
   color-scheme: dark;
 }

@@ -1,10 +1,12 @@
 import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
-import { ArchiveIcon, BranchIcon, CheckIcon, CloseIcon, OpenIcon, PromptIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import type { ReactNode } from "react";
+import { ArchiveIcon, BranchIcon, CheckIcon, CloseIcon, CommitIcon, DoorIcon, FolderIcon, HourglassIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
+import { FileTree } from "./FileTree.tsx";
 import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, requestText, shownBlockers, stateLabel } from "./sessionText.ts";
@@ -85,7 +87,9 @@ export function SessionDetail({
 
       <div className={styles.body}>
         <section className={styles.section}>
-          <h3>{t("sessions.detail.awaited")}</h3>
+          <SectionTitle icon={<HourglassIcon />} hue={!awaited || !isTodo(s) ? "muted" : awaited.kind === "error" ? "danger" : "warn"}>
+            {t("sessions.detail.awaited")}
+          </SectionTitle>
           {awaited ? (
             <div className={`${styles.ask} ${!isTodo(s) ? styles.neutral : awaited.kind === "error" ? styles.danger : styles.warn}`}>
               <AwaitedIcon kind={awaited.kind} isMuted={!isTodo(s)} />
@@ -100,7 +104,9 @@ export function SessionDetail({
         </section>
 
         <section className={styles.section}>
-          <h3>{t("sessions.detail.canClose")}</h3>
+          <SectionTitle icon={<DoorIcon />} hue="close">
+            {t("sessions.detail.canClose")}
+          </SectionTitle>
           {s.isOutsideSelo ? (
             <div className={`${styles.verdict} ${styles.neutral}`}>
               <WarningIcon />
@@ -135,7 +141,9 @@ export function SessionDetail({
 
         {!s.isOutsideSelo && (s.recap || s.commits.length > 0) && (
           <section className={styles.section}>
-            <h3>{t("sessions.detail.recap")}</h3>
+            <SectionTitle icon={<CommitIcon />} hue="recap">
+              {t("sessions.detail.recap")}
+            </SectionTitle>
             {s.recap && <p>{s.recap}</p>}
             {s.commits.length > 0 && (
               <ul className={styles.lines}>
@@ -152,7 +160,9 @@ export function SessionDetail({
 
         {!s.isOutsideSelo && (
           <section className={styles.section}>
-            <h3>{t("sessions.detail.subagents")}</h3>
+            <SectionTitle icon={<RobotIcon />} hue="agents" count={s.subagents.length}>
+              {t("sessions.detail.subagents")}
+            </SectionTitle>
             {s.subagents.length ? (
               <ul className={styles.lines}>
                 {s.subagents.map((a, i) => (
@@ -171,15 +181,11 @@ export function SessionDetail({
 
         {!s.isOutsideSelo && (
           <section className={styles.section}>
-            <h3>{t("sessions.detail.files")}</h3>
+            <SectionTitle icon={<FolderIcon />} hue="files" count={s.touchedFiles.length}>
+              {t("sessions.detail.files")}
+            </SectionTitle>
             {s.touchedFiles.length ? (
-              <ul className={styles.lines}>
-                {s.touchedFiles.map((f) => (
-                  <li key={f}>
-                    <span className={styles.line}>{f}</span>
-                  </li>
-                ))}
-              </ul>
+              <FileTree paths={s.touchedFiles} />
             ) : (
               <p className={styles.muted}>{t("sessions.detail.none")}</p>
             )}
@@ -187,7 +193,9 @@ export function SessionDetail({
         )}
 
         <section className={styles.section}>
-          <h3>{t("sessions.detail.settings")}</h3>
+          <SectionTitle icon={<SlidersIcon />} hue="muted">
+            {t("sessions.detail.settings")}
+          </SectionTitle>
           <div className={styles.kv}>
             <span className={styles.key}>{t("sessions.detail.model")}</span>
             <span>{s.model ?? unknown}</span>
@@ -209,5 +217,26 @@ export function SessionDetail({
         </section>
       </div>
     </>
+  );
+}
+
+const HUES = {
+  muted: styles.hueMuted,
+  warn: styles.hueWarn,
+  danger: styles.hueDanger,
+  close: styles.hueClose,
+  recap: styles.hueRecap,
+  agents: styles.hueAgents,
+  files: styles.hueFiles,
+};
+
+// A section's heading: its icon in the section's own hue, then its title and, for a list, how many it holds.
+function SectionTitle({ icon, hue, count, children }: { icon: ReactNode; hue: keyof typeof HUES; count?: number; children: ReactNode }) {
+  return (
+    <h3 className={styles.sectionTitle}>
+      <span className={`${styles.chip} ${HUES[hue]}`}>{icon}</span>
+      {children}
+      {count ? <span className={styles.count}>{count}</span> : null}
+    </h3>
   );
 }

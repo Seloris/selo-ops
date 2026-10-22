@@ -79,11 +79,49 @@
   border-bottom: 0;
 }
 
-.section h3 {
-  margin: 0 0 6px;
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
   font-size: 0.83em;
   font-weight: 600;
+  color: var(--text);
+}
+
+/* The icon sits on a soft tint of its section's hue. */
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: calc(var(--radius-control) / 2);
+  color: var(--hue);
+  background: color-mix(in srgb, var(--hue) 16%, transparent);
+}
+
+.chip svg {
+  width: 13px;
+  height: 13px;
+}
+
+.hueMuted { --hue: var(--text-muted); }
+.hueWarn { --hue: var(--warn); }
+.hueDanger { --hue: var(--danger); }
+.hueClose { --hue: var(--hue-close); }
+.hueRecap { --hue: var(--hue-recap); }
+.hueAgents { --hue: var(--hue-agents); }
+.hueFiles { --hue: var(--hue-files); }
+
+.count {
+  padding: 0 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
   color: var(--text-muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .section p {
