@@ -1,26 +1,33 @@
 .head {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 18px 24px;
+  gap: 8px;
+  padding: 14px 20px 12px;
   border-bottom: var(--border-width) solid var(--border);
 }
 
 .row {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 8px;
 }
 
-.grow {
+.state {
+  display: flex;
   flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-width: 0;
+  min-height: calc(var(--control-h) - 10px);
 }
 
 .title {
   margin: 0;
-  font-size: 1.2em;
+  font-size: 1.12em;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.35;
+  text-wrap: pretty;
   overflow-wrap: anywhere;
 }
 
@@ -28,8 +35,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 10px;
-  font-size: 0.87em;
+  gap: 4px 10px;
+  font-size: 0.85em;
   color: var(--text-muted);
 }
 
@@ -53,17 +60,18 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  margin-top: 2px;
 }
 
 .body {
   flex: 1;
   overflow: auto;
-  padding: 0 24px 24px;
+  padding: 0 20px 16px;
 }
 
 .section {
-  padding: 16px 0;
+  padding: 12px 0;
   border-bottom: var(--border-width) solid var(--border);
 }
 
@@ -72,7 +80,7 @@
 }
 
 .section h3 {
-  margin: 0 0 10px;
+  margin: 0 0 6px;
   font-size: 0.83em;
   font-weight: 600;
   color: var(--text-muted);
@@ -80,6 +88,7 @@
 
 .section p {
   margin: 0;
+  line-height: 1.45;
 }
 
 .muted {
@@ -89,9 +98,9 @@
 .ask {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 12px 14px;
-  line-height: 1.5;
+  gap: 10px;
+  padding: 8px 12px;
+  line-height: 1.45;
   border-radius: var(--radius-control);
 }
 
@@ -112,7 +121,7 @@
 }
 
 .section .pre {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -121,8 +130,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 10px;
-  padding: 10px 14px;
+  gap: 2px 8px;
+  padding: 6px 12px;
   border-radius: var(--radius-control);
 }
 
@@ -139,21 +148,21 @@
 .blockers {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin: 12px 0 0;
-  padding: 0 0 0 4px;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0 0 0 12px;
   list-style: none;
 }
 
 .blockers li {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  line-height: 1.45;
+  gap: 10px;
+  line-height: 1.4;
 }
 
 .blockers li > span:first-child {
-  margin-top: 0.42em;
+  margin-top: 0.4em;
 }
 
 .blockers b {
@@ -161,18 +170,19 @@
 }
 
 .section .blockers p {
-  margin-top: 2px;
-  font-size: 0.9em;
+  margin-top: 0;
+  font-size: 0.87em;
 }
 
 .lines {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin: 10px 0 0;
+  gap: 3px;
+  margin: 6px 0 0;
   padding: 0;
   list-style: none;
   font-size: 0.9em;
+  line-height: 1.45;
 }
 
 .lines:first-child {
@@ -211,9 +221,9 @@
 
 .kv {
   display: grid;
-  grid-template-columns: 130px minmax(0, 1fr);
-  gap: 6px 16px;
-  font-size: 0.9em;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 3px 12px;
+  font-size: 0.87em;
 }
 
 .key {

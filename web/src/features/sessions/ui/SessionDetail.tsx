@@ -35,9 +35,10 @@ export function SessionDetail({
     <>
       <div className={styles.head}>
         <div className={styles.row}>
-          <StateLabel session={s} />
-          {tag.isTag && <Tag>{tag.text}</Tag>}
-          <span className={styles.grow} />
+          <span className={styles.state}>
+            <StateLabel session={s} />
+            {tag.isTag && <Tag>{tag.text}</Tag>}
+          </span>
           <Button size="sm" title={t("sessions.detail.closeHint")} onClick={onClose}>
             <CloseIcon />
             {t("sessions.detail.close")}
