@@ -1,0 +1,194 @@
+import type { ReactNode } from "react";
+import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
+import { Card } from "../../../shared/ui/Card.tsx";
+import { Tag } from "../../../shared/ui/Tag.tsx";
+import type { DecisionGuide, Lane, LaneId, LifecycleStep, Role, Section, Skill, Term } from "../content.ts";
+import styles from "./HelpParts.module.css";
+
+function Code({ text }: { text: MessageKey }) {
+  return <code className={styles.code}>{t(text)}</code>;
+}
+
+// A label key carries its own colon (and the narrow no-break space before it).
+function Labelled({ label, children }: { label: MessageKey; children: ReactNode }) {
+  return (
+    <p className={styles.text}>
+      <span className={styles.label}>{t(label)}</span> {children}
+    </p>
+  );
+}
+
+export function TableOfContents({ title, sections }: { title: MessageKey; sections: Section[] }) {
+  return (
+    <nav className={styles.toc} aria-labelledby="help-toc">
+      <h2 id="help-toc" className={styles.tocTitle}>
+        {t(title)}
+      </h2>
+      <ol className={styles.tocList}>
+        {sections.map((section) => (
+          <li key={section.id}>
+            <a className={styles.tocLink} href={`#${section.id}`}>
+              {t(section.title)}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
+export function HelpSection({ section, intro, children }: { section: Section; intro?: MessageKey; children: ReactNode }) {
+  return (
+    <section id={section.id} className={styles.section} aria-labelledby={`${section.id}-title`}>
+      <h2 id={`${section.id}-title`} className={styles.sectionTitle}>
+        {t(section.title)}
+      </h2>
+      {intro && <p className={styles.muted}>{t(intro)}</p>}
+      {children}
+    </section>
+  );
+}
+
+export function SubTitle({ text }: { text: MessageKey }) {
+  return <h3 className={styles.subTitle}>{t(text)}</h3>;
+}
+
+export function LaneList({ lanes }: { lanes: Lane[] }) {
+  return (
+    <ul className={styles.cards}>
+      {lanes.map((lane) => (
+        <li key={lane.id} className={styles.cell}>
+          <Card>
+            <h3 className={styles.cardTitle}>{t(lane.name)}</h3>
+            <Labelled label="help.lanes.when">{t(lane.when)}</Labelled>
+            <div className={styles.codes} aria-label={t("help.lanes.prompt")}>
+              {lane.prompts.map((prompt) => (
+                <Code key={prompt} text={prompt} />
+              ))}
+            </div>
+          </Card>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function DecisionGuideList({ guide, lanesById }: { guide: DecisionGuide; lanesById: Record<LaneId, Lane> }) {
+  const last = guide.questions.length - 1;
+  return (
+    <ol className={styles.steps}>
+      {guide.questions.map((step, index) => (
+        <li key={step.question} className={styles.cell}>
+          <Card>
+            <p className={styles.numbered}>{t(step.question)}</p>
+            <ul className={styles.textList}>
+              <li>
+                <span className={styles.label}>{t("help.guide.yes")}</span> <strong>{t(lanesById[step.yes].name)}</strong>
+              </li>
+              <li>
+                <span className={styles.label}>{t("help.guide.no")}</span>{" "}
+                {index === last ? <strong>{t(lanesById[guide.otherwise].name)}</strong> : t("help.guide.next")}
+              </li>
+            </ul>
+          </Card>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export function LifecycleList({ steps, lanes }: { steps: LifecycleStep[]; lanes: Lane[] }) {
+  return (
+    <ol className={styles.steps}>
+      {steps.map((step) => (
+        <li key={step.name} className={styles.cell}>
+          <Card>
+            <div className={styles.stepHead}>
+              <h3 className={`${styles.cardTitle} ${styles.numbered}`}>{t(step.name)}</h3>
+              <span className={styles.tags} aria-label={t("help.lifecycle.lanes")}>
+                {lanes
+                  .filter((lane) => step.lanes.includes(lane.id))
+                  .map((lane) => (
+                    <Tag key={lane.id}>{t(lane.short)}</Tag>
+                  ))}
+              </span>
+            </div>
+            <p className={styles.text}>{t(step.text)}</p>
+          </Card>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export function TextList({ items }: { items: MessageKey[] }) {
+  return (
+    <ul className={styles.textList}>
+      {items.map((item) => (
+        <li key={item}>{t(item)}</li>
+      ))}
+    </ul>
+  );
+}
+
+// Under an h3 subtitle: the card titles are h4.
+export function SkillCards({ skills }: { skills: Skill[] }) {
+  return (
+    <ul className={styles.cards}>
+      {skills.map((skill) => (
+        <li key={skill.name} className={styles.cell}>
+          <Card>
+            <h4 className={styles.cardTitle}>{t(skill.name)}</h4>
+            <p className={styles.text}>{t(skill.what)}</p>
+            <Labelled label="help.skills.when">{t(skill.when)}</Labelled>
+            <div className={styles.codes} aria-label={t("help.skills.prompt")}>
+              <Code text={skill.prompt} />
+            </div>
+            <div className={styles.options}>
+              <span className={styles.label}>{t("help.skills.options")}</span>
+              {skill.options.length === 0
+                ? t("help.skills.noOption")
+                : skill.options.map((option) => <Code key={option} text={option} />)}
+            </div>
+          </Card>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function RoleCards({ roles }: { roles: Role[] }) {
+  return (
+    <ul className={styles.cards}>
+      {roles.map((role) => (
+        <li key={role.name} className={styles.cell}>
+          <Card>
+            <h4 className={styles.cardTitle}>{t(role.name)}</h4>
+            <p className={styles.text}>{t(role.what)}</p>
+            <Labelled label="help.roles.never">{t(role.never)}</Labelled>
+            <Labelled label="help.roles.model">
+              <Code text={role.model} />
+            </Labelled>
+          </Card>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function Glossary({ terms }: { terms: Term[] }) {
+  return (
+    <dl className={styles.glossary}>
+      {terms.map((term) => (
+        <Card key={term.term}>
+          <dt className={styles.cardTitle}>{t(term.term)}</dt>
+          <dd className={styles.text}>{t(term.definition)}</dd>
+        </Card>
+      ))}
+    </dl>
+  );
+}
+
+export function Note({ text }: { text: MessageKey }) {
+  return <p className={styles.muted}>{t(text)}</p>;
+}

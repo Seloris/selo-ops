@@ -1,0 +1,160 @@
+.toc,
+.section {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.section {
+  /* The anchor lands with some air above the title. */
+  scroll-margin-top: 24px;
+}
+
+.tocTitle,
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.45em;
+  font-weight: var(--title-weight);
+  line-height: 1.2;
+}
+
+.tocList {
+  margin: 0;
+  padding-left: 1.4em;
+  display: grid;
+  gap: 6px;
+}
+
+.tocLink {
+  color: var(--text);
+  text-underline-offset: 3px;
+  text-decoration-color: var(--text-muted);
+}
+
+.tocLink:hover {
+  text-decoration-color: var(--text);
+}
+
+.subTitle {
+  margin: 12px 0 0;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.muted {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.text {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.code {
+  padding: 1px 7px;
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  line-height: 1.7;
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  overflow-wrap: anywhere;
+}
+
+.codes,
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Cards: two columns, one under 640px. */
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* The list item lets its card fill the row's height. */
+.cell {
+  display: grid;
+  min-width: 0;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  counter-reset: step;
+}
+
+.steps > .cell {
+  counter-increment: step;
+}
+
+.numbered {
+  margin: 0;
+  font-weight: 500;
+}
+
+.numbered::before {
+  content: counter(step) ". ";
+  color: var(--text-muted);
+}
+
+.stepHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stepHead .numbered {
+  font-weight: 600;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.textList {
+  margin: 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 4px;
+}
+
+.glossary {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

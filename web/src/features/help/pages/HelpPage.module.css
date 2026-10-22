@@ -1,0 +1,20 @@
+/* The side gutter the Panel lacks: 16px at phone width, more on a large screen. */
+.page {
+  padding: 40px 24px 64px;
+}
+
+.header {
+  display: grid;
+  gap: 10px;
+}
+
+.intro {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 16px 16px 40px;
+  }
+}

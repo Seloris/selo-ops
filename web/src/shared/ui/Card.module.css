@@ -1,0 +1,11 @@
+.card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+  padding: var(--item-pad);
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--item-radius);
+  overflow-wrap: anywhere;
+}
