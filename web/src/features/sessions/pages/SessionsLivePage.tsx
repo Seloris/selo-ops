@@ -30,6 +30,7 @@ import { useSessionsQuery } from "../data/useSessionsQuery.ts";
 import { useUnarchiveSessionMutation } from "../data/useUnarchiveSessionMutation.ts";
 import { BlockedCommand } from "../ui/BlockedCommand.tsx";
 import { SessionCards } from "../ui/SessionCards.tsx";
+import { parseFoldedSections, toggleSection, type DetailSection } from "../ui/detailSections.ts";
 import { SessionDetail } from "../ui/SessionDetail.tsx";
 import { ArchivedToggle, ClosedHeader, ProjectHeader, SessionGroup, StatusHeader } from "../ui/SessionGroup.tsx";
 import { ColumnHead, SessionList, type SessionActions } from "../ui/SessionList.tsx";
@@ -39,12 +40,14 @@ import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } f
 import { desktopLinkOf, laneLabel, resumeCommand, stateLabel } from "../ui/sessionText.ts";
 import styles from "./SessionsLivePage.module.css";
 
-// sessions-live FR-08 and FR-27: the view, the grouping and the detail's width are remembered in the browser.
+// sessions-live FR-08, FR-27 and FR-31: the view, the grouping, the detail's width and its folded sections are
+// remembered in the browser.
 const SETTINGS_KEY = "selo-ops/sessions-live/settings";
 interface Settings {
   view: View;
   grouping: Grouping;
   panelWidth: number | null;
+  foldedSections: DetailSection[];
 }
 
 function readSettings(): Settings {
@@ -54,6 +57,7 @@ function readSettings(): Settings {
     view: o.view === "cards" ? "cards" : "list",
     grouping: o.grouping === "status" || o.grouping === "none" ? o.grouping : "project",
     panelWidth: parsePanelWidth(o.panelWidth),
+    foldedSections: parseFoldedSections(o.foldedSections),
   };
 }
 
@@ -310,8 +314,10 @@ export function SessionsLivePage() {
               projectName={projectName(selected.projectId)}
               now={now}
               isNextOpen={nextShown.has(selected.id)}
+              foldedSections={settings.foldedSections}
               actions={actions}
               onClose={closeDetail}
+              onToggleSection={(section) => updateSettings({ foldedSections: toggleSection(settings.foldedSections, section) })}
             />
           )}
         </Drawer>

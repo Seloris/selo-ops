@@ -1,11 +1,12 @@
 import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
-import type { ReactNode } from "react";
-import { ArchiveIcon, BranchIcon, CheckIcon, CloseIcon, CommitIcon, DoorIcon, FolderIcon, HourglassIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { useId, type ReactNode } from "react";
+import { ArchiveIcon, BranchIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, CloseIcon, CommitIcon, DoorIcon, FolderIcon, HourglassIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
+import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
 import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
@@ -19,20 +20,25 @@ export function SessionDetail({
   projectName,
   now,
   isNextOpen,
+  foldedSections,
   actions,
   onClose,
+  onToggleSection,
 }: {
   session: Session;
   projectName: string;
   now: number;
   isNextOpen: boolean;
+  foldedSections: readonly DetailSection[];
   actions: SessionActions;
   onClose: () => void;
+  onToggleSection: (section: DetailSection) => void;
 }) {
   const awaited = awaitedOf(s);
   const blockers = shownBlockers(s);
   const tag = ageDisplay(s, now);
   const unknown = t("sessions.facts.unknown");
+  const fold = (section: DetailSection) => ({ isFolded: foldedSections.includes(section), onToggle: () => onToggleSection(section) });
   return (
     <>
       <div className={styles.head}>
@@ -86,10 +92,7 @@ export function SessionDetail({
       </div>
 
       <div className={styles.body}>
-        <section className={styles.section}>
-          <SectionTitle icon={<HourglassIcon />} hue={!awaited || !isTodo(s) ? "muted" : awaited.kind === "error" ? "danger" : "warn"}>
-            {t("sessions.detail.awaited")}
-          </SectionTitle>
+        <Section icon={<HourglassIcon />} hue={!awaited || !isTodo(s) ? "muted" : awaited.kind === "error" ? "danger" : "warn"} title={t("sessions.detail.awaited")} {...fold("awaited")}>
           {awaited ? (
             <div className={`${styles.ask} ${!isTodo(s) ? styles.neutral : awaited.kind === "error" ? styles.danger : styles.warn}`}>
               <AwaitedIcon kind={awaited.kind} isMuted={!isTodo(s)} />
@@ -101,12 +104,9 @@ export function SessionDetail({
           ) : (
             <p className={styles.muted}>{calmText(s)}</p>
           )}
-        </section>
+        </Section>
 
-        <section className={styles.section}>
-          <SectionTitle icon={<DoorIcon />} hue="close">
-            {t("sessions.detail.canClose")}
-          </SectionTitle>
+        <Section icon={<DoorIcon />} hue="close" title={t("sessions.detail.canClose")} {...fold("close")}>
           {s.isOutsideSelo ? (
             <div className={`${styles.verdict} ${styles.neutral}`}>
               <WarningIcon />
@@ -137,13 +137,10 @@ export function SessionDetail({
               </ul>
             </>
           )}
-        </section>
+        </Section>
 
         {!s.isOutsideSelo && (s.recap || s.commits.length > 0) && (
-          <section className={styles.section}>
-            <SectionTitle icon={<CommitIcon />} hue="recap">
-              {t("sessions.detail.recap")}
-            </SectionTitle>
+          <Section icon={<CommitIcon />} hue="recap" title={t("sessions.detail.recap")} {...fold("recap")}>
             {s.recap && <p>{s.recap}</p>}
             {s.commits.length > 0 && (
               <ul className={styles.lines}>
@@ -155,14 +152,11 @@ export function SessionDetail({
                 ))}
               </ul>
             )}
-          </section>
+          </Section>
         )}
 
         {!s.isOutsideSelo && (
-          <section className={styles.section}>
-            <SectionTitle icon={<RobotIcon />} hue="agents" count={s.subagents.length}>
-              {t("sessions.detail.subagents")}
-            </SectionTitle>
+          <Section icon={<RobotIcon />} hue="agents" count={s.subagents.length} title={t("sessions.detail.subagents")} {...fold("agents")}>
             {s.subagents.length ? (
               <ul className={styles.lines}>
                 {s.subagents.map((a, i) => (
@@ -176,26 +170,20 @@ export function SessionDetail({
             ) : (
               <p className={styles.muted}>{t("sessions.detail.none")}</p>
             )}
-          </section>
+          </Section>
         )}
 
         {!s.isOutsideSelo && (
-          <section className={styles.section}>
-            <SectionTitle icon={<FolderIcon />} hue="files" count={s.touchedFiles.length}>
-              {t("sessions.detail.files")}
-            </SectionTitle>
+          <Section icon={<FolderIcon />} hue="files" count={s.touchedFiles.length} title={t("sessions.detail.files")} {...fold("files")}>
             {s.touchedFiles.length ? (
               <FileTree paths={s.touchedFiles} />
             ) : (
               <p className={styles.muted}>{t("sessions.detail.none")}</p>
             )}
-          </section>
+          </Section>
         )}
 
-        <section className={styles.section}>
-          <SectionTitle icon={<SlidersIcon />} hue="muted">
-            {t("sessions.detail.settings")}
-          </SectionTitle>
+        <Section icon={<SlidersIcon />} hue="muted" title={t("sessions.detail.settings")} {...fold("settings")}>
           <div className={styles.kv}>
             <span className={styles.key}>{t("sessions.detail.model")}</span>
             <span>{s.model ?? unknown}</span>
@@ -214,7 +202,7 @@ export function SessionDetail({
             <span className={styles.key}>{t("sessions.detail.session")}</span>
             <span className={styles.mono}>{s.id}</span>
           </div>
-        </section>
+        </Section>
       </div>
     </>
   );
@@ -230,13 +218,39 @@ const HUES = {
   files: styles.hueFiles,
 };
 
-// A section's heading: its icon in the section's own hue, then its title and, for a list, how many it holds.
-function SectionTitle({ icon, hue, count, children }: { icon: ReactNode; hue: keyof typeof HUES; count?: number; children: ReactNode }) {
+// A section: its heading (the icon in the section's own hue, the title and, for a list, how many it holds)
+// folds and unfolds it (sessions-live FR-31).
+function Section({
+  icon,
+  hue,
+  title,
+  count,
+  isFolded,
+  onToggle,
+  children,
+}: {
+  icon: ReactNode;
+  hue: keyof typeof HUES;
+  title: string;
+  count?: number;
+  isFolded: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  const bodyId = useId();
   return (
-    <h3 className={styles.sectionTitle}>
-      <span className={`${styles.chip} ${HUES[hue]}`}>{icon}</span>
-      {children}
-      {count ? <span className={styles.count}>{count}</span> : null}
-    </h3>
+    <section className={styles.section}>
+      <h3 className={styles.sectionTitle}>
+        <button type="button" className={styles.sectionToggle} aria-expanded={!isFolded} aria-controls={bodyId} onClick={onToggle}>
+          <span className={`${styles.chip} ${HUES[hue]}`}>{icon}</span>
+          {title}
+          {count ? <span className={styles.count}>{count}</span> : null}
+          <span className={styles.fold}>{isFolded ? <ChevronRightIcon /> : <ChevronDownIcon />}</span>
+        </button>
+      </h3>
+      <div id={bodyId} className={styles.sectionBody} hidden={isFolded}>
+        {children}
+      </div>
+    </section>
   );
 }

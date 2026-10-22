@@ -80,13 +80,44 @@
 }
 
 .sectionTitle {
+  margin: 0;
+  font-size: 0.83em;
+  font-weight: 600;
+}
+
+/* The whole heading folds its section; the chevron at its end says which way. */
+.sectionToggle {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 8px;
-  font-size: 0.83em;
-  font-weight: 600;
+  width: 100%;
+  padding: 2px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
   color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sectionToggle:hover .fold {
+  color: var(--text);
+}
+
+.sectionBody {
+  margin-top: 8px;
+}
+
+.fold {
+  display: inline-flex;
+  margin-left: auto;
+  color: var(--text-muted);
+}
+
+.fold svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* The icon sits on a soft tint of its section's hue. */
