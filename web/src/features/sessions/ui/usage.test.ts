@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exactTokens, formatTokens, hasDroppedPrompts, runRequestText, runTimeText, skillHowLabel, topWithRest, totalTokens, type RunUsage } from "./usage.ts";
+import { cacheReuse, exactTokens, formatTokens, hasDroppedPrompts, kindShares, percentText, runRequestText, runTimeText, skillHowLabel, topWithRest, totalTokens, widthPercent, type RunUsage } from "./usage.ts";
 
 const NARROW = " ";
 
@@ -36,6 +36,47 @@ describe("exactTokens", () => {
 describe("totalTokens", () => {
   it("sums the four kinds", () => {
     expect(totalTokens({ input: 1, cacheRead: 20, cacheWrite: 300, output: 4000 })).toBe(4321);
+  });
+});
+
+describe("kindShares", () => {
+  it("gives each kind's count and share of the total", () => {
+    const shares = kindShares({ input: 10, cacheRead: 70, cacheWrite: 0, output: 20 });
+    expect(shares.map((s) => s.kind)).toEqual(["input", "cacheRead", "cacheWrite", "output"]);
+    expect(shares.map((s) => s.ratio)).toEqual([0.1, 0.7, 0, 0.2]);
+  });
+
+  it("gives no share for an empty total", () => {
+    expect(kindShares({ input: 0, cacheRead: 0, cacheWrite: 0, output: 0 }).every((s) => s.ratio === 0)).toBe(true);
+  });
+});
+
+describe("cacheReuse", () => {
+  it("is the cache read over everything read, output left out", () => {
+    expect(cacheReuse({ input: 10, cacheRead: 80, cacheWrite: 10, output: 5000 })).toBe(0.8);
+  });
+
+  it("is null when nothing was read", () => {
+    expect(cacheReuse({ input: 0, cacheRead: 0, cacheWrite: 0, output: 12 })).toBeNull();
+  });
+});
+
+describe("percentText", () => {
+  it("rounds to a whole percent with a narrow space", () => {
+    expect(percentText(0.874)).toBe(`87${NARROW}%`);
+    expect(percentText(1)).toBe(`100${NARROW}%`);
+    expect(percentText(0)).toBe(`0${NARROW}%`);
+  });
+
+  it("marks a share under one percent", () => {
+    expect(percentText(0.003)).toBe(`< 1${NARROW}%`);
+  });
+});
+
+describe("widthPercent", () => {
+  it("scales against the largest, and is zero when that is zero", () => {
+    expect(widthPercent(25, 100)).toBe(25);
+    expect(widthPercent(5, 0)).toBe(0);
   });
 });
 

@@ -9,7 +9,7 @@ import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
 import { totalTokens } from "./usage.ts";
-import { RunUsageView, SessionRunsView, TokenCount, UsageTable } from "./UsageParts.tsx";
+import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
@@ -192,12 +192,11 @@ export function SessionDetail({
         )}
 
         <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.usage")} {...fold("usage")}>
-          {s.usage ? <UsageTable usage={s.usage} /> : <p className={styles.muted}>{unknown}</p>}
-          {s.runs.length > 0 && <SessionRunsView runs={s.runs} isCut={s.isRunListCut} now={now} />}
-        </Section>
-
-        <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.runUsage")} {...fold("runUsage")}>
-          {s.runUsage ? <RunUsageView run={s.runUsage} /> : <p className={styles.muted}>{unknown}</p>}
+          {s.usage || s.runs.length > 0 || s.runUsage ? (
+            <UsageDashboard usage={s.usage} runs={s.runs} isRunListCut={s.isRunListCut} runUsage={s.runUsage} now={now} />
+          ) : (
+            <p className={styles.muted}>{unknown}</p>
+          )}
         </Section>
 
         {!s.isOutsideSelo && (

@@ -30,6 +30,28 @@ export function formatTokens(n: number): string {
 // The exact count, for the tooltip: « 1 234 567 ».
 export const exactTokens = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
 
+// sessions-live FR-32: each kind's count and its share of the four summed, in the order of TOKEN_KINDS.
+export function kindShares(tokens: Tokens): { kind: (typeof TOKEN_KINDS)[number]; count: number; ratio: number }[] {
+  const total = totalTokens(tokens);
+  return TOKEN_KINDS.map((kind) => ({ kind, count: tokens[kind], ratio: total ? tokens[kind] / total : 0 }));
+}
+
+// sessions-live FR-32: the part of what the model read that came from the cache (cache read over input, cache read and
+// cache write); null when it read nothing. Output is written, not read, so it stays out.
+export function cacheReuse(tokens: Tokens): number | null {
+  const read = tokens.input + tokens.cacheRead + tokens.cacheWrite;
+  return read ? tokens.cacheRead / read : null;
+}
+
+// « 87 % », « < 1 % » for a share that exists but rounds to nothing.
+export function percentText(ratio: number): string {
+  if (ratio > 0 && ratio < 0.01) return `< 1${NARROW}%`;
+  return `${Math.round(ratio * 100)}${NARROW}%`;
+}
+
+// A bar's width against the largest one of its list, in percent.
+export const widthPercent = (n: number, max: number) => (max > 0 ? Math.min(100, (n / max) * 100) : 0);
+
 // sessions-live FR-33: the first ones, then how many are left for « + N autres ».
 export function topWithRest<T>(items: readonly T[], limit = 5): { shown: T[]; rest: number } {
   return { shown: items.slice(0, limit), rest: Math.max(0, items.length - limit) };
