@@ -1,5 +1,6 @@
 import type { ClaudeStatusFile } from "../src/features/sessions/sessions.desktop.js";
 import type { ExportRun, ProjectFile, SessionFile } from "../src/features/sessions/sessions.export.js";
+import type { RunningStatusFile } from "../src/features/sessions/sessions.outside.js";
 
 // One `build{Entity}(overrides)` per entity: the only way a test builds a row.
 
@@ -79,5 +80,25 @@ export function buildStatusFile(overrides: Partial<ClaudeStatusFile> = {}): Clau
     ...overrides,
   };
 }
+
+// A status file of a running process outside selo: this test process's own pid, so it counts as alive.
+export function buildRunningStatusFile(overrides: Partial<RunningStatusFile> = {}): RunningStatusFile {
+  counter += 1;
+  return {
+    pid: process.pid,
+    sessionId: `00000000-0000-4000-9000-${String(counter).padStart(12, "0")}`,
+    cwd: "C:/code/outside",
+    startedAt: Date.parse(EPOCH),
+    entrypoint: "cli",
+    hostSessionId: null,
+    name: null,
+    status: "busy",
+    statusUpdatedAt: Date.parse(EPOCH),
+    ...overrides,
+  };
+}
+
+// The folder Claude Code names a session's transcripts after: every character but a letter or a digit becomes `-`.
+export const transcriptFolderOf = (cwd: string) => cwd.replace(/[^A-Za-z0-9]/g, "-");
 
 export const rootKeyOf = keyOf;

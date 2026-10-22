@@ -97,7 +97,7 @@ The `drizzle-migrations` skill reads this table.
 
 | Item | Value |
 |---|---|
-| Setup | `test/setup.ts`: `createTestContext()` returns `{ app, db, clock, seed, reset, clearStatus }` (`seed.session`, `seed.project`, `seed.status` for Claude Code's status files, `seed.raw` and `seed.rawStatus` for broken ones) on an in-memory PGlite with the migrations applied; one context per file (`beforeAll`), `reset()` truncates every table in `beforeEach` |
+| Setup | `test/setup.ts`: `createTestContext()` returns `{ app, db, clock, seed, code, reset, clearStatus }` (`seed.session`, `seed.project`, `seed.status` for Claude Code's status files, `seed.running` and `seed.transcript` for a session outside selo, `seed.raw` and `seed.rawStatus` for broken ones; `code.repo`, `code.worktree`, `code.folder` make the folders a session runs in) on an in-memory PGlite with the migrations applied; one context per file (`beforeAll`), `reset()` truncates every table in `beforeEach` |
 | HTTP client | Supertest: `request(app).post("/v1/orders").send(body)` |
 | Factories | `test/factories.ts`, `build{Entity}(overrides)` |
 | Database assertion | read back through `db` (Drizzle) after every write |
@@ -115,4 +115,4 @@ The `write-api-tests` skill reads this table.
 - Reset the local database: stop the API, delete `.data/pglite`, `npm run db:migrate`.
 - Demo: `npm run demo` → http://localhost:3101 (slot 0; `/selo:run api — demo` on this worktree's slot), an in-memory database migrated and seeded by `src/seed/demo.ts` at each start; it never touches `.data/pglite`. `try` starts and stops it. A feature that adds a screen adds its demo rows to `seedDemo`.
 - The ops export folder: `~/.claude/selo` (else `SELO_OPS_DIR`, else `CLAUDE_CONFIG_DIR/selo`), written by the selo plugin's hooks.
-- Claude Code's status files of running processes: `{CLAUDE_CONFIG_DIR or ~/.claude}/sessions/*.json`, read only for `hostSessionId`, the desktop app's `local_<uuid>` behind `claude://claude.ai/epitaxy/{id}`, which no session log nor the ops export holds; kept in `desktop_session_links` since the file goes with its process.
+- Claude Code's status files of running processes: `{CLAUDE_CONFIG_DIR or ~/.claude}/sessions/*.json`, read for `hostSessionId`, the desktop app's `local_<uuid>` behind `claude://claude.ai/epitaxy/{id}`, which no session log nor the ops export holds (kept in `desktop_session_links` for the export's sessions, since the file goes with its process), and for the sessions outside selo: a live `pid` whose `sessionId` has no export file, with its transcript `{config dir}/projects/{folder}/{sessionId}.jsonl` (last 256 KB) and its repository read from the folder's `.git`, no git process. The demo writes its own, in its temporary folder.

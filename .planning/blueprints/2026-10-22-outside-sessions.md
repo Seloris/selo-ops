@@ -32,6 +32,14 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 - Demo → fixture status files (the API's own pid) and transcripts in the temporary export folder: one per state, one non-git folder, one worktree through a `.git` file
 - Glossary at the merge → `session` meaning « One Claude Code conversation: one file of the ops export, or a running process outside selo », and a row `hors selo` / `isOutsideSelo` (the delta grammar has no glossary line)
 
+### Decided during build
+- Status mapping as written names values that exist nowhere (`awaitingAnswer` is no status of Claude Code's files, `turn-running` and `question` are no phase of the export) → Claude Code's files carry `busy`, `idle` or `waiting` with `waitingFor`: `busy`, `running` and any other status → `working`; `waiting` for a permission, sandbox, worker or goal dialog, or for no reason → `working` (it cannot be told from a tool that runs); any other `waiting` → `awaiting-answer`; `idle` → `turn-ended` (the export's own phases, so the web's states, order and buckets hold unchanged; the wait reasons as claude-companion reads the same files)
+- Status file shape → its own schema (`pid`, `sessionId`, `cwd`, `startedAt` required, the rest loose), the desktop-link reader left as it was (its tests seed files with no `pid`)
+- Run identity before any prompt → `started:{startedAt}` (a stable string, unlike a bare number)
+- Model → an assistant entry whose model is `<synthetic>` skipped (Claude Code wrote it, no model answered)
+- `changedCount` null → only for a project that sessions outside selo alone show; a project of export sessions with no project file keeps 0 (unchanged behaviour)
+- Demo folders → the demo's projects live in real temporary folders (no more `~/code`), with a `.git` each, so its sessions outside selo find their repository and join a selo project
+
 ## Stages
 1. api — `feat(outside-sessions): api — sessions outside selo from Claude Code's status files and transcripts`
 2. web — `feat(outside-sessions): web — sessions outside selo in the list and the detail`
@@ -42,7 +50,7 @@ Pages: `sessions-live` · Domain: `session` · Components: `api`, `web`
 - browser: demo at 1280×800 and 390 wide: outside sessions in each grouping with « hors selo », their own project and a selo project's block; detail with « Inconnu hors selo » and no recap, commits, subagents, files; archive a « Tour terminé » one; Ouvrir copies `claude --resume`
 
 ## Progress
-- [ ] Stage 1 — api
+- [x] Stage 1 — api
 - [ ] Stage 2 — web
 - [ ] Review
 - [ ] Browser test

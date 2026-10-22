@@ -1,7 +1,8 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, utimesSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Database } from "../db/client.js";
 import type { ExportRun, ProjectFile, SessionFile } from "../features/sessions/sessions.export.js";
+import { normRoot, type RunningStatusFile } from "../features/sessions/sessions.outside.js";
 import { createDesktopSessionLinkRepository, createSessionArchiveRepository } from "../features/sessions/sessions.repository.js";
 import type { Clock } from "../shared/clock.js";
 
@@ -144,9 +145,29 @@ const SESSIONS: DemoSession[] = [
     recap: "Icône sombre ajoutée pour iOS et Android.", commits: [{ sha: "0a9f3e4", subject: "feat(app): dark app icon" }] },
 ];
 
-const ROOT = "~/code";
-const repoOf = (project: string) => `${ROOT}/${project}/.git`;
-const rootOf = (s: DemoSession) => (s.worktree ? `${ROOT}/${s.project}/.claude/worktrees/${s.worktree}` : `${ROOT}/${s.project}`);
+// Sessions outside selo (`session` BR-12): Claude Code's status files (the demo's own pid, so they count as alive) and
+// transcripts. `folder`: a selo project's (joins its block), a worktree of one (through a `.git` file), a repository
+// without selo, or a folder in no repository.
+interface DemoOutside {
+  id: string;
+  folder: { project: string; worktree?: string } | { repository: string } | { scratch: string };
+  status: "busy" | "waiting" | "idle";
+  age: number;
+  prompt: string;
+  model: string;
+}
+
+const OUTSIDE: DemoOutside[] = [
+  { id: "4c1e9a27-8b3d-4f60-a2d5-7e0b6c9f3a18", folder: { project: "selo-ops" }, status: "busy", age: 40,
+    prompt: "Pourquoi le rafraîchissement rate parfois un changement d’état ?", model: OPUS },
+  { id: "e8b2d5f0-3a7c-4e19-9d64-1f0a8c2b7e53", folder: { project: "selo-ops", worktree: "duration-chart" }, status: "waiting", age: 150,
+    prompt: "Essayer un graphique des durées de tour par projet", model: SONNET },
+  { id: "7a3f0c64-d29e-4b81-b5c7-08e4f1a6d2b9", folder: { repository: "weather-cli" }, status: "idle", age: 420,
+    prompt: "Ajouter une option --json à la commande today", model: SONNET },
+  { id: "b06d4e81-5c2a-4f37-8e9b-a3c7f2d10e64", folder: { scratch: "notes" }, status: "idle", age: 900,
+    prompt: "Résume ces notes de réunion en cinq points", model: OPUS },
+];
+
 const keyOf = (root: string) => root.replace(/[^A-Za-z0-9]/g, "-");
 
 function writeJson(dir: string, name: string, data: unknown) {
@@ -158,9 +179,41 @@ function writeJson(dir: string, name: string, data: unknown) {
 // by the desktop app, their desktop id derived from their id.
 const CLI_SESSIONS = new Set(["5a6e3d92-81bf-4c07-9e2a-d4f1b0c87e36", "e47c1a08-9d35-4b62-8f0e-1c5a7b93d2f4"]);
 
-export async function seedDemo(db: Database, clock: Clock, { opsDir }: { opsDir: string }): Promise<void> {
+// A repository's `.git` folder, or a worktree's `.git` file leading to its own git dir in the repository's.
+function writeRepository(root: string, branch: string) {
+  mkdirSync(join(root, ".git"), { recursive: true });
+  writeFileSync(join(root, ".git", "HEAD"), `ref: refs/heads/${branch}\n`);
+}
+
+function writeWorktree(repository: string, root: string, name: string) {
+  const gitDir = join(repository, ".git", "worktrees", name);
+  mkdirSync(gitDir, { recursive: true });
+  mkdirSync(root, { recursive: true });
+  writeFileSync(join(gitDir, "HEAD"), `ref: refs/heads/claude/${name}\n`);
+  writeFileSync(join(gitDir, "commondir"), "../..\n");
+  writeFileSync(join(root, ".git"), `gitdir: ${gitDir}\n`);
+}
+
+export interface DemoFolders {
+  // The ops export the demo writes.
+  opsDir: string;
+  // Claude Code's status files and transcripts the demo writes, for the sessions outside selo.
+  claudeSessionsDir: string;
+  claudeProjectsDir: string;
+  // The projects' folders, real ones: a session outside selo finds its repository from its folder.
+  codeDir: string;
+  // A folder in no repository.
+  scratchDir: string;
+}
+
+export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders): Promise<void> {
+  const { opsDir } = folders;
   const now = clock.now().getTime();
   const at = (secondsAgo: number) => new Date(now - secondsAgo * 1000).toISOString();
+  const ROOT = normRoot(folders.codeDir);
+  const repoOf = (project: string) => `${ROOT}/${project}/.git`;
+  const rootOf = (s: DemoSession) => (s.worktree ? `${ROOT}/${s.project}/.claude/worktrees/${s.worktree}` : `${ROOT}/${s.project}`);
+  for (const [name, p] of Object.entries(PROJECTS)) writeRepository(`${ROOT}/${name}`, p.branch);
 
   const projectFiles: ProjectFile[] = [
     ...Object.entries(PROJECTS).map(([name, p]) => ({
@@ -198,5 +251,39 @@ export async function seedDemo(db: Database, clock: Clock, { opsDir }: { opsDir:
     };
     writeJson(join(opsDir, "sessions"), `${s.id}.json`, file);
     if (s.archivedAge !== undefined) await archives.save({ sessionId: s.id, runId: current.id, archivedAt: new Date(now - s.archivedAge * 1000) });
+  }
+  seedOutside(folders, ROOT, now);
+}
+
+function seedOutside(folders: DemoFolders, root: string, now: number) {
+  for (const o of OUTSIDE) {
+    let cwd: string;
+    if ("project" in o.folder) {
+      const main = `${root}/${o.folder.project}`;
+      cwd = o.folder.worktree ? `${main}/.claude/worktrees/${o.folder.worktree}` : main;
+      if (o.folder.worktree) writeWorktree(main, cwd, o.folder.worktree);
+    } else if ("repository" in o.folder) {
+      cwd = `${root}/${o.folder.repository}`;
+      writeRepository(cwd, "main");
+    } else {
+      cwd = normRoot(join(folders.scratchDir, o.folder.scratch));
+      mkdirSync(cwd, { recursive: true });
+    }
+    const updatedAt = now - o.age * 1000;
+    const status: RunningStatusFile = {
+      pid: process.pid, sessionId: o.id, cwd, startedAt: updatedAt - 3_600_000, entrypoint: "cli", hostSessionId: null, name: null,
+      status: o.status, waitingFor: o.status === "waiting" ? "input needed" : null, statusUpdatedAt: updatedAt, updatedAt,
+    };
+    writeJson(folders.claudeSessionsDir, `${o.id}.json`, status);
+    const lines = [
+      { type: "user", uuid: `${o.id}:prompt`, sessionId: o.id, message: { role: "user", content: o.prompt } },
+      { type: "assistant", sessionId: o.id, message: { id: `${o.id}:reply`, model: o.model, role: "assistant", content: [{ type: "text", text: "…" }] } },
+      { type: "last-prompt", lastPrompt: o.prompt, sessionId: o.id },
+    ];
+    const transcriptDir = join(folders.claudeProjectsDir, keyOf(cwd));
+    mkdirSync(transcriptDir, { recursive: true });
+    const transcript = join(transcriptDir, `${o.id}.jsonl`);
+    writeFileSync(transcript, lines.map((l) => JSON.stringify(l)).join("\n") + "\n");
+    utimesSync(transcript, new Date(updatedAt), new Date(updatedAt));
   }
 }

@@ -191,6 +191,9 @@
               "null"
             ]
           },
+          "isOutsideSelo": {
+            "type": "boolean"
+          },
           "updatedAt": {
             "type": "string",
             "format": "date-time"
@@ -225,6 +228,7 @@
           "subagents",
           "touchedFiles",
           "desktopLink",
+          "isOutsideSelo",
           "updatedAt"
         ]
       },
@@ -266,7 +270,10 @@
             ]
           },
           "changedCount": {
-            "type": "integer"
+            "type": [
+              "integer",
+              "null"
+            ]
           }
         },
         "required": [
@@ -349,7 +356,7 @@
     },
     "/v1/sessions": {
       "get": {
-        "summary": "Every session of the ops export, with its derived state, and their projects",
+        "summary": "Every session of the ops export and every running session outside selo, with its derived state, and their projects",
         "responses": {
           "200": {
             "description": "The sessions and projects",
@@ -401,7 +408,7 @@
             "description": "Archived"
           },
           "404": {
-            "description": "The session is not in the export",
+            "description": "The session is neither in the export nor running outside selo",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -440,7 +447,7 @@
             "description": "Back in the list"
           },
           "404": {
-            "description": "The session is not in the export",
+            "description": "The session is neither in the export nor running outside selo",
             "content": {
               "application/problem+json": {
                 "schema": {

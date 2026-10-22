@@ -43,6 +43,9 @@ export const sessionSchema = z
     // `claude://claude.ai/epitaxy/local_{uuid}`, opening the session in the Claude desktop app; null for a session
     // the desktop app did not start, or that Selo Ops never saw running (`session` BR-11).
     desktopLink: z.string().nullable(),
+    // A running Claude Code process with no file in the ops export (`session` BR-12): its lane is `outside`, and it has no
+    // recap, commits, blockers, subagents, files touched, effort nor permissions, which only the export gives.
+    isOutsideSelo: z.boolean(),
     updatedAt: z.iso.datetime(),
   })
   .meta({ id: "Session" });
@@ -52,7 +55,8 @@ export const projectSchema = z
     id: z.string(),
     name: z.string(),
     branch: z.string().nullable(),
-    changedCount: z.number().int(),
+    // Null for a project only sessions outside selo show: its count needs a git process, never run on the poll.
+    changedCount: z.number().int().nullable(),
   })
   .meta({ id: "Project" });
 
@@ -76,7 +80,7 @@ const problem = (description: string) => ({
 registry.registerPath({
   method: "get",
   path: "/v1/sessions",
-  summary: "Every session of the ops export, with its derived state, and their projects",
+  summary: "Every session of the ops export and every running session outside selo, with its derived state, and their projects",
   responses: {
     200: { description: "The sessions and projects", content: { "application/json": { schema: sessionsResponseSchema } } },
   },
@@ -89,7 +93,7 @@ registry.registerPath({
   request: { params: sessionParamsSchema },
   responses: {
     204: { description: "Archived" },
-    404: problem("The session is not in the export"),
+    404: problem("The session is neither in the export nor running outside selo"),
     422: problem("The session's current run is neither done nor at a turn end (code session_not_done)"),
   },
 });
@@ -101,6 +105,6 @@ registry.registerPath({
   request: { params: sessionParamsSchema },
   responses: {
     204: { description: "Back in the list" },
-    404: problem("The session is not in the export"),
+    404: problem("The session is neither in the export nor running outside selo"),
   },
 });
