@@ -32,6 +32,17 @@
   margin-right: var(--drawer-w);
 }
 
+/* FR-27: the width chosen by dragging the edge (--drawer-chosen-w, set on the page),
+   bounded again when the window shrinks, with the bounds of panelWidth.ts (360px, 560px). */
+.sized {
+  --drawer-w: clamp(360px, var(--drawer-chosen-w), calc(100vw - 560px));
+}
+
+/* While the edge moves, the list follows it at once. */
+.resizing .content {
+  transition: none;
+}
+
 .error {
   display: flex;
   flex-direction: column;
@@ -59,5 +70,10 @@
 
   .withPanel .content {
     margin-right: 0;
+  }
+
+  /* A chosen width never applies here: the detail covers the screen. */
+  .sized {
+    --drawer-w: 100%;
   }
 }

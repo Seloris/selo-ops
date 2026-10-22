@@ -35,6 +35,7 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 ## Detail
 
 - **FR-18** — A click on a session opens its detail in a panel sliding from the right; the list stays visible with all its columns, the fixed ones narrower; the address keeps the open session, and Échap or « Fermer » closes it.
+- **FR-27** — Above 900 px of width, the edge between the list and the detail drags (or moves with the arrow keys once focused) to share the width between them, the detail at least 360 px wide and the list at least 560 px; the chosen width is remembered in the browser, and a double click on the edge goes back to the default width. Below 900 px the detail covers the screen and has no edge.
 - **FR-19** — The detail shows the state and tag, the request, project, branch, type and age; the whole awaited text (a commit with its body); « Peut-on fermer la session ? » with « Oui, rien ne bloque » or « Pas encore » and its blockers (`session` BR-06); the recap and commits of a finished run; the subagents of the current run (type, task, state); the files touched; the model (« — » when unknown), effort, permissions, blueprint, folder and session id.
 
 ## Actions

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useSearchParams } from "react-router";
 import { copyText } from "../../../shared/lib/clipboard.ts";
 import { t } from "../../../shared/lib/i18n/index.ts";
@@ -6,7 +6,7 @@ import { readStored, writeStored } from "../../../shared/lib/storage.ts";
 import { useTheme } from "../../../shared/lib/theme.ts";
 import { useNow } from "../../../shared/lib/useNow.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
-import { Drawer } from "../../../shared/ui/Drawer.tsx";
+import { Drawer, type DrawerResize } from "../../../shared/ui/Drawer.tsx";
 import { EmptyState } from "../../../shared/ui/EmptyState.tsx";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage.tsx";
 import { LoadingState } from "../../../shared/ui/LoadingState.tsx";
@@ -33,14 +33,16 @@ import { ArchivedToggle, ClosedHeader, ProjectHeader, SessionGroup, StatusHeader
 import { ColumnHead, SessionList, type SessionActions } from "../ui/SessionList.tsx";
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
 import { SettingsBar, type View } from "../ui/SettingsBar.tsx";
+import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../ui/panelWidth.ts";
 import { laneLabel, resumeCommand } from "../ui/sessionText.ts";
 import styles from "./SessionsLivePage.module.css";
 
-// sessions-live FR-08: the view and the grouping are remembered in the browser.
+// sessions-live FR-08 and FR-27: the view, the grouping and the detail's width are remembered in the browser.
 const SETTINGS_KEY = "selo-ops/sessions-live/settings";
 interface Settings {
   view: View;
   grouping: Grouping;
+  panelWidth: number | null;
 }
 
 function readSettings(): Settings {
@@ -49,6 +51,7 @@ function readSettings(): Settings {
   return {
     view: o.view === "cards" ? "cards" : "list",
     grouping: o.grouping === "status" || o.grouping === "none" ? o.grouping : "project",
+    panelWidth: parsePanelWidth(o.panelWidth),
   };
 }
 
@@ -77,10 +80,34 @@ export function SessionsLivePage() {
   const [nextShown, setNextShown] = useState<Set<string>>(() => new Set());
   const [toast, setToast] = useState<ToastState | null>(null);
 
+  const [isResizing, setResizing] = useState(false);
+
   const updateSettings = (patch: Partial<Settings>) => {
     const next = { ...settings, ...patch };
     setSettings(next);
     writeStored(SETTINGS_KEY, next);
+  };
+
+  // sessions-live FR-27: while the edge moves, the width goes straight to the page's style (no re-render
+  // of the list per pixel); once it stops, it becomes a setting, stored. A double click goes back to the default.
+  const appRef = useRef<HTMLDivElement>(null);
+  const panelResize: DrawerResize = {
+    label: t("sessions.detail.resize"),
+    min: MIN_PANEL_WIDTH,
+    max: clampPanelWidth(Number.POSITIVE_INFINITY, window.innerWidth),
+    step: PANEL_WIDTH_STEP,
+    onResize: (width) => {
+      appRef.current?.style.setProperty("--drawer-chosen-w", `${clampPanelWidth(width, window.innerWidth)}px`);
+      setResizing(true);
+    },
+    onResizeEnd: (width) => {
+      setResizing(false);
+      updateSettings({ panelWidth: clampPanelWidth(width, window.innerWidth) });
+    },
+    onReset: () => {
+      setResizing(false);
+      updateSettings({ panelWidth: null });
+    },
   };
 
   const sessions = useMemo(() => query.data?.sessions ?? [], [query.data]);
@@ -188,7 +215,11 @@ export function SessionsLivePage() {
   const updatedSeconds = query.dataUpdatedAt ? Math.max(0, Math.floor((now - query.dataUpdatedAt) / 1000)) : null;
 
   return (
-    <div className={`${styles.app} ${isPanelOpen ? styles.withPanel : ""}`}>
+    <div
+      ref={appRef}
+      className={`${styles.app} ${isPanelOpen ? styles.withPanel : ""} ${settings.panelWidth !== null || isResizing ? styles.sized : ""} ${isResizing ? styles.resizing : ""}`}
+      style={settings.panelWidth !== null ? ({ "--drawer-chosen-w": `${settings.panelWidth}px` } as CSSProperties) : undefined}
+    >
       <SessionsHeader counts={counts} updatedSeconds={updatedSeconds} isRefreshing={query.isFetching} theme={theme} onTheme={setTheme} />
       <SettingsBar
         view={settings.view}
@@ -243,7 +274,7 @@ export function SessionsLivePage() {
             </>
           )}
         </main>
-        <Drawer isOpen={isPanelOpen} label={t("sessions.detail.label")}>
+        <Drawer isOpen={isPanelOpen} label={t("sessions.detail.label")} resize={panelResize}>
           {selected && (
             <SessionDetail
               session={selected}

@@ -33,3 +33,42 @@
     border: 0;
   }
 }
+
+/* The left edge, a strip wider than the border so it is easy to catch. */
+.handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -5px;
+  z-index: 1;
+  width: 10px;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+
+.handle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 2px;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.handle:hover::after,
+.handle:active::after {
+  background: var(--text-muted);
+}
+
+.handle:focus-visible::after {
+  background: var(--focus);
+}
+
+@media (max-width: 900px) {
+  .handle {
+    display: none;
+  }
+}
