@@ -206,6 +206,14 @@ export interface components {
             }[];
             usage: components["schemas"]["Usage"];
             runUsage: components["schemas"]["RunUsage"];
+            runs: {
+                /** Format: date-time */
+                since: string;
+                request: string;
+                isRequestCut: boolean;
+                usage: components["schemas"]["Usage"];
+            }[];
+            isRunListCut: boolean;
             touchedFiles: string[];
             desktopLink: string | null;
             isOutsideSelo: boolean;

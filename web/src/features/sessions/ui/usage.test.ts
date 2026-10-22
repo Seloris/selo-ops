@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exactTokens, formatTokens, hasDroppedPrompts, skillHowLabel, topWithRest, totalTokens, type RunUsage } from "./usage.ts";
+import { exactTokens, formatTokens, hasDroppedPrompts, runRequestText, runTimeText, skillHowLabel, topWithRest, totalTokens, type RunUsage } from "./usage.ts";
 
 const NARROW = " ";
 
@@ -85,5 +85,31 @@ describe("hasDroppedPrompts", () => {
   it("tells nothing for exactly 50 prompts holding every call, or fewer than 50", () => {
     expect(hasDroppedPrompts(run(50, 100))).toBe(false);
     expect(hasDroppedPrompts(run(49, 140))).toBe(false);
+  });
+});
+
+describe("runTimeText", () => {
+  const now = new Date(2026, 9, 23, 10, 0).getTime();
+
+  it("writes the time alone for a run of today", () => {
+    expect(runTimeText(new Date(2026, 9, 23, 0, 54).toISOString(), now)).toBe("00:54");
+  });
+
+  it("adds the day for a run of another day, and the year for another year", () => {
+    expect(runTimeText(new Date(2026, 9, 22, 22, 30).toISOString(), now)).toBe("22 oct. 22:30");
+    expect(runTimeText(new Date(2025, 11, 31, 9, 5).toISOString(), now)).toBe("31 déc. 2025 09:05");
+  });
+});
+
+describe("runRequestText", () => {
+  const run = (request: string, isRequestCut = false) => ({ since: "2026-10-22T22:30:00.000Z", request, isRequestCut, usage: null });
+
+  it("writes the request, with « … » when the export cut it", () => {
+    expect(runRequestText(run("fait un .bat stp"))).toBe("fait un .bat stp");
+    expect(runRequestText(run("x".repeat(200), true))).toBe(`${"x".repeat(200)}…`);
+  });
+
+  it("says an empty request is unreadable", () => {
+    expect(runRequestText(run(""))).toBe("Demande non lisible dans l’export");
   });
 });

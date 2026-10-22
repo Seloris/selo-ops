@@ -1,3 +1,4 @@
+import { dayTime } from "../../../shared/lib/dayTime.ts";
 import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import type { Session } from "../data/sessionView.ts";
 
@@ -6,6 +7,7 @@ import type { Session } from "../data/sessionView.ts";
 export type Usage = NonNullable<Session["usage"]>;
 export type RunUsage = NonNullable<Session["runUsage"]>;
 export type Tokens = Usage["tokens"];
+export type SessionRun = Session["runs"][number];
 
 export const TOKEN_KINDS = ["input", "cacheRead", "cacheWrite", "output"] as const satisfies readonly (keyof Tokens)[];
 
@@ -41,6 +43,18 @@ const HOW: Record<string, MessageKey> = {
 
 // How a skill was loaded; a way a later export adds shows as the export names it.
 export const skillHowLabel = (how: string) => (HOW[how] ? t(HOW[how]) : how);
+
+// sessions-live FR-36: « 22:30 » for a run of today, « 22 oct. 22:30 » for another day, with the year for another year.
+export function runTimeText(iso: string, now: number): string {
+  const { day, time, isToday } = dayTime(iso, now);
+  return isToday ? time : `${day} ${time}`;
+}
+
+// sessions-live FR-36, `session` BR-10: « … » when the export cut the request; an unreadable one says so.
+export function runRequestText(run: SessionRun): string {
+  if (!run.request) return t("sessions.request.empty");
+  return run.isRequestCut ? `${run.request}…` : run.request;
+}
 
 // The export keeps a run's latest 50 prompts only (sessions-live FR-34): a full list whose calls fall short of the run's
 // says that earlier ones were dropped, the run's totals counting them. A partial run's slice starts mid-run: calls before

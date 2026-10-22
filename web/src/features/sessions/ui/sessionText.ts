@@ -1,3 +1,4 @@
+import { dayTime } from "../../../shared/lib/dayTime.ts";
 import { formatAge } from "../../../shared/lib/formatAge.ts";
 import { t, tn, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import type { DotTone } from "../../../shared/ui/StatusDot.tsx";
@@ -12,10 +13,7 @@ export const age = (ms: number) => formatAge(ms, units());
 
 // sessions-live FR-19: the day and time the session was created, with its year only when it is not the current one.
 export function createdText(iso: string, now: number): string {
-  const at = new Date(iso);
-  const isThisYear = at.getFullYear() === new Date(now).getFullYear();
-  const day = at.toLocaleDateString("fr-FR", { day: "numeric", month: "short", ...(isThisYear ? {} : { year: "numeric" }) });
-  const time = at.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  const { day, time } = dayTime(iso, now);
   return t("sessions.detail.created", { day, time });
 }
 

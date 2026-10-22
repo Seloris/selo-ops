@@ -55,6 +55,8 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     subagents: [],
     usage: null,
     runUsage: null,
+    runs: [],
+    isRunListCut: false,
     touchedFiles: [],
     desktopLink: null,
     isOutsideSelo: false,

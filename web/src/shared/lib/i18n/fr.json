@@ -188,6 +188,9 @@
   "sessions.usage.how.preloaded": "préchargée",
   "sessions.usage.prompts": "Demandes",
   "sessions.usage.promptsCut": "Seules les 50 dernières demandes sont listées ; les totaux du tour restent exacts.",
+  "sessions.usage.runs": "Demandes de la session",
+  "sessions.usage.runsCut": "L’export ne garde que les 100 derniers tours : les plus anciennes demandes peuvent manquer, les totaux de la session restent exacts.",
+  "sessions.usage.request": "Demande",
 
   "sessions.toast.resumeCopied": "Commande copiée",
   "sessions.toast.resumeHint": "Lance-la dans un terminal, dans le dossier de la session : {folder}",

@@ -124,3 +124,12 @@
   font-size: 0.85em;
   color: var(--text-muted);
 }
+
+/* The request takes the room left and is cut on one line, whole in its tooltip. */
+.table .request {
+  width: 100%;
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}

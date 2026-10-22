@@ -2,7 +2,7 @@ import { useId, useState } from "react";
 import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { ChevronDownIcon, ChevronRightIcon } from "../../../shared/ui/icons.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
-import { exactTokens, formatTokens, hasDroppedPrompts, skillHowLabel, TOKEN_KINDS, topWithRest, totalTokens, type RunUsage, type Tokens, type Usage } from "./usage.ts";
+import { exactTokens, formatTokens, hasDroppedPrompts, runRequestText, runTimeText, skillHowLabel, TOKEN_KINDS, topWithRest, totalTokens, type RunUsage, type SessionRun, type Tokens, type Usage } from "./usage.ts";
 import styles from "./UsageParts.module.css";
 
 // sessions-live FR-32 to FR-35: what a session or its current run consumed, as the export gives it (`session` BR-18, BR-19).
@@ -131,6 +131,50 @@ export function RunUsageView({ run }: { run: RunUsage }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// sessions-live FR-36: every main run the export keeps, oldest first, folded; a free prompt opens a run of its own.
+export function SessionRunsView({ runs, isCut, now }: { runs: SessionRun[]; isCut: boolean; now: number }) {
+  const [isOpen, setOpen] = useState(false);
+  const listId = useId();
+  const unknown = t("sessions.facts.unknown");
+  return (
+    <div>
+      <button type="button" className={styles.toggle} aria-expanded={isOpen} aria-controls={listId} onClick={() => setOpen(!isOpen)}>
+        {isOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
+        {t("sessions.usage.runs")}
+        <span className={styles.count}>{runs.length}</span>
+      </button>
+      <div id={listId} hidden={!isOpen}>
+        {isCut && <p className={styles.note}>{t("sessions.usage.runsCut")}</p>}
+        <div className={styles.scroll}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th scope="col">{t("sessions.usage.time")}</th>
+                <th scope="col" className={styles.request}>{t("sessions.usage.request")}</th>
+                <th scope="col">{t("sessions.usage.calls")}</th>
+                <th scope="col">{t("sessions.usage.tokens")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {runs.map((r, i) => {
+                const request = runRequestText(r);
+                return (
+                  <tr key={i}>
+                    <th scope="row">{runTimeText(r.since, now)}</th>
+                    <td className={styles.request} title={request}>{request}</td>
+                    <td>{r.usage ? exactTokens(r.usage.calls) : unknown}</td>
+                    <td>{r.usage ? <TokenCount count={totalTokens(r.usage.tokens)} /> : unknown}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

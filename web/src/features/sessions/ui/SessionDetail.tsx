@@ -9,7 +9,7 @@ import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
 import { totalTokens } from "./usage.ts";
-import { RunUsageView, TokenCount, UsageTable } from "./UsageParts.tsx";
+import { RunUsageView, SessionRunsView, TokenCount, UsageTable } from "./UsageParts.tsx";
 import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
@@ -181,6 +181,7 @@ export function SessionDetail({
 
         <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.usage")} {...fold("usage")}>
           {s.usage ? <UsageTable usage={s.usage} /> : <p className={styles.muted}>{unknown}</p>}
+          {s.runs.length > 0 && <SessionRunsView runs={s.runs} isCut={s.isRunListCut} now={now} />}
         </Section>
 
         <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.runUsage")} {...fold("runUsage")}>
