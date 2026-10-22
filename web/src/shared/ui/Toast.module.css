@@ -1,15 +1,19 @@
 .toast {
+  --tone: var(--text);
+  --tone-soft: var(--surface-2);
   position: fixed;
   left: 50%;
   bottom: 28px;
   z-index: 50;
   transform: translateX(-50%);
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  width: 620px;
-  max-width: calc(100% - 32px);
-  padding: 14px 14px 14px 18px;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  min-width: 280px;
+  max-width: min(560px, calc(100% - 32px));
+  padding: 10px 8px 10px 10px;
+  overflow: hidden;
   font-size: 0.9em;
   background: var(--pop-bg);
   border: var(--border-width) solid var(--border);
@@ -17,6 +21,29 @@
   box-shadow: var(--shadow-pop);
   -webkit-backdrop-filter: var(--blur);
   backdrop-filter: var(--blur);
+  animation: enter 220ms cubic-bezier(.2, .9, .3, 1.2);
+}
+
+.toast[data-tone="warn"] {
+  --tone: var(--warn);
+  --tone-soft: var(--warn-soft);
+}
+
+.toast[data-tone="danger"] {
+  --tone: var(--danger);
+  --tone-soft: var(--danger-soft);
+}
+
+.icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--tone);
+  background: var(--tone-soft);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-pill);
 }
 
 .body {
@@ -24,10 +51,47 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   overflow-wrap: anywhere;
 }
 
 .title {
   font-weight: 600;
+}
+
+/* Time left before the toast closes itself; hovering or focusing the toast pauses it. */
+.timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--tone);
+  opacity: 0.35;
+  transform-origin: left;
+  animation: drain linear forwards;
+}
+
+.toast:hover .timer,
+.toast:focus-within .timer {
+  animation-play-state: paused;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px) scale(0.97);
+  }
+}
+
+@keyframes drain {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
 }

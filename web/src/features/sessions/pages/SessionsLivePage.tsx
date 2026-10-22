@@ -10,7 +10,8 @@ import { Drawer, type DrawerResize } from "../../../shared/ui/Drawer.tsx";
 import { EmptyState } from "../../../shared/ui/EmptyState.tsx";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage.tsx";
 import { LoadingState } from "../../../shared/ui/LoadingState.tsx";
-import { Toast } from "../../../shared/ui/Toast.tsx";
+import { OpenIcon } from "../../../shared/ui/icons.tsx";
+import { Toast, type ToastTone } from "../../../shared/ui/Toast.tsx";
 import {
   archivedSessions,
   closedSessions,
@@ -56,7 +57,12 @@ function readSettings(): Settings {
 }
 
 interface ToastState {
+  // A new id per message: the toast restarts its entrance and its timer.
+  id: number;
   title: string;
+  tone?: ToastTone;
+  // The desktop app opened the session: the open icon instead of the check.
+  isOpened?: boolean;
   hint?: string;
   // A command the browser refused to copy: shown selected, to copy by hand.
   blockedCommand?: string;
@@ -135,20 +141,18 @@ export function SessionsLivePage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [isProjectsOpen, selectedId, closeDetail]);
 
-  const toastTimer = useRef<number | undefined>(undefined);
-  const showToast = useCallback((next: ToastState) => {
-    window.clearTimeout(toastTimer.current);
-    setToast(next);
-    toastTimer.current = window.setTimeout(() => setToast(null), next.blockedCommand ? 14_000 : 6_000);
+  const toastId = useRef(0);
+  const showToast = useCallback((next: Omit<ToastState, "id">) => {
+    toastId.current += 1;
+    setToast({ ...next, id: toastId.current });
   }, []);
-  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
   const copy = async (command: string, title: string, hint: string) => {
     const isCopied = await copyText(command);
-    showToast(isCopied ? { title, hint } : { title: t("sessions.toast.copyBlocked"), hint, blockedCommand: command });
+    showToast(isCopied ? { title, hint } : { title: t("sessions.toast.copyBlocked"), hint, tone: "warn", blockedCommand: command });
   };
 
-  const failed = (error: Error) => showToast({ title: t("sessions.toast.failed"), hint: error.message || t("sessions.toast.failedUnknown") });
+  const failed = (error: Error) => showToast({ title: t("sessions.toast.failed"), hint: error.message || t("sessions.toast.failedUnknown"), tone: "danger" });
 
   const actions: SessionActions = {
     onOpen: (id) => {
@@ -170,7 +174,7 @@ export function SessionsLivePage() {
       const anchor = document.createElement("a");
       anchor.href = link;
       anchor.click();
-      showToast({ title: t("sessions.toast.desktopOpening") });
+      showToast({ title: t("sessions.toast.desktopOpening"), isOpened: true });
     },
     onToggleNext: (id) =>
       setNextShown((shown) => {
@@ -300,7 +304,15 @@ export function SessionsLivePage() {
         </Drawer>
       </div>
       {toast && (
-        <Toast title={toast.title} closeLabel={t("app.toast.close")} onClose={() => setToast(null)}>
+        <Toast
+          key={toast.id}
+          title={toast.title}
+          tone={toast.tone}
+          icon={toast.isOpened ? <OpenIcon /> : undefined}
+          duration={toast.blockedCommand ? 14_000 : toast.hint ? 6_000 : 3_500}
+          closeLabel={t("app.toast.close")}
+          onClose={() => setToast(null)}
+        >
           {toast.blockedCommand && <BlockedCommand command={toast.blockedCommand} />}
           {toast.hint && <span className={styles.hint}>{toast.hint}</span>}
         </Toast>
