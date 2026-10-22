@@ -85,3 +85,16 @@ export const MAX_PROMPTS = 50;
 export function hasDroppedPrompts(run: RunUsage): boolean {
   return !run.partial && run.prompts.length >= MAX_PROMPTS && run.prompts.reduce((n, p) => n + p.calls, 0) < run.calls;
 }
+
+// sessions-live FR-32: the model's name when the usage comes from one model only, shown beside the total instead of a
+// « Modèles » list of one row; null when there are several, or none.
+export const soleModel = (usage: Usage): string | null => (usage.byModel.length === 1 ? (usage.byModel[0]?.model ?? null) : null);
+
+// sessions-live FR-36: « Tours » lists the runs when there are several, when the export cut the list, or when a single
+// run's tokens differ from the session's (subagents, a run with no usage); a single run matching the session repeats it.
+export function listsRuns(runs: readonly SessionRun[], isRunListCut: boolean, session: Usage | null): boolean {
+  if (runs.length > 1 || isRunListCut) return true;
+  const only = runs[0];
+  if (!only || !session) return false;
+  return !only.usage || totalTokens(only.usage.tokens) !== totalTokens(session.tokens);
+}

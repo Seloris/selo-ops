@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cacheReuse, exactTokens, formatTokens, hasDroppedPrompts, kindShares, percentText, runRequestText, runTimeText, skillHowLabel, topWithRest, totalTokens, widthPercent, type RunUsage } from "./usage.ts";
+import { cacheReuse, exactTokens, formatTokens, hasDroppedPrompts, kindShares, listsRuns, percentText, runRequestText, runTimeText, skillHowLabel, soleModel, topWithRest, totalTokens, widthPercent, type RunUsage } from "./usage.ts";
 
 const NARROW = " ";
 
@@ -152,5 +152,39 @@ describe("runRequestText", () => {
 
   it("says an empty request is unreadable", () => {
     expect(runRequestText(run(""))).toBe("Demande non lisible dans l’export");
+  });
+});
+
+describe("soleModel", () => {
+  const tokens = { input: 1, cacheRead: 2, cacheWrite: 3, output: 4 };
+  it("names the model when there is one only", () => {
+    expect(soleModel({ tokens, calls: 1, byModel: [{ model: "m1", tokens, calls: 1 }] } as never)).toBe("m1");
+  });
+  it("returns null for several models or none", () => {
+    expect(soleModel({ tokens, calls: 2, byModel: [{ model: "m1", tokens, calls: 1 }, { model: "m2", tokens, calls: 1 }] } as never)).toBeNull();
+    expect(soleModel({ tokens, calls: 0, byModel: [] } as never)).toBeNull();
+  });
+});
+
+describe("listsRuns", () => {
+  const tokens = { input: 1, cacheRead: 2, cacheWrite: 3, output: 4 };
+  const session = { tokens, calls: 1, byModel: [] } as never;
+  const run = (usage: unknown) => ({ since: "2026-10-23T01:10:00Z", usage }) as never;
+  it("lists the runs when there are several", () => {
+    expect(listsRuns([run(null), run(null)], false, session)).toBe(true);
+  });
+  it("skips a single run whose tokens are the session's", () => {
+    expect(listsRuns([run({ tokens })], false, session)).toBe(false);
+    expect(listsRuns([], false, session)).toBe(false);
+  });
+  it("skips a single run when the session has no usage", () => {
+    expect(listsRuns([run(null)], false, null)).toBe(false);
+  });
+  it("lists a single run that differs from the session or has no usage", () => {
+    expect(listsRuns([run({ tokens: { ...tokens, output: 9 } })], false, session)).toBe(true);
+    expect(listsRuns([run(null)], false, session)).toBe(true);
+  });
+  it("lists a single run when the export cut the list", () => {
+    expect(listsRuns([run({ tokens })], true, session)).toBe(true);
   });
 });

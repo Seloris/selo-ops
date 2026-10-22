@@ -1,21 +1,16 @@
+/* The usage dashboard reads top-down: the total, the split of the four kinds, the models, the runs. Its layout follows
+   its own width (the side panel or the full screen), not the window's. */
 .dashboard {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
-.detail {
+.dashboard section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin: 0;
-  padding: 10px 0 6px 20px;
-}
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .mono {
@@ -27,95 +22,36 @@
   color: var(--text-muted);
 }
 
-/* The four kinds of tokens: the same colours in every bar, dot and legend. */
+/* Right-aligned figures that line up from row to row. */
+.figure {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* The four kinds of tokens: the same colours in every bar and dot. */
 .input { background: var(--kind-input); }
 .cacheRead { background: var(--kind-cache-read); }
 .cacheWrite { background: var(--kind-cache-write); }
 .output { background: var(--kind-output); }
-
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 8px;
-}
-
-.tile {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 10px;
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-control);
-  background: var(--item-bg);
-}
-
-.tileValue {
-  font-size: 1.35em;
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.15;
-}
-
-.tileLabel {
-  font-size: 0.78em;
-  color: var(--text-muted);
-}
-
-.bar {
-  min-width: 0;
-  height: 8px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-2);
-  overflow: hidden;
-}
-
-.barFill {
-  display: flex;
-  height: 100%;
-  gap: 1px;
-}
-
-.seg {
-  display: block;
-  flex-basis: 0;
-  height: 100%;
-}
-
-.legend {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 4px 14px;
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 0.85em;
-  font-variant-numeric: tabular-nums;
-}
-
-.legend li {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
+.neutral { background: var(--text-muted); opacity: 0.55; }
 
 .dot {
   flex: none;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: var(--radius-pill);
 }
 
-.kindName {
-  color: var(--text-muted);
-}
-
-.subtitle {
+.heading {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 0 0 6px;
-  font-size: 0.83em;
+  margin: 0;
+  font-size: 0.78em;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--text-muted);
 }
 
@@ -123,33 +59,160 @@
   padding: 0 7px;
   border-radius: var(--radius-pill);
   background: var(--surface-2);
-  color: var(--text-muted);
   font-weight: 500;
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
 
 .note {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 0.85em;
   color: var(--text-muted);
 }
 
-/* A list of bars: a name, the bar on the room left, the figure and its detail on the right. */
-.rows {
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* A bar on its track. */
+.track {
+  min-width: 0;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+}
+
+/* The summary: the total on the left, three figures on the right; stacked when the panel is narrow. */
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  padding: 14px 16px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--item-bg);
+}
+
+.total {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
+  min-width: 0;
+}
+
+.totalValue {
+  font-size: 2em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+
+.totalLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+}
+
+.stat dt {
+  font-size: 0.78em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.stat dd {
+  margin: 0;
+  font-size: 1.25em;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.stat[title] dt {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+/* The four kinds: name and what it is, bar, count, share. */
+.kinds,
+.rows,
+.runs {
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.kinds {
+  gap: 10px;
+}
+
+.kind {
+  display: grid;
+  grid-template-columns: minmax(0, 15em) minmax(60px, 1fr) 4.5em 3.5em;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9em;
+}
+
+.kindName {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.kindName .dot {
+  margin-top: 0.3em;
+}
+
+.kindName > span:last-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kindHint {
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+/* A list of bars: a name, the bar on the room left, the figure and its detail. */
+.rows {
+  gap: 8px;
+}
+
 .row {
   display: grid;
-  grid-template-columns: minmax(70px, 9em) minmax(40px, 1fr) minmax(70px, auto);
+  grid-template-columns: minmax(3.5em, 11em) minmax(60px, 1fr) 4.5em minmax(5em, auto);
   align-items: center;
-  gap: 10px;
-  font-size: 0.85em;
+  gap: 12px;
+  font-size: 0.88em;
 }
 
 .rowName {
@@ -159,45 +222,76 @@
   font-variant-numeric: tabular-nums;
 }
 
-.rowFigure {
+/* Tools and skills: name (and how it was loaded), bar against the most used, count. */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px 28px;
+}
+
+.columns > div {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  font-size: 0.95em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.25;
+  gap: 8px;
+}
+
+.ranked {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(40px, 1fr) 3em;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88em;
+}
+
+.rankedName {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rankedName > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.rowFigure .muted {
+.rankedName .muted {
   font-size: 0.85em;
 }
 
-.runs {
+.activity {
   display: flex;
   flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 16px;
+}
+
+/* The runs: one line each, unfolding into the run's figures. */
+.runs {
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  overflow: hidden;
 }
 
 .run + .run {
   border-top: var(--border-width) solid var(--border);
 }
 
+.runOpen {
+  background: var(--item-bg);
+}
+
 .runHead {
   display: grid;
-  grid-template-columns: 14px auto minmax(60px, 1fr) minmax(50px, 90px) minmax(56px, auto);
+  grid-template-columns: 16px auto minmax(60px, 1fr) minmax(50px, 110px) 4.5em 3.5em;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 7px 2px;
+  padding: 10px 12px;
   border: 0;
-  border-radius: var(--radius-control);
   background: none;
   color: var(--text);
   font: inherit;
-  font-size: 0.85em;
+  font-size: 0.88em;
   text-align: left;
   cursor: pointer;
 }
@@ -206,9 +300,15 @@
   background: var(--item-bg);
 }
 
-.runChevron svg {
-  width: 14px;
-  height: 14px;
+.runHead:focus-visible {
+  outline: 2px solid var(--text-muted);
+  outline-offset: -2px;
+}
+
+.chevron svg {
+  display: block;
+  width: 16px;
+  height: 16px;
   color: var(--text-muted);
 }
 
@@ -225,26 +325,99 @@
   white-space: nowrap;
 }
 
-.lists {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px 16px;
-}
-
-.list {
+.runBody {
   display: flex;
   flex-direction: column;
+  gap: 14px;
+  padding: 4px 14px 16px 38px;
+}
+
+.runBody[hidden] {
+  display: none;
+}
+
+.runFacts {
+  margin: 0;
+  font-size: 0.88em;
+  color: var(--text-muted);
+}
+
+/* A run's four kinds on one line: the split bar, then each kind's count. */
+.kindLine {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.split {
+  display: flex;
   gap: 2px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.split > span {
+  flex-basis: 0;
+}
+
+.inlineLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 0.87em;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
-.list li {
+.inlineLegend li {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 8px;
-  overflow-wrap: anywhere;
+  align-items: center;
+  gap: 6px;
+}
+
+.inlineLegend b {
+  color: var(--text);
+}
+
+/* The side panel: the hints of the kinds and the run bars give way to the figures. */
+@container (max-width: 560px) {
+  .summary {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stats {
+    justify-content: space-between;
+  }
+
+  .kind {
+    grid-template-columns: minmax(0, 7.5em) minmax(40px, 1fr) 4em 3em;
+    gap: 10px;
+  }
+
+  .kindHint {
+    display: none;
+  }
+
+  .row {
+    grid-template-columns: minmax(3em, 6em) minmax(30px, 1fr) 4em auto;
+    gap: 8px;
+  }
+
+  .runHead {
+    grid-template-columns: 16px auto minmax(40px, 1fr) 4em 3em;
+    gap: 8px;
+  }
+
+  .runHead > :nth-child(4) {
+    display: none;
+  }
+
+  .runBody {
+    padding-left: 14px;
+  }
 }
