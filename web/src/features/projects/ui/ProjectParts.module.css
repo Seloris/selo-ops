@@ -76,21 +76,24 @@
   background: var(--bp);
 }
 
-.milestone {
-  padding: 0 7px;
-  font-size: 0.75em;
-  line-height: 18px;
+.stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 4px;
+  font-size: 0.78em;
   white-space: nowrap;
-  color: var(--text-muted);
-  border: var(--border-width) dashed var(--border);
-  border-radius: var(--radius-pill);
 }
 
-.milestone.filled {
-  color: var(--bp);
-  border-style: solid;
-  border-color: color-mix(in srgb, var(--bp) 45%, transparent);
-  background: color-mix(in srgb, var(--bp) 10%, transparent);
+/* Plain muted text, so the review and the merge never read as a state tag. */
+.milestone {
+  font-size: 0.78em;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.milestone.reached {
+  color: var(--text);
 }
 
 /* The large track: one line per step, joined by a rule. */
@@ -151,7 +154,7 @@
   color: var(--text-muted);
 }
 
-/* projects FR-08: neutral shades, darkest for added lines, so no part reads as a state colour. */
+/* projects FR-08 and FR-11: neutral shades, darkest for added lines, so no part reads as a state colour. */
 .delta {
   display: inline-flex;
   align-items: center;
@@ -200,11 +203,11 @@
 }
 
 .fr {
-  background: var(--hue-specs);
+  background: var(--text);
 }
 
 .br {
-  background: var(--hue-blueprints);
+  background: var(--text-muted);
 }
 
 .sectionTitle {

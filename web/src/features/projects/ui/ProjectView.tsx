@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { t, tn } from "../../../shared/lib/i18n/index.ts";
+import { t, tn, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { EmptyState } from "../../../shared/ui/EmptyState.tsx";
@@ -18,7 +18,7 @@ import {
   type ProjectOverview,
   type SpecSheet,
 } from "../data/projectView.ts";
-import { DeltaBar, HueChip, LiveSessions, ProgressTrack, SectionTitle, SizeBar, StateBar, StateTag, Tiles, type Hue, type LiveItem } from "./ProjectParts.tsx";
+import { DeltaFigures, DoneSummary, HueChip, LiveSessions, ProgressTrack, SectionTitle, SizeBar, StateBar, StateTag, Tiles, type Hue, type LiveItem } from "./ProjectParts.tsx";
 import styles from "./ProjectView.module.css";
 
 export const IDEAS_FILE = ".planning/ideas.md";
@@ -70,10 +70,10 @@ export function ProjectView({
           {b.sheets.join(" · ")}
         </span>
         <span className={styles.deltaCell}>
-          <DeltaBar delta={b.delta} />
+          <DeltaFigures delta={b.delta} />
         </span>
         <span className={styles.trackCell}>
-          <ProgressTrack blueprint={b} />
+          {b.state === "done" ? <DoneSummary blueprint={b} /> : <ProgressTrack blueprint={b} />}
         </span>
       </button>
     </li>
@@ -81,7 +81,7 @@ export function ProjectView({
 
   // One line per sheet; the open blueprints touching it, when any, on a second line.
   const sheetRow = (s: SpecSheet) => {
-    const commit = s.lastCommit && t("projects.specs.lastCommit", { subject: s.lastCommit.subject, age: ageOf(s.lastCommit.at) });
+    const commit = s.lastCommit && t("projects.specs.lastCommit", { age: ageOf(s.lastCommit.at), subject: s.lastCommit.subject });
     return (
       <li key={s.file}>
         <button type="button" className={`${rowClass(s.file)} ${styles.sheetRow}`} onClick={() => onOpenFile(s.file)} aria-current={openPath === s.file || undefined}>
@@ -112,6 +112,17 @@ export function ProjectView({
       </li>
     );
   };
+
+  // projects FR-08 and FR-09: the columns named once above the rows; hidden for assistive tech, each cell carrying its own label.
+  const headRow = (keys: MessageKey[], gridClass: string | undefined, endFrom = keys.length) => (
+    <div className={`${styles.headRow} ${gridClass ?? ""}`} aria-hidden="true">
+      {keys.map((k, i) => (
+        <span key={k} className={i >= endFrom ? styles.end : undefined}>
+          {t(k)}
+        </span>
+      ))}
+    </div>
+  );
 
   const noteRow = (path: string, icon: ReactNode, hue: Hue, title: string, count: number, empty: string) => (
     <li key={path}>
@@ -275,6 +286,11 @@ export function ProjectView({
           <EmptyState>{t("projects.empty.blueprints")}</EmptyState>
         ) : (
           <>
+            {headRow(
+              ["projects.columns.date", "projects.columns.blueprint", "projects.columns.state", "projects.columns.sheets", "projects.columns.delta", "projects.columns.progress"],
+              styles.bpRow,
+              4,
+            )}
             <ul className={styles.rows}>{listed.map(blueprintRow)}</ul>
             {legacy.length > 0 && (
               <details className={styles.legacy}>
@@ -289,6 +305,7 @@ export function ProjectView({
       <section className={styles.section}>
         <SectionTitle icon={<TextFileIcon />} hue="specs" title={t("projects.specs.title")} count={p.sheets.length} />
         {p.sheets.length === 0 && <EmptyState>{t("projects.empty.specs")}</EmptyState>}
+        {p.sheets.length > 0 && headRow(["projects.columns.sheet", "projects.columns.counts", "projects.columns.size", "projects.columns.lastCommit"], styles.sheetRow)}
         {pages.length > 0 && (
           <>
             <h4 className={styles.group}>

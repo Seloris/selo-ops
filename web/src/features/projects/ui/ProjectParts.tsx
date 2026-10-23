@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router";
-import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
+import { t, tn, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { SpecChip, type SpecKind } from "../../../shared/ui/SpecKind.tsx";
 import { StatusDot, type DotTone } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
@@ -56,10 +56,13 @@ export function ProgressTrack({ blueprint, isLarge = false }: { blueprint: Bluep
       <span className={styles.track} style={colorStyle(blueprint.state)} role="img" aria-label={label} title={label}>
         {steps.map((s, i) =>
           s.kind === "stage" ? (
-            <span key={i} className={`${styles.pip} ${s.isDone ? styles.filled : ""}`} />
+            <span key={i} className={styles.stage}>
+              <span className={`${styles.pip} ${s.isDone ? styles.filled : ""}`} />
+              {s.number} {s.component}
+            </span>
           ) : (
-            <span key={i} className={`${styles.milestone} ${s.isDone ? styles.filled : ""}`}>
-              {nameOf(s)}
+            <span key={i} className={`${styles.milestone} ${s.isDone ? styles.reached : ""}`}>
+              {t(s.kind === "review" ? "projects.progress.reviewShort" : "projects.progress.mergedShort")}
             </span>
           ),
         )}
@@ -91,23 +94,38 @@ export function ProgressTrack({ blueprint, isLarge = false }: { blueprint: Bluep
   );
 }
 
-// projects FR-08: the delta's lines added, changed and removed, as a bar and in figures.
-export function DeltaBar({ delta }: { delta: DeltaLine[] }) {
+// projects FR-08: the delta's lines added, changed and removed, in figures, the zeros left out.
+export function DeltaFigures({ delta }: { delta: DeltaLine[] }) {
   const { added, changed, removed } = deltaSplit(delta);
   if (delta.length === 0) return null;
   const label = t("projects.delta.label", { added, changed, removed });
+  const figures = [added > 0 && `+${added}`, changed > 0 && `~${changed}`, removed > 0 && `−${removed}`].filter(Boolean).join(" ");
   return (
-    <span className={styles.delta} role="img" aria-label={label} title={label}>
-      <span className={styles.deltaBar}>
+    <span className={styles.figures} role="img" aria-label={label} title={label}>
+      {figures}
+    </span>
+  );
+}
+
+// projects FR-11: the same figures behind a bar of their shares.
+export function DeltaBar({ delta }: { delta: DeltaLine[] }) {
+  const { added, changed, removed } = deltaSplit(delta);
+  if (delta.length === 0) return null;
+  return (
+    <span className={styles.delta}>
+      <span className={styles.deltaBar} aria-hidden="true">
         {added > 0 && <span className={styles.added} style={{ flexGrow: added }} />}
         {changed > 0 && <span className={styles.changed} style={{ flexGrow: changed }} />}
         {removed > 0 && <span className={styles.removed} style={{ flexGrow: removed }} />}
       </span>
-      <span className={styles.figures} aria-hidden="true">
-        +{added} ~{changed} −{removed}
-      </span>
+      <DeltaFigures delta={delta} />
     </span>
   );
+}
+
+// projects FR-08: a « Terminé » blueprint's progress in one muted line, its track saying nothing more.
+export function DoneSummary({ blueprint }: { blueprint: Blueprint }) {
+  return <span className={styles.muted}>{tn("projects.progress.doneSummary", blueprint.stages.length)}</span>;
 }
 
 // projects FR-09: a sheet's FRs and BRs, scaled to the biggest sheet.
