@@ -8,7 +8,7 @@ import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
-import { totalTokens } from "./usage.ts";
+import { formatTokens, totalTokens } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
@@ -48,7 +48,7 @@ export function SessionDetail({
   const unknown = t("sessions.facts.unknown");
   const fold = (section: DetailSection) => ({ isFolded: foldedSections.includes(section), onToggle: () => onToggleSection(section) });
   const awaitedSection = (
-    <Section icon={<HourglassIcon />} hue={!awaited || !isTodo(s) ? "muted" : awaited.kind === "error" ? "danger" : "warn"} title={t("sessions.detail.awaited")} {...fold("awaited")}>
+    <Section icon={<HourglassIcon />} hue={!awaited || !isTodo(s) ? "muted" : awaited.kind === "error" ? "danger" : "warn"} title={t("sessions.detail.awaited")} summary={awaited ? `${awaited.label} · ${awaited.text}` : calmText(s)} {...fold("awaited")}>
       {awaited ? (
         <div className={`${styles.ask} ${!isTodo(s) ? styles.neutral : awaited.kind === "error" ? styles.danger : styles.warn}`}>
           <AwaitedIcon kind={awaited.kind} isMuted={!isTodo(s)} />
@@ -63,7 +63,7 @@ export function SessionDetail({
     </Section>
   );
   const closeSection = (
-    <Section icon={<DoorIcon />} hue="close" title={t("sessions.detail.canClose")} {...fold("close")}>
+    <Section icon={<DoorIcon />} hue="close" title={t("sessions.detail.canClose")} summary={closeText(s)} {...fold("close")}>
       {s.isOutsideSelo ? (
         <div className={`${styles.verdict} ${styles.neutral}`}>
           <WarningIcon />
@@ -97,7 +97,7 @@ export function SessionDetail({
     </Section>
   );
   const recapSection = !s.isOutsideSelo && (s.recap || s.commits.length > 0) && (
-    <Section icon={<CommitIcon />} hue="recap" title={t("sessions.detail.recap")} {...fold("recap")}>
+    <Section icon={<CommitIcon />} hue="recap" count={s.commits.length} title={t("sessions.detail.recap")} summary={s.recap} {...fold("recap")}>
       {s.recap && <p>{s.recap}</p>}
       {s.commits.length > 0 && (
         <ul className={styles.lines}>
@@ -112,7 +112,7 @@ export function SessionDetail({
     </Section>
   );
   const agentsSection = !s.isOutsideSelo && (
-    <Section icon={<RobotIcon />} hue="agents" count={s.subagents.length} title={t("sessions.detail.subagents")} {...fold("agents")}>
+    <Section icon={<RobotIcon />} hue="agents" count={s.subagents.length} title={t("sessions.detail.subagents")} summary={s.subagents.length ? [...new Set(s.subagents.map((a) => a.type))].join(" · ") : t("sessions.detail.none")} {...fold("agents")}>
       {s.subagents.length ? (
         <ul className={styles.lines}>
           {s.subagents.map((a, i) => (
@@ -132,7 +132,7 @@ export function SessionDetail({
     </Section>
   );
   const usageSection = (
-    <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.usage")} {...fold("usage")}>
+    <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.usage")} summary={s.usage ? t("sessions.detail.usageSummary", { tokens: formatTokens(totalTokens(s.usage.tokens)) }) : unknown} {...fold("usage")}>
       {s.usage || s.runs.length > 0 || s.runUsage ? (
         <UsageDashboard usage={s.usage} runs={s.runs} isRunListCut={s.isRunListCut} runUsage={s.runUsage} now={now} />
       ) : (
@@ -141,7 +141,7 @@ export function SessionDetail({
     </Section>
   );
   const filesSection = !s.isOutsideSelo && (
-    <Section icon={<FolderIcon />} hue="files" count={s.touchedFiles.length} title={t("sessions.detail.files")} {...fold("files")}>
+    <Section icon={<FolderIcon />} hue="files" count={s.touchedFiles.length} title={t("sessions.detail.files")} summary={s.touchedFiles.length ? s.touchedFiles.map((f) => f.split("/").pop()).join(" · ") : t("sessions.detail.none")} {...fold("files")}>
       {s.touchedFiles.length ? (
         <FileTree paths={s.touchedFiles} />
       ) : (
@@ -150,7 +150,7 @@ export function SessionDetail({
     </Section>
   );
   const settingsSection = (
-    <Section icon={<SlidersIcon />} hue="muted" title={t("sessions.detail.settings")} {...fold("settings")}>
+    <Section icon={<SlidersIcon />} hue="muted" title={t("sessions.detail.settings")} summary={[s.model, s.effort, s.permissionMode].filter(Boolean).join(" · ") || unknown} {...fold("settings")}>
       <div className={styles.kv}>
         <span className={styles.key}>{t("sessions.detail.model")}</span>
         <span>{s.model ?? unknown}</span>
@@ -238,19 +238,19 @@ export function SessionDetail({
       </div>
 
       {isFullscreen ? (
-        // Full screen only: the sections become cards in two stacks, the narrow one with the state of the session,
-        // the wide one with the usage and the files.
+        // Full screen only: the sections become cards in two stacks, the narrow one with the state of the session
+        // and its outcome (what is awaited, closing, recap and files), the wide one with the usage, the subagents and the settings.
         <div className={`${styles.body} ${styles.cards}`}>
           <div className={styles.stack}>
             {awaitedSection}
             {closeSection}
             {recapSection}
-            {agentsSection}
-            {settingsSection}
+            {filesSection}
           </div>
           <div className={styles.stack}>
             {usageSection}
-            {filesSection}
+            {agentsSection}
+            {settingsSection}
           </div>
         </div>
       ) : (
@@ -258,9 +258,9 @@ export function SessionDetail({
           {awaitedSection}
           {closeSection}
           {recapSection}
-          {agentsSection}
-          {usageSection}
           {filesSection}
+          {usageSection}
+          {agentsSection}
           {settingsSection}
         </div>
       )}
@@ -286,6 +286,7 @@ function Section({
   hue,
   title,
   count,
+  summary,
   isFolded,
   onToggle,
   children,
@@ -294,6 +295,8 @@ function Section({
   hue: keyof typeof HUES;
   title: string;
   count?: number;
+  // What the heading keeps showing while the section is folded.
+  summary?: string | null;
   isFolded: boolean;
   onToggle: () => void;
   children: ReactNode;
@@ -306,6 +309,7 @@ function Section({
           <span className={`${styles.chip} ${HUES[hue]}`}>{icon}</span>
           {title}
           {count ? <span className={styles.count}>{count}</span> : null}
+          {isFolded && summary ? <span className={styles.summary}>{summary}</span> : null}
           <span className={styles.fold}>{isFolded ? <ChevronRightIcon /> : <ChevronDownIcon />}</span>
         </button>
       </h3>

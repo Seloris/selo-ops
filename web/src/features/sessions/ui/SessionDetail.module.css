@@ -121,6 +121,17 @@
   margin-top: 8px;
 }
 
+/* Folded, the heading still says the section's gist, on one line. */
+.summary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .fold {
   display: inline-flex;
   margin-left: auto;
