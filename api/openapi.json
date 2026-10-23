@@ -6,6 +6,440 @@
   },
   "components": {
     "schemas": {
+      "ProjectsResponse": {
+        "type": "object",
+        "properties": {
+          "projects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectOverview"
+            }
+          }
+        },
+        "required": [
+          "projects"
+        ]
+      },
+      "ProjectOverview": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "root": {
+            "type": "string"
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "baseBranch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "seloVersion": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "changedCount": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "unpushedCount": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "hasPlanning": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "worktrees": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "root": {
+                  "type": "string"
+                },
+                "branch": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "aheadCount": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "changedCount": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "root",
+                "branch",
+                "aheadCount",
+                "changedCount"
+              ]
+            }
+          },
+          "sheets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpecSheet"
+            }
+          },
+          "blueprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Blueprint"
+            }
+          },
+          "ideaCount": {
+            "type": "integer"
+          },
+          "debtCount": {
+            "type": "integer"
+          },
+          "sessionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "root",
+          "branch",
+          "baseBranch",
+          "seloVersion",
+          "changedCount",
+          "unpushedCount",
+          "hasPlanning",
+          "error",
+          "worktrees",
+          "sheets",
+          "blueprints",
+          "ideaCount",
+          "debtCount",
+          "sessionIds"
+        ]
+      },
+      "SpecSheet": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "page",
+              "domain",
+              "app"
+            ]
+          },
+          "slug": {
+            "type": "string"
+          },
+          "component": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "file": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "route": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "frCount": {
+            "type": "integer"
+          },
+          "brCount": {
+            "type": "integer"
+          },
+          "nextFr": {
+            "type": "string"
+          },
+          "nextBr": {
+            "type": "string"
+          },
+          "lastCommit": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "sha": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "sha",
+              "subject",
+              "at"
+            ]
+          },
+          "openBlueprints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "kind",
+          "slug",
+          "component",
+          "file",
+          "title",
+          "route",
+          "frCount",
+          "brCount",
+          "nextFr",
+          "nextBr",
+          "lastCommit",
+          "openBlueprints"
+        ]
+      },
+      "Blueprint": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "sheets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "state": {
+            "$ref": "#/components/schemas/BlueprintState"
+          },
+          "delta": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sheet": {
+                  "type": "string"
+                },
+                "op": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "sheet",
+                "op",
+                "id",
+                "text"
+              ]
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "number": {
+                  "type": "integer"
+                },
+                "component": {
+                  "type": "string"
+                },
+                "commit": {
+                  "type": "string"
+                },
+                "sha": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "isDone": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "number",
+                "component",
+                "commit",
+                "sha",
+                "isDone"
+              ]
+            }
+          },
+          "isReviewDone": {
+            "type": "boolean"
+          },
+          "isSpecMerged": {
+            "type": "boolean"
+          },
+          "nextPrompt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sessionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "worktreeBranch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "modifiedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "file",
+          "title",
+          "sheets",
+          "components",
+          "state",
+          "delta",
+          "decisions",
+          "stages",
+          "isReviewDone",
+          "isSpecMerged",
+          "nextPrompt",
+          "sessionIds",
+          "worktreeBranch",
+          "modifiedAt"
+        ]
+      },
+      "BlueprintState": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "ready",
+          "building",
+          "review",
+          "merging",
+          "done",
+          "legacy"
+        ]
+      },
+      "ProjectFile": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "text"
+        ]
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status"
+        ]
+      },
       "Session": {
         "type": "object",
         "properties": {
@@ -564,40 +998,6 @@
           "name",
           "versions"
         ]
-      },
-      "ProblemDetails": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "status": {
-            "type": "integer"
-          },
-          "detail": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          },
-          "errors": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "required": [
-          "type",
-          "title",
-          "status"
-        ]
       }
     },
     "parameters": {}
@@ -629,6 +1029,80 @@
                     "status",
                     "time"
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/projects": {
+      "get": {
+        "summary": "Every project of the ops export, its checkouts merged per repository, with its specs and blueprints",
+        "responses": {
+          "200": {
+            "description": "The projects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/projects/{id}/file": {
+      "get": {
+        "summary": "The raw Markdown of a planning file the export lists for the project, or its ideas or technical debt",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "path",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file's text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectFile"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The path is missing",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such project, a path the export does not list, or a file that cannot be read",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }

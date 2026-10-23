@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm";
 import { createApp } from "../src/app.js";
 import { migrateDatabase, openDatabase, type Database } from "../src/db/client.js";
 import type { ClaudeStatusFile } from "../src/features/sessions/sessions.desktop.js";
-import type { ProjectFile, SessionFile } from "../src/features/sessions/sessions.export.js";
+import type { ProjectFileInput, SessionFile } from "../src/features/sessions/sessions.export.js";
 import type { RunningStatusFile } from "../src/features/sessions/sessions.outside.js";
 import type { Clock } from "../src/shared/clock.js";
 import { rootKeyOf } from "./factories.js";
@@ -35,7 +35,7 @@ function createOpsDir() {
   };
   const seed = {
     session: (file: SessionFile) => write("sessions", `${file.sessionId}.json`, JSON.stringify(file)),
-    project: (file: ProjectFile) => write("projects", `${rootKeyOf(file.root)}.json`, JSON.stringify(file)),
+    project: (file: ProjectFileInput) => write("projects", `${rootKeyOf(file.root)}.json`, JSON.stringify(file)),
     raw: (sub: "sessions" | "projects", name: string, content: string) => write(sub, name, content),
   };
   const clear = () => {

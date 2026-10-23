@@ -1,8 +1,9 @@
 import { mkdirSync, utimesSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import type { Database } from "../db/client.js";
-import type { ExportRun, ExportRunUsage, ExportUsage, ProjectFile, SessionFile } from "../features/sessions/sessions.export.js";
+import type { ExportRun, ExportRunUsage, ExportUsage, ProjectFileInput, SessionFile } from "../features/sessions/sessions.export.js";
 import { normRoot, type RunningStatusFile } from "../features/sessions/sessions.outside.js";
+import { seedPlanning } from "./demo.planning.js";
 import { createDesktopSessionLinkRepository, createSessionArchiveRepository, createSessionNoteRepository } from "../features/sessions/sessions.repository.js";
 import type { Clock } from "../shared/clock.js";
 
@@ -334,13 +335,23 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
   const rootOf = (s: DemoSession) => (s.worktree ? `${ROOT}/${s.project}/.claude/worktrees/${s.worktree}` : `${ROOT}/${s.project}`);
   for (const [name, p] of Object.entries(PROJECTS)) writeRepository(`${ROOT}/${name}`, p.branch);
 
-  const projectFiles: ProjectFile[] = [
-    ...Object.entries(PROJECTS).map(([name, p]) => ({
+  // `project` BR-01: each project's planning, its worktrees' own blueprints in their folder.
+  const worktreeRootOf = (project: string, name: string) => `${ROOT}/${project}/.claude/worktrees/${name}`;
+  const planning = new Map(Object.keys(PROJECTS).map((name) => [name, seedPlanning(name, `${ROOT}/${name}`, (w) => worktreeRootOf(name, w), at)]));
+  const projectFiles: ProjectFileInput[] = [
+    ...Object.entries(PROJECTS).map(([name, p], i) => ({
       schemaVersion: 1 as const, root: `${ROOT}/${name}`, repo: repoOf(name), branch: p.branch, changedCount: p.changed, manifest: { name },
+      selo: i === 1 ? "2.3.0" : "2.4.0", baseBranch: p.branch, aheadCount: null, unpushedCount: i, error: null,
+      sheets: planning.get(name)?.sheets ?? [], blueprints: planning.get(name)?.blueprints ?? [],
     })),
     ...SESSIONS.filter((s) => s.worktree).map((s) => ({
       schemaVersion: 1 as const, root: rootOf(s), repo: repoOf(s.project), branch: `claude/${s.worktree}`, changedCount: 2, manifest: { name: s.project },
+      selo: "2.4.0", baseBranch: PROJECTS[s.project]?.branch ?? "main", aheadCount: 3, unpushedCount: null, error: null,
+      blueprints: planning.get(s.project)?.worktrees.get(s.worktree ?? "") ?? [],
     })),
+    // `project` BR-04: a repository with no selo planning, listed with its git counts only.
+    { schemaVersion: 1 as const, root: `${ROOT}/weather-cli`, repo: repoOf("weather-cli"), branch: "main", changedCount: 1, manifest: null,
+      selo: "2.4.0", baseBranch: "main", aheadCount: null, unpushedCount: 2, error: null, sheets: [], blueprints: [] },
   ];
   for (const p of projectFiles) writeJson(join(opsDir, "projects"), `${keyOf(p.root)}.json`, p);
 

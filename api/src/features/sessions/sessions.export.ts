@@ -72,6 +72,48 @@ export const sessionFileSchema = z.object({
   usage: usageSchema.nullish().catch(null),
 });
 
+// Each item parsed on its own: one that does not match is dropped, never its siblings nor the file.
+const lenientArray = <T>(item: z.ZodType<T>) =>
+  z
+    .array(z.unknown())
+    .nullish()
+    .catch(null)
+    .transform((items) => (items ?? []).flatMap((i) => {
+      const parsed = item.safeParse(i);
+      return parsed.success ? [parsed.data] : [];
+    }));
+
+export const BLUEPRINT_STATES = ["draft", "ready", "building", "review", "merging", "done", "legacy"] as const;
+
+const sheetSchema = z.object({
+  kind: z.enum(["page", "domain", "app"]),
+  slug: z.string(),
+  component: z.string().nullish(),
+  file: z.string(),
+  title: z.string(),
+  route: z.string().nullish(),
+  ids: z.object({ fr: z.number(), br: z.number(), next: z.object({ fr: z.string(), br: z.string() }) }),
+  lastCommit: z.object({ sha: z.string(), subject: z.string(), at: z.string() }).nullish(),
+  openBlueprints: z.array(z.string()).nullish(),
+});
+
+const blueprintSchema = z.object({
+  name: z.string(),
+  file: z.string(),
+  title: z.string(),
+  sheets: z.array(z.string()),
+  components: z.array(z.string()),
+  state: z.enum(BLUEPRINT_STATES),
+  delta: z.array(z.object({ sheet: z.string(), op: z.string(), id: z.string(), text: z.string() })),
+  decisions: z.array(z.string()).nullish(),
+  stages: z.array(z.object({ number: z.number(), component: z.string(), commit: z.string(), sha: z.string().nullish(), done: z.boolean() })),
+  progress: z.object({ reviewDone: z.boolean(), specMerged: z.boolean() }),
+  next: z.object({ prompt: z.string() }).nullish().catch(null),
+  sessions: z.array(z.string()).nullish().catch(null),
+  modifiedAt: z.string().nullish().catch(null),
+});
+
+// The fields the projects page reads (`project` BR-01) are read leniently: a mismatch never drops the file sessions read.
 export const projectFileSchema = z.object({
   schemaVersion: z.literal(1),
   root: z.string(),
@@ -79,6 +121,13 @@ export const projectFileSchema = z.object({
   branch: z.string().nullish(),
   changedCount: z.number().nullish(),
   manifest: z.object({ name: z.string() }).nullish(),
+  selo: z.string().nullish().catch(null),
+  baseBranch: z.string().nullish().catch(null),
+  aheadCount: z.number().nullish().catch(null),
+  unpushedCount: z.number().nullish().catch(null),
+  error: z.string().nullish().catch(null),
+  sheets: lenientArray(sheetSchema),
+  blueprints: lenientArray(blueprintSchema),
 });
 
 export type ExportRun = z.infer<typeof runSchema>;
@@ -86,6 +135,10 @@ export type ExportUsage = z.infer<typeof usageSchema>;
 export type ExportRunUsage = z.infer<typeof runUsageSchema>;
 export type SessionFile = z.infer<typeof sessionFileSchema>;
 export type ProjectFile = z.infer<typeof projectFileSchema>;
+// What a test or the demo writes: the planning fields may be left out, as an older export does.
+export type ProjectFileInput = z.input<typeof projectFileSchema>;
+export type ExportSheet = z.infer<typeof sheetSchema>;
+export type ExportBlueprint = z.infer<typeof blueprintSchema>;
 
 export interface OpsExport {
   sessions: SessionFile[];

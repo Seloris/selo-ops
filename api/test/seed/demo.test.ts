@@ -5,6 +5,7 @@ import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
 import { migrateDatabase, openDatabase } from "../../src/db/client.js";
+import { projectFileResponseSchema, projectsResponseSchema } from "../../src/features/projects/projects.schema.js";
 import { sessionsResponseSchema } from "../../src/features/sessions/sessions.schema.js";
 import { seedDemo } from "../../src/seed/demo.js";
 import { createTestClock } from "../setup.js";
@@ -77,5 +78,29 @@ describe("demo", () => {
       { name: "selo", versions: ["2.2.0", "2.1.0"] },
       { name: "selo-ops", versions: ["2.2.1"] },
     ]);
+  });
+
+  it("shows every blueprint state, a worktree's own blueprint, a project without planning and readable files", async () => {
+    // Arrange
+    const app = await demoApp();
+
+    // Act
+    const res = await request(app).get("/v1/projects");
+
+    // Assert
+    const { projects } = projectsResponseSchema.parse(res.body);
+    const blueprints = projects.flatMap((p) => p.blueprints);
+    expect(new Set(blueprints.map((b) => b.state))).toEqual(new Set(["draft", "ready", "building", "review", "merging", "done", "legacy"]));
+    expect(blueprints.some((b) => b.worktreeBranch !== null)).toBe(true);
+    expect(blueprints.some((b) => b.sessionIds.length > 0)).toBe(true);
+    expect(projects.some((p) => !p.hasPlanning)).toBe(true);
+    expect(projects.some((p) => p.ideaCount > 0 && p.debtCount > 0)).toBe(true);
+    for (const p of projects.filter((x) => x.hasPlanning)) {
+      for (const file of [...p.sheets.map((s) => s.file), ...p.blueprints.map((b) => b.file), ".planning/ideas.md"]) {
+        const read = await request(app).get(`/v1/projects/${p.id}/file`).query({ path: file });
+        expect(read.status, `${p.name} ${file}`).toBe(200);
+        expect(projectFileResponseSchema.parse(read.body).text).toMatch(/^# /);
+      }
+    }
   });
 });

@@ -1,5 +1,5 @@
 import type { ClaudeStatusFile } from "../src/features/sessions/sessions.desktop.js";
-import type { ExportRun, ExportRunUsage, ExportUsage, ProjectFile, SessionFile } from "../src/features/sessions/sessions.export.js";
+import type { ExportBlueprint, ExportRun, ExportRunUsage, ExportSheet, ExportUsage, ProjectFileInput, SessionFile } from "../src/features/sessions/sessions.export.js";
 import type { RunningStatusFile } from "../src/features/sessions/sessions.outside.js";
 
 // One `build{Entity}(overrides)` per entity: the only way a test builds a row.
@@ -83,7 +83,7 @@ export function buildRunUsage(overrides: Partial<ExportRunUsage> = {}): ExportRu
   };
 }
 
-export function buildProjectFile(overrides: Partial<ProjectFile> = {}): ProjectFile {
+export function buildProjectFile(overrides: Partial<ProjectFileInput> = {}): ProjectFileInput {
   const root = overrides.root ?? "C:/code/ledger-api";
   return {
     schemaVersion: 1,
@@ -128,3 +128,45 @@ export function buildRunningStatusFile(overrides: Partial<RunningStatusFile> = {
 export const transcriptFolderOf = (cwd: string) => cwd.replace(/[^A-Za-z0-9]/g, "-");
 
 export const rootKeyOf = keyOf;
+
+// A spec sheet as the export lists it in a project file.
+export function buildExportSheet(overrides: Partial<ExportSheet> = {}): ExportSheet {
+  const slug = overrides.slug ?? "home";
+  return {
+    kind: "page",
+    slug,
+    component: null,
+    file: `.planning/pages/${slug}.md`,
+    title: "Home",
+    route: "/",
+    ids: { fr: 3, br: 0, next: { fr: "FR-04", br: "BR-01" } },
+    lastCommit: { sha: "a1b2c3d", subject: "feat(home): list", at: EPOCH },
+    openBlueprints: [],
+    ...overrides,
+  };
+}
+
+// A blueprint as the export lists it in a project file: two stages, the first one committed.
+export function buildExportBlueprint(overrides: Partial<ExportBlueprint> = {}): ExportBlueprint {
+  const name = overrides.name ?? "2026-01-01-due-date";
+  const file = `.planning/blueprints/${name}.md`;
+  return {
+    name,
+    file,
+    title: "Due date",
+    sheets: ["home"],
+    components: ["api", "web"],
+    state: "building",
+    delta: [{ sheet: "home", op: "+", id: "FR-04", text: "A due date." }],
+    decisions: ["Format → day only (no time)"],
+    stages: [
+      { number: 1, component: "api", commit: "feat(due-date): api — due date", sha: "1111111", done: true },
+      { number: 2, component: "web", commit: "feat(due-date): web — due date", sha: null, done: false },
+    ],
+    progress: { reviewDone: false, specMerged: false },
+    next: { prompt: `/selo:build ${file}` },
+    sessions: [],
+    modifiedAt: EPOCH,
+    ...overrides,
+  };
+}

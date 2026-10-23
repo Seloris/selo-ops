@@ -1,6 +1,9 @@
 import express from "express";
 import type { Database } from "./db/client.js";
 import { healthRoutes } from "./features/health/health.routes.js";
+import { createPlanningReader } from "./features/projects/projects.planning.js";
+import { projectsRoutes } from "./features/projects/projects.routes.js";
+import { createProjectService } from "./features/projects/projects.service.js";
 import { createDesktopSessionReader } from "./features/sessions/sessions.desktop.js";
 import { createOpsExportReader } from "./features/sessions/sessions.export.js";
 import { createInstalledPluginReader } from "./features/sessions/sessions.plugins.js";
@@ -29,8 +32,9 @@ export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjects
   const app = express();
   app.use(express.json());
   app.use(healthRoutes({ clock }));
+  const opsExport = createOpsExportReader(opsDir);
   const sessions = createSessionService({
-    opsExport: createOpsExportReader(opsDir),
+    opsExport,
     outsideSessions: createOutsideSessionReader(claudeSessionsDir, claudeProjectsDir),
     archives: createSessionArchiveRepository(db),
     notes: createSessionNoteRepository(db),
@@ -40,6 +44,7 @@ export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjects
     clock,
   });
   app.use(sessionsRoutes({ sessions }));
+  app.use(projectsRoutes({ projects: createProjectService({ opsExport, planning: createPlanningReader() }) }));
   app.use(errorHandler);
   return app;
 }
