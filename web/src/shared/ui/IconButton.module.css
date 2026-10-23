@@ -28,3 +28,79 @@
 .accent:hover {
   background: var(--accent-soft);
 }
+
+.mark {
+  color: var(--mark);
+}
+
+.mark:hover {
+  background: var(--surface-2);
+}
+
+.wrap {
+  position: relative;
+  flex: none;
+  display: inline-grid;
+}
+
+/* A card under the button, its right edge near the button's: shown after a short pause on hover, at once on focus. */
+.tip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: -6px;
+  z-index: 30;
+  width: max-content;
+  max-width: min(320px, 70vw);
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  background: var(--pop-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-pop);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px) scale(0.98);
+  transform-origin: top right;
+  transition: opacity 0.14s ease-out, transform 0.14s ease-out, visibility 0s linear 0.14s;
+}
+
+/* The arrow, pointing at the button's centre. */
+.tip::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: calc(6px + (var(--control-h) - 8px) / 2 - 5px);
+  width: 10px;
+  height: 10px;
+  background: var(--pop-bg);
+  border-top: var(--border-width) solid var(--border);
+  border-left: var(--border-width) solid var(--border);
+  transform: rotate(45deg);
+}
+
+.wrap:hover > .tip,
+.wrap:has(> :focus-visible) > .tip {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.wrap:hover > .tip {
+  transition: opacity 0.14s ease-out 0.25s, transform 0.14s ease-out 0.25s, visibility 0s linear 0.25s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tip,
+  .wrap:hover > .tip {
+    transform: none;
+    transition: none;
+  }
+}

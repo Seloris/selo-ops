@@ -7,6 +7,7 @@
    --font-mono           commands, branches, commit subjects
    --lane-free, --lane-fastlane, --lane-autopilot   the type of work: sky, lime, violet (sessions-live FR-29)
    --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
+   --mark                a control that holds something of the person's (the session's note button): blue
    --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia
 
    --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
@@ -18,6 +19,7 @@
   --done: #16a34a;
   --warn-soft: rgba(217,119,6,.15);
   --lane-free: #0284c7;
+  --mark: #2563eb;
   --lane-fastlane: #4d7c0f;
   --lane-autopilot: #7c3aed;
   --lane-blueprint: #0f766e;
@@ -38,6 +40,7 @@
     --done: #4ade80;
     --warn-soft: rgba(251,191,36,.16);
     --lane-free: #7dd3fc;
+    --mark: #93c5fd;
     --lane-fastlane: #a3e635;
     --lane-autopilot: #c4b5fd;
     --lane-blueprint: #2dd4bf;
@@ -77,6 +80,7 @@
   --done: #16a34a;
   --warn-soft: rgba(217,119,6,.15);
   --lane-free: #0284c7;
+  --mark: #2563eb;
   --lane-fastlane: #4d7c0f;
   --lane-autopilot: #7c3aed;
   --lane-blueprint: #0f766e;
@@ -116,6 +120,7 @@
   --done: #4ade80;
   --warn-soft: rgba(251,191,36,.16);
   --lane-free: #7dd3fc;
+  --mark: #93c5fd;
   --lane-fastlane: #a3e635;
   --lane-autopilot: #c4b5fd;
   --lane-blueprint: #2dd4bf;

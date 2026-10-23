@@ -2,7 +2,7 @@ import { t } from "../../../shared/lib/i18n/index.ts";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { NoteIcon, OpenIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
-import { AgeLabel, AwaitedIcon, FilesCount, LaneLabel, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
+import { AgeLabel, AwaitedIcon, FilesCount, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import { awaitedOf, requestText } from "./sessionText.ts";
 import { totalTokens } from "./usage.ts";
 import { TokenCount } from "./UsageParts.tsx";
@@ -71,10 +71,7 @@ export function SessionList({
               </span>
               {layout.showProject && <span className={styles.muted}>{projectName(s.projectId)}</span>}
               <span className={styles.type}><LaneLabel session={s} /></span>
-              <span className={styles.requestCell}>
-                <span className={styles.request}>{requestText(s)}</span>
-                {s.note && <NoteText note={s.note} isOneLine />}
-              </span>
+              <span className={styles.request}>{requestText(s)}</span>
               <span className={styles.awaited}>
                 {awaited && (
                   <>
@@ -91,7 +88,12 @@ export function SessionList({
               </span>
               <span className={styles.tokens}>{s.usage && <TokenCount count={totalTokens(s.usage.tokens)} />}</span>
             </button>
-            <IconButton label={t("sessions.actions.note")} onClick={() => actions.onEditNote(s)}>
+            <IconButton
+              label={s.note ? t("sessions.actions.editNote") : t("sessions.actions.note")}
+              tone={s.note ? "mark" : "muted"}
+              tooltip={s.note ? <NoteTip note={s.note} /> : undefined}
+              onClick={() => actions.onEditNote(s)}
+            >
               <NoteIcon />
             </IconButton>
             <IconButton label={t("sessions.actions.open")} tone="accent" onClick={() => actions.onResume(s)}>
@@ -101,5 +103,15 @@ export function SessionList({
         );
       })}
     </ul>
+  );
+}
+
+// sessions-live FR-11: the note, whole, in the card the note button shows on hover.
+function NoteTip({ note }: { note: string }) {
+  return (
+    <span className={styles.tip}>
+      <span className={styles.tipTitle}>{t("sessions.note.label")}</span>
+      <span>{note}</span>
+    </span>
   );
 }

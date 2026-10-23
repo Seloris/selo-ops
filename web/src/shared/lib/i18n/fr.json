@@ -142,6 +142,7 @@
   "sessions.actions.archive": "Archiver",
   "sessions.actions.unarchive": "Désarchiver",
   "sessions.actions.note": "Note",
+  "sessions.actions.editNote": "Modifier la note",
   "sessions.note.title": "Note sur la session",
   "sessions.note.hint": "Un mot pour toi, quand tu reviendras sur la session.",
   "sessions.note.label": "Note",

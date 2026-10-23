@@ -62,12 +62,12 @@ export function AwaitedIcon({ kind, isMuted = false }: { kind: AwaitedKind; isMu
   );
 }
 
-// sessions-live FR-40: the person's note, cut to one line with `isOneLine` (whole in its tooltip).
-export function NoteText({ note, isOneLine = false }: { note: string; isOneLine?: boolean }) {
+// sessions-live FR-13, FR-19: the person's note, whole, on a card and in the detail.
+export function NoteText({ note }: { note: string }) {
   return (
-    <span className={`${styles.note} ${isOneLine ? styles.noteOneLine : ""}`} title={isOneLine ? note : undefined}>
+    <span className={styles.note}>
       <NoteIcon />
-      <span className={styles.noteText}>{note}</span>
+      <span>{note}</span>
     </span>
   );
 }

@@ -105,19 +105,3 @@
   width: 14px;
   height: 14px;
 }
-
-.noteOneLine {
-  align-items: center;
-  overflow: hidden;
-}
-
-.noteOneLine > svg {
-  margin-top: 0;
-}
-
-.noteOneLine > .noteText {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
