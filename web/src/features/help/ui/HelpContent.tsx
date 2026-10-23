@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { t } from "../../../shared/lib/i18n/index.ts";
 import {
   commitPlaces,
   helpTabs,
@@ -10,12 +11,10 @@ import {
   lanesById,
   lifecycleSteps,
   roles,
-  sampleDelta,
   sectionOrder,
   sections,
   skills,
   planningTree,
-  sampleSpec,
   specChecks,
   specFlows,
   specLines,
@@ -28,6 +27,7 @@ import {
 } from "../content.ts";
 import {
   DecisionGuideList,
+  type FileExample,
   Glossary,
   HelpSection,
   HelpTabs,
@@ -101,17 +101,21 @@ function GuideTab() {
 
 // help FR-13, its figures FR-14.
 function SpecsTab() {
+  const [example, setExample] = useState<FileExample | null>(null);
   return (
     <>
       <Note text="help.specs.intro" />
       <Split>
-        <PlanningTree caption="help.specs.tree.caption" root={planningTree} />
-        <RuleCards rules={whereRules} />
+        <PlanningTree caption="help.specs.tree.caption" root={planningTree} selected={example?.path} onSelect={setExample} />
+        {example ? (
+          <SpecSample caption={t("help.specs.tree.example", { path: example.path })} text={example.text} onClose={() => setExample(null)} />
+        ) : (
+          <RuleCards rules={whereRules} />
+        )}
       </Split>
 
       <HelpSection section={specSections.units}>
         <SpecUnits units={specUnits} />
-        <SpecSample caption="help.specs.sample.caption" text={sampleSpec} />
       </HelpSection>
 
       <HelpSection section={specSections.ids}>
@@ -121,7 +125,6 @@ function SpecsTab() {
 
       <HelpSection section={specSections.follows} intro="help.specs.follows.intro">
         <SpecFlows caption="help.specs.flow.caption" flows={specFlows} lanesById={lanesById} />
-        <SpecSample caption="help.specs.delta.caption" text={sampleDelta} />
         <Note text="help.specs.follows.noChange" />
       </HelpSection>
 

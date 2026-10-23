@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { Card } from "../../../shared/ui/Card.tsx";
+import { CloseIcon } from "../../../shared/ui/icons.tsx";
+import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { SpecChip, SpecIcon, specColor, type SpecKind } from "../../../shared/ui/SpecKind.tsx";
@@ -236,44 +238,79 @@ export function HelpTabs({ tabs, value, onChange }: { tabs: { value: HelpTab; la
   );
 }
 
-function TreeItems({ nodes }: { nodes: TreeNode[] }) {
+export interface FileExample {
+  path: string;
+  text: string;
+}
+
+interface TreeChoice {
+  selected?: string;
+  onSelect(example: FileExample | null): void;
+}
+
+function TreeItems({ nodes, parent, selected, onSelect }: { nodes: TreeNode[]; parent: string } & TreeChoice) {
   return (
     <ul className={styles.treeList}>
-      {nodes.map((node) => (
-        <li key={node.name} className={styles.treeItem}>
-          <span
-            className={`${node.children ? styles.treeFolder : styles.treeFile} ${node.kind ? styles.treeKind : ""}`}
-            style={node.kind ? { color: specColor(node.kind) } : undefined}
-          >
+      {nodes.map((node) => {
+        const path = parent + node.name;
+        const nameClass = `${node.children ? styles.treeFolder : styles.treeFile} ${node.kind ? styles.treeKind : ""}`;
+        const name = (
+          <>
             {node.kind && <SpecIcon kind={node.kind} />}
             {node.name}
-          </span>
-          {node.note && <span className={styles.treeNote}>{t(node.note)}</span>}
-          {node.children && <TreeItems nodes={node.children} />}
-        </li>
-      ))}
+          </>
+        );
+        const color = node.kind ? { color: specColor(node.kind) } : undefined;
+        return (
+          <li key={node.name} className={styles.treeItem}>
+            {node.sample !== undefined ? (
+              // help FR-14: a click shows the file's example beside the tree; a second click gives the cards back.
+              <button
+                type="button"
+                className={`${nameClass} ${styles.treeButton}`}
+                style={color}
+                aria-pressed={selected === path}
+                onClick={() => onSelect(selected === path ? null : { path, text: node.sample ?? "" })}
+              >
+                {name}
+              </button>
+            ) : (
+              <span className={nameClass} style={color}>
+                {name}
+              </span>
+            )}
+            {node.note && <span className={styles.treeNote}>{t(node.note)}</span>}
+            {node.children && <TreeItems nodes={node.children} parent={path} selected={selected} onSelect={onSelect} />}
+          </li>
+        );
+      })}
     </ul>
   );
 }
 
 // help FR-14.
-export function PlanningTree({ caption, root }: { caption: MessageKey; root: TreeNode }) {
+export function PlanningTree({ caption, root, selected, onSelect }: { caption: MessageKey; root: TreeNode } & TreeChoice) {
   return (
     <figure className={styles.figure}>
       <figcaption className={styles.figureCaption}>{t(caption)}</figcaption>
       <div className={styles.tree}>
         <span className={styles.treeFolder}>{root.name}</span>
-        <TreeItems nodes={root.children ?? []} />
+        <TreeItems nodes={root.children ?? []} parent={root.name} selected={selected} onSelect={onSelect} />
       </div>
     </figure>
   );
 }
 
 // help FR-14: the ids of a sample spec stand out, as a reader looks for them first.
-export function SpecSample({ caption, text }: { caption: MessageKey; text: string }) {
+export function SpecSample({ caption, text, onClose }: { caption: string; text: string; onClose(): void }) {
   return (
     <figure className={styles.figure}>
-      <figcaption className={styles.figureCaption}>{t(caption)}</figcaption>
+      <figcaption className={`${styles.figureCaption} ${styles.sampleCaption}`}>
+        {caption}
+        <IconButton label={t("help.specs.tree.close")} onClick={onClose}>
+          <CloseIcon />
+        </IconButton>
+      </figcaption>
       <pre className={styles.sample}>
         {text.split(/\b((?:FR|BR|US|Q)-\d+)\b/).map((part, index) =>
           index % 2 === 1 ? (

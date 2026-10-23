@@ -268,14 +268,6 @@ export const idKinds: Rule[] = (["fr", "br", "us", "q"] as const).map((id) => ({
 
 export const idRules: MessageKey[] = ["help.specs.ids.perFile", "help.specs.ids.appendOnly", "help.specs.ids.doubt"];
 
-// help FR-14: a blueprint's Spec delta, its signs highlighted.
-export const sampleDelta = `## Spec delta
-
-- home + FR-18 — A todo past its due date shows « En retard ».
-- home ~ FR-03 — A click on a row opens its detail panel.
-  Before: A click on a row opens its detail.
-- todo + BR-06 — A due date has passed when it is before today.`;
-
 export const stubSteps: StripStep[] = [
   { name: "help.specs.stubs.stub.name", text: "help.specs.stubs.stub.text", code: "help.specs.stubs.stub.code" },
   { name: "help.specs.stubs.bootstrap.name", text: "help.specs.stubs.bootstrap.text", code: "help.specs.stubs.example1" },
@@ -298,44 +290,13 @@ export interface TreeNode {
   // app FR-04: the folder of a kind of spec file, and its files, wear that kind's colour and icon.
   kind?: SpecKind;
   note?: MessageKey;
+  // help FR-14: a file's example, shown beside the tree when the file is clicked.
+  sample?: string;
   children?: TreeNode[];
 }
 
-// help FR-14: where the specs live, as a project lays them out.
-export const planningTree: TreeNode = {
-  name: ".planning/",
-  children: [
-    {
-      name: "pages/",
-      kind: "page",
-      note: "help.specs.tree.pages",
-      children: [
-        { name: "home.md", kind: "page", note: "help.specs.tree.home" },
-        { name: "todo-detail.md", kind: "page", note: "help.specs.tree.todoDetail" },
-      ],
-    },
-    {
-      name: "domain/",
-      kind: "domain",
-      note: "help.specs.tree.domain",
-      children: [
-        { name: "todo.md", kind: "domain", note: "help.specs.tree.todo" },
-        { name: "app.md", kind: "domain", note: "help.specs.tree.app" },
-      ],
-    },
-    {
-      name: "blueprints/",
-      kind: "blueprint",
-      note: "help.specs.tree.blueprints",
-      children: [{ name: "2026-10-21-due-date.md", kind: "blueprint", note: "help.specs.tree.blueprint" }],
-    },
-    { name: "ideas.md", note: "help.specs.tree.ideas" },
-    { name: "technical-debt.md", note: "help.specs.tree.debt" },
-  ],
-};
-
-// help FR-14: a sample page spec, in the repository's language like the real files.
-export const sampleSpec = `# Home
+// help FR-14: the example of each file of the tree, in the repository's language like the real files.
+const homeSample = `# Home
 
 Route: \`/\` · Domain: \`todo\`
 
@@ -355,6 +316,141 @@ The list of todos, so that a person sees what is left to do.
 - **Q-01** — Should a done todo stay in the list?
 
 Retired: FR-04`;
+
+const todoDetailSample = `# Todo detail
+
+Route: \`/todos/:id\` · Domain: \`todo\`
+
+The detail of one todo, so that a person edits or closes it.
+
+## Header
+
+- **FR-01** — The title shows the todo's name and its state (\`todo\` BR-02).
+
+## Form
+
+- **FR-02** — « Enregistrer » saves the title and the due date.
+- **FR-03** — A title over 120 characters is refused (\`todo\` BR-01).
+
+Retired:`;
+
+const todoSample = `# Todo
+
+What holds for a todo on every page. Pages cite these \`BR\` ids, never restate them.
+
+## Glossary
+
+| Business term | Identifier | Business meaning |
+|---|---|---|
+| \`tâche\` | \`Todo\` | Something a person has to do. |
+| \`échéance\` | \`dueDate\` | The day a todo is due. |
+
+## Business rules
+
+- **BR-01** — A todo has a title of 1 to 120 characters.
+- **BR-02** — A todo is « À faire » until it is done; a done todo never reopens.
+
+## Lifecycle
+
+« À faire » → « Fait »
+
+Retired:`;
+
+const appSample = `# App
+
+The shell: its navigation, its sign-in, its errors.
+
+## Functional requirements
+
+- **FR-01** — The header shows « Tâches » and the signed-in person's name.
+- **FR-02** — An address that leads nowhere shows « Page introuvable ».
+- **FR-03** — A failed request shows its message in a toast.
+
+Retired:`;
+
+const blueprintSample = `# Due date
+
+Pages: \`home\`, \`todo-detail\` · Components: \`api\`, \`web\`
+
+## Spec delta
+- home + FR-18 — A todo past its due date shows « En retard ».
+- home ~ FR-03 — A click on a row opens its detail panel.
+  Before: A click on a row opens its detail.
+- todo + BR-06 — A due date has passed when it is before today.
+
+## Business decisions
+- « En retard » is computed on the server, in the person's time zone.
+
+## Technical defaults
+- A nullable \`due_date\` column on \`todos\`.
+
+## Stages
+1. api — \`feat(todo): api — due date and overdue flag\`
+2. web — \`feat(home): web — overdue tag\`
+
+## Tests
+- api: a todo due yesterday is overdue, one due today is not.
+
+## Progress
+- [x] Stage 1 — api
+- [ ] Stage 2 — web
+- [ ] Review
+- [ ] Browser test
+- [ ] Spec merged`;
+
+const ideasSample = `# Ideas
+
+The person's ideas, not yet specified: one \`## <scope>\` section per component, feature or \`app\`, new items at the bottom.
+Format: \`- {YYYY-MM-DD} — **<Short title>:** <The idea>.\`
+
+## home
+
+- 2026-10-20 — **Sort by due date:** Sort the list by due date, the closest first.
+
+## app
+
+- 2026-10-22 — **Dark theme:** A dark theme, chosen in the header.`;
+
+const debtSample = `# Technical debt
+
+A flat list, new items appended at the bottom.
+Format: \`- **<Short title> (<scope>):** <What is wrong or missing>. See [<File>](<relative-path>).\`
+
+- **No pagination (api):** The todo list loads every todo at once. See [todoRoutes.ts](../api/src/features/todo/todoRoutes.ts).
+- **Dates as text (web):** Due dates are compared as strings, not as dates. See [dueDate.ts](../web/src/features/todo/dueDate.ts).`;
+
+// help FR-14: where the specs live, as a project lays them out.
+export const planningTree: TreeNode = {
+  name: ".planning/",
+  children: [
+    {
+      name: "pages/",
+      kind: "page",
+      note: "help.specs.tree.pages",
+      children: [
+        { name: "home.md", kind: "page", note: "help.specs.tree.home", sample: homeSample },
+        { name: "todo-detail.md", kind: "page", note: "help.specs.tree.todoDetail", sample: todoDetailSample },
+      ],
+    },
+    {
+      name: "domain/",
+      kind: "domain",
+      note: "help.specs.tree.domain",
+      children: [
+        { name: "todo.md", kind: "domain", note: "help.specs.tree.todo", sample: todoSample },
+        { name: "app.md", kind: "domain", note: "help.specs.tree.app", sample: appSample },
+      ],
+    },
+    {
+      name: "blueprints/",
+      kind: "blueprint",
+      note: "help.specs.tree.blueprints",
+      children: [{ name: "2026-10-21-due-date.md", kind: "blueprint", note: "help.specs.tree.blueprint", sample: blueprintSample }],
+    },
+    { name: "ideas.md", note: "help.specs.tree.ideas", sample: ideasSample },
+    { name: "technical-debt.md", note: "help.specs.tree.debt", sample: debtSample },
+  ],
+};
 
 export interface FlowStep {
   label: MessageKey;

@@ -332,6 +332,33 @@
   color: var(--hue-files);
 }
 
+/* help FR-14: a file with an example is a button, pressed while its example shows. */
+.treeButton {
+  padding: 0 4px;
+  margin-left: -4px;
+  font: inherit;
+  background: none;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.treeButton:hover {
+  text-decoration: underline;
+}
+
+.treeButton[aria-pressed="true"] {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+.sampleCaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .treeNote {
   margin-left: 12px;
   font-family: var(--font-sans);
