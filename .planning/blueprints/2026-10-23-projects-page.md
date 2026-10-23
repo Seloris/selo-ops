@@ -76,4 +76,4 @@ Pages: `projects` (new, `Route: /projects`) · Domain: `project` (new), `session
 - [x] Stage 2 — web
 - [x] Review
 - [x] Browser test
-- [ ] Spec merged
+- [x] Spec merged
