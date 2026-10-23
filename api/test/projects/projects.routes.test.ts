@@ -101,7 +101,8 @@ describe("projects", () => {
           nextFr: "FR-04",
           nextBr: "BR-01",
           lastCommit: { sha: "a1b2c3d", subject: "feat(home): list", at: "2026-01-01T00:00:00.000Z" },
-          openBlueprints: [],
+          // The worktree's own open blueprint touches it too.
+          openBlueprints: ["2026-01-02-tags", "2026-01-01-due-date"],
         },
       ]);
       expect(project?.blueprints[1]).toMatchObject({
@@ -149,6 +150,24 @@ describe("projects", () => {
       expect(projects.map((p) => [p.name, p.hasPlanning, p.sheets.length, p.worktrees.length])).toEqual([
         ["factory", false, 0, 0],
         ["todo-app", true, 1, 0],
+      ]);
+    });
+
+    it("lists a folder nested in a worktree, on its branch, as a project of its own, not a worktree", async () => {
+      // Arrange
+      const root = slash(ctx.code.repo("factory"));
+      const worktree = `${root}/.claude/worktrees/x`;
+      ctx.seed.project(buildProjectFile({ root, manifest: null }));
+      ctx.seed.project(buildProjectFile({ root: worktree, repo: `${root}/.git`, branch: "claude/x", manifest: null }));
+      ctx.seed.project(buildProjectFile({ root: `${worktree}/samples/todo-app`, repo: `${root}/.git`, branch: "claude/x", manifest: null, sheets: [buildExportSheet()] }));
+
+      // Act
+      const projects = await list();
+
+      // Assert
+      expect(projects.map((p) => [p.name, p.worktrees.map((w) => w.branch), p.sheets.length])).toEqual([
+        ["factory", ["claude/x"], 0],
+        ["todo-app", [], 1],
       ]);
     });
 
@@ -280,6 +299,23 @@ describe("projects", () => {
       // Assert
       expect(res.status).toBe(200);
       expect(res.body.text).toBe("# Tags\n");
+    });
+
+    it("reads a blueprint two worktrees hold from the one the list names", async () => {
+      // Arrange
+      const { root, worktree } = seedRepoWithWorktree();
+      const second = slash(ctx.code.folder("ledger-api-wt2"));
+      ctx.seed.project(buildProjectFile({ root: second, repo: `${root}/.git`, branch: "claude/other", blueprints: [buildExportBlueprint({ name: "2026-01-02-tags" })] }));
+      writeFile(worktree, ".planning/blueprints/2026-01-02-tags.md", "# First");
+      writeFile(second, ".planning/blueprints/2026-01-02-tags.md", "# Second");
+
+      // Act
+      const [project] = await list();
+      const res = await readFile(rootKeyOf(root), ".planning/blueprints/2026-01-02-tags.md");
+
+      // Assert
+      const named = project?.blueprints.find((b) => b.name === "2026-01-02-tags")?.worktreeBranch;
+      expect(res.body.text).toBe(named === "claude/tags" ? "# First" : "# Second");
     });
 
     it("returns the ideas and the technical debt", async () => {
