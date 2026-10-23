@@ -52,44 +52,52 @@ export function ProjectView({
   const unknown = t("projects.view.unknown");
   const rowClass = (path: string) => `${styles.row} ${openPath === path ? styles.selected : ""}`;
 
+  // One line per blueprint, its cells in columns shared by every row.
   const blueprintRow = (b: Blueprint) => (
     <li key={b.name}>
-      <button type="button" className={rowClass(b.file)} onClick={() => onOpenFile(b.file)} aria-current={openPath === b.file || undefined}>
+      <button type="button" className={`${rowClass(b.file)} ${styles.bpRow}`} onClick={() => onOpenFile(b.file)} aria-current={openPath === b.file || undefined}>
         <span className={styles.date}>{dateOf(b) ?? ""}</span>
-        <span className={styles.rowMain}>
-          <span className={styles.rowTitle}>
-            <SpecChip kind="blueprint" />
-            {b.title}
-          </span>
-          <span className={styles.rowMeta}>
-            <StateTag state={b.state} />
-            {b.worktreeBranch && <Tag icon={<BranchIcon />}>{t("projects.worktree", { branch: b.worktreeBranch })}</Tag>}
-            {b.sheets.length > 0 && <span className={styles.mono}>{b.sheets.join(" · ")}</span>}
-          </span>
+        <span className={styles.rowTitle} title={b.title}>
+          <SpecChip kind="blueprint" />
+          <span className={styles.ellipsis}>{b.title}</span>
+          {b.worktreeBranch && <Tag icon={<BranchIcon />}>{t("projects.worktree", { branch: b.worktreeBranch })}</Tag>}
         </span>
-        <span className={styles.rowSide}>
+        <span className={styles.state}>
+          <StateTag state={b.state} />
+        </span>
+        <span className={`${styles.sheets} ${styles.ellipsis}`} title={b.sheets.join(" · ")}>
+          {b.sheets.join(" · ")}
+        </span>
+        <span className={styles.deltaCell}>
           <DeltaBar delta={b.delta} />
+        </span>
+        <span className={styles.trackCell}>
           <ProgressTrack blueprint={b} />
         </span>
       </button>
     </li>
   );
 
-  const sheetRow = (s: SpecSheet) => (
-    <li key={s.file}>
-      <button type="button" className={rowClass(s.file)} onClick={() => onOpenFile(s.file)} aria-current={openPath === s.file || undefined}>
-        <span className={styles.rowMain}>
-          <span className={styles.rowTitle}>
+  // One line per sheet; the open blueprints touching it, when any, on a second line.
+  const sheetRow = (s: SpecSheet) => {
+    const commit = s.lastCommit && t("projects.specs.lastCommit", { subject: s.lastCommit.subject, age: ageOf(s.lastCommit.at) });
+    return (
+      <li key={s.file}>
+        <button type="button" className={`${rowClass(s.file)} ${styles.sheetRow}`} onClick={() => onOpenFile(s.file)} aria-current={openPath === s.file || undefined}>
+          <span className={styles.rowTitle} title={s.title}>
             <SpecChip kind={s.kind === "page" ? "page" : "domain"} />
-            {s.title}
+            <span className={styles.ellipsis}>{s.title}</span>
             {s.route && <span className={styles.route}>{s.route}</span>}
           </span>
-          <span className={styles.rowMeta}>
-            <span>{t("projects.specs.counts", { fr: s.frCount, br: s.brCount })}</span>
-            {s.lastCommit && <span className={styles.mono}>{t("projects.specs.lastCommit", { subject: s.lastCommit.subject, age: ageOf(s.lastCommit.at) })}</span>}
+          <span className={styles.counts}>{t("projects.specs.counts", { fr: s.frCount, br: s.brCount })}</span>
+          <span className={`${styles.commit} ${styles.ellipsis}`} title={commit ?? undefined}>
+            {commit}
+          </span>
+          <span className={styles.sizeCell}>
+            <SizeBar fr={s.frCount} br={s.brCount} max={max} />
           </span>
           {s.openBlueprints.length > 0 && (
-            <span className={styles.rowMeta}>
+            <span className={styles.touching}>
               {p.blueprints
                 .filter((b) => s.openBlueprints.includes(b.name))
                 .map((b) => (
@@ -98,24 +106,19 @@ export function ProjectView({
               <span>{s.openBlueprints.join(" · ")}</span>
             </span>
           )}
-        </span>
-        <span className={styles.sizeCell}>
-          <SizeBar fr={s.frCount} br={s.brCount} max={max} />
-        </span>
-      </button>
-    </li>
-  );
+        </button>
+      </li>
+    );
+  };
 
   const noteRow = (path: string, icon: ReactNode, hue: Hue, title: string, count: number, empty: string) => (
     <li key={path}>
-      <button type="button" className={rowClass(path)} onClick={() => onOpenFile(path)} aria-current={openPath === path || undefined}>
-        <span className={styles.rowMain}>
-          <span className={styles.rowTitle}>
-            <HueChip icon={icon} hue={hue} />
-            {title}
-          </span>
-          <span className={styles.rowMeta}>{count > 0 ? tn("projects.specs.items", count) : empty}</span>
+      <button type="button" className={`${rowClass(path)} ${styles.sheetRow}`} onClick={() => onOpenFile(path)} aria-current={openPath === path || undefined}>
+        <span className={styles.rowTitle}>
+          <HueChip icon={icon} hue={hue} />
+          <span className={styles.ellipsis}>{title}</span>
         </span>
+        <span className={styles.noteCount}>{count > 0 ? tn("projects.specs.items", count) : empty}</span>
       </button>
     </li>
   );
@@ -123,38 +126,53 @@ export function ProjectView({
   return (
     <div className={styles.view}>
       <div className={styles.head}>
-        <Button size="sm" onClick={onBack}>
-          ← {t("projects.view.back")}
-        </Button>
-        <h2 className={styles.name}>{p.name}</h2>
+        <div className={styles.titleLine}>
+          <Button size="sm" onClick={onBack}>
+            ← {t("projects.view.back")}
+          </Button>
+          <h2 className={styles.name}>{p.name}</h2>
+        </div>
+        {/* Each fact a label and its value, side by side, wrapping as a whole. */}
         <dl className={styles.facts}>
-          <dt>{t("projects.view.folder")}</dt>
-          <dd className={styles.mono}>{p.root}</dd>
-          <dt>{t("projects.view.branch")}</dt>
-          <dd className={styles.mono}>{p.branch ?? unknown}</dd>
-          <dt>{t("projects.view.baseBranch")}</dt>
-          <dd className={styles.mono}>{p.baseBranch ?? unknown}</dd>
-          <dt>{t("projects.view.selo")}</dt>
-          <dd className={styles.mono}>{p.seloVersion ?? unknown}</dd>
-          <dt>{t("projects.view.git")}</dt>
-          <dd>
-            {tn("projects.card.changed", p.changedCount ?? 0)} · {tn("projects.card.unpushed", p.unpushedCount ?? 0)}
-          </dd>
-          <dt>{t("projects.view.worktrees")}</dt>
-          <dd>
-            {p.worktrees.length === 0 ? (
-              t("projects.view.noWorktree")
-            ) : (
-              <ul className={styles.worktrees}>
-                {p.worktrees.map((w) => (
-                  <li key={w.root}>
-                    <span className={styles.mono}>{w.branch ?? unknown}</span>
-                    {w.aheadCount !== null && <span className={styles.muted}> · {tn("projects.view.ahead", w.aheadCount)}</span>}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </dd>
+          <div>
+            <dt>{t("projects.view.folder")}</dt>
+            <dd className={styles.mono}>{p.root}</dd>
+          </div>
+          <div>
+            <dt>{t("projects.view.branch")}</dt>
+            <dd className={styles.mono}>{p.branch ?? unknown}</dd>
+          </div>
+          <div>
+            <dt>{t("projects.view.baseBranch")}</dt>
+            <dd className={styles.mono}>{p.baseBranch ?? unknown}</dd>
+          </div>
+          <div>
+            <dt>{t("projects.view.selo")}</dt>
+            <dd className={styles.mono}>{p.seloVersion ?? unknown}</dd>
+          </div>
+          <div>
+            <dt>{t("projects.view.git")}</dt>
+            <dd>
+              {tn("projects.card.changed", p.changedCount ?? 0)} · {tn("projects.card.unpushed", p.unpushedCount ?? 0)}
+            </dd>
+          </div>
+          <div>
+            <dt>{t("projects.view.worktrees")}</dt>
+            <dd>
+              {p.worktrees.length === 0 ? (
+                t("projects.view.noWorktree")
+              ) : (
+                <ul className={styles.worktrees}>
+                  {p.worktrees.map((w) => (
+                    <li key={w.root}>
+                      <span className={styles.mono}>{w.branch ?? unknown}</span>
+                      {w.aheadCount !== null && <span className={styles.muted}> · {tn("projects.view.ahead", w.aheadCount)}</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </dd>
+          </div>
         </dl>
         {p.error && (
           <ErrorMessage>

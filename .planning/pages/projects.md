@@ -25,8 +25,8 @@ The selo projects of the developer, read from the ops export and their `.plannin
 ## Side panel
 
 - **FR-10** — A click on a blueprint, a sheet, « Idées » or « Dette technique » opens it in the side panel of `sessions-live` FR-18, with its grip bar (FR-27) and full screen (FR-37); the address keeps it, Échap or the close button closes it.
-- **FR-11** — A blueprint's panel shows its title, state, date, pages, domain sheets and components, its progress track in large with each stage's commit subject and short hash once committed, its spec delta grouped by sheet with each line's « + », « ~ » or « - » and id, its Business decisions, its live sessions and its next prompt with « Copier », then its whole text.
-- **FR-12** — A sheet's panel shows its title, kind, route, FR and BR counts, next free ids, last commit and the open blueprints touching it with their delta lines for this sheet, then its whole text.
+- **FR-11** — A blueprint's panel shows its title and state, then two tabs, « Résumé » open first and « Texte complet » (its whole text), so that the delta and the decisions never show twice: the summary gives its date, pages, domain sheets and components, its progress track in large with each stage's commit subject and short hash once committed, its spec delta grouped by sheet (each group with its delta bar, under a legend of the signs) with each line's « + », « ~ » or « - » and id, its Business decisions, its live sessions and its next prompt with « Copier ».
+- **FR-12** — A sheet's panel shows its title and kind, then the same two tabs: the summary gives its route, FR and BR counts, next free ids, last commit and the open blueprints touching it with their delta lines for this sheet; « Texte complet » its whole text. « Idées » and « Dette technique » show their whole text alone, with no tab.
 - **FR-13** — A file's whole text is shown formatted (titles, lists, ticked boxes, tables, bold, code), read from the project when the panel opens (`project` BR-01); a file that cannot be read says so and the rest of the panel stays.
 
 ## Whole page

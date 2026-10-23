@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage.tsx";
@@ -9,8 +9,10 @@ import { SpecIcon, specColor } from "../../../shared/ui/SpecKind.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { dateOf, deltaBySheet, type Blueprint, type DeltaLine, type SpecSheet } from "../data/projectView.ts";
 import { InlineMarkdown, Markdown } from "./Markdown.tsx";
-import { LiveSessions, ProgressTrack, StateTag, type LiveItem } from "./ProjectParts.tsx";
+import { DeltaBar, LiveSessions, ProgressTrack, StateTag, type LiveItem } from "./ProjectParts.tsx";
 import styles from "./ProjectPanel.module.css";
+
+const TABS = ["summary", "text"] as const;
 
 export type PanelSubject =
   | { kind: "blueprint"; blueprint: Blueprint }
@@ -73,6 +75,8 @@ export function ProjectPanel({
     subject.kind === "blueprint" ? null : subject.kind === "sheet" ? t(`projects.panel.kind.${subject.sheet.kind}` as MessageKey) : t(`projects.panel.kind.${subject.kind}`);
   const sheetKind = subject.kind === "sheet" && subject.sheet.kind === "page" ? "page" : "domain";
   const none = t("projects.panel.none");
+  // The summary and the whole text in two tabs, so the delta and the decisions never show twice; the panel is keyed on its file.
+  const [tab, setTab] = useState<(typeof TABS)[number]>("summary");
 
   let facts: ReactNode = null;
   if (subject.kind === "blueprint") {
@@ -95,9 +99,12 @@ export function ProjectPanel({
         )}
         {b.delta.length > 0 && (
           <Block title={t("projects.panel.delta")}>
+            <p className={styles.legend}>{t("projects.panel.deltaLegend")}</p>
             {deltaBySheet(b.delta).map((g) => (
               <div key={g.sheet} className={styles.group}>
-                <h4 className={styles.groupTitle}>{g.sheet}</h4>
+                <h4 className={styles.groupTitle}>
+                  {g.sheet} <DeltaBar delta={g.lines} />
+                </h4>
                 <DeltaLines lines={g.lines} />
               </div>
             ))}
@@ -196,17 +203,44 @@ export function ProjectPanel({
         </div>
         <h2 className={styles.title}>{title}</h2>
       </div>
-      <div className={`${styles.body} ${isFullscreen ? styles.wide : ""}`}>
-        {facts}
-        <Block title={t("projects.panel.text")}>
-          {file.isPending ? (
-            <LoadingState>{t("projects.panel.loading")}</LoadingState>
-          ) : file.error !== null ? (
-            <ErrorMessage>{t("projects.panel.error", { message: file.error || t("projects.page.errorUnknown") })}</ErrorMessage>
-          ) : (
+      {facts && (
+        <div className={styles.tabs} role="tablist" aria-label={t("projects.panel.tabs")}>
+          {TABS.map((v) => (
+            <button
+              key={v}
+              id={`panel-tab-${v}`}
+              type="button"
+              role="tab"
+              className={styles.tab}
+              aria-selected={tab === v}
+              aria-controls="panel-tabpanel"
+              tabIndex={tab === v ? 0 : -1}
+              onClick={() => setTab(v)}
+              onKeyDown={(e) => {
+                // Two tabs: either arrow moves to the other one.
+                if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                const next = v === "summary" ? "text" : "summary";
+                setTab(next);
+                document.getElementById(`panel-tab-${next}`)?.focus();
+              }}
+            >
+              {t(v === "summary" ? "projects.panel.summary" : "projects.panel.text")}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className={`${styles.body} ${isFullscreen ? styles.wide : ""}`} {...(facts ? { id: "panel-tabpanel", role: "tabpanel", "aria-labelledby": `panel-tab-${tab}` } : {})}>
+        {facts && tab === "summary" ? (
+          facts
+        ) : file.isPending ? (
+          <LoadingState>{t("projects.panel.loading")}</LoadingState>
+        ) : file.error !== null ? (
+          <ErrorMessage>{t("projects.panel.error", { message: file.error || t("projects.page.errorUnknown") })}</ErrorMessage>
+        ) : (
+          <div className={styles.fileText}>
             <Markdown source={file.text ?? ""} />
-          )}
-        </Block>
+          </div>
+        )}
       </div>
     </div>
   );

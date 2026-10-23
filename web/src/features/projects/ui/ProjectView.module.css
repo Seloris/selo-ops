@@ -1,7 +1,7 @@
 .view {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .head {
@@ -11,18 +11,31 @@
   gap: 8px;
 }
 
+.titleLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
 .name {
   margin: 0;
-  font-size: 1.6em;
+  font-size: 1.5em;
   font-weight: 500;
 }
 
 .facts {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  gap: 4px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
   margin: 0;
-  font-size: 0.88em;
+  font-size: 0.86em;
+}
+
+.facts > div {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
 }
 
 .facts dt {
@@ -35,6 +48,9 @@
 }
 
 .worktrees {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 14px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -49,10 +65,11 @@
 }
 
 .section {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 16px 18px;
+  gap: 8px;
+  padding: 12px 14px;
   background: var(--item-bg);
   border: var(--item-border);
   border-radius: var(--radius);
@@ -72,20 +89,19 @@
 .openList {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* A line that opens its file in the panel. */
+/* A line that opens its file in the panel; each list sets its columns. */
 .row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 6px 14px;
+  gap: 4px 14px;
   width: 100%;
-  padding: 8px 10px;
+  padding: 6px 10px;
   color: var(--text);
   font: inherit;
   text-align: left;
@@ -109,37 +125,104 @@
   border-color: var(--border);
 }
 
+/* Fixed widths so the columns line up from one row to the next. */
+.bpRow {
+  grid-template-columns: 5.6em minmax(0, 1fr) 8.5em minmax(0, 0.6fr) 8.5em 11.5em;
+  column-gap: 10px;
+  grid-template-areas: "date title state sheets delta track";
+}
+
+.sheetRow {
+  grid-template-columns: minmax(0, 1.1fr) 7em minmax(0, 1fr) 100px;
+  grid-template-areas: "title counts commit size";
+}
+
 .date {
+  grid-area: date;
   font-family: var(--font-mono);
   font-size: 0.82em;
   color: var(--text-muted);
   white-space: nowrap;
 }
 
-.rowMain {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-  grid-column: 1 / 3;
-}
-
-.date + .rowMain {
-  grid-column: 2;
-}
-
 .rowTitle {
+  grid-area: title;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 500;
+}
+
+.ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.route {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.state {
+  grid-area: state;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.sheets {
+  grid-area: sheets;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  color: var(--text-muted);
+}
+
+.deltaCell {
+  grid-area: delta;
+  justify-self: end;
+}
+
+.trackCell {
+  grid-area: track;
+  justify-self: end;
+}
+
+.counts,
+.noteCount {
+  grid-area: counts;
+  font-size: 0.82em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.noteCount {
+  grid-column: 2 / -1;
+}
+
+.commit {
+  grid-area: commit;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--text-muted);
+}
+
+.sizeCell {
+  grid-area: size;
+}
+
+.touching {
+  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 10px;
-  font-weight: 500;
-}
-
-.route {
-  font-family: var(--font-mono);
   font-size: 0.82em;
-  font-weight: 400;
   color: var(--text-muted);
 }
 
@@ -150,17 +233,6 @@
   gap: 4px 10px;
   font-size: 0.82em;
   color: var(--text-muted);
-}
-
-.rowSide {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}
-
-.sizeCell {
-  width: 140px;
 }
 
 .openItem {
@@ -205,21 +277,24 @@
   cursor: pointer;
 }
 
-@media (max-width: 700px) {
-  .row {
-    grid-template-columns: minmax(0, 1fr);
+/* The column narrows when the panel is open: follow its width, not the window's. */
+@container (max-width: 760px) {
+  .bpRow {
+    grid-template-columns: max-content minmax(0, 1fr);
+    grid-template-areas: "date title" "state sheets" "delta track";
   }
 
-  .rowMain,
-  .date + .rowMain {
-    grid-column: 1;
+  .deltaCell,
+  .trackCell {
+    justify-self: start;
   }
 
-  .rowSide {
-    align-items: flex-start;
+  .sheetRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "title counts" "commit size";
   }
 
   .sizeCell {
-    width: 100%;
+    width: 80px;
   }
 }
