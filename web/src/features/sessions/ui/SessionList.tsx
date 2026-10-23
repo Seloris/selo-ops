@@ -4,6 +4,8 @@ import { OpenIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
 import { AgeLabel, AwaitedIcon, FilesCount, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import { awaitedOf, requestText } from "./sessionText.ts";
+import { totalTokens } from "./usage.ts";
+import { TokenCount } from "./UsageParts.tsx";
 import styles from "./SessionList.module.css";
 
 export interface SessionActions {
@@ -33,6 +35,7 @@ export function ColumnHead(layout: Layout) {
       <span>{t("sessions.columns.awaited")}</span>
       <span />
       <span className={styles.end}>{t("sessions.columns.age")}</span>
+      <span className={styles.end}>{t("sessions.columns.tokens")}</span>
     </div>
   );
 }
@@ -82,6 +85,7 @@ export function SessionList({
                 <AgeLabel session={s} now={now} />
                 <span className={styles.warningSlot}>{outdatedIds.has(s.id) && <PluginWarning session={s} />}</span>
               </span>
+              <span className={styles.tokens}>{s.usage && <TokenCount count={totalTokens(s.usage.tokens)} />}</span>
             </button>
             <IconButton label={t("sessions.actions.open")} tone="accent" onClick={() => actions.onResume(s)}>
               <OpenIcon />

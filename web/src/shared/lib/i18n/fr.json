@@ -54,6 +54,7 @@
   "sessions.columns.type": "Type",
   "sessions.columns.request": "Demande",
   "sessions.columns.awaited": "Ce qui est attendu",
+  "sessions.columns.tokens": "Tokens",
   "sessions.columns.age": "Depuis",
 
   "sessions.state.awaiting-answer": "Attend ta réponse",

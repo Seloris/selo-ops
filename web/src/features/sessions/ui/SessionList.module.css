@@ -1,21 +1,21 @@
 /* State, project and type give way first when the list runs short of room, so the age never spills over the open button. */
 .withProject {
-  --cols: minmax(0, 176px) minmax(0, 124px) minmax(0, 84px) minmax(0, 1fr) minmax(0, 1.2fr) 44px 220px;
+  --cols: minmax(0, 176px) minmax(0, 124px) minmax(0, 84px) minmax(0, 1fr) minmax(0, 1.2fr) 44px 190px 56px;
   --col-gap: 16px;
 }
 
 .noProject {
-  --cols: minmax(0, 176px) minmax(0, 84px) minmax(0, 1fr) minmax(0, 1.2fr) 44px 220px;
+  --cols: minmax(0, 176px) minmax(0, 84px) minmax(0, 1fr) minmax(0, 1.2fr) 44px 190px 56px;
   --col-gap: 16px;
 }
 
 .withProject.narrow {
-  --cols: minmax(0, 150px) minmax(0, 108px) minmax(0, 72px) minmax(0, 1fr) minmax(0, 1.1fr) 40px 196px;
+  --cols: minmax(0, 150px) minmax(0, 108px) minmax(0, 72px) minmax(0, 1fr) minmax(0, 1.1fr) 40px 170px 52px;
   --col-gap: 12px;
 }
 
 .noProject.narrow {
-  --cols: minmax(0, 150px) minmax(0, 72px) minmax(0, 1fr) minmax(0, 1.1fr) 40px 196px;
+  --cols: minmax(0, 150px) minmax(0, 72px) minmax(0, 1fr) minmax(0, 1.1fr) 40px 170px 52px;
   --col-gap: 12px;
 }
 
@@ -151,6 +151,15 @@
   display: flex;
 }
 
+.tokens {
+  justify-self: end;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
 .age {
   justify-self: end;
   min-width: 0;
@@ -191,7 +200,8 @@
   .main > .muted,
   .main > .type,
   .main > .awaited,
-  .main > .files {
+  .main > .files,
+  .main > .tokens {
     display: none;
   }
 }
