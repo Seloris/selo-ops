@@ -28,7 +28,13 @@ const durationsOf = (trail: TrailEntry[]) =>
     return next ? Date.parse(next.at) - Date.parse(e.at) : null;
   });
 
-export const hasTrail = (s: Session) => !s.isOutsideSelo && s.trail.length > 0;
+const SKILL_LANES: Readonly<Record<string, string>> = { fastlane: "fastlane", blueprint: "blueprint", build: "blueprint", autopilot: "autopilot" };
+
+// A line's skill in its lane's colour (sessions-live FR-29's tokens); neutral for the others.
+export const skillColor = (skill: string | null): string | undefined =>
+  skill && SKILL_LANES[skill] ? `var(--lane-${SKILL_LANES[skill]})` : undefined;
+
+export const hasTrail =(s: Session) => !s.isOutsideSelo && s.trail.length > 0;
 
 export function trailLines(trail: TrailEntry[], now: number): TrailLine[] {
   const durations = durationsOf(trail);

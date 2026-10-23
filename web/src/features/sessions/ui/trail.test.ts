@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/sessionView.ts";
-import { hasTrail, MAX_WEIGHT, trailLines, waitingText, type TrailEntry } from "./trail.ts";
+import { hasTrail, MAX_WEIGHT, skillColor, trailLines, waitingText, type TrailEntry } from "./trail.ts";
+
+describe("skillColor", () => {
+  it("colours the lane skills, build as a blueprint, and leaves the others neutral", () => {
+    // Act
+    const colors = ["fastlane", "blueprint", "build", "autopilot", "review", null].map(skillColor);
+
+    // Assert
+    expect(colors).toEqual(["var(--lane-fastlane)", "var(--lane-blueprint)", "var(--lane-blueprint)", "var(--lane-autopilot)", undefined, undefined]);
+  });
+});
 
 const T0 = Date.parse("2026-10-23T09:00:00.000Z");
 const at = (minutes: number) => new Date(T0 + minutes * 60_000).toISOString();

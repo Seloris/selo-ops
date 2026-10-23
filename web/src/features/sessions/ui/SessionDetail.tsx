@@ -9,7 +9,7 @@ import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
-import { hasTrail, trailLines, waitingText } from "./trail.ts";
+import { hasTrail, skillColor, trailLines, waitingText } from "./trail.ts";
 import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
@@ -141,7 +141,11 @@ export function SessionDetail({
             >
               <StatusDot tone={l.tone} />
             </span>
-            <span className={styles.line}>{[l.entry.skill, l.stepText].filter(Boolean).join(" · ")}</span>
+            <span className={styles.line}>
+              <span style={{ color: skillColor(l.entry.skill) }}>{l.entry.skill}</span>
+              {l.entry.skill && l.stepText && " · "}
+              {l.stepText}
+            </span>
             <span className={styles.status}>
               {l.isPastWork ? <span /> : <StateLabel session={{ ...s, state: l.entry.phase, isClosed: false, isArchived: false }} />}
               {/* Both always there, empty when they have nothing to say, so every line fills the grid's five columns. */}
