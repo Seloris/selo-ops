@@ -71,6 +71,17 @@ describe("sessions routes — run trail", () => {
     expect(session).toMatchObject({ flow, skill });
   });
 
+  it("takes the skill a 2.5.0 hook gave a run opened before 2.5.0, its flow read from the lane", async () => {
+    // Arrange
+    ctx.seed.session(buildSessionFile({ current: buildRun({ lane: "build", skill: "review" }) }));
+
+    // Act
+    const session = await only();
+
+    // Assert
+    expect(session).toMatchObject({ flow: "blueprint", skill: "review" });
+  });
+
   it("keeps a run that has no lane at all", async () => {
     // Arrange
     const run: Record<string, unknown> = { ...buildRun(), flow: "fastlane", skill: "fastlane" };

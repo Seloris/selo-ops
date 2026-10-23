@@ -118,7 +118,7 @@ const SESSIONS: DemoSession[] = [
     subagents: [{ type: "selo:runner", task: "npx vitest run checkout", phase: "working" }],
     files: ["web/src/features/checkout/pages/CheckoutPage.tsx", "web/src/features/checkout/ui/AddressForm.tsx"] },
   { id: "c2d94f10-37a8-4e5b-a1c6-90e4b7d3f285", project: "harbor-mobile", flow: "free", skill: "review", phase: "working", age: 21,
-    trail: [[620, null, null, null, "working"], [600, "review", null, "review", "working"]],
+    trail: [[620, null, null, null, "working"], [600, "review", null, null, "working"]],
     request: "Relire le travail d’hier sur la synchro des photos",
     model: OPUS, effort: "medium", perms: "default", blockers: ["not-done", "subagents"],
     subagents: [{ type: "selo:reviewer", task: "relecture de 4 commits", phase: "working" }] },

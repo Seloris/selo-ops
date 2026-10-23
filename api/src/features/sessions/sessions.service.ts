@@ -83,7 +83,8 @@ const SKILL_LANES = new Set(["fastlane", "blueprint", "build", "autopilot", "rev
 function workOf(run: ExportRun): { flow: string; skill: string | null } {
   if (run.flow) return { flow: run.flow, skill: run.skill ?? null };
   const lane = run.lane ?? "free";
-  return { flow: LANE_FLOWS[lane] ?? "free", skill: SKILL_LANES.has(lane) ? lane : null };
+  // A run opened before 2.5.0 may get its skill from a 2.5.0 hook, its flow never.
+  return { flow: LANE_FLOWS[lane] ?? "free", skill: run.skill ?? (SKILL_LANES.has(lane) ? lane : null) };
 }
 
 function toSession(
