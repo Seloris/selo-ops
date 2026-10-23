@@ -10,7 +10,6 @@ import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
 import { hasTrail, trailLines, waitingText } from "./trail.ts";
-import { dayTime } from "../../../shared/lib/dayTime.ts";
 import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
@@ -131,20 +130,25 @@ export function SessionDetail({
       {...fold("trail")}
     >
       <ul className={`${styles.lines} ${styles.trail}`}>
-        {s.isTrailCut && <li className={styles.muted}>{t("sessions.trail.cut")}</li>}
-        {trail.map((l, i) => (
+        {/* Newest first: the line under a dot is the earlier step's, which lasted until this one. */}
+        {trail.map((l, i) => ({ l, i, earlier: trail[i - 1] })).reverse().map(({ l, i, earlier }) => (
           <li key={i}>
-            <span className={styles.hash}>{dayTime(l.entry.at, now).time}</span>
-            <span className={`${styles.node} ${styles[`rail-${l.tone}`]}`} style={{ "--weight": l.weight } as CSSProperties}>
+            <span className={styles.hash}>{new Date(l.entry.at).toLocaleTimeString("fr-FR")}</span>
+            <span
+              className={`${styles.node} ${earlier ? styles[`rail-${earlier.tone}`] : styles.end}`}
+              style={{ "--weight": earlier?.weight ?? 0 } as CSSProperties}
+            >
               <StatusDot tone={l.tone} />
             </span>
             <span className={styles.line}>{[l.entry.skill, l.stepText].filter(Boolean).join(" · ")}</span>
             <span className={styles.status}>
               <StateLabel session={{ ...s, state: l.entry.phase, isClosed: false, isArchived: false }} />
-              {l.durationText && <span className={styles.duration}>{l.durationText}</span>}
+              {/* Always there, empty on the newest line, so every line fills the grid's five columns. */}
+              <span className={styles.duration}>{l.durationText}</span>
             </span>
           </li>
         ))}
+        {s.isTrailCut && <li className={styles.muted}>{t("sessions.trail.cut")}</li>}
       </ul>
     </Section>
   );

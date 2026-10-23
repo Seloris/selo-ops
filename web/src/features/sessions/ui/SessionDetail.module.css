@@ -397,12 +397,12 @@
   background: repeating-linear-gradient(var(--tone) 0 4px, transparent 4px 7px);
 }
 
-.trail li:last-child .node::after {
+.node.end::after {
   display: none;
 }
 
 /* Only the dot of the line still running pulses. */
-.trail li:not(:last-child) .node > span {
+.trail li:not(:first-child) .node > span {
   animation: none;
 }
 

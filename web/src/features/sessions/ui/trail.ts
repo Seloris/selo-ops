@@ -2,7 +2,7 @@ import { t } from "../../../shared/lib/i18n/index.ts";
 import type { Session } from "../data/sessionView.ts";
 import { age, stepText } from "./sessionText.ts";
 
-// sessions-live FR-41: the current run's history as the export keeps it, oldest first.
+// sessions-live FR-41: the current run's history as the export keeps it, oldest first (displayed newest first).
 
 export type TrailEntry = Session["trail"][number];
 
