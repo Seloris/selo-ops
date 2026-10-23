@@ -21,5 +21,6 @@ What holds for a project on every page: its terms and its rules, as Selo Ops rea
 - **BR-03** — A blueprint's progress is its stages, each ticked or not and named by its component, then its review, then its spec merged, as the export gives them; a legacy blueprint has no progress.
 - **BR-04** — A project whose export holds no selo planning (no spec nor blueprint read, and no manifest read without error) is still listed, with its git counts only; an export error with its planning read leaves the project open, the error shown.
 - **BR-05** — A project's slots are the run files the selo plugin writes in its repository's git folder (`selo/slots/{n}.json`), read, never written, those of its own checkouts only, each with its checkout's branch, its components' names, modes and URLs; a run is « En cours » while it is not stopped, was recorded since the machine last booted and its supervisor or one of its components is still alive, else « Arrêté », so that a run left by a crash or a reboot never shows as running.
+- **BR-06** — A page spec is a stub (« À bootstrapper ») when its file holds the line `Status: to bootstrap`: its page's code exists, its spec is not written yet.
 
 Retired:

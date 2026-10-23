@@ -97,6 +97,7 @@ describe("projects", () => {
           file: ".planning/pages/home.md",
           title: "Home",
           route: "/",
+          isStub: false,
           frCount: 3,
           brCount: 0,
           nextFr: "FR-04",
@@ -238,6 +239,20 @@ describe("projects", () => {
 
       // Assert
       expect(project?.blueprints[0]).toMatchObject({ state: "legacy", stages: [], nextPrompt: null });
+    });
+
+    it("flags a page stub from its file's status line", async () => {
+      // Arrange
+      const root = slash(ctx.code.repo("ledger-api"));
+      ctx.seed.project(buildProjectFile({ root, sheets: [buildExportSheet(), buildExportSheet({ slug: "balance", file: ".planning/pages/balance.md" })] }));
+      writeFile(root, ".planning/pages/home.md", "# Home\n\nRoute: `/`\n\n- **FR-01** — A list.\n");
+      writeFile(root, ".planning/pages/balance.md", "# Balance\n\nRoute: `/balance`\nStatus: to bootstrap\n");
+
+      // Act
+      const [project] = await list();
+
+      // Assert
+      expect(project?.sheets.map((s) => [s.slug, s.isStub])).toEqual([["home", false], ["balance", true]]);
     });
 
     it("counts the ideas and technical debts of the base checkout", async () => {

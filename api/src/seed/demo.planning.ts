@@ -14,6 +14,8 @@ interface DemoSheet {
   intro: string;
   frs?: string[];
   brs?: string[];
+  // A page stub: `Status: to bootstrap` under its route, nothing else.
+  isStub?: boolean;
   // The last commit that touched it: its subject and how long ago, in seconds.
   commit: [string, number];
 }
@@ -105,6 +107,7 @@ export const DEMO_PLANNING: Record<string, DemoPlanning> = {
     sheets: [
       { kind: "page", slug: "catalog", title: "Catalog", route: "/", intro: "The shop's catalog.", frs: ["Products show in a grid with their price.", "A size filter narrows the grid."], commit: ["feat(catalog): size filter", 9 * MINUTE] },
       { kind: "page", slug: "cart", title: "Cart", route: "/cart", intro: "The customer's cart.", frs: ["The cart lists its lines with their quantity.", "A promo code field applies a discount."], commit: ["feat(cart): promo code", 6 * MINUTE] },
+      { kind: "page", slug: "account", title: "Account", route: "/account", intro: "", isStub: true, commit: ["chore: set up selo", 3 * DAY] },
     ],
     blueprints: [
       { name: "2026-10-22-one-step-checkout", title: "One-step checkout", state: "building", pages: ["cart"], domain: [], components: ["api", "web"], worktree: "one-step-checkout",
@@ -151,6 +154,7 @@ const blueprintFile = (b: DemoBlueprint) => `.planning/blueprints/${b.name}.md`;
 const shaOf = (text: string) => [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7).toString(16).padStart(7, "0").slice(0, 7);
 
 function sheetText(s: DemoSheet): string {
+  if (s.isStub) return `# ${s.title}\n\nRoute: \`${s.route ?? ""}\`\nStatus: to bootstrap\n`;
   const frs = (s.frs ?? []).map((t, i) => `- **${id("FR", i)}** — ${t}`);
   const brs = (s.brs ?? []).map((t, i) => `- **${id("BR", i)}** — ${t}`);
   return [

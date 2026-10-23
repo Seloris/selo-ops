@@ -18,6 +18,8 @@ export const sheetSchema = z
     file: z.string(),
     title: z.string(),
     route: z.string().nullable(),
+    // A page stub: its file holds the line `Status: to bootstrap`, its spec is not written yet.
+    isStub: z.boolean(),
     frCount: z.number().int(),
     brCount: z.number().int(),
     nextFr: z.string(),

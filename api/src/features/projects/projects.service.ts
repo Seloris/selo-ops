@@ -47,13 +47,16 @@ const touching = (s: ExportSheet, blueprints: Blueprint[]) => {
     .map((b) => b.name);
 };
 
-const toSheet = (s: ExportSheet, blueprints: Blueprint[]): SpecSheet => ({
+const STUB_LINE = /^Status: to bootstrap\s*$/m;
+
+const toSheet = (s: ExportSheet, blueprints: Blueprint[], text: string | null): SpecSheet => ({
   kind: s.kind,
   slug: s.slug,
   component: s.component ?? null,
   file: s.file,
   title: s.title,
   route: s.route ?? null,
+  isStub: text !== null && STUB_LINE.test(text),
   frCount: s.ids.fr,
   brCount: s.ids.br,
   nextFr: s.ids.next.fr,
@@ -136,7 +139,7 @@ function toProject(checkouts: Checkouts, liveSessions: SessionFile[], planning: 
     hasPlanning,
     error: base.error ?? null,
     worktrees: worktrees.map((w) => ({ root: w.root, branch: w.branch ?? null, aheadCount: w.aheadCount ?? null, changedCount: w.changedCount ?? null })),
-    sheets: hasPlanning ? base.sheets.map((s) => toSheet(s, blueprints)) : [],
+    sheets: hasPlanning ? base.sheets.map((s) => toSheet(s, blueprints, planning.read(base.root, s.file))) : [],
     blueprints,
     ideaCount: hasPlanning ? countItems(planning.read(base.root, IDEAS_FILE)) : 0,
     debtCount: hasPlanning ? countItems(planning.read(base.root, DEBT_FILE)) : 0,
