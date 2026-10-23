@@ -41,11 +41,11 @@ export function SessionCards({
             <button type="button" className={styles.main} onClick={() => actions.onOpen(s.id)} aria-current={s.id === selectedId || undefined}>
               <span className={styles.head}>
                 <StateLabel session={s} />
-                {outdatedIds.has(s.id) && <PluginWarning session={s} />}
                 {showProject && <span className={styles.meta}>· {projectName(s.projectId)}</span>}
                 <span className={`${styles.meta} ${styles.mono}`}>· <LaneLabel session={s} /></span>
                 <span className={styles.end}>
                   <AgeLabel session={s} now={now} />
+                  {outdatedIds.has(s.id) && <PluginWarning session={s} />}
                 </span>
               </span>
               <span className={styles.request}>{requestText(s)}</span>

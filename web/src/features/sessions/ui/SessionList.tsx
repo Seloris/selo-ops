@@ -63,7 +63,6 @@ export function SessionList({
             <button type="button" className={styles.main} onClick={() => actions.onOpen(s.id)} title={requestText(s)} aria-current={s.id === selectedId || undefined}>
               <span className={styles.state}>
                 <StateLabel session={s} />
-                {outdatedIds.has(s.id) && <PluginWarning session={s} />}
               </span>
               {layout.showProject && <span className={styles.muted}>{projectName(s.projectId)}</span>}
               <span className={styles.type}><LaneLabel session={s} /></span>
@@ -79,6 +78,7 @@ export function SessionList({
               </span>
               <span className={styles.age}>
                 <AgeLabel session={s} now={now} />
+                <span className={styles.warningSlot}>{outdatedIds.has(s.id) && <PluginWarning session={s} />}</span>
               </span>
             </button>
             <IconButton label={t("sessions.actions.open")} tone="accent" onClick={() => actions.onResume(s)}>
