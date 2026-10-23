@@ -16,7 +16,7 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 - **FR-05** — « Projets » is a checklist of the projects with « Tous », each with its count of open sessions, all checked by default.
 - **FR-06** — « Afficher les fermées », unchecked by default, with its count, adds a « Fermées » block of the closed sessions not archived (`session` BR-03).
 - **FR-07** — The search filters on the request, the blueprint, the branch and the project, in every block.
-- **FR-08** — The view and the grouping are remembered in the browser; the project filter, « Afficher les fermées » and the search are not.
+- **FR-08** — The view, the grouping and the project filter (as the unchecked projects, so a new project shows) are remembered in the browser; « Afficher les fermées » and the search are not.
 
 ## Sessions
 

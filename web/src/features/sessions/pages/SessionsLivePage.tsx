@@ -48,6 +48,8 @@ interface Settings {
   grouping: Grouping;
   panelWidth: number | null;
   foldedSections: DetailSection[];
+  // The unchecked projects, not the checked ones: a project that appears later shows by default.
+  hiddenProjectIds: string[];
 }
 
 function readSettings(): Settings {
@@ -58,6 +60,7 @@ function readSettings(): Settings {
     grouping: o.grouping === "status" || o.grouping === "none" ? o.grouping : "project",
     panelWidth: parsePanelWidth(o.panelWidth),
     foldedSections: parseFoldedSections(o.foldedSections),
+    hiddenProjectIds: Array.isArray(o.hiddenProjectIds) ? o.hiddenProjectIds.filter((id): id is string => typeof id === "string") : [],
   };
 }
 
@@ -82,7 +85,6 @@ export function SessionsLivePage() {
   const selectedId = params.get("session");
 
   const [settings, setSettings] = useState(readSettings);
-  const [projectIds, setProjectIds] = useState<Set<string> | null>(null);
   const [isProjectsOpen, setProjectsOpen] = useState(false);
   const [showClosed, setShowClosed] = useState(false);
   const [search, setSearch] = useState("");
@@ -230,11 +232,14 @@ export function SessionsLivePage() {
       unarchive.mutate(id, { onSuccess: () => showToast({ title: t("sessions.toast.unarchived"), hint: t("sessions.toast.unarchivedHint") }), onError: failed }),
   };
 
+  // The checked projects; null while none is unchecked (every project, the ones to come included).
+  const hidden = new Set(settings.hiddenProjectIds);
+  const projectIds = projects.some((p) => hidden.has(p.id)) ? new Set(projects.filter((p) => !hidden.has(p.id)).map((p) => p.id)) : null;
+
   const toggleProject = (id: string) => {
-    const current = projectIds ?? new Set(projects.map((p) => p.id));
-    const next = new Set(current);
+    const next = new Set(settings.hiddenProjectIds);
     if (!next.delete(id)) next.add(id);
-    setProjectIds(next.size === projects.length ? null : next);
+    updateSettings({ hiddenProjectIds: [...next] });
   };
 
   const filters: Filters = { projectIds, search };
@@ -294,7 +299,7 @@ export function SessionsLivePage() {
         projects={projects.map((p) => ({ project: p, openCount: openByProject.get(p.id) ?? 0 }))}
         projectIds={projectIds}
         onToggleProject={toggleProject}
-        onAllProjects={() => setProjectIds(null)}
+        onAllProjects={() => updateSettings({ hiddenProjectIds: [] })}
         isProjectsOpen={isProjectsOpen}
         onToggleProjects={() => setProjectsOpen((o) => !o)}
         onCloseProjects={() => setProjectsOpen(false)}
