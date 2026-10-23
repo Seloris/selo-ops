@@ -9,7 +9,6 @@ import { SpecChip } from "../../../shared/ui/SpecKind.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import {
-  biggestSheet,
   blueprintLists,
   dateOf,
   isOpenBlueprint,
@@ -18,7 +17,7 @@ import {
   type ProjectOverview,
   type SpecSheet,
 } from "../data/projectView.ts";
-import { DeltaFigures, DoneSummary, HueChip, LiveSessions, ProgressTrack, SectionTitle, SizeBar, StateBar, StateTag, Tiles, type Hue, type LiveItem } from "./ProjectParts.tsx";
+import { DeltaFigures, DoneSummary, HueChip, LiveSessions, ProgressTrack, SectionTitle, StateBar, StateTag, Tiles, type Hue, type LiveItem } from "./ProjectParts.tsx";
 import styles from "./ProjectView.module.css";
 
 export const IDEAS_FILE = ".planning/ideas.md";
@@ -47,7 +46,6 @@ export function ProjectView({
   const open = p.blueprints.filter(isOpenBlueprint);
   const { listed, legacy } = blueprintLists(p.blueprints);
   const { pages, domains } = sheetLists(p.sheets);
-  const max = biggestSheet(p.sheets);
   const frs = p.sheets.reduce((n, s) => n + s.frCount, 0);
   const brs = p.sheets.reduce((n, s) => n + s.brCount, 0);
   const unknown = t("projects.view.unknown");
@@ -81,7 +79,6 @@ export function ProjectView({
 
   // One line per sheet; the open blueprints touching it, when any, on a second line.
   const sheetRow = (s: SpecSheet) => {
-    const commit = s.lastCommit && t("projects.specs.lastCommit", { age: ageOf(s.lastCommit.at), subject: s.lastCommit.subject });
     return (
       <li key={s.file}>
         <button type="button" className={`${rowClass(s.file)} ${styles.sheetRow}`} onClick={() => onOpenFile(s.file)} aria-current={openPath === s.file || undefined}>
@@ -92,11 +89,9 @@ export function ProjectView({
             {s.isStub && <Tag>{t("projects.specs.stub")}</Tag>}
           </span>
           <span className={styles.counts}>{t("projects.specs.counts", { fr: s.frCount, br: s.brCount })}</span>
-          <span className={`${styles.commit} ${styles.ellipsis}`} title={commit ?? undefined}>
-            {commit}
-          </span>
-          <span className={styles.sizeCell}>
-            <SizeBar fr={s.frCount} br={s.brCount} max={max} />
+          <span className={styles.questions}>{s.questionCount > 0 && tn("projects.specs.questions", s.questionCount)}</span>
+          <span className={styles.commit} title={s.lastCommit?.subject}>
+            {s.lastCommit && t("projects.specs.age", { age: ageOf(s.lastCommit.at) })}
           </span>
           {s.openBlueprints.length > 0 && (
             <span className={styles.touching}>
@@ -305,7 +300,7 @@ export function ProjectView({
       <section className={styles.section}>
         <SectionTitle icon={<TextFileIcon />} hue="specs" title={t("projects.specs.title")} count={p.sheets.length} />
         {p.sheets.length === 0 && <EmptyState>{t("projects.empty.specs")}</EmptyState>}
-        {p.sheets.length > 0 && headRow(["projects.columns.sheet", "projects.columns.counts", "projects.columns.size", "projects.columns.lastCommit"], styles.sheetRow)}
+        {p.sheets.length > 0 && headRow(["projects.columns.sheet", "projects.columns.counts", "projects.columns.questions", "projects.columns.lastCommit"], styles.sheetRow)}
         {pages.length > 0 && (
           <>
             <h4 className={styles.group}>

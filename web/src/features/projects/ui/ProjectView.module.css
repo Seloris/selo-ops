@@ -149,8 +149,8 @@
 }
 
 .sheetRow {
-  grid-template-columns: minmax(0, 26em) 7em 100px minmax(0, 1fr);
-  grid-template-areas: "title counts size commit";
+  grid-template-columns: minmax(0, 26em) 7em 11em minmax(0, 1fr);
+  grid-template-areas: "title counts questions commit";
 }
 
 /* The column names, laid out by the row's own grid. */
@@ -253,8 +253,11 @@
   color: var(--text-muted);
 }
 
-.sizeCell {
-  grid-area: size;
+.questions {
+  grid-area: questions;
+  font-size: 0.82em;
+  color: var(--text);
+  white-space: nowrap;
 }
 
 .touching {
@@ -340,10 +343,6 @@
 
   .sheetRow {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "title counts" "commit size";
-  }
-
-  .sizeCell {
-    width: 80px;
+    grid-template-areas: "title counts" "commit questions";
   }
 }

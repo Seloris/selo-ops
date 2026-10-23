@@ -149,16 +149,6 @@ export function DoneSummary({ blueprint }: { blueprint: Blueprint }) {
   );
 }
 
-// projects FR-09: a sheet's FRs and BRs, scaled to the biggest sheet.
-export function SizeBar({ fr, br, max }: { fr: number; br: number; max: number }) {
-  return (
-    <span className={styles.size} aria-hidden="true">
-      <span className={styles.fr} style={{ width: `${(fr / max) * 100}%` }} />
-      <span className={styles.br} style={{ width: `${(br / max) * 100}%` }} />
-    </span>
-  );
-}
-
 const HUES = {
   progress: styles.hueProgress,
   blueprints: styles.hueBlueprints,

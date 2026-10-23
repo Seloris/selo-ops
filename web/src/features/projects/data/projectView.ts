@@ -77,10 +77,6 @@ export function sheetLists(sheets: SpecSheet[]) {
   };
 }
 
-// The size bars of projects FR-09 are scaled to the biggest sheet; never zero, so an empty project divides safely.
-export const sheetSize = (s: SpecSheet) => s.frCount + s.brCount;
-export const biggestSheet = (sheets: SpecSheet[]) => Math.max(1, ...sheets.map(sheetSize));
-
 // The open blueprints touching a sheet, each with its delta lines for that sheet (projects FR-12).
 export function blueprintsTouching(blueprints: Blueprint[], sheet: SpecSheet) {
   const key = sheet.component ? `${sheet.component}/${sheet.slug}` : sheet.slug;

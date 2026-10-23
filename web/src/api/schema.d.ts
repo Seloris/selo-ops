@@ -355,6 +355,7 @@ export interface components {
             isStub: boolean;
             frCount: number;
             brCount: number;
+            questionCount: number;
             nextFr: string;
             nextBr: string;
             lastCommit: {

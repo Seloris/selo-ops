@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  biggestSheet,
   blueprintLists,
   blueprintsTouching,
   dateOf,
@@ -68,6 +67,7 @@ const sheet = (overrides: Partial<SpecSheet> = {}): SpecSheet => ({
   isStub: false,
   frCount: 3,
   brCount: 0,
+  questionCount: 0,
   nextFr: "FR-04",
   nextBr: "BR-01",
   lastCommit: null,
@@ -148,12 +148,6 @@ describe("sheetLists", () => {
     const sheets = [sheet({ kind: "domain", slug: "todo" }), sheet({ slug: "zz" }), sheet({ kind: "app", slug: "app" }), sheet({ slug: "aa" })];
     const { pages, domains } = sheetLists(sheets);
     expect([pages.map((s) => s.slug), domains.map((s) => s.slug)]).toEqual([["aa", "zz"], ["app", "todo"]]);
-  });
-});
-
-describe("biggestSheet", () => {
-  it("is the largest FR and BR count, never zero", () => {
-    expect([biggestSheet([sheet({ frCount: 2, brCount: 3 }), sheet()]), biggestSheet([])]).toEqual([5, 1]);
   });
 });
 
