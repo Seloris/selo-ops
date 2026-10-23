@@ -1,6 +1,7 @@
 import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
+import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { useId, type ReactNode } from "react";
 import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, NoteIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
@@ -167,15 +168,13 @@ export function SessionDetail({
           </span>
           <span className={styles.headButtons}>
             <span className={styles.fullscreen}>
-              <Button size="sm" aria-pressed={isFullscreen} title={isFullscreen ? t("sessions.detail.exitFullscreenHint") : t("sessions.detail.fullscreenHint")} onClick={onToggleFullscreen}>
+              <IconButton label={isFullscreen ? t("sessions.detail.exitFullscreenHint") : t("sessions.detail.fullscreenHint")} aria-pressed={isFullscreen} onClick={onToggleFullscreen}>
                 {isFullscreen ? <CollapseIcon /> : <ExpandIcon />}
-                {isFullscreen ? t("sessions.detail.exitFullscreen") : t("sessions.detail.fullscreen")}
-              </Button>
+              </IconButton>
             </span>
-            <Button size="sm" title={t("sessions.detail.closeHint")} onClick={onClose}>
+            <IconButton label={t("sessions.detail.closeHint")} onClick={onClose}>
               <CloseIcon />
-              {t("sessions.detail.close")}
-            </Button>
+            </IconButton>
           </span>
         </div>
         <h2 className={styles.title}>{requestText(s)}</h2>
@@ -189,6 +188,7 @@ export function SessionDetail({
             </span>
           )}
           <span className={styles.mono}><LaneLabel session={s} /></span>
+          {(s.model || s.effort) && <span className={styles.mono}>{[s.model, s.effort].filter(Boolean).join(" · ")}</span>}
           <span>{createdText(s.createdAt, now)}</span>
           <span>{t("sessions.detail.updated", { age: age(ageMs({ ...s, isArchived: false }, now)) })}</span>
         </div>
