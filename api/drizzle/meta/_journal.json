@@ -15,6 +15,13 @@
       "when": 1792680439118,
       "tag": "0001_desktop_session_links",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792745458325,
+      "tag": "0002_session_notes",
+      "breakpoints": true
     }
   ]
 }

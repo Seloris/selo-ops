@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
-import { desktopSessionLinks, sessionArchives, type DesktopSessionLink, type SessionArchive } from "./sessions.table.js";
+import { desktopSessionLinks, sessionArchives, sessionNotes, type DesktopSessionLink, type SessionArchive, type SessionNote } from "./sessions.table.js";
 
 export interface SessionArchiveRepository {
   list(): Promise<SessionArchive[]>;
@@ -37,6 +37,27 @@ export function createDesktopSessionLinkRepository(db: Database): DesktopSession
         .insert(desktopSessionLinks)
         .values(links)
         .onConflictDoUpdate({ target: desktopSessionLinks.sessionId, set: { desktopSessionId: sql`excluded.desktop_session_id` } });
+    },
+  };
+}
+
+export interface SessionNoteRepository {
+  list(): Promise<SessionNote[]>;
+  save(note: SessionNote): Promise<void>;
+  remove(sessionId: string): Promise<void>;
+}
+
+export function createSessionNoteRepository(db: Database): SessionNoteRepository {
+  return {
+    list: () => db.select().from(sessionNotes),
+    save: async (note) => {
+      await db
+        .insert(sessionNotes)
+        .values(note)
+        .onConflictDoUpdate({ target: sessionNotes.sessionId, set: { text: note.text, updatedAt: note.updatedAt } });
+    },
+    remove: async (sessionId) => {
+      await db.delete(sessionNotes).where(eq(sessionNotes.sessionId, sessionId));
     },
   };
 }

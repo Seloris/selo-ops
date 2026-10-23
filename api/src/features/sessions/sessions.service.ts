@@ -4,7 +4,7 @@ import { desktopSessionIdOf, toDesktopLink, type DesktopSessionReader } from "./
 import type { ExportRun, ExportUsage, OpsExportReader, ProjectFile, SessionFile } from "./sessions.export.js";
 import type { InstalledPluginReader } from "./sessions.plugins.js";
 import type { GitPlace, OutsideSession, OutsideSessionReader, PermissionWait } from "./sessions.outside.js";
-import type { DesktopSessionLinkRepository, SessionArchiveRepository } from "./sessions.repository.js";
+import type { DesktopSessionLinkRepository, SessionArchiveRepository, SessionNoteRepository } from "./sessions.repository.js";
 import type { SessionArchive } from "./sessions.table.js";
 import { closeBlockerSchema, type CloseBlocker, type Project, type Session, type SessionsResponse, type Usage } from "./sessions.schema.js";
 
@@ -87,7 +87,7 @@ function toSession(
   transcriptStart: number | undefined,
   permissionWait: PermissionWait | undefined,
   isAnswerWait: boolean,
-): Session {
+): Omit<Session, "note"> {
   // An archive covers the run it was made on: a new run brings the session back (`session` BR-09).
   const isArchived = archive !== undefined && archive.runId === current.id;
   const ownProject = projectFiles.find((p) => norm(p.root) === norm(file.root));
@@ -163,7 +163,7 @@ const projectIdOfOutside = (outside: OutsideSession) => outside.git?.repo ?? out
 // `session` BR-09: the last person prompt starts a run; before any, the process's start does.
 const runIdOf = (outside: OutsideSession) => outside.transcript?.runKey ?? `started:${outside.status.startedAt}`;
 
-function toOutsideSession(outside: OutsideSession, archive: SessionArchive | undefined): Session {
+function toOutsideSession(outside: OutsideSession, archive: SessionArchive | undefined): Omit<Session, "note"> {
   const { status, transcript } = outside;
   const isArchived = archive !== undefined && archive.runId === runIdOf(outside);
   // `statusUpdatedAt` moves only when the status changes: the transcript tells a turn that keeps working.
@@ -219,6 +219,7 @@ export function createSessionService({
   opsExport,
   outsideSessions,
   archives,
+  notes,
   desktopSessions,
   desktopLinks,
   installedPlugins,
@@ -227,6 +228,7 @@ export function createSessionService({
   opsExport: OpsExportReader;
   outsideSessions: OutsideSessionReader;
   archives: SessionArchiveRepository;
+  notes: SessionNoteRepository;
   desktopSessions: DesktopSessionReader;
   desktopLinks: DesktopSessionLinkRepository;
   installedPlugins: InstalledPluginReader;
@@ -271,6 +273,8 @@ export function createSessionService({
       const open = withRun.filter(({ file }) => file.status !== "ended").map(({ file: { sessionId, root, rootKey } }) => ({ sessionId, root, rootKey }));
       const { outside, permissionWaits, answerWaits } = outsideSessions.read({ exported: exportedIds(sessions, deletedSessionIds), open, now: clock.now().getTime() });
       const byId = new Map((await archives.list()).map((a) => [a.sessionId, a]));
+      const noteOf = new Map((await notes.list()).map((n) => [n.sessionId, n.text]));
+      const withNote = (session: Omit<Session, "note">): Session => ({ ...session, note: noteOf.get(session.id) ?? null });
       const desktopIds = await desktopSessionIds(new Set(withRun.map(({ file }) => file.sessionId)));
       const exportIds = withRun.map(({ file }) => projectIdOf(file, projects));
       const exportProjects = new Set(exportIds);
@@ -278,7 +282,7 @@ export function createSessionService({
       return {
         sessions: [
           ...withRun.map(({ file, current }) =>
-            toSession(
+            withNote(toSession(
               file,
               current,
               byId.get(file.sessionId),
@@ -287,9 +291,9 @@ export function createSessionService({
               transcriptStarts.get(file.sessionId),
               permissionWaits.get(file.sessionId),
               answerWaits.has(file.sessionId),
-            ),
+            )),
           ),
-          ...outside.map((o) => toOutsideSession(o, byId.get(o.status.sessionId))),
+          ...outside.map((o) => withNote(toOutsideSession(o, byId.get(o.status.sessionId)))),
         ],
         projects: projectsOf([...exportIds, ...outside.map(projectIdOfOutside)], projects, outsideGit),
         plugins: installedPlugins.read(),
@@ -304,6 +308,13 @@ export function createSessionService({
     async unarchive(id: string): Promise<void> {
       findRun(id);
       await archives.remove(id);
+    },
+
+    // `session` BR-21: one note per session, kept across runs; an empty text removes it.
+    async saveNote(id: string, text: string): Promise<void> {
+      findRun(id);
+      if (text === "") await notes.remove(id);
+      else await notes.save({ sessionId: id, text, updatedAt: clock.now() });
     },
   };
 }

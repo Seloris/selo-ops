@@ -70,6 +70,12 @@
           "canArchive": {
             "type": "boolean"
           },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "question": {
             "type": [
               "string",
@@ -278,6 +284,7 @@
           "isArchived",
           "archivedAt",
           "canArchive",
+          "note",
           "question",
           "permissionTool",
           "pendingCommit",
@@ -717,6 +724,65 @@
         "responses": {
           "204": {
             "description": "Back in the list"
+          },
+          "404": {
+            "description": "The session is neither in the export nor running outside selo",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sessions/{id}/note": {
+      "put": {
+        "summary": "Save the session's note, kept across runs; an empty text removes it",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "text"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Saved, or removed"
+          },
+          "400": {
+            "description": "The text is missing or longer than 200 characters",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           },
           "404": {
             "description": "The session is neither in the export nor running outside selo",

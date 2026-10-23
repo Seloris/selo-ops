@@ -17,3 +17,12 @@ export const desktopSessionLinks = pgTable("desktop_session_links", {
 });
 
 export type DesktopSessionLink = typeof desktopSessionLinks.$inferSelect;
+
+// A short note the person keeps on a session, whatever its run (`session` BR-21).
+export const sessionNotes = pgTable("session_notes", {
+  sessionId: text().primaryKey(),
+  text: text().notNull(),
+  updatedAt: timestamp({ withTimezone: true }).notNull(),
+});
+
+export type SessionNote = typeof sessionNotes.$inferSelect;

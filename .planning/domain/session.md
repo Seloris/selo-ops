@@ -21,7 +21,7 @@ What holds for a Claude Code session on every page: its terms and its rules, as 
 
 ## Business rules
 
-- **BR-01** — Selo Ops reads the selo ops export (one file per session, one per project folder) and the status files and transcripts Claude Code writes, for the sessions outside selo (BR-12), for a permission wait (BR-16) and for a question the export missed (BR-17), and Claude Code's list of installed plugins, for the selo plugins' versions; it never writes to any of them, and its own data (archives, desktop links) lives apart.
+- **BR-01** — Selo Ops reads the selo ops export (one file per session, one per project folder) and the status files and transcripts Claude Code writes, for the sessions outside selo (BR-12), for a permission wait (BR-16) and for a question the export missed (BR-17), and Claude Code's list of installed plugins, for the selo plugins' versions; it never writes to any of them, and its own data (archives, notes, desktop links) lives apart.
 - **BR-02** — A session's state is the phase of its current run, unless it waits on a permission (BR-16) or on an answer the export missed (BR-17): « Attend ta réponse » (question asked), « Attend ta permission » (BR-16), « Commit à valider » (commit proposed), « Arrêtée » (error or interruption), « En cours » (Claude works), « Tour terminé » (turn ended with no question nor commit), « Job done » (JOB DONE footer), in that order of urgency; an open session whose run ended (« Tour terminé » or « Job done ») while a subagent of that run still works is « En cours ».
 - **BR-03** — A session is closed once the export marks it ended in Claude Code; it is open otherwise.
 - **BR-04** — A session is « à traiter » when it is open, not archived, and « Attend ta réponse », « Attend ta permission », « Commit à valider » or « Arrêtée ».
@@ -41,5 +41,6 @@ What holds for a Claude Code session on every page: its terms and its rules, as 
 - **BR-18** — A session's and a run's usage (API calls, tokens by kind: « Entrée », « Cache lu », « Cache écrit », « Sortie », and their split per model) are read from the export only, never counted by Selo Ops; a session outside selo (BR-12), a session written by an export older than 2.2.0, a run before its first stop, a subagent still working and a subagent stopped by Échap have none and show « — ».
 - **BR-19** — A run whose figures the export has not settled yet shows them tagged « provisoire », since they may still grow; a run whose figures cover only the end of an oversized transcript shows them tagged « partiel : 32 derniers Mo ».
 - **BR-20** — A session's model is the export's, else the top model of its latest main run that has usage, so that the list, the card and the detail agree; a subagent's model is the top model of its own usage (its real model).
+- **BR-21** — A session holds at most one note of the person, plain text of 200 characters at most, trimmed; unlike an archive (BR-09) it is kept across the session's runs, until the person clears it, and an empty text is no note.
 
 Retired:

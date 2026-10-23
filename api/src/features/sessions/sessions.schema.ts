@@ -70,6 +70,8 @@ export const sessionSchema = z
     isArchived: z.boolean(),
     archivedAt: z.iso.datetime().nullable(),
     canArchive: z.boolean(),
+    // `session` BR-21: the person's note on the session, null when none.
+    note: z.string().nullable(),
     question: z.string().nullable(),
     // `awaiting-permission` only: the shell command to allow, else the tool's name; null when the transcript names none.
     permissionTool: z.string().nullable(),
@@ -137,6 +139,10 @@ export const sessionsResponseSchema = z.object({
 
 export const sessionParamsSchema = z.object({ id: z.string().min(1) });
 
+export const NOTE_MAX = 200;
+// Trimmed before the length check; an empty text removes the note.
+export const noteBodySchema = z.object({ text: z.string().trim().max(NOTE_MAX) });
+
 export type Session = z.infer<typeof sessionSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type InstalledPlugin = z.infer<typeof installedPluginSchema>;
@@ -177,6 +183,18 @@ registry.registerPath({
   request: { params: sessionParamsSchema },
   responses: {
     204: { description: "Back in the list" },
+    404: problem("The session is neither in the export nor running outside selo"),
+  },
+});
+
+registry.registerPath({
+  method: "put",
+  path: "/v1/sessions/{id}/note",
+  summary: "Save the session's note, kept across runs; an empty text removes it",
+  request: { params: sessionParamsSchema, body: { content: { "application/json": { schema: noteBodySchema } } } },
+  responses: {
+    204: { description: "Saved, or removed" },
+    400: problem("The text is missing or longer than 200 characters"),
     404: problem("The session is neither in the export nor running outside selo"),
   },
 });

@@ -3,7 +3,7 @@ import { basename, dirname, join } from "node:path";
 import type { Database } from "../db/client.js";
 import type { ExportRun, ExportRunUsage, ExportUsage, ProjectFile, SessionFile } from "../features/sessions/sessions.export.js";
 import { normRoot, type RunningStatusFile } from "../features/sessions/sessions.outside.js";
-import { createDesktopSessionLinkRepository, createSessionArchiveRepository } from "../features/sessions/sessions.repository.js";
+import { createDesktopSessionLinkRepository, createSessionArchiveRepository, createSessionNoteRepository } from "../features/sessions/sessions.repository.js";
 import type { Clock } from "../shared/clock.js";
 
 // The demo's data, inserted at each start of `npm run demo`: each feature adds the rows its browser
@@ -37,6 +37,8 @@ interface DemoSession {
   commits?: { sha: string; subject: string }[];
   isClosed?: boolean;
   archivedAge?: number;
+  // The person's note on the session (`session` BR-21).
+  note?: string;
   // The shell command its running process waits on a permission dialog to run (`session` BR-16), since `age`.
   permission?: string;
   // Earlier free prompts, each a main run of its own before the current one (sessions-live FR-36); null when unreadable.
@@ -99,6 +101,7 @@ const SESSIONS: DemoSession[] = [
     request: "Refaire la page de paiement en une seule étape : adresse, livraison et carte sur le même écran, validation en direct de chaque champ, et un récapitulatif fixe à droite sur grand écran",
     blueprint: "2026-10-22-one-step-checkout", step: "stage:1", substep: "tests",
     model: OPUS, effort: "high", perms: "auto", blockers: ["not-done", "dirty-files", "subagents"],
+    note: "Après : vérifier le récap fixe sur iPad, puis demander la relecture à Inès",
     subagents: [{ type: "selo:runner", task: "npx vitest run checkout", phase: "working" }],
     files: ["web/src/features/checkout/pages/CheckoutPage.tsx", "web/src/features/checkout/ui/AddressForm.tsx"] },
   { id: "c2d94f10-37a8-4e5b-a1c6-90e4b7d3f285", project: "harbor-mobile", lane: "review", phase: "working", age: 21,
@@ -342,6 +345,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
   for (const p of projectFiles) writeJson(join(opsDir, "projects"), `${keyOf(p.root)}.json`, p);
 
   const archives = createSessionArchiveRepository(db);
+  const notes = createSessionNoteRepository(db);
   await createDesktopSessionLinkRepository(db).saveMany(
     SESSIONS.filter((s) => !CLI_SESSIONS.has(s.id)).map((s) => ({ sessionId: s.id, desktopSessionId: `local_${s.id}` })),
   );
@@ -383,6 +387,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
     writeJson(join(opsDir, "sessions"), `${s.id}.json`, file);
     if (s.permission !== undefined) seedPermissionWait(folders, file, s.permission, now - s.age * 1000);
     if (s.archivedAge !== undefined) await archives.save({ sessionId: s.id, runId: current.id, archivedAt: new Date(now - s.archivedAge * 1000) });
+    if (s.note !== undefined) await notes.save({ sessionId: s.id, text: s.note, updatedAt: new Date(now - s.age * 1000) });
   }
   seedOutside(folders, ROOT, now);
   seedInstalledPlugins(folders.claudePluginsFile, ROOT);

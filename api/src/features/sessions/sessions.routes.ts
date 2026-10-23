@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { inputOf, validate } from "../../shared/validate.js";
-import { sessionParamsSchema } from "./sessions.schema.js";
+import { noteBodySchema, sessionParamsSchema } from "./sessions.schema.js";
 import type { SessionService } from "./sessions.service.js";
 
 const byId = { params: sessionParamsSchema };
+const note = { params: sessionParamsSchema, body: noteBodySchema };
 
 // Public, like the whole application (see app.ts).
 export function sessionsRoutes({ sessions }: { sessions: SessionService }): Router {
@@ -17,6 +18,11 @@ export function sessionsRoutes({ sessions }: { sessions: SessionService }): Rout
   });
   router.delete("/v1/sessions/:id/archive", validate(byId), async (_req, res) => {
     await sessions.unarchive(inputOf<typeof byId>(res).params.id);
+    res.status(204).end();
+  });
+  router.put("/v1/sessions/:id/note", validate(note), async (_req, res) => {
+    const { params, body } = inputOf<typeof note>(res);
+    await sessions.saveNote(params.id, body.text);
     res.status(204).end();
   });
   return router;
