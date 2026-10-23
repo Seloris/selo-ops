@@ -99,10 +99,11 @@ export function DeltaFigures({ delta }: { delta: DeltaLine[] }) {
   const { added, changed, removed } = deltaSplit(delta);
   if (delta.length === 0) return null;
   const label = t("projects.delta.label", { added, changed, removed });
-  const figures = [added > 0 && `+${added}`, changed > 0 && `~${changed}`, removed > 0 && `−${removed}`].filter(Boolean).join(" ");
   return (
     <span className={styles.figures} role="img" aria-label={label} title={label}>
-      {figures}
+      {added > 0 && <span className={styles.addText}>+{added}</span>}
+      {changed > 0 && <span className={styles.changeText}>~{changed}</span>}
+      {removed > 0 && <span className={styles.removeText}>−{removed}</span>}
     </span>
   );
 }
@@ -123,9 +124,20 @@ export function DeltaBar({ delta }: { delta: DeltaLine[] }) {
   );
 }
 
-// projects FR-08: a « Terminé » blueprint's progress in one muted line, its track saying nothing more.
+// projects FR-08: a « Terminé » blueprint's progress in short: one filled pip per commit, then the review and the merge checked.
 export function DoneSummary({ blueprint }: { blueprint: Blueprint }) {
-  return <span className={styles.muted}>{tn("projects.progress.doneSummary", blueprint.stages.length)}</span>;
+  const count = blueprint.stages.length;
+  const label = tn("projects.progress.doneSummary", count);
+  return (
+    <span className={styles.track} style={colorStyle("done")} role="img" aria-label={label} title={label}>
+      {blueprint.stages.map((_, i) => (
+        <span key={i} className={`${styles.pip} ${styles.filled}`} />
+      ))}
+      <span className={styles.stage}>{tn("projects.progress.commits", count)}</span>
+      <span className={styles.check}>✓ {t("projects.progress.reviewed")}</span>
+      <span className={styles.check}>✓ {t("projects.progress.mergedDone")}</span>
+    </span>
+  );
 }
 
 // projects FR-09: a sheet's FRs and BRs, scaled to the biggest sheet.

@@ -143,7 +143,7 @@
 
 /* Fixed widths so the columns line up from one row to the next; the slack goes to the muted column, not the title. */
 .bpRow {
-  grid-template-columns: 5.6em minmax(0, 22em) 9.5em minmax(0, 1fr) 6em 14em;
+  grid-template-columns: 5.6em minmax(0, 18em) 8em minmax(0, 1fr) 7em 14em;
   column-gap: 10px;
   grid-template-areas: "date title state sheets delta track";
 }

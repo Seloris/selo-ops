@@ -96,6 +96,16 @@
   color: var(--text);
 }
 
+/* A done blueprint's review and merge, checked on a soft tint of its state. */
+.check {
+  padding: 1px 7px;
+  font-size: 0.74em;
+  white-space: nowrap;
+  color: var(--text);
+  background: color-mix(in srgb, var(--bp) 16%, transparent);
+  border-radius: var(--radius-pill);
+}
+
 /* The large track: one line per step, joined by a rule. */
 .steps {
   display: flex;
@@ -175,22 +185,36 @@
 }
 
 .added {
-  background: var(--text);
+  background: var(--delta-add);
 }
 
 .changed {
-  background: var(--text-muted);
+  background: var(--delta-change);
 }
 
 .removed {
-  background: color-mix(in srgb, var(--text-muted) 40%, transparent);
+  background: var(--delta-remove);
 }
 
 .figures {
+  display: inline-flex;
+  gap: 6px;
   font-family: var(--font-mono);
   font-size: 0.78em;
-  color: var(--text-muted);
+  font-weight: 600;
   white-space: nowrap;
+}
+
+.addText {
+  color: var(--delta-add);
+}
+
+.changeText {
+  color: var(--delta-change);
+}
+
+.removeText {
+  color: var(--delta-remove);
 }
 
 .size {

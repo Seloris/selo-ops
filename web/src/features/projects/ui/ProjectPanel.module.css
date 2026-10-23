@@ -195,13 +195,16 @@
   text-align: center;
 }
 
-.add,
+.add {
+  color: var(--delta-add);
+}
+
 .change {
-  color: var(--text);
+  color: var(--delta-change);
 }
 
 .remove {
-  color: var(--text-muted);
+  color: var(--delta-remove);
 }
 
 .id {
