@@ -1,4 +1,5 @@
 import { mkdirSync, utimesSync, writeFileSync } from "node:fs";
+import { uptime } from "node:os";
 import { basename, dirname, join } from "node:path";
 import type { Database } from "../db/client.js";
 import type { ExportRun, ExportRunUsage, ExportUsage, ProjectFileInput, SessionFile } from "../features/sessions/sessions.export.js";
@@ -354,6 +355,19 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
       selo: "2.4.0", baseBranch: "main", aheadCount: null, unpushedCount: 2, error: null, sheets: [], blueprints: [] },
   ];
   for (const p of projectFiles) writeJson(join(opsDir, "projects"), `${keyOf(p.root)}.json`, p);
+
+  // `project` BR-05: atelier-web runs on slot 0, held by the demo's own process so it reads as live; its worktree's run
+  // on slot 1 is stopped.
+  const slotsDir = join(`${ROOT}/atelier-web`, ".git", "selo", "slots");
+  const boot = Date.now() - uptime() * 1000;
+  writeJson(slotsDir, "0.json", {
+    slot: 0, root: `${ROOT}/atelier-web`, pid: process.pid, boot, startedAt: at(1800), stoppedAt: null,
+    components: [{ name: "api", mode: "dev", url: "http://localhost:3000", pid: process.pid }, { name: "web", mode: "dev", url: "http://localhost:5173", pid: process.pid }],
+  });
+  writeJson(slotsDir, "1.json", {
+    slot: 1, root: worktreeRootOf("atelier-web", "one-step-checkout"), pid: 1, boot, startedAt: at(7200), stoppedAt: at(5400),
+    components: [{ name: "web", mode: "demo", url: "http://localhost:5191", pid: 1 }],
+  });
 
   const archives = createSessionArchiveRepository(db);
   const notes = createSessionNoteRepository(db);

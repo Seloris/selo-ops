@@ -12,6 +12,7 @@ What holds for a project on every page: its terms and its rules, as Selo Ops rea
 | `avancement` | `stages`, `isReviewDone`, `isSpecMerged` | A blueprint's stages, review and spec merged, each done or not. |
 | `fiche` | `SpecSheet` | A page spec or a domain sheet of the project. |
 | `worktree` | `worktrees` | Another checkout of the project's repository, on its own branch. |
+| `slot` | `slots` | A numbered place where the app of one checkout runs, on ports of its own (base ports + 10 per slot). |
 
 ## Business rules
 
@@ -19,5 +20,6 @@ What holds for a project on every page: its terms and its rules, as Selo Ops rea
 - **BR-02** — A blueprint's state is the export's, shown as « Brouillon » (written, not committed), « Prêt », « En construction », « À revoir », « À fusionner », « Terminé » and « Legacy », in that order; a blueprint is open unless « Terminé » or « Legacy ».
 - **BR-03** — A blueprint's progress is its stages, each ticked or not and named by its component, then its review, then its spec merged, as the export gives them; a legacy blueprint has no progress.
 - **BR-04** — A project whose export holds no selo planning (no spec nor blueprint read, and no manifest read without error) is still listed, with its git counts only; an export error with its planning read leaves the project open, the error shown.
+- **BR-05** — A project's slots are the run files the selo plugin writes in its repository's git folder (`selo/slots/{n}.json`), read, never written, those of its own checkouts only, each with its checkout's branch, its components' names, modes and URLs; a run is « En cours » while it is not stopped, was recorded since the machine last booted and its supervisor or one of its components is still alive, else « Arrêté », so that a run left by a crash or a reboot never shows as running.
 
 Retired:

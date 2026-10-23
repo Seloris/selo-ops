@@ -52,6 +52,19 @@ export const blueprintSchema = z
   })
   .meta({ id: "Blueprint" });
 
+// `project` BR-05: a run of the app on a slot of one of the project's checkouts.
+export const projectSlotSchema = z
+  .object({
+    number: z.number().int(),
+    root: z.string(),
+    // The checkout's branch.
+    branch: z.string().nullable(),
+    startedAt: z.string().nullable(),
+    isRunning: z.boolean(),
+    components: z.array(z.object({ name: z.string(), mode: z.string(), url: z.string() })),
+  })
+  .meta({ id: "ProjectSlot" });
+
 export const projectSchema = z
   .object({
     // The export key of its base checkout.
@@ -74,6 +87,8 @@ export const projectSchema = z
     debtCount: z.number().int(),
     // The live sessions in its base checkout or one of its worktrees.
     sessionIds: z.array(z.string()),
+    // By slot number.
+    slots: z.array(projectSlotSchema),
   })
   .meta({ id: "ProjectOverview" });
 
@@ -86,6 +101,7 @@ export const projectFileResponseSchema = z.object({ path: z.string(), text: z.st
 export type Project = z.infer<typeof projectSchema>;
 export type Blueprint = z.infer<typeof blueprintSchema>;
 export type SpecSheet = z.infer<typeof sheetSchema>;
+export type ProjectSlot = z.infer<typeof projectSlotSchema>;
 export type ProjectsResponse = z.infer<typeof projectsResponseSchema>;
 export type ProjectFileResponse = z.infer<typeof projectFileResponseSchema>;
 

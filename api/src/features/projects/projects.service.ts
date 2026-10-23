@@ -1,7 +1,8 @@
 import { NotFoundError } from "../../shared/errors.js";
 import type { ExportBlueprint, ExportSheet, OpsExportReader, ProjectFile, SessionFile } from "../sessions/sessions.export.js";
 import type { PlanningReader } from "./projects.planning.js";
-import type { Blueprint, Project, ProjectFileResponse, ProjectsResponse, SpecSheet } from "./projects.schema.js";
+import type { SlotReader } from "./projects.slots.js";
+import type { Blueprint, Project, ProjectSlot, ProjectFileResponse, ProjectsResponse, SpecSheet } from "./projects.schema.js";
 
 export const IDEAS_FILE = ".planning/ideas.md";
 export const DEBT_FILE = ".planning/technical-debt.md";
@@ -93,7 +94,20 @@ function filesOf({ base, worktrees }: Checkouts): Map<string, string> {
   return files;
 }
 
-function toProject(checkouts: Checkouts, liveSessions: SessionFile[], planning: PlanningReader): Project {
+// `project` BR-05: the runs of the repository's slots, those of its own checkouts only (a nested project shares the repository).
+function slotsOf({ base, worktrees }: Checkouts, slots: SlotReader): ProjectSlot[] {
+  if (base.repo == null) return [];
+  const checkouts = [base, ...worktrees];
+  return slots
+    .read(base.repo)
+    .flatMap(({ slot, root, startedAt, isRunning, components }) => {
+      const checkout = checkouts.find((c) => norm(c.root) === norm(root));
+      return checkout === undefined ? [] : [{ number: slot, root, branch: checkout.branch ?? null, startedAt, isRunning, components }];
+    })
+    .sort((a, b) => a.number - b.number);
+}
+
+function toProject(checkouts: Checkouts, liveSessions: SessionFile[], planning: PlanningReader, slots: SlotReader): Project {
   const { base, worktrees } = checkouts;
   const roots = new Set([base, ...worktrees].map((f) => norm(f.root)));
   const sessions = liveSessions.filter((s) => roots.has(norm(s.root)));
@@ -127,10 +141,11 @@ function toProject(checkouts: Checkouts, liveSessions: SessionFile[], planning: 
     ideaCount: hasPlanning ? countItems(planning.read(base.root, IDEAS_FILE)) : 0,
     debtCount: hasPlanning ? countItems(planning.read(base.root, DEBT_FILE)) : 0,
     sessionIds: sessions.map((s) => s.sessionId),
+    slots: slotsOf(checkouts, slots),
   };
 }
 
-export function createProjectService({ opsExport, planning }: { opsExport: OpsExportReader; planning: PlanningReader }) {
+export function createProjectService({ opsExport, planning, slots }: { opsExport: OpsExportReader; planning: PlanningReader; slots: SlotReader }) {
   const checkoutsOf = () => {
     const { projects, sessions } = opsExport.read();
     return { groups: groupCheckouts(projects), live: sessions.filter((s) => s.status === "live") };
@@ -138,7 +153,7 @@ export function createProjectService({ opsExport, planning }: { opsExport: OpsEx
   return {
     list: (): ProjectsResponse => {
       const { groups, live } = checkoutsOf();
-      const projects = groups.map((g) => toProject(g, live, planning));
+      const projects = groups.map((g) => toProject(g, live, planning, slots));
       return { projects: projects.sort((a, b) => a.name.localeCompare(b.name)) };
     },
     // Only a file the export lists for the project, or its ideas or debt: never any path of the disk.

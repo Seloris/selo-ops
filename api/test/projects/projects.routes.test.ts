@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from "node:fs";
+import { uptime } from "node:os";
 import { dirname, join } from "node:path";
 import request from "supertest";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -270,6 +271,31 @@ describe("projects", () => {
       expect(project?.blueprints.map((b) => [b.name, b.sessionIds])).toEqual([
         ["2026-01-02-tags", [onWorktree.sessionId]],
         ["2026-01-01-due-date", [onBase.sessionId]],
+      ]);
+    });
+
+    it("lists the slots of its checkouts, running only while live since this boot", async () => {
+      // Arrange
+      const { root, worktree } = seedRepoWithWorktree();
+      const boot = Date.now() - uptime() * 1000;
+      const component = (url: string) => ({ name: "api", mode: "dev", url, pid: process.pid });
+      const slot = (n: number, rec: object) => writeFile(root, `.git/selo/slots/${n}.json`, JSON.stringify({ slot: n, stoppedAt: null, ...rec }));
+      slot(0, { root, pid: process.pid, boot, startedAt: "2026-01-01T10:00:00.000Z", components: [component("http://localhost:3000")] });
+      // A run of the previous boot: its pids may be reused by now.
+      slot(1, { root: worktree, pid: process.pid, boot: boot - 3_600_000, startedAt: "2026-01-01T09:00:00.000Z", components: [component("http://localhost:3010")] });
+      slot(2, { root, pid: process.pid, boot, stoppedAt: "2026-01-01T11:00:00.000Z", components: [] });
+      // Another folder of the repository, not one of the project's checkouts.
+      slot(3, { root: `${root}/elsewhere`, pid: process.pid, boot, components: [] });
+      writeFile(root, ".git/selo/slots/4.json", "not json");
+
+      // Act
+      const [project] = await list();
+
+      // Assert
+      expect(project?.slots).toEqual([
+        { number: 0, root, branch: "main", startedAt: "2026-01-01T10:00:00.000Z", isRunning: true, components: [{ name: "api", mode: "dev", url: "http://localhost:3000" }] },
+        { number: 1, root: worktree, branch: "claude/tags", startedAt: "2026-01-01T09:00:00.000Z", isRunning: false, components: [{ name: "api", mode: "dev", url: "http://localhost:3010" }] },
+        { number: 2, root, branch: "main", startedAt: null, isRunning: false, components: [] },
       ]);
     });
   });

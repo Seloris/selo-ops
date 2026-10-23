@@ -129,6 +129,12 @@
             "items": {
               "type": "string"
             }
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectSlot"
+            }
           }
         },
         "required": [
@@ -147,7 +153,8 @@
           "blueprints",
           "ideaCount",
           "debtCount",
-          "sessionIds"
+          "sessionIds",
+          "slots"
         ]
       },
       "SpecSheet": {
@@ -389,6 +396,62 @@
           "merging",
           "done",
           "legacy"
+        ]
+      },
+      "ProjectSlot": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer"
+          },
+          "root": {
+            "type": "string"
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isRunning": {
+            "type": "boolean"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "mode": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "mode",
+                "url"
+              ]
+            }
+          }
+        },
+        "required": [
+          "number",
+          "root",
+          "branch",
+          "startedAt",
+          "isRunning",
+          "components"
         ]
       },
       "ProjectFile": {
