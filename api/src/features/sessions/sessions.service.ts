@@ -87,6 +87,7 @@ function toSession(
   transcriptStart: number | undefined,
   permissionWait: PermissionWait | undefined,
   isAnswerWait: boolean,
+  imageRequestRunIds: Set<string>,
 ): Omit<Session, "note"> {
   // An archive covers the run it was made on: a new run brings the session back (`session` BR-09).
   const isArchived = archive !== undefined && archive.runId === current.id;
@@ -112,6 +113,7 @@ function toSession(
     lane: current.lane,
     request: text,
     isRequestCut: isCut,
+    isRequestImage: imageRequestRunIds.has(current.id),
     blueprint: current.blueprint ? `.planning/blueprints/${current.blueprint}.md` : null,
     step: current.step ?? null,
     substep: current.substep ?? null,
@@ -146,7 +148,13 @@ function toSession(
       .sort((a, b) => Date.parse(a.since) - Date.parse(b.since))
       .map((r) => {
         const request = cleanRequest(r.request ?? "");
-        return { since: r.since, request: request.text, isRequestCut: request.isCut, usage: r.usage ?? null };
+        return {
+          since: r.since,
+          request: request.text,
+          isRequestCut: request.isCut,
+          isRequestImage: imageRequestRunIds.has(r.id),
+          usage: r.usage ?? null,
+        };
       }),
     isRunListCut: file.runs.length >= EXPORT_MAX_RUNS,
     touchedFiles: file.touchedFiles ?? [],
@@ -180,6 +188,7 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     lane: OUTSIDE_LANE,
     request: prompt || (status.name ?? "").trim(),
     isRequestCut,
+    isRequestImage: false,
     blueprint: null,
     step: null,
     substep: null,
@@ -263,7 +272,7 @@ export function createSessionService({
 
   return {
     async list(): Promise<SessionsResponse> {
-      const { sessions, projects, deletedSessionIds, transcriptStarts } = opsExport.read();
+      const { sessions, projects, deletedSessionIds, transcriptStarts, imageRequestRunIds } = opsExport.read();
       // A session with no run yet holds no request: nothing to show.
       const withRun = sessions.flatMap((file) => {
         const current = currentOf(file);
@@ -291,6 +300,7 @@ export function createSessionService({
               transcriptStarts.get(file.sessionId),
               permissionWaits.get(file.sessionId),
               answerWaits.has(file.sessionId),
+              imageRequestRunIds,
             )),
           ),
           ...outside.map((o) => withNote(toOutsideSession(o, byId.get(o.status.sessionId)))),

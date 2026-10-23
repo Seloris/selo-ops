@@ -530,6 +530,9 @@
           "isRequestCut": {
             "type": "boolean"
           },
+          "isRequestImage": {
+            "type": "boolean"
+          },
           "blueprint": {
             "type": [
               "string",
@@ -720,6 +723,9 @@
                 "isRequestCut": {
                   "type": "boolean"
                 },
+                "isRequestImage": {
+                  "type": "boolean"
+                },
                 "usage": {
                   "$ref": "#/components/schemas/RunUsage"
                 }
@@ -728,6 +734,7 @@
                 "since",
                 "request",
                 "isRequestCut",
+                "isRequestImage",
                 "usage"
               ]
             }
@@ -773,6 +780,7 @@
           "lane",
           "request",
           "isRequestCut",
+          "isRequestImage",
           "blueprint",
           "step",
           "substep",

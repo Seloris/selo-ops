@@ -265,6 +265,23 @@ describe("sessions routes", () => {
       expect(session.isRequestCut).toBe(false);
     });
 
+    it("marks an empty request whose prompt in the transcript is an image with no text", async () => {
+      // Arrange
+      const wrapped = { type: "user", message: { role: "user", content: [{ type: "text", text: "<system-reminder>x</system-reminder>" }] } };
+      const image = { type: "user", message: { role: "user", content: [{ type: "image", source: { data: "iVBOR" } }] } };
+      const transcriptPath = ctx.seed.transcript("C--code-ledger-api", "s-image", [wrapped, image]);
+      const first = buildRun({ request: "", since: "2026-01-01T08:00:00.000Z", transcriptFrom: 0 });
+      const current = buildRun({ request: "", since: "2026-01-01T09:00:00.000Z", transcriptFrom: JSON.stringify(wrapped).length + 1 });
+      ctx.seed.session(buildSessionFile({ transcriptPath, current, runs: [first, current] }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.isRequestImage).toBe(true);
+      expect(session.runs.map((r) => r.isRequestImage)).toEqual([false, true]);
+    });
+
     it("groups the sessions of a worktree under their repository's project, each with its own branch", async () => {
       // Arrange
       const main = "C:/code/selo-ops";

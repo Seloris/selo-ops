@@ -82,6 +82,7 @@ describe("sessions outside selo", () => {
         lane: "outside",
         request: "Fix the build",
         isRequestCut: false,
+        isRequestImage: false,
         isOutsideSelo: true,
         isClosed: false,
         blueprint: null,

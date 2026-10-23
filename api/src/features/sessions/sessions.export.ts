@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { createTranscriptStartReader } from "./sessions.transcript.js";
+import { createImagePromptReader, createTranscriptStartReader } from "./sessions.transcript.js";
 
 // The files the selo plugin's hooks write (its scripts/ops.mjs, schema version 1). Only the fields this
 // application reads are declared; a file that does not match is skipped, never fatal.
@@ -46,6 +46,8 @@ const runSchema = z.object({
   commits: z.array(commitSchema).nullish(),
   resumePrompt: z.string().nullish(),
   usage: runUsageSchema.nullish().catch(null),
+  // Where the run's prompt starts in the transcript, in bytes.
+  transcriptFrom: z.number().nullish().catch(null),
   since: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -147,6 +149,8 @@ export interface OpsExport {
   deletedSessionIds: Set<string>;
   // When each session's transcript starts, by session id: only the sessions whose transcript gives a date.
   transcriptStarts: Map<string, number>;
+  // The main runs whose request is empty because their prompt is an image with no text, by run id (`session` BR-10).
+  imageRequestRunIds: Set<string>;
 }
 
 export interface OpsExportReader {
@@ -179,6 +183,7 @@ const isTranscriptGone = (file: SessionFile) => file.transcriptPath != null && !
 
 export function createOpsExportReader(opsDir: string): OpsExportReader {
   const transcriptStartOf = createTranscriptStartReader();
+  const isImagePrompt = createImagePromptReader();
   return {
     read: () => {
       const files = readFolder(join(opsDir, "sessions"), sessionFileSchema);
@@ -189,11 +194,20 @@ export function createOpsExportReader(opsDir: string): OpsExportReader {
         const start = file.transcriptPath == null ? null : transcriptStartOf(file.transcriptPath);
         if (start !== null) transcriptStarts.set(file.sessionId, start);
       }
+      const imageRequestRunIds = new Set<string>();
+      for (const file of sessions) {
+        const path = file.transcriptPath;
+        if (path == null) continue;
+        for (const run of file.runs) {
+          if (!run.agentId && !run.request && run.transcriptFrom != null && isImagePrompt(path, run.transcriptFrom)) imageRequestRunIds.add(run.id);
+        }
+      }
       return {
         sessions,
         projects: readFolder(join(opsDir, "projects"), projectFileSchema),
         deletedSessionIds: new Set(deleted.map((file) => file.sessionId)),
         transcriptStarts,
+        imageRequestRunIds,
       };
     },
   };

@@ -47,3 +47,39 @@ export function createTranscriptStartReader(): TranscriptStartReader {
     return start;
   };
 }
+
+// A run's prompt sits at the export's offset into the transcript; its head is enough, an image's data follows it.
+function readImagePrompt(path: string, from: number): boolean {
+  let head: string;
+  try {
+    const fd = openSync(path, "r");
+    try {
+      const buffer = Buffer.alloc(HEAD_BYTES);
+      const length = readSync(fd, buffer, 0, HEAD_BYTES, from);
+      head = buffer.toString("utf8", 0, length);
+    } finally {
+      closeSync(fd);
+    }
+  } catch {
+    return false;
+  }
+  // The line may be cut inside the image's data: matched as text, never parsed.
+  const prompt = head.split("\n").find((line) => line.includes('"role":"user"'));
+  return prompt !== undefined && prompt.includes('"content":[{"type":"image"');
+}
+
+export type ImagePromptReader = (path: string, from: number) => boolean;
+
+// `session` BR-10: a prompt with no text whose first block is an image. A run's prompt never changes: each is read once.
+export function createImagePromptReader(): ImagePromptReader {
+  const known = new Map<string, boolean>();
+  return (path, from) => {
+    const key = `${path}:${from}`;
+    let isImage = known.get(key);
+    if (isImage === undefined) {
+      isImage = readImagePrompt(path, from);
+      known.set(key, isImage);
+    }
+    return isImage;
+  };
+}

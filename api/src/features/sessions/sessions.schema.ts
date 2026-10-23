@@ -62,6 +62,8 @@ export const sessionSchema = z
     lane: z.string(),
     request: z.string(),
     isRequestCut: z.boolean(),
+    // `session` BR-10: the request is empty because its prompt is an image with no text; false outside selo.
+    isRequestImage: z.boolean(),
     blueprint: z.string().nullable(),
     step: z.string().nullable(),
     substep: z.string().nullable(),
@@ -96,7 +98,9 @@ export const sessionSchema = z
     // Every main run the export keeps, oldest first: its request, cleaned (`session` BR-10), "" when unreadable, and its
     // usage with what it did (tools, skills, prompts), null before its first stop or in an export older than 2.2.0.
     // Empty for a session outside selo.
-    runs: z.array(z.object({ since: z.iso.datetime(), request: z.string(), isRequestCut: z.boolean(), usage: runUsageSchema.nullable() })),
+    runs: z.array(
+      z.object({ since: z.iso.datetime(), request: z.string(), isRequestCut: z.boolean(), isRequestImage: z.boolean(), usage: runUsageSchema.nullable() }),
+    ),
     // True once the export holds its 100 runs, subagents included: the oldest ones may be gone.
     isRunListCut: z.boolean(),
     touchedFiles: z.array(z.string()),
