@@ -16,6 +16,8 @@ import {
   pluginsText,
   requestText,
   rowContext,
+  laneColor,
+  metaText,
   workLabel,
   shownBlockers,
   toneOf,
@@ -389,5 +391,21 @@ describe("workLabel", () => {
     ["free", null, "libre"],
   ] as const)("reads flow %s and skill %s as « %s »", (flow, skill, label) => {
     expect(workLabel(buildSession({ flow, skill }))).toBe(label);
+  });
+});
+
+describe("laneColor", () => {
+  it("takes the lane's token, none outside selo or for an unknown flow", () => {
+    expect(laneColor(buildSession({ flow: "free" }))).toBe("var(--lane-free)");
+    expect(laneColor(buildSession({ flow: "blueprint" }))).toBe("var(--lane-blueprint)");
+    expect(laneColor(buildSession({ flow: "other" }))).toBeUndefined();
+    expect(laneColor(buildSession({ isOutsideSelo: true }))).toBeUndefined();
+  });
+});
+
+describe("metaText", () => {
+  it("adds the project only when shown", () => {
+    expect(metaText(buildSession({ flow: "fastlane", skill: null }), "selo-ops")).toBe("fastlane · selo-ops");
+    expect(metaText(buildSession({ flow: "fastlane", skill: null }), null)).toBe("fastlane");
   });
 });

@@ -1,9 +1,10 @@
+import type { CSSProperties } from "react";
 import { t } from "../../../shared/lib/i18n/index.ts";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { NoteIcon, OpenIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
 import { AgeLabel, AwaitedIcon, FilesCount, PluginWarning, StateLabel } from "./SessionBits.tsx";
-import { requestText, rowContext, workLabel } from "./sessionText.ts";
+import { laneColor, requestText, rowContext, workLabel } from "./sessionText.ts";
 import { NextButton } from "./NextAction.tsx";
 import { totalTokens } from "./usage.ts";
 import { TokenCount } from "./UsageParts.tsx";
@@ -29,6 +30,7 @@ export function SessionList({
   actions,
   showProject,
   isNarrow,
+  metaChars,
 }: {
   sessions: Session[];
   projectName: (projectId: string) => string;
@@ -39,9 +41,11 @@ export function SessionList({
   showProject: boolean;
   // The detail is open: the badge column narrows (sessions-live FR-18).
   isNarrow: boolean;
+  // The longest second line of every list on the page, so all their columns line up (FR-11).
+  metaChars: number;
 }) {
   return (
-    <ul className={`${styles.rows} ${isNarrow ? styles.narrow : ""}`}>
+    <ul className={`${styles.rows} ${isNarrow ? styles.narrow : ""}`} style={{ "--meta-ch": metaChars } as CSSProperties}>
       {sessions.map((s) => {
         const tint = isTodo(s) ? (s.state === "stopped" ? styles.danger : styles.warn) : "";
         return (
@@ -56,7 +60,7 @@ export function SessionList({
                 <span className={styles.warningSlot}>{outdatedIds.has(s.id) && <PluginWarning session={s} />}</span>
               </span>
               <span className={styles.meta}>
-                {workLabel(s)}
+                <span style={{ color: laneColor(s) }}>{workLabel(s)}</span>
                 {showProject && ` · ${projectName(s.projectId)}`}
               </span>
               <RowContext session={s} />

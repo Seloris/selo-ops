@@ -29,6 +29,17 @@ export function workLabel(s: Pick<Session, "isOutsideSelo" | "flow" | "skill">):
   return s.skill && s.skill !== s.flow ? `${flow} › ${s.skill}` : flow;
 }
 
+// sessions-live FR-11: the row's second line under the badge — the type of work, then the project when shown.
+export const metaText = (s: Pick<Session, "isOutsideSelo" | "flow" | "skill">, project: string | null): string =>
+  project === null ? workLabel(s) : `${workLabel(s)} · ${project}`;
+
+const LANES: ReadonlySet<string> = new Set(["free", "fastlane", "blueprint", "autopilot"]);
+
+// sessions-live FR-29: the type of work in its lane's colour, the help's; neutral outside selo or for an unknown flow.
+export function laneColor(s: Pick<Session, "isOutsideSelo" | "flow">): string | undefined {
+  return !s.isOutsideSelo && LANES.has(s.flow) ? `var(--lane-${s.flow})` : undefined;
+}
+
 export const blockerLabel = (b: Session["blockers"][number]) => t(`sessions.blocker.${b}` as MessageKey);
 
 // sessions-live FR-28: what clears a blocker; amber only for those that wait on the person.

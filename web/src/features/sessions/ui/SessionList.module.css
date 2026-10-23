@@ -1,10 +1,11 @@
-/* sessions-live FR-11: two lines on three columns — the badge column fixed, the request and the context flexible,
-   the age and the counts at the end; the buttons after them, across both lines. */
+/* sessions-live FR-11: two lines on three columns — the badge column as wide as its widest type of work, never cut,
+   the request and the context flexible, the age and the counts at the end; the buttons after them, across both lines.
+   The rows share the list's columns (subgrid), so the first column fits every row of the list. */
 .rows {
   --badge-col: 150px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: minmax(var(--badge-col), max-content) minmax(0, 1fr) auto auto;
+  row-gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -16,7 +17,9 @@
 }
 
 .row {
-  display: flex;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
   align-items: center;
   border-radius: calc(var(--radius-control) - 2px);
 }
@@ -44,10 +47,10 @@
 }
 
 .main {
-  flex: 1;
+  grid-column: 1 / 4;
   min-width: 0;
   display: grid;
-  grid-template-columns: var(--badge-col) minmax(0, 1fr) auto;
+  grid-template-columns: subgrid;
   grid-template-areas: "badge request age" "meta context counts";
   column-gap: 14px;
   row-gap: 4px;
@@ -90,6 +93,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* As wide as the page's longest second line, in its monospace ch, so every list's columns line up. */
+.meta {
+  min-width: calc(var(--meta-ch, 0) * 1ch + 2px);
 }
 
 .context {
@@ -171,7 +179,7 @@
 }
 
 .actions {
-  flex: none;
+  grid-column: 4;
   display: flex;
   align-items: center;
   margin-right: 4px;

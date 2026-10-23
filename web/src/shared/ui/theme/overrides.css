@@ -8,6 +8,7 @@
    --working             sky blue, the pulsing dot of a running session; no lane's colour, not --mark's blue (sessions-live FR-10)
    --lane-fastlane, --lane-autopilot   the lanes on the help page: lime, violet (help FR-11)
    --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
+   --lane-free           a free request: slate; the four --lane-* also colour the type of work of a session (sessions-live FR-29)
    --mark                a control that holds something of the person's (the session's note button): blue
    --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage, --hue-next, --hue-trail   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia, violet, lime; --hue-next is also the next action's chip and button in the list (sessions-live FR-10)
 
@@ -28,6 +29,7 @@
   --lane-fastlane: #4d7c0f;
   --lane-autopilot: #7c3aed;
   --lane-blueprint: #0f766e;
+  --lane-free: #475569;
   --hue-close: #047857;
   --hue-recap: #be185d;
   --hue-agents: #0e7490;
@@ -69,6 +71,7 @@
     --lane-fastlane: #a3e635;
     --lane-autopilot: #c4b5fd;
     --lane-blueprint: #2dd4bf;
+    --lane-free: #94a3b8;
     --hue-close: #6ee7b7;
     --hue-recap: #f9a8d4;
     --hue-agents: #67e8f9;
@@ -129,6 +132,7 @@
   --lane-fastlane: #4d7c0f;
   --lane-autopilot: #7c3aed;
   --lane-blueprint: #0f766e;
+  --lane-free: #475569;
   --hue-close: #047857;
   --hue-recap: #be185d;
   --hue-agents: #0e7490;
@@ -189,6 +193,7 @@
   --lane-fastlane: #a3e635;
   --lane-autopilot: #c4b5fd;
   --lane-blueprint: #2dd4bf;
+  --lane-free: #94a3b8;
   --hue-close: #6ee7b7;
   --hue-recap: #f9a8d4;
   --hue-agents: #67e8f9;
