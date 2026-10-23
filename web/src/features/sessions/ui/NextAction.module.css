@@ -1,0 +1,89 @@
+/* The row's slot, as wide as an icon button. The row gives the « Note » button after it a 6px left margin
+   (SessionList.module.css): the negative right margin cancels it, so the icons sit together, 6px after the row. */
+.slot {
+  flex: none;
+  display: inline-grid;
+  width: calc(var(--control-h) - 8px);
+  margin: 0 -6px 0 6px;
+}
+
+.tip {
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.tipTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  transition: color 0.14s;
+}
+
+.tipTitle svg {
+  width: 13px;
+  height: 13px;
+}
+
+.copied .tipTitle {
+  color: var(--hue-next);
+}
+
+/* The command, on a tint of the section hue with a bar on its left. */
+.command {
+  display: block;
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  line-height: 1.4;
+  background: color-mix(in srgb, var(--hue-next) 14%, transparent);
+  border-left: 2px solid var(--hue-next);
+  border-radius: calc(var(--radius-control) / 2);
+}
+
+/* The check pops in once the command is copied. */
+.copied button svg {
+  animation: pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.copied button,
+.copied button:hover {
+  color: var(--hue-next);
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.4) rotate(-20deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copied button svg {
+    animation: none;
+  }
+}
+
+/* The detail: the section's hue, and « Archiver » or « Désarchiver » at the end of the actions' line, in amber. */
+.hueNext {
+  --hue: var(--hue-next);
+}
+
+.archive {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.archive > button {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.archive > button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--warn-soft), var(--warn) 14%);
+}

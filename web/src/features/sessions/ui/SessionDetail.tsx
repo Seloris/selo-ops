@@ -15,6 +15,7 @@ import { AwaitedIcon, LaneLabel, NoteText, PluginWarning, StateLabel } from "./S
 import type { SessionActions } from "./SessionList.tsx";
 import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
+import extras from "./NextAction.module.css";
 
 // sessions-live FR-19 to FR-23: everything the export knows of one session, and its actions. A session outside selo
 // (sessions-live FR-30) shows no recap, commits, subagents, files modified nor blueprint: only the export gives them.
@@ -22,7 +23,6 @@ export function SessionDetail({
   session: s,
   projectName,
   now,
-  isNextOpen,
   isPluginOutdated,
   foldedSections,
   actions,
@@ -34,7 +34,6 @@ export function SessionDetail({
   session: Session;
   projectName: string;
   now: number;
-  isNextOpen: boolean;
   isPluginOutdated: boolean;
   foldedSections: readonly DetailSection[];
   actions: SessionActions;
@@ -60,6 +59,12 @@ export function SessionDetail({
           </div>
         </div>
       )}
+    </Section>
+  );
+  const next = s.isArchived ? null : s.nextAction;
+  const nextSection = next && (
+    <Section icon={<PromptIcon />} hue="next" title={t("sessions.actions.next")} summary={next} {...fold("next")}>
+      <CommandBox command={next} copyLabel={t("sessions.actions.copy")} onCopy={() => actions.onCopyNext(s)} />
     </Section>
   );
   const closeSection = (
@@ -197,30 +202,27 @@ export function SessionDetail({
             <OpenIcon />
             {t("sessions.actions.open")}
           </Button>
-          {s.nextAction && !s.isArchived && (
-            <Button size="sm" aria-expanded={isNextOpen} onClick={() => actions.onToggleNext(s.id)}>
-              <PromptIcon />
-              {t("sessions.actions.next")}
-            </Button>
-          )}
           <Button size="sm" onClick={() => actions.onEditNote(s)}>
             <NoteIcon />
             {t("sessions.actions.note")}
           </Button>
-          {s.canArchive && (
-            <Button size="sm" onClick={() => actions.onArchive(s)}>
-              <ArchiveIcon />
-              {t("sessions.actions.archive")}
-            </Button>
-          )}
-          {s.isArchived && (
-            <Button size="sm" onClick={() => actions.onUnarchive(s.id)}>
-              <UnarchiveIcon />
-              {t("sessions.actions.unarchive")}
-            </Button>
+          {(s.canArchive || s.isArchived) && (
+            <span className={extras.archive}>
+              {s.canArchive && (
+                <Button size="sm" onClick={() => actions.onArchive(s)}>
+                  <ArchiveIcon />
+                  {t("sessions.actions.archive")}
+                </Button>
+              )}
+              {s.isArchived && (
+                <Button size="sm" onClick={() => actions.onUnarchive(s.id)}>
+                  <UnarchiveIcon />
+                  {t("sessions.actions.unarchive")}
+                </Button>
+              )}
+            </span>
           )}
         </div>
-        {isNextOpen && s.nextAction && !s.isArchived && <CommandBox command={s.nextAction} copyLabel={t("sessions.actions.copy")} onCopy={() => actions.onCopyNext(s)} />}
       </div>
 
       {isFullscreen ? (
@@ -229,6 +231,7 @@ export function SessionDetail({
         <div className={`${styles.body} ${styles.cards}`}>
           <div className={styles.stack}>
             {awaitedSection}
+            {nextSection}
             {closeSection}
             {recapSection}
             {filesSection}
@@ -242,6 +245,7 @@ export function SessionDetail({
       ) : (
         <div className={styles.body}>
           {awaitedSection}
+          {nextSection}
           {closeSection}
           {recapSection}
           {filesSection}
@@ -263,6 +267,7 @@ const HUES = {
   agents: styles.hueAgents,
   files: styles.hueFiles,
   usage: styles.hueUsage,
+  next: extras.hueNext,
 };
 
 // A section: its heading (the icon in the section's own hue, the title and, for a list, how many it holds)

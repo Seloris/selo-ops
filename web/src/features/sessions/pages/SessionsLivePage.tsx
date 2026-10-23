@@ -362,7 +362,6 @@ export function SessionsLivePage() {
               session={selected}
               projectName={projectName(selected.projectId)}
               now={now}
-              isNextOpen={nextShown.has(selected.id)}
               isPluginOutdated={outdatedIds.has(selected.id)}
               foldedSections={settings.foldedSections[isFullscreen ? "fullscreen" : "panel"]}
               actions={actions}

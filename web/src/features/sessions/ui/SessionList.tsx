@@ -4,6 +4,7 @@ import { NoteIcon, OpenIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
 import { AgeLabel, AwaitedIcon, FilesCount, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import { awaitedOf, requestText } from "./sessionText.ts";
+import { NextButton } from "./NextAction.tsx";
 import { totalTokens } from "./usage.ts";
 import { TokenCount } from "./UsageParts.tsx";
 import styles from "./SessionList.module.css";
@@ -88,6 +89,7 @@ export function SessionList({
               </span>
               <span className={styles.tokens}>{s.usage && <TokenCount count={totalTokens(s.usage.tokens)} />}</span>
             </button>
+            <NextButton session={s} onCopy={actions.onCopyNext} />
             <IconButton
               label={s.note ? t("sessions.actions.editNote") : t("sessions.actions.note")}
               tone={s.note ? "mark" : "muted"}

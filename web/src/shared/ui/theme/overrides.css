@@ -8,7 +8,7 @@
    --lane-free, --lane-fastlane, --lane-autopilot   the type of work: sky, lime, violet (sessions-live FR-29)
    --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
    --mark                a control that holds something of the person's (the session's note button): blue
-   --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia
+   --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage, --hue-next   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia, violet
 
    --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
@@ -28,6 +28,7 @@
   --hue-agents: #0e7490;
   --hue-files: #4338ca;
   --hue-usage: #a21caf;
+  --hue-next: #7c3aed;
   --kind-input: #2563eb;
   --kind-cache-read: #a8a29e;
   --kind-cache-write: #7c3aed;
@@ -49,6 +50,7 @@
     --hue-agents: #67e8f9;
     --hue-files: #a5b4fc;
     --hue-usage: #f0abfc;
+    --hue-next: #c4b5fd;
     --kind-input: #60a5fa;
     --kind-cache-read: #a8a29e;
     --kind-cache-write: #a78bfa;
@@ -89,6 +91,7 @@
   --hue-agents: #0e7490;
   --hue-files: #4338ca;
   --hue-usage: #a21caf;
+  --hue-next: #7c3aed;
   --kind-input: #2563eb;
   --kind-cache-read: #a8a29e;
   --kind-cache-write: #7c3aed;
@@ -129,6 +132,7 @@
   --hue-agents: #67e8f9;
   --hue-files: #a5b4fc;
   --hue-usage: #f0abfc;
+  --hue-next: #c4b5fd;
   --kind-input: #60a5fa;
   --kind-cache-read: #a8a29e;
   --kind-cache-write: #a78bfa;
