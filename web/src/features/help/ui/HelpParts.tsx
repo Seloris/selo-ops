@@ -4,7 +4,7 @@ import { Card } from "../../../shared/ui/Card.tsx";
 import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { SpecChip, SpecIcon, specColor, type SpecKind } from "../../../shared/ui/SpecKind.tsx";
-import type { DecisionGuide, FlowStep, HelpTab, Lane, LaneId, LifecycleStep, Role, Section, Skill, Term, TreeNode } from "../content.ts";
+import type { DecisionGuide, FlowStep, HelpTab, Lane, LaneId, LifecycleStep, Role, Rule, Section, Skill, SpecUnit, StripStep, Term, TreeNode } from "../content.ts";
 import styles from "./HelpParts.module.css";
 
 // help FR-11: a lane's class sets --lane, which its card, name and dot read.
@@ -160,7 +160,6 @@ export function TextList({ items }: { items: MessageKey[] }) {
   );
 }
 
-// Under an h3 subtitle: the card titles are h4.
 export function SkillCards({ skills }: { skills: Skill[] }) {
   return (
     <ul className={styles.cards}>
@@ -170,10 +169,10 @@ export function SkillCards({ skills }: { skills: Skill[] }) {
           className={skill.lane ? `${styles.cell} ${styles.laneCell} ${laneClass(skill.lane)}` : styles.cell}
         >
           <Card>
-            <h4 className={skill.lane ? `${styles.cardTitle} ${styles.laneTitle}` : styles.cardTitle}>
+            <h3 className={skill.lane ? `${styles.cardTitle} ${styles.laneTitle}` : styles.cardTitle}>
               {skill.lane && <span className={styles.dot} aria-hidden="true" />}
               {t(skill.name)}
-            </h4>
+            </h3>
             <p className={styles.text}>{t(skill.what)}</p>
             <Labelled label="help.skills.when">{t(skill.when)}</Labelled>
             <div className={styles.codes} aria-label={t("help.skills.prompt")}>
@@ -198,7 +197,7 @@ export function RoleCards({ roles }: { roles: Role[] }) {
       {roles.map((role) => (
         <li key={role.name} className={styles.cell}>
           <Card>
-            <h4 className={styles.cardTitle}>{t(role.name)}</h4>
+            <h3 className={styles.cardTitle}>{t(role.name)}</h3>
             <p className={styles.text}>{t(role.what)}</p>
             <Labelled label="help.roles.never">{t(role.never)}</Labelled>
             <Labelled label="help.roles.model">
@@ -228,17 +227,7 @@ export function Note({ text }: { text: MessageKey }) {
   return <p className={styles.muted}>{t(text)}</p>;
 }
 
-export function CodeList({ label, items }: { label: MessageKey; items: MessageKey[] }) {
-  return (
-    <div className={styles.codes} aria-label={t(label)}>
-      {items.map((item) => (
-        <Code key={item} text={item} />
-      ))}
-    </div>
-  );
-}
-
-// help FR-12: pressed buttons rather than ARIA tabs, which would also need arrow-key navigation.
+// help FR-12: pressed buttons rather than ARIA tabs, which would also need arrow-key navigation; the bar sticks to the top of the scroller.
 export function HelpTabs({ tabs, value, onChange }: { tabs: { value: HelpTab; label: MessageKey }[]; value: HelpTab; onChange(tab: HelpTab): void }) {
   return (
     <div className={styles.tabs}>
@@ -319,5 +308,81 @@ export function SpecFlows({ caption, flows, lanesById }: { caption: MessageKey; 
         </div>
       ))}
     </figure>
+  );
+}
+
+// help FR-15: one line per skill, its prompt in its lane's colour.
+export function SkillList({ skills }: { skills: Skill[] }) {
+  return (
+    <dl className={styles.skillList}>
+      {skills.map((skill) => (
+        <div key={skill.name} className={`${styles.skillRow} ${skill.lane ? laneClass(skill.lane) : ""}`}>
+          <dt className={styles.skillPrompt}>{t(skill.prompt)}</dt>
+          <dd className={styles.text}>{t(skill.what)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+// Two figures side by side, one under the other when narrow.
+export function Split({ children }: { children: ReactNode }) {
+  return <div className={styles.split}>{children}</div>;
+}
+
+// help FR-14: short cards, a code or a kind chip on top of one sentence.
+export function RuleCards({ rules, layout = "grid" }: { rules: Rule[]; layout?: "grid" | "dense" | "rows" }) {
+  return (
+    <ul className={layout === "grid" ? styles.rules : `${styles.rules} ${styles[layout]}`}>
+      {rules.map((rule) => (
+        <li key={rule.text} className={styles.cell}>
+          <Card>
+            {rule.kind && <SpecChip kind={rule.kind} />}
+            {rule.head && <Code text={rule.head} />}
+            <p className={styles.text}>{t(rule.text)}</p>
+          </Card>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// help FR-14: the page spec and the domain sheet, side by side, each in its kind's colour.
+export function SpecUnits({ units }: { units: SpecUnit[] }) {
+  return (
+    <ul className={styles.units}>
+      {units.map((unit) => (
+        <li key={unit.kind} className={styles.unit} style={{ borderTopColor: specColor(unit.kind) }}>
+          <h3 className={`${styles.cardTitle} ${styles.kindTitle}`}>
+            <SpecChip kind={unit.kind} />
+            {t(unit.name)}
+          </h3>
+          <dl className={styles.facts}>
+            {unit.facts.map((fact) => (
+              <div key={fact.label}>
+                <dt className={styles.factLabel}>{t(fact.label)}</dt>
+                <dd className={styles.text}>{t(fact.text)}</dd>
+              </div>
+            ))}
+          </dl>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// help FR-14: numbered steps in one band, one under the other when narrow.
+export function Strip({ steps }: { steps: StripStep[] }) {
+  return (
+    <ol className={styles.strip}>
+      {steps.map((step, index) => (
+        <li key={step.name} className={styles.stripStep}>
+          <span className={styles.stripNumber}>{index + 1}</span>
+          <strong>{t(step.name)}</strong>
+          <span className={styles.muted}>{t(step.text)}</span>
+          {step.code && <Code text={step.code} />}
+        </li>
+      ))}
+    </ol>
   );
 }

@@ -204,60 +204,93 @@ export const vocabulary: Term[] = (
   ["pageSpec", "pageStub", "domainSheet", "fr", "br", "q", "specDelta", "blueprint", "stage", "specLine", "doneFooter"] as const
 ).map((term) => ({ term: `help.vocabulary.${term}.term`, definition: `help.vocabulary.${term}.definition` }));
 
-// help FR-12: the two tabs of the page and of the popup.
-export type HelpTab = "guide" | "specs";
+// help FR-12: the three tabs of the page and of the popup.
+export type HelpTab = "guide" | "specs" | "technical";
 
 export const helpTabs: { value: HelpTab; label: MessageKey }[] = [
   { value: "guide", label: "help.tabs.guide" },
   { value: "specs", label: "help.tabs.specs" },
+  { value: "technical", label: "help.tabs.technical" },
 ];
 
-export interface SpecTopic {
-  section: Section;
+// help FR-06, FR-07: the « Technique » tab's two sections.
+export const technicalSections = {
+  skills: { id: "technical-skills", title: "help.skills.skillsTitle" },
+  roles: { id: "technical-roles", title: "help.roles.title" },
+} as const satisfies Record<string, Section>;
+
+// A short card: an optional code or kind chip on top, then one sentence.
+export interface Rule {
+  head?: MessageKey;
   kind?: SpecKind;
-  points: MessageKey[];
-  examples: MessageKey[];
+  text: MessageKey;
 }
 
-// help FR-13: how selo manages specs, in this order.
-export const specTopics: SpecTopic[] = [
-  {
-    section: { id: "specs-pages", title: "help.specs.pages.title" },
-    kind: "page",
-    points: ["help.specs.pages.point1", "help.specs.pages.point2", "help.specs.pages.point3", "help.specs.pages.point4"],
-    examples: ["help.specs.pages.example1"],
-  },
-  {
-    section: { id: "specs-domain", title: "help.specs.domain.title" },
-    kind: "domain",
-    points: ["help.specs.domain.point1", "help.specs.domain.point2", "help.specs.domain.point3", "help.specs.domain.point4"],
-    examples: ["help.specs.domain.example1"],
-  },
-  {
-    section: { id: "specs-ids", title: "help.specs.ids.title" },
-    points: ["help.specs.ids.point1", "help.specs.ids.point2", "help.specs.ids.point3", "help.specs.ids.point4"],
-    examples: [],
-  },
-  {
-    section: { id: "specs-stubs", title: "help.specs.stubs.title" },
-    points: ["help.specs.stubs.point1", "help.specs.stubs.point2", "help.specs.stubs.point3", "help.specs.stubs.point4"],
-    examples: ["help.specs.stubs.example1"],
-  },
-  {
-    section: { id: "specs-follows", title: "help.specs.follows.title" },
-    points: ["help.specs.follows.point1", "help.specs.follows.point2", "help.specs.follows.point3", "help.specs.follows.point4", "help.specs.follows.point5"],
-    examples: [],
-  },
-  {
-    section: { id: "specs-specLine", title: "help.specs.specLine.title" },
-    points: ["help.specs.specLine.point1", "help.specs.specLine.point2", "help.specs.specLine.point3"],
-    examples: ["help.specs.specLine.example1", "help.specs.specLine.example2", "help.specs.specLine.example3"],
-  },
-  {
-    section: { id: "specs-specCheck", title: "help.specs.specCheck.title" },
-    points: ["help.specs.specCheck.point1", "help.specs.specCheck.point2", "help.specs.specCheck.point3", "help.specs.specCheck.point4"],
-    examples: ["help.specs.specCheck.example1", "help.specs.specCheck.example2"],
-  },
+// A numbered step of a strip.
+export interface StripStep {
+  name: MessageKey;
+  text: MessageKey;
+  code?: MessageKey;
+}
+
+// The two kinds of spec file, side by side.
+export interface SpecUnit {
+  kind: SpecKind;
+  name: MessageKey;
+  facts: { label: MessageKey; text: MessageKey }[];
+}
+
+// help FR-13: the sections of the « Specs » tab, in this order.
+export const specSections = {
+  units: { id: "specs-units", title: "help.specs.units.title" },
+  ids: { id: "specs-ids", title: "help.specs.ids.title" },
+  follows: { id: "specs-follows", title: "help.specs.follows.title" },
+  stubs: { id: "specs-stubs", title: "help.specs.stubs.title" },
+  specLine: { id: "specs-specLine", title: "help.specs.specLine.title" },
+} as const satisfies Record<string, Section>;
+
+// help FR-14: beside the tree, which file a fact goes to.
+export const whereRules: Rule[] = [
+  { kind: "page", text: "help.specs.where.page" },
+  { kind: "domain", text: "help.specs.where.domain" },
+  { head: "help.specs.where.citeHead", text: "help.specs.where.cite" },
+];
+
+const unitFacts = (unit: "page" | "domain") =>
+  (["where", "holds", "rule"] as const).map((fact) => ({ label: `help.specs.units.${fact}` as const, text: `help.specs.units.${unit}.${fact}` as const }));
+
+export const specUnits: SpecUnit[] = [
+  { kind: "page", name: "help.specs.units.page.name", facts: unitFacts("page") },
+  { kind: "domain", name: "help.specs.units.domain.name", facts: unitFacts("domain") },
+];
+
+export const idKinds: Rule[] = (["fr", "br", "us", "q"] as const).map((id) => ({ head: `help.specs.ids.${id}.head`, text: `help.specs.ids.${id}.text` }));
+
+export const idRules: MessageKey[] = ["help.specs.ids.perFile", "help.specs.ids.appendOnly", "help.specs.ids.doubt"];
+
+// help FR-14: a blueprint's Spec delta, its signs highlighted.
+export const sampleDelta = `## Spec delta
+
+- home + FR-18 — A todo past its due date shows « En retard ».
+- home ~ FR-03 — A click on a row opens its detail panel.
+  Before: A click on a row opens its detail.
+- todo + BR-06 — A due date has passed when it is before today.`;
+
+export const stubSteps: StripStep[] = [
+  { name: "help.specs.stubs.stub.name", text: "help.specs.stubs.stub.text", code: "help.specs.stubs.stub.code" },
+  { name: "help.specs.stubs.bootstrap.name", text: "help.specs.stubs.bootstrap.text", code: "help.specs.stubs.example1" },
+  { name: "help.specs.stubs.delta.name", text: "help.specs.stubs.delta.text" },
+];
+
+export const specLines: Rule[] = [
+  { head: "help.specs.specLine.example1", text: "help.specs.specLine.ids" },
+  { head: "help.specs.specLine.example2", text: "help.specs.specLine.pending" },
+  { head: "help.specs.specLine.example3", text: "help.specs.specLine.none" },
+];
+
+export const specChecks: Rule[] = [
+  { head: "help.specs.specCheck.example1", text: "help.specs.specCheck.cite" },
+  { head: "help.specs.specCheck.example2", text: "help.specs.specCheck.merge" },
 ];
 
 export interface TreeNode {

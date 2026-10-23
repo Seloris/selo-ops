@@ -1,24 +1,32 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   commitPlaces,
   helpTabs,
   type HelpTab,
   decisionGuide,
+  idKinds,
+  idRules,
   lanes,
   lanesById,
   lifecycleSteps,
   roles,
+  sampleDelta,
   sectionOrder,
   sections,
   skills,
   planningTree,
   sampleSpec,
+  specChecks,
   specFlows,
-  specTopics,
+  specLines,
+  specSections,
+  specUnits,
+  stubSteps,
+  technicalSections,
   vocabulary,
+  whereRules,
 } from "../content.ts";
 import {
-  CodeList,
   DecisionGuideList,
   Glossary,
   HelpSection,
@@ -28,9 +36,14 @@ import {
   Note,
   PlanningTree,
   RoleCards,
+  RuleCards,
   SkillCards,
+  SkillList,
   SpecFlows,
   SpecSample,
+  SpecUnits,
+  Split,
+  Strip,
   SubTitle,
   TableOfContents,
   TextList,
@@ -39,35 +52,24 @@ import {
 // help FR-12: the same tabs on the page and in the popup (help FR-10), the guide first.
 export function HelpContent() {
   const [tab, setTab] = useState<HelpTab>("guide");
+  const top = useRef<HTMLDivElement>(null);
+  const choose = (next: HelpTab) => {
+    setTab(next);
+    // While the tabs stick (scrolled past), the new tab opens at its top, not halfway down.
+    const marker = top.current;
+    const bar = marker?.nextElementSibling;
+    if (marker && bar && marker.getBoundingClientRect().bottom < bar.getBoundingClientRect().top - 1) marker.scrollIntoView({ block: "start" });
+  };
   return (
     <>
-      <HelpTabs tabs={helpTabs} value={tab} onChange={setTab} />
-      {tab === "guide" ? <GuideTab /> : <SpecsTab />}
+      <div ref={top} />
+      <HelpTabs tabs={helpTabs} value={tab} onChange={choose} />
+      {tab === "guide" ? <GuideTab /> : tab === "specs" ? <SpecsTab /> : <TechnicalTab />}
     </>
   );
 }
 
-// help FR-13, its figures FR-14.
-function SpecsTab() {
-  return (
-    <>
-      <Note text="help.specs.intro" />
-      <PlanningTree caption="help.specs.tree.caption" root={planningTree} />
-      {specTopics.map((topic) => (
-        <HelpSection key={topic.section.id} section={topic.section} kind={topic.kind}>
-          <TextList items={topic.points} />
-          {topic.examples.length > 0 && <CodeList label="help.specs.examples" items={topic.examples} />}
-          {topic.section.id === "specs-pages" && <SpecSample caption="help.specs.sample.caption" text={sampleSpec} />}
-          {topic.section.id === "specs-follows" && (
-            <SpecFlows caption="help.specs.flow.caption" flows={specFlows} lanesById={lanesById} />
-          )}
-        </HelpSection>
-      ))}
-    </>
-  );
-}
-
-// help FR-01 to FR-08.
+// help FR-01 to FR-05, FR-08, FR-15.
 function GuideTab() {
   return (
     <>
@@ -86,16 +88,67 @@ function GuideTab() {
         <TextList items={commitPlaces} />
       </HelpSection>
 
-      <HelpSection section={sections.skills} intro="help.skills.intro">
-        <SubTitle text="help.skills.skillsTitle" />
-        <SkillCards skills={skills} />
-        <Note text="help.skills.autonomousNote" />
-        <SubTitle text="help.roles.title" />
-        <RoleCards roles={roles} />
+      <HelpSection section={sections.skills} intro="help.skills.listIntro">
+        <SkillList skills={skills} />
       </HelpSection>
 
       <HelpSection section={sections.vocabulary}>
         <Glossary terms={vocabulary} />
+      </HelpSection>
+    </>
+  );
+}
+
+// help FR-13, its figures FR-14.
+function SpecsTab() {
+  return (
+    <>
+      <Note text="help.specs.intro" />
+      <Split>
+        <PlanningTree caption="help.specs.tree.caption" root={planningTree} />
+        <RuleCards rules={whereRules} />
+      </Split>
+
+      <HelpSection section={specSections.units}>
+        <SpecUnits units={specUnits} />
+        <SpecSample caption="help.specs.sample.caption" text={sampleSpec} />
+      </HelpSection>
+
+      <HelpSection section={specSections.ids}>
+        <RuleCards rules={idKinds} layout="dense" />
+        <TextList items={idRules} />
+      </HelpSection>
+
+      <HelpSection section={specSections.follows} intro="help.specs.follows.intro">
+        <SpecFlows caption="help.specs.flow.caption" flows={specFlows} lanesById={lanesById} />
+        <SpecSample caption="help.specs.delta.caption" text={sampleDelta} />
+        <Note text="help.specs.follows.noChange" />
+      </HelpSection>
+
+      <HelpSection section={specSections.stubs} intro="help.specs.stubs.intro">
+        <Strip steps={stubSteps} />
+      </HelpSection>
+
+      <HelpSection section={specSections.specLine} intro="help.specs.specLine.intro">
+        <RuleCards rules={specLines} layout="rows" />
+        <SubTitle text="help.specs.specCheck.title" />
+        <Note text="help.specs.specCheck.intro" />
+        <RuleCards rules={specChecks} layout="rows" />
+      </HelpSection>
+    </>
+  );
+}
+
+// help FR-06, FR-07.
+function TechnicalTab() {
+  return (
+    <>
+      <HelpSection section={technicalSections.skills} intro="help.skills.intro">
+        <SkillCards skills={skills} />
+        <Note text="help.skills.autonomousNote" />
+      </HelpSection>
+      <HelpSection section={technicalSections.roles} intro="help.roles.intro">
+        <RoleCards roles={roles} />
       </HelpSection>
     </>
   );

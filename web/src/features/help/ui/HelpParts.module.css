@@ -6,8 +6,8 @@
 }
 
 .section {
-  /* The anchor lands with some air above the title. */
-  scroll-margin-top: 24px;
+  /* The anchor lands below the sticky tab bar, with some air above the title. */
+  scroll-margin-top: 80px;
 }
 
 .tocTitle,
@@ -255,9 +255,17 @@
   }
 }
 
-/* In the content's grid, the tab switcher keeps its own width. */
+/* help FR-12: the tab bar stays at the top of its scroller (the page, or the popup's body), opaque over what scrolls under it. */
 .tabs {
-  justify-self: start;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 8px;
+  background: var(--pop-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
 }
 
 /* help FR-14: the figures of the « Specs » tab. */
@@ -418,4 +426,162 @@
   height: 13px;
   margin-right: 6px;
   vertical-align: -2px;
+}
+
+/* help FR-15: the guide's one line per skill. */
+.skillList {
+  margin: 0;
+  display: grid;
+  gap: 0;
+  padding: 6px 16px;
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--item-radius);
+}
+
+.skillRow {
+  display: grid;
+  grid-template-columns: minmax(0, 15em) minmax(0, 1fr);
+  gap: 4px 16px;
+  padding: 8px 0;
+}
+
+.skillRow + .skillRow {
+  border-top: var(--border-width) solid var(--border);
+}
+
+.skillRow dd {
+  margin: 0;
+}
+
+.skillPrompt {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  font-weight: 500;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  color: var(--lane, var(--text));
+}
+
+/* help FR-14: the tree beside its rule cards, then the other figures. */
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 10px;
+}
+
+/* Beside the tree, the cards stack; under it (narrow), they share a row. */
+.split .rules {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+}
+
+.dense {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+}
+
+.rows {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.rules .code {
+  justify-self: start;
+}
+
+.units {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 12px;
+}
+
+.unit {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  padding: var(--item-pad);
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-top: 3px solid;
+  border-radius: var(--item-radius);
+}
+
+.facts {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.factLabel {
+  color: var(--text-muted);
+  font-size: 0.78em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.strip {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--item-radius);
+  overflow: hidden;
+}
+
+.stripStep {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px;
+  border-right: var(--border-width) solid var(--border);
+}
+
+.stripStep:last-child {
+  border-right: 0;
+}
+
+/* Stacked when narrow: a line between the steps instead. */
+@media (max-width: 560px) {
+  .stripStep {
+    border-right: 0;
+  }
+
+  .stripStep + .stripStep {
+    border-top: var(--border-width) solid var(--border);
+  }
+}
+
+.stripNumber {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .skillRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
