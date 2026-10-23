@@ -18,7 +18,13 @@ interface DemoSession {
   id: string;
   project: string;
   worktree?: string;
-  lane: string;
+  // An export older than 2.5.0 writes the lane alone; 2.5.0 adds flow, skill and the trail (`session` BR-22).
+  lane?: string;
+  flow?: string;
+  skill?: string;
+  // The current run's trail: seconds ago, skill, step, substep, phase (sessions-live FR-41).
+  trail?: [number, string | null, string | null, string | null, Phase][];
+  trailCut?: boolean;
   phase: Phase;
   age: number;
   request: string;
@@ -91,7 +97,8 @@ const SESSIONS: DemoSession[] = [
     permission: "rm -rf android/app/build/intermediates/photo-cache && npx react-native run-android --variant=debug",
     model: OPUS, effort: "medium", perms: "default", blockers: ["not-done", "dirty-files"],
     files: ["src/features/rounds/data/photoCache.ts", "src/features/rounds/data/photoCache.test.ts"] },
-  { id: "7c3a9e51-0f2b-4d84-a6e7-b19d4c2f8a03", project: "selo-ops", lane: "build", phase: "working", age: 4,
+  { id: "7c3a9e51-0f2b-4d84-a6e7-b19d4c2f8a03", project: "selo-ops", lane: "build", flow: "blueprint", skill: "build", phase: "working", age: 4, trailCut: true,
+    trail: [[590, "build", "stage:1", "commit", "awaiting-commit"], [500, "build", "stage:2", "tests", "working"], [300, "build", "stage:2", "code", "working"]],
     request: ".planning/blueprints/2026-10-22-sessions-live.md", blueprint: "2026-10-22-sessions-live", step: "stage:2", substep: "code",
     model: OPUS, effort: "high", perms: "auto", blockers: ["not-done", "dirty-files", "background-tasks", "subagents"],
     subagents: [
@@ -99,14 +106,19 @@ const SESSIONS: DemoSession[] = [
       { type: "selo:reviewer", task: "relecture de l’étape 1 (api)", phase: "job-done" },
     ],
     files: ["web/src/features/sessions/pages/SessionsLivePage.tsx", "web/src/features/sessions/ui/SessionRow.tsx", "web/src/shared/lib/i18n/fr.json"] },
-  { id: "b81e0c44-6a2f-4c19-8d3e-5f07a9c2e611", project: "atelier-web", worktree: "one-step-checkout", lane: "autopilot", phase: "working", age: 2,
+  { id: "b81e0c44-6a2f-4c19-8d3e-5f07a9c2e611", project: "atelier-web", worktree: "one-step-checkout", lane: "autopilot", flow: "autopilot", skill: "build", phase: "working", age: 2,
+    trail: [
+      [600, "autopilot", null, null, "working"], [570, "blueprint", null, null, "working"], [420, "blueprint", null, "commit", "awaiting-commit"],
+      [300, "blueprint", null, null, "working"], [240, "build", "stage:1", "tests", "working"],
+    ],
     request: "Refaire la page de paiement en une seule étape : adresse, livraison et carte sur le même écran, validation en direct de chaque champ, et un récapitulatif fixe à droite sur grand écran",
     blueprint: "2026-10-22-one-step-checkout", step: "stage:1", substep: "tests",
     model: OPUS, effort: "high", perms: "auto", blockers: ["not-done", "dirty-files", "subagents"],
     note: "Après : vérifier le récap fixe sur iPad, puis demander la relecture à Inès",
     subagents: [{ type: "selo:runner", task: "npx vitest run checkout", phase: "working" }],
     files: ["web/src/features/checkout/pages/CheckoutPage.tsx", "web/src/features/checkout/ui/AddressForm.tsx"] },
-  { id: "c2d94f10-37a8-4e5b-a1c6-90e4b7d3f285", project: "harbor-mobile", lane: "review", phase: "working", age: 21,
+  { id: "c2d94f10-37a8-4e5b-a1c6-90e4b7d3f285", project: "harbor-mobile", flow: "free", skill: "review", phase: "working", age: 21,
+    trail: [[620, null, null, null, "working"], [600, "review", null, "review", "working"]],
     request: "Relire le travail d’hier sur la synchro des photos",
     model: OPUS, effort: "medium", perms: "default", blockers: ["not-done", "subagents"],
     subagents: [{ type: "selo:reviewer", task: "relecture de 4 commits", phase: "working" }] },
@@ -377,8 +389,11 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
   for (const s of SESSIONS) {
     const since = at(s.age + 600);
     const current: ExportRun = {
-      id: `${s.id}:1`, agentId: null, lane: s.lane, request: s.request, task: null, blueprint: s.blueprint ?? null,
-      step: s.step ?? s.lane, substep: s.substep ?? null, error: s.error ?? null, phase: s.phase,
+      id: `${s.id}:1`, agentId: null, ...(s.lane === undefined ? {} : { lane: s.lane }), request: s.request, task: null, blueprint: s.blueprint ?? null,
+      ...(s.flow === undefined ? {} : { flow: s.flow, skill: s.skill ?? null }),
+      trail: (s.trail ?? []).map(([ago, skill, step, substep, phase]) => ({ at: at(ago), skill, step, substep, phase })),
+      ...(s.trailCut === undefined ? {} : { trailCut: s.trailCut }),
+      step: s.step ?? (s.flow === undefined ? s.lane : null), substep: s.substep ?? null, error: s.error ?? null, phase: s.phase,
       pendingCommit: s.commit ?? null, question: s.question ?? null,
       recap: s.recap ? { text: s.recap, commits: s.commits ?? [] } : null, commits: s.commits ?? [],
       resumePrompt: s.next ?? null, since, updatedAt: at(s.age),

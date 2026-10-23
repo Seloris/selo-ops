@@ -29,10 +29,35 @@ const runUsageSchema = z.object({
   partial: z.boolean(),
 });
 
+// Each item parsed on its own: one that does not match is dropped, never its siblings nor the file.
+const lenientArray = <T>(item: z.ZodType<T>) =>
+  z
+    .array(z.unknown())
+    .nullish()
+    .catch(null)
+    .transform((items) => (items ?? []).flatMap((i) => {
+      const parsed = item.safeParse(i);
+      return parsed.success ? [parsed.data] : [];
+    }));
+
+// Since the plugin's 2.5.0 (`session` BR-22): one entry at each change of the run's skill, step, substep or phase.
+const trailEntrySchema = z.object({
+  at: z.iso.datetime(),
+  skill: z.string().nullable(),
+  step: z.string().nullable(),
+  substep: z.string().nullable(),
+  phase: z.enum(PHASES),
+});
+
 const runSchema = z.object({
   id: z.string(),
   agentId: z.string().nullish(),
-  lane: z.string(),
+  // Deprecated by 2.5.0, which still writes it; `flow` and `skill` replace it.
+  lane: z.string().nullish(),
+  flow: z.string().nullish(),
+  skill: z.string().nullish(),
+  trail: lenientArray(trailEntrySchema),
+  trailCut: z.boolean().nullish().catch(null),
   request: z.string().nullish(),
   task: z.string().nullish(),
   blueprint: z.string().nullish(),
@@ -73,17 +98,6 @@ export const sessionFileSchema = z.object({
   // Every run summed, subagents and runs the export dropped included.
   usage: usageSchema.nullish().catch(null),
 });
-
-// Each item parsed on its own: one that does not match is dropped, never its siblings nor the file.
-const lenientArray = <T>(item: z.ZodType<T>) =>
-  z
-    .array(z.unknown())
-    .nullish()
-    .catch(null)
-    .transform((items) => (items ?? []).flatMap((i) => {
-      const parsed = item.safeParse(i);
-      return parsed.success ? [parsed.data] : [];
-    }));
 
 export const BLUEPRINT_STATES = ["draft", "ready", "building", "review", "merging", "done", "legacy"] as const;
 
@@ -133,6 +147,7 @@ export const projectFileSchema = z.object({
 });
 
 export type ExportRun = z.infer<typeof runSchema>;
+export type ExportTrailEntry = z.infer<typeof trailEntrySchema>;
 export type ExportUsage = z.infer<typeof usageSchema>;
 export type ExportRunUsage = z.infer<typeof runUsageSchema>;
 export type SessionFile = z.infer<typeof sessionFileSchema>;

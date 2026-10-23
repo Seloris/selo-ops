@@ -76,7 +76,15 @@ function modelOf(file: SessionFile): string | null {
     .sort((a, b) => Date.parse(b.since) - Date.parse(a.since))[0];
   return latest ? topModelOf(latest) : null;
 }
-export const OUTSIDE_LANE = "outside";
+// `session` BR-22: an export older than 2.5.0 writes only a lane, which mixed the flow with the skill running.
+const LANE_FLOWS: Record<string, string> = { fastlane: "fastlane", blueprint: "blueprint", build: "blueprint", autopilot: "autopilot" };
+const SKILL_LANES = new Set(["fastlane", "blueprint", "build", "autopilot", "review", "try", "grill", "setup", "run"]);
+
+function workOf(run: ExportRun): { flow: string; skill: string | null } {
+  if (run.flow) return { flow: run.flow, skill: run.skill ?? null };
+  const lane = run.lane ?? "free";
+  return { flow: LANE_FLOWS[lane] ?? "free", skill: SKILL_LANES.has(lane) ? lane : null };
+}
 
 function toSession(
   file: SessionFile,
@@ -110,7 +118,9 @@ function toSession(
     projectId: projectIdOf(file, projectFiles),
     branch: ownProject?.branch ?? null,
     folder: file.root,
-    lane: current.lane,
+    ...workOf(current),
+    trail: current.trail,
+    isTrailCut: current.trailCut ?? false,
     request: text,
     isRequestCut: isCut,
     isRequestImage: imageRequestRunIds.has(current.id),
@@ -185,7 +195,10 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     projectId: projectIdOfOutside(outside),
     branch: outside.git?.branch ?? null,
     folder: outside.folder,
-    lane: OUTSIDE_LANE,
+    flow: "free",
+    skill: null,
+    trail: [],
+    isTrailCut: false,
     request: prompt || (status.name ?? "").trim(),
     isRequestCut,
     isRequestImage: false,

@@ -100,7 +100,8 @@ describe("sessions routes", () => {
       expect(session).toMatchObject({
         id: file.sessionId,
         folder: "C:/code/atelier-web",
-        lane: "build",
+        flow: "blueprint",
+        skill: "build",
         blueprint: ".planning/blueprints/2026-10-22-cart.md",
         step: "stage:2",
         substep: "tests",

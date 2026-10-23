@@ -24,6 +24,10 @@ export const closeBlockerSchema = z
 
 const commitSchema = z.object({ sha: z.string(), subject: z.string() });
 
+export const trailEntrySchema = z
+  .object({ at: z.iso.datetime(), skill: z.string().nullable(), step: z.string().nullable(), substep: z.string().nullable(), phase: sessionStateSchema })
+  .meta({ id: "TrailEntry" });
+
 // `session` BR-18: what the export says a session or a run consumed; Selo Ops never counts it.
 export const tokensSchema = z
   .object({ input: z.number().int(), cacheRead: z.number().int(), cacheWrite: z.number().int(), output: z.number().int() })
@@ -59,7 +63,14 @@ export const sessionSchema = z
     projectId: z.string(),
     branch: z.string().nullable(),
     folder: z.string(),
-    lane: z.string(),
+    // `session` BR-22: how the current run is driven (`free`, `fastlane`, `blueprint`, `autopilot`) and the selo skill
+    // running now, null when none; an export older than 2.5.0 has them read from its lane.
+    flow: z.string(),
+    skill: z.string().nullable(),
+    // sessions-live FR-41: the current run's history, oldest first; empty outside selo and before 2.5.0.
+    trail: z.array(trailEntrySchema),
+    // True once the export dropped the trail's oldest entries.
+    isTrailCut: z.boolean(),
     request: z.string(),
     isRequestCut: z.boolean(),
     // `session` BR-10: the request is empty because its prompt is an image with no text; false outside selo.
@@ -107,7 +118,7 @@ export const sessionSchema = z
     // `claude://claude.ai/epitaxy/local_{uuid}`, opening the session in the Claude desktop app; null for a session
     // the desktop app did not start, or that Selo Ops never saw running (`session` BR-11).
     desktopLink: z.string().nullable(),
-    // A running Claude Code process with no file in the ops export (`session` BR-12): its lane is `outside`, and it has no
+    // A running Claude Code process with no file in the ops export (`session` BR-12): its flow is `free`, and it has no
     // recap, commits, blockers, subagents, files touched, effort nor permissions, which only the export gives.
     isOutsideSelo: z.boolean(),
     // The version of the selo-ops plugin that wrote the session's export file; null outside selo or in an older export.

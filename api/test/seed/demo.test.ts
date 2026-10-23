@@ -39,7 +39,7 @@ describe("demo", () => {
     expect(res.status).toBe(200);
     const waiting = sessionsResponseSchema.parse(res.body).sessions.filter((s) => s.state === "awaiting-permission");
     expect(waiting).toHaveLength(1);
-    expect(waiting[0]).toMatchObject({ isOutsideSelo: false, lane: "fastlane", permissionTool: expect.stringMatching(/\S/) });
+    expect(waiting[0]).toMatchObject({ isOutsideSelo: false, flow: "fastlane", permissionTool: expect.stringMatching(/\S/) });
   });
 
   it("shows every case of usage the browser test needs", async () => {

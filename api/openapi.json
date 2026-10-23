@@ -525,8 +525,23 @@
           "folder": {
             "type": "string"
           },
-          "lane": {
+          "flow": {
             "type": "string"
+          },
+          "skill": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "trail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrailEntry"
+            }
+          },
+          "isTrailCut": {
+            "type": "boolean"
           },
           "request": {
             "type": "string"
@@ -781,7 +796,10 @@
           "projectId",
           "branch",
           "folder",
-          "lane",
+          "flow",
+          "skill",
+          "trail",
+          "isTrailCut",
           "request",
           "isRequestCut",
           "isRequestImage",
@@ -816,6 +834,43 @@
           "writtenBy",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "TrailEntry": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "skill": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "step": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "substep": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "phase": {
+            "$ref": "#/components/schemas/SessionState"
+          }
+        },
+        "required": [
+          "at",
+          "skill",
+          "step",
+          "substep",
+          "phase"
         ]
       },
       "SessionState": {

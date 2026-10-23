@@ -15,6 +15,7 @@ export function buildRun(overrides: Partial<ExportRun> = {}): ExportRun {
     id: `run-${counter}`,
     agentId: null,
     lane: "free",
+    trail: [],
     request: "Fix the build",
     task: null,
     blueprint: null,

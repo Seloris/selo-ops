@@ -79,7 +79,10 @@ describe("sessions outside selo", () => {
       expect(session).toMatchObject({
         id: status.sessionId,
         folder: slash(status.cwd),
-        lane: "outside",
+        flow: "free",
+        skill: null,
+        trail: [],
+        isTrailCut: false,
         request: "Fix the build",
         isRequestCut: false,
         isRequestImage: false,
@@ -107,7 +110,7 @@ describe("sessions outside selo", () => {
       const session = await only();
 
       // Assert
-      expect(session).toMatchObject({ id: file.sessionId, isOutsideSelo: false, lane: "free" });
+      expect(session).toMatchObject({ id: file.sessionId, isOutsideSelo: false, flow: "free", skill: null });
     });
 
     it("leaves out a status file of the export with no run yet", async () => {
