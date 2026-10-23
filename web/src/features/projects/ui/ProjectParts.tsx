@@ -54,17 +54,24 @@ export function ProgressTrack({ blueprint, isLarge = false }: { blueprint: Bluep
   if (!isLarge) {
     return (
       <span className={styles.track} style={colorStyle(blueprint.state)} role="img" aria-label={label} title={label}>
-        {steps.map((s, i) =>
-          s.kind === "stage" ? (
-            <span key={i} className={styles.stage}>
-              <span className={`${styles.pip} ${styles.numbered} ${s.isDone ? styles.filled : ""}`}>{s.number}</span>
-              {s.component}
-            </span>
-          ) : (
-            <span key={i} className={`${styles.milestone} ${s.isDone ? styles.reached : ""}`}>
-              {t(s.kind === "review" ? "projects.progress.reviewShort" : "projects.progress.mergedShort")}
-            </span>
-          ),
+        <span className={styles.stageSlots}>
+          {steps.map(
+            (s) =>
+              s.kind === "stage" && (
+                <span key={s.number} className={styles.stage}>
+                  <span className={`${styles.pip} ${styles.numbered} ${s.isDone ? styles.filled : ""}`}>{s.number}</span>
+                  {s.component}
+                </span>
+              ),
+          )}
+        </span>
+        {steps.map(
+          (s) =>
+            s.kind !== "stage" && (
+              <span key={s.kind} className={`${styles.milestone} ${s.isDone ? styles.reached : ""}`}>
+                {t(s.kind === "review" ? "projects.progress.reviewShort" : "projects.progress.mergedShort")}
+              </span>
+            ),
         )}
       </span>
     );
@@ -129,11 +136,13 @@ export function DoneSummary({ blueprint }: { blueprint: Blueprint }) {
   const label = tn("projects.progress.doneSummary", blueprint.stages.length);
   return (
     <span className={styles.track} style={colorStyle("done")} role="img" aria-label={label} title={label}>
-      {blueprint.stages.map((s) => (
-        <span key={s.number} className={`${styles.pip} ${styles.numbered} ${styles.filled}`}>
-          {s.number}
-        </span>
-      ))}
+      <span className={styles.pipSlots}>
+        {blueprint.stages.map((s) => (
+          <span key={s.number} className={`${styles.pip} ${styles.numbered} ${styles.filled}`}>
+            {s.number}
+          </span>
+        ))}
+      </span>
       <span className={styles.check}>✓ {t("projects.progress.reviewed")}</span>
       <span className={styles.check}>✓ {t("projects.progress.mergedDone")}</span>
     </span>

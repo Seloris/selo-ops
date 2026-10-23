@@ -93,11 +93,23 @@
   color: var(--bg);
 }
 
+/* Room for three stages, so the review and the merge line up from row to row; a fourth one wraps. */
+.stageSlots {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 4.2em);
+  row-gap: 4px;
+}
+
+.pipSlots {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 17px);
+  gap: 4px;
+}
+
 .stage {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-right: 4px;
   font-size: 0.78em;
   white-space: nowrap;
 }
