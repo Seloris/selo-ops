@@ -3,6 +3,7 @@ import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { Card } from "../../../shared/ui/Card.tsx";
 import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
+import { SpecChip, SpecIcon, specColor, type SpecKind } from "../../../shared/ui/SpecKind.tsx";
 import type { DecisionGuide, FlowStep, HelpTab, Lane, LaneId, LifecycleStep, Role, Section, Skill, Term, TreeNode } from "../content.ts";
 import styles from "./HelpParts.module.css";
 
@@ -53,11 +54,18 @@ export function TableOfContents({ title, sections }: { title: MessageKey; sectio
   );
 }
 
-export function HelpSection({ section, intro, children }: { section: Section; intro?: MessageKey; children: ReactNode }) {
+export function HelpSection({ section, intro, kind, children }: { section: Section; intro?: MessageKey; kind?: SpecKind; children: ReactNode }) {
   return (
     <section id={section.id} className={styles.section} aria-labelledby={`${section.id}-title`}>
       <h2 id={`${section.id}-title`} className={styles.sectionTitle}>
-        {t(section.title)}
+        {kind ? (
+          <span className={styles.kindTitle}>
+            <SpecChip kind={kind} />
+            {t(section.title)}
+          </span>
+        ) : (
+          t(section.title)
+        )}
       </h2>
       {intro && <p className={styles.muted}>{t(intro)}</p>}
       {children}
@@ -244,7 +252,13 @@ function TreeItems({ nodes }: { nodes: TreeNode[] }) {
     <ul className={styles.treeList}>
       {nodes.map((node) => (
         <li key={node.name} className={styles.treeItem}>
-          <span className={node.children ? styles.treeFolder : styles.treeFile}>{node.name}</span>
+          <span
+            className={`${node.children ? styles.treeFolder : styles.treeFile} ${node.kind ? styles.treeKind : ""}`}
+            style={node.kind ? { color: specColor(node.kind) } : undefined}
+          >
+            {node.kind && <SpecIcon kind={node.kind} />}
+            {node.name}
+          </span>
           {node.note && <span className={styles.treeNote}>{t(node.note)}</span>}
           {node.children && <TreeItems nodes={node.children} />}
         </li>

@@ -87,3 +87,9 @@ button.card:focus-visible {
 .counts {
   color: var(--text);
 }
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

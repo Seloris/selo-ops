@@ -1,4 +1,5 @@
 import type { MessageKey } from "../../shared/lib/i18n/index.ts";
+import type { SpecKind } from "../../shared/ui/SpecKind.tsx";
 
 // The help page's content as translation keys: hand-written, static, no API call (help FR-09).
 
@@ -213,6 +214,7 @@ export const helpTabs: { value: HelpTab; label: MessageKey }[] = [
 
 export interface SpecTopic {
   section: Section;
+  kind?: SpecKind;
   points: MessageKey[];
   examples: MessageKey[];
 }
@@ -221,11 +223,13 @@ export interface SpecTopic {
 export const specTopics: SpecTopic[] = [
   {
     section: { id: "specs-pages", title: "help.specs.pages.title" },
+    kind: "page",
     points: ["help.specs.pages.point1", "help.specs.pages.point2", "help.specs.pages.point3", "help.specs.pages.point4"],
     examples: ["help.specs.pages.example1"],
   },
   {
     section: { id: "specs-domain", title: "help.specs.domain.title" },
+    kind: "domain",
     points: ["help.specs.domain.point1", "help.specs.domain.point2", "help.specs.domain.point3", "help.specs.domain.point4"],
     examples: ["help.specs.domain.example1"],
   },
@@ -258,6 +262,8 @@ export const specTopics: SpecTopic[] = [
 
 export interface TreeNode {
   name: string;
+  // app FR-04: the folder of a kind of spec file, and its files, wear that kind's colour and icon.
+  kind?: SpecKind;
   note?: MessageKey;
   children?: TreeNode[];
 }
@@ -268,24 +274,27 @@ export const planningTree: TreeNode = {
   children: [
     {
       name: "pages/",
+      kind: "page",
       note: "help.specs.tree.pages",
       children: [
-        { name: "home.md", note: "help.specs.tree.home" },
-        { name: "todo-detail.md", note: "help.specs.tree.todoDetail" },
+        { name: "home.md", kind: "page", note: "help.specs.tree.home" },
+        { name: "todo-detail.md", kind: "page", note: "help.specs.tree.todoDetail" },
       ],
     },
     {
       name: "domain/",
+      kind: "domain",
       note: "help.specs.tree.domain",
       children: [
-        { name: "todo.md", note: "help.specs.tree.todo" },
-        { name: "app.md", note: "help.specs.tree.app" },
+        { name: "todo.md", kind: "domain", note: "help.specs.tree.todo" },
+        { name: "app.md", kind: "domain", note: "help.specs.tree.app" },
       ],
     },
     {
       name: "blueprints/",
+      kind: "blueprint",
       note: "help.specs.tree.blueprints",
-      children: [{ name: "2026-10-21-due-date.md", note: "help.specs.tree.blueprint" }],
+      children: [{ name: "2026-10-21-due-date.md", kind: "blueprint", note: "help.specs.tree.blueprint" }],
     },
     { name: "ideas.md", note: "help.specs.tree.ideas" },
     { name: "technical-debt.md", note: "help.specs.tree.debt" },

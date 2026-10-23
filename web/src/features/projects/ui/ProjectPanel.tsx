@@ -5,6 +5,7 @@ import { ErrorMessage } from "../../../shared/ui/ErrorMessage.tsx";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { CloseIcon, CollapseIcon, ExpandIcon } from "../../../shared/ui/icons.tsx";
 import { LoadingState } from "../../../shared/ui/LoadingState.tsx";
+import { SpecIcon, specColor } from "../../../shared/ui/SpecKind.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { dateOf, deltaBySheet, type Blueprint, type DeltaLine, type SpecSheet } from "../data/projectView.ts";
 import { InlineMarkdown, Markdown } from "./Markdown.tsx";
@@ -70,6 +71,7 @@ export function ProjectPanel({
   const title = subject.kind === "blueprint" ? subject.blueprint.title : subject.kind === "sheet" ? subject.sheet.title : subject.title;
   const kindLabel =
     subject.kind === "blueprint" ? null : subject.kind === "sheet" ? t(`projects.panel.kind.${subject.sheet.kind}` as MessageKey) : t(`projects.panel.kind.${subject.kind}`);
+  const sheetKind = subject.kind === "sheet" && subject.sheet.kind === "page" ? "page" : "domain";
   const none = t("projects.panel.none");
 
   let facts: ReactNode = null;
@@ -165,7 +167,20 @@ export function ProjectPanel({
       <div className={styles.head}>
         <div className={styles.row}>
           <span className={styles.tags}>
-            {subject.kind === "blueprint" ? <StateTag state={subject.blueprint.state} /> : <Tag>{kindLabel}</Tag>}
+            {subject.kind === "blueprint" ? (
+              <>
+                <Tag icon={<SpecIcon kind="blueprint" />} color={specColor("blueprint")}>
+                  {t("projects.panel.kind.blueprint")}
+                </Tag>
+                <StateTag state={subject.blueprint.state} />
+              </>
+            ) : subject.kind === "sheet" ? (
+              <Tag icon={<SpecIcon kind={sheetKind} />} color={specColor(sheetKind)}>
+                {kindLabel}
+              </Tag>
+            ) : (
+              <Tag>{kindLabel}</Tag>
+            )}
             {subject.kind === "blueprint" && subject.blueprint.worktreeBranch && <Tag>{t("projects.worktree", { branch: subject.blueprint.worktreeBranch })}</Tag>}
           </span>
           <span className={styles.buttons}>

@@ -11,7 +11,6 @@ export function HelpPage() {
       <Panel>
         <header className={styles.header}>
           <PageTitle>{t("help.page.title")}</PageTitle>
-          <p className={styles.intro}>{t("help.page.intro")}</p>
         </header>
         <HelpContent />
       </Panel>

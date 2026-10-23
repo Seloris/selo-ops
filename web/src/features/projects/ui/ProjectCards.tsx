@@ -1,5 +1,6 @@
 import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { BranchIcon } from "../../../shared/ui/icons.tsx";
+import { SpecChip } from "../../../shared/ui/SpecKind.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import type { ProjectOverview } from "../data/projectView.ts";
 import { LiveDots, StateBar, type LiveItem } from "./ProjectParts.tsx";
@@ -57,9 +58,18 @@ export function ProjectCards({
               </span>
               {git}
               <span className={styles.counts}>
-                <span>{tn("projects.card.pages", pages)}</span>
-                <span>{tn("projects.card.domains", p.sheets.length - pages)}</span>
-                <span>{tn("projects.card.blueprints", p.blueprints.length)}</span>
+                <span className={styles.count}>
+                  <SpecChip kind="page" />
+                  {tn("projects.card.pages", pages)}
+                </span>
+                <span className={styles.count}>
+                  <SpecChip kind="domain" />
+                  {tn("projects.card.domains", p.sheets.length - pages)}
+                </span>
+                <span className={styles.count}>
+                  <SpecChip kind="blueprint" />
+                  {tn("projects.card.blueprints", p.blueprints.length)}
+                </span>
               </span>
               <StateBar blueprints={p.blueprints} />
             </button>

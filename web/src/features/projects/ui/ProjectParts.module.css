@@ -230,7 +230,7 @@
 }
 
 .hueProgress { --hue: var(--hue-progress); }
-.hueBlueprints { --hue: var(--hue-blueprints); }
+.hueBlueprints { --hue: var(--spec-blueprint); }
 .hueSpecs { --hue: var(--hue-specs); }
 .hueIdeas { --hue: var(--hue-ideas); }
 .hueDebt { --hue: var(--hue-debt); }
@@ -303,6 +303,9 @@
 }
 
 .tileValue {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 1.9em;
   font-weight: 500;
   line-height: 1.1;

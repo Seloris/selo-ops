@@ -8,7 +8,6 @@ export function HelpDialog({ onClose }: { onClose(): void }) {
   return (
     <Modal title={t("help.page.title")} closeLabel={t("help.dialog.close")} onClose={onClose}>
       <div className={styles.content}>
-        <p className={styles.intro}>{t("help.page.intro")}</p>
         <HelpContent />
       </div>
     </Modal>

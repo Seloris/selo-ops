@@ -2,8 +2,3 @@
   display: grid;
   gap: 28px;
 }
-
-.intro {
-  margin: 0;
-  color: var(--text-muted);
-}

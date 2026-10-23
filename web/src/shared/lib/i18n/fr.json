@@ -227,7 +227,6 @@
 
   "help.page.title": "Aide",
   "help.dialog.close": "Fermer",
-  "help.page.intro": "Comment selo mène une demande jusqu’au commit : la voie à choisir, les étapes d’un travail, les skills et les agents, le vocabulaire des specs, et comment selo tient les specs.",
   "help.toc.title": "Sommaire",
 
   "help.lanes.title": "Choisir une voie",
@@ -567,6 +566,7 @@
   "projects.panel.progress": "Avancement",
   "projects.panel.next": "Prochain prompt",
   "projects.panel.notCommitted": "pas encore commitée",
+  "projects.panel.kind.blueprint": "Blueprint",
   "projects.panel.kind.page": "Page",
   "projects.panel.kind.domain": "Fiche de domaine",
   "projects.panel.kind.app": "Application",

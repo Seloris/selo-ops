@@ -54,7 +54,7 @@ function SpecsTab() {
       <Note text="help.specs.intro" />
       <PlanningTree caption="help.specs.tree.caption" root={planningTree} />
       {specTopics.map((topic) => (
-        <HelpSection key={topic.section.id} section={topic.section}>
+        <HelpSection key={topic.section.id} section={topic.section} kind={topic.kind}>
           <TextList items={topic.points} />
           {topic.examples.length > 0 && <CodeList label="help.specs.examples" items={topic.examples} />}
           {topic.section.id === "specs-pages" && <SpecSample caption="help.specs.sample.caption" text={sampleSpec} />}

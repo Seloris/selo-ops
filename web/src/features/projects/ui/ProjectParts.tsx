@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router";
 import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
+import { SpecChip, type SpecKind } from "../../../shared/ui/SpecKind.tsx";
 import { StatusDot, type DotTone } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { deltaSplit, progressSteps, stateCounts, type Blueprint, type BlueprintState, type DeltaLine } from "../data/projectView.ts";
@@ -179,12 +180,15 @@ export function LiveDots({ items }: { items: LiveItem[] }) {
 }
 
 // projects FR-06: each count large, its label below.
-export function Tiles({ tiles }: { tiles: { label: string; value: ReactNode }[] }) {
+export function Tiles({ tiles }: { tiles: { label: string; value: ReactNode; kind?: SpecKind }[] }) {
   return (
     <ul className={styles.tiles}>
       {tiles.map((tile) => (
         <li key={tile.label} className={styles.tile}>
-          <span className={styles.tileValue}>{tile.value}</span>
+          <span className={styles.tileValue}>
+            {tile.kind && <SpecChip kind={tile.kind} />}
+            {tile.value}
+          </span>
           <span className={styles.tileLabel}>{tile.label}</span>
         </li>
       ))}

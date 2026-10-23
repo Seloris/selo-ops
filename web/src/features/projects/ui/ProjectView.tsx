@@ -4,7 +4,8 @@ import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { EmptyState } from "../../../shared/ui/EmptyState.tsx";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage.tsx";
-import { BranchIcon, FileIcon, GaugeIcon, NoteIcon, TextFileIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { BlueprintIcon, BranchIcon, GaugeIcon, NoteIcon, TextFileIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { SpecChip } from "../../../shared/ui/SpecKind.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import {
   biggestSheet,
@@ -56,7 +57,10 @@ export function ProjectView({
       <button type="button" className={rowClass(b.file)} onClick={() => onOpenFile(b.file)} aria-current={openPath === b.file || undefined}>
         <span className={styles.date}>{dateOf(b) ?? ""}</span>
         <span className={styles.rowMain}>
-          <span className={styles.rowTitle}>{b.title}</span>
+          <span className={styles.rowTitle}>
+            <SpecChip kind="blueprint" />
+            {b.title}
+          </span>
           <span className={styles.rowMeta}>
             <StateTag state={b.state} />
             {b.worktreeBranch && <Tag icon={<BranchIcon />}>{t("projects.worktree", { branch: b.worktreeBranch })}</Tag>}
@@ -76,6 +80,7 @@ export function ProjectView({
       <button type="button" className={rowClass(s.file)} onClick={() => onOpenFile(s.file)} aria-current={openPath === s.file || undefined}>
         <span className={styles.rowMain}>
           <span className={styles.rowTitle}>
+            <SpecChip kind={s.kind === "page" ? "page" : "domain"} />
             {s.title}
             {s.route && <span className={styles.route}>{s.route}</span>}
           </span>
@@ -161,9 +166,9 @@ export function ProjectView({
 
       <Tiles
         tiles={[
-          { label: t("projects.tiles.open"), value: `${open.length} / ${p.blueprints.length}` },
-          { label: t("projects.tiles.pages"), value: pages.length },
-          { label: t("projects.tiles.domains"), value: domains.length },
+          { label: t("projects.tiles.open"), value: `${open.length} / ${p.blueprints.length}`, kind: "blueprint" },
+          { label: t("projects.tiles.pages"), value: pages.length, kind: "page" },
+          { label: t("projects.tiles.domains"), value: domains.length, kind: "domain" },
           { label: t("projects.tiles.frs"), value: frs },
           { label: t("projects.tiles.brs"), value: brs },
           { label: t("projects.tiles.ideas"), value: p.ideaCount },
@@ -185,6 +190,7 @@ export function ProjectView({
                 {open.map((b) => (
                   <li key={b.name} className={styles.openItem}>
                     <button type="button" className={styles.openTitle} onClick={() => onOpenFile(b.file)}>
+                      <SpecChip kind="blueprint" />
                       {b.title}
                     </button>
                     <span className={styles.rowMeta}>
@@ -203,7 +209,7 @@ export function ProjectView({
       </section>
 
       <section className={styles.section}>
-        <SectionTitle icon={<FileIcon />} hue="blueprints" title={t("projects.blueprints.title")} count={listed.length} />
+        <SectionTitle icon={<BlueprintIcon />} hue="blueprints" title={t("projects.blueprints.title")} count={listed.length} />
         {p.blueprints.length === 0 ? (
           <EmptyState>{t("projects.empty.blueprints")}</EmptyState>
         ) : (
@@ -224,13 +230,19 @@ export function ProjectView({
         {p.sheets.length === 0 && <EmptyState>{t("projects.empty.specs")}</EmptyState>}
         {pages.length > 0 && (
           <>
-            <h4 className={styles.group}>{t("projects.specs.pages")}</h4>
+            <h4 className={styles.group}>
+              <SpecChip kind="page" />
+              {t("projects.specs.pages")}
+            </h4>
             <ul className={styles.rows}>{pages.map(sheetRow)}</ul>
           </>
         )}
         {domains.length > 0 && (
           <>
-            <h4 className={styles.group}>{t("projects.specs.domains")}</h4>
+            <h4 className={styles.group}>
+              <SpecChip kind="domain" />
+              {t("projects.specs.domains")}
+            </h4>
             <ul className={styles.rows}>{domains.map(sheetRow)}</ul>
           </>
         )}

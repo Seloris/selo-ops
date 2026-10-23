@@ -14,6 +14,7 @@
    --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
    --bp-draft, --bp-ready, --bp-building, --bp-review, --bp-merging, --bp-done, --bp-legacy   a blueprint's state, the same in bars, legends, tags and tracks: lime, cyan, blue, violet, fuchsia, green, grey (projects FR-14); none is --mark, amber or rose
    --hue-progress, --hue-blueprints, --hue-specs, --hue-ideas, --hue-debt   the icons of the projects page's sections: orange, teal, emerald, sky, stone
+   --spec-page, --spec-domain, --spec-blueprint   a page spec, a domain sheet, a blueprint, wherever one shows (app FR-04): indigo, pink, teal like the blueprint lane
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
    of that scheme, so the choice wins over the system's prefers-color-scheme. */
 :root {
@@ -48,6 +49,9 @@
     --hue-specs: #047857;
     --hue-ideas: #0369a1;
     --hue-debt: #78716c;
+    --spec-page: #4f46e5;
+    --spec-domain: #db2777;
+    --spec-blueprint: #0f766e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -82,6 +86,9 @@
     --hue-specs: #6ee7b7;
     --hue-ideas: #7dd3fc;
     --hue-debt: #d6d3d1;
+    --spec-page: #a5b4fc;
+    --spec-domain: #f9a8d4;
+    --spec-blueprint: #2dd4bf;
   }
 }
 
@@ -135,6 +142,9 @@
   --hue-specs: #047857;
   --hue-ideas: #0369a1;
   --hue-debt: #78716c;
+  --spec-page: #4f46e5;
+  --spec-domain: #db2777;
+  --spec-blueprint: #0f766e;
   color-scheme: light;
 }
 
@@ -188,5 +198,8 @@
   --hue-specs: #6ee7b7;
   --hue-ideas: #7dd3fc;
   --hue-debt: #d6d3d1;
+  --spec-page: #a5b4fc;
+  --spec-domain: #f9a8d4;
+  --spec-blueprint: #2dd4bf;
   color-scheme: dark;
 }

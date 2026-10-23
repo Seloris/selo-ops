@@ -1,0 +1,16 @@
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: calc(var(--radius-control) / 2);
+  color: var(--spec);
+  background: color-mix(in srgb, var(--spec) 16%, transparent);
+}
+
+.chip svg {
+  width: 14px;
+  height: 14px;
+}

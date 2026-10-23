@@ -413,3 +413,31 @@ export function NoteIcon() {
     </svg>
   );
 }
+
+// The three kinds of spec file (app FR-04): a page's window, a domain's book, a blueprint's plan.
+export function PageIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 9h18M7 6.5h.01M10 6.5h.01" />
+    </svg>
+  );
+}
+
+export function DomainIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5v-13A2.5 2.5 0 0 1 6.5 3z" />
+    </svg>
+  );
+}
+
+export function BlueprintIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M3 9h18M9 21V9M15 15h3" />
+    </svg>
+  );
+}
