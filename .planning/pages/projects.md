@@ -21,6 +21,7 @@ The selo projects of the developer, read from the ops export and their `.plannin
 - **FR-07** — « Avancement des blueprints » shows a bar splitting the blueprints by state with a legend counting each, then one line per open blueprint: title, state, the worktree's branch when only a worktree holds it, its progress track (`project` BR-03: one pip per stage, filled once ticked, then « Revue » and « Spec fusionnée »), its live sessions and its next prompt with « Copier ».
 - **FR-08** — « Blueprints » lists every blueprint not legacy, newest first: date, title, state, pages and domain sheets, a bar of its delta lines (added, changed, removed) and its progress track; the legacy ones sit in a folded section at the bottom with their count.
 - **FR-09** — « Specs » lists the page specs with their route, then the domain sheets, `app` first, then « Idées » and « Dette technique »; a sheet shows a bar of its FRs and BRs scaled to the biggest sheet, its counts, its last commit (subject and age) and the open blueprints touching it.
+- **FR-17** — Among its facts, « Slots » lists the project's slots by number (`project` BR-05): its number, its checkout's branch, « En cours depuis X » or « Arrêté », and each component with its mode when not `dev` and its URL, a link only while it runs; « Aucun lancement » when none.
 
 ## Side panel
 

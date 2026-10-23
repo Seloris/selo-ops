@@ -56,6 +56,22 @@
   list-style: none;
 }
 
+.slots {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slots li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 10px;
+}
+
 .mono {
   font-family: var(--font-mono);
 }

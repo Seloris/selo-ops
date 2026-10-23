@@ -55,6 +55,7 @@ const project = (name: string, blueprints: Blueprint[] = []): ProjectOverview =>
   ideaCount: 0,
   debtCount: 0,
   sessionIds: [],
+  slots: [],
 });
 
 const sheet = (overrides: Partial<SpecSheet> = {}): SpecSheet => ({

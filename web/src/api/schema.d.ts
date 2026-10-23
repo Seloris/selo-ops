@@ -342,6 +342,7 @@ export interface components {
             ideaCount: number;
             debtCount: number;
             sessionIds: string[];
+            slots: components["schemas"]["ProjectSlot"][];
         };
         SpecSheet: {
             /** @enum {string} */
@@ -392,6 +393,18 @@ export interface components {
         };
         /** @enum {string} */
         BlueprintState: "draft" | "ready" | "building" | "review" | "merging" | "done" | "legacy";
+        ProjectSlot: {
+            number: number;
+            root: string;
+            branch: string | null;
+            startedAt: string | null;
+            isRunning: boolean;
+            components: {
+                name: string;
+                mode: string;
+                url: string;
+            }[];
+        };
         ProjectFile: {
             path: string;
             text: string;

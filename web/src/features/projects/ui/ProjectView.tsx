@@ -6,6 +6,7 @@ import { EmptyState } from "../../../shared/ui/EmptyState.tsx";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage.tsx";
 import { BlueprintIcon, BranchIcon, GaugeIcon, NoteIcon, TextFileIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { SpecChip } from "../../../shared/ui/SpecKind.tsx";
+import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import {
   biggestSheet,
@@ -167,6 +168,45 @@ export function ProjectView({
                     <li key={w.root}>
                       <span className={styles.mono}>{w.branch ?? unknown}</span>
                       {w.aheadCount !== null && <span className={styles.muted}> · {tn("projects.view.ahead", w.aheadCount)}</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </dd>
+          </div>
+          {/* projects FR-17: each slot's run, its URLs live links only while it runs. */}
+          <div>
+            <dt>{t("projects.view.slots")}</dt>
+            <dd>
+              {p.slots.length === 0 ? (
+                t("projects.view.noSlot")
+              ) : (
+                <ul className={styles.slots}>
+                  {p.slots.map((s) => (
+                    <li key={s.number}>
+                      <StatusDot tone={s.isRunning ? "pulse" : "off"} />
+                      <span>{t("projects.view.slot", { number: s.number })}</span>
+                      <span className={styles.mono}>{s.branch ?? unknown}</span>
+                      <span className={styles.muted}>
+                        {s.isRunning
+                          ? s.startedAt
+                            ? t("projects.view.slotRunningFor", { age: ageOf(s.startedAt) })
+                            : t("projects.view.slotRunning")
+                          : t("projects.view.slotStopped")}
+                      </span>
+                      {s.components.map((c) => (
+                        <span key={c.name} className={s.isRunning ? undefined : styles.muted}>
+                          {c.name}
+                          {c.mode !== "dev" && ` (${c.mode})`}{" "}
+                          {s.isRunning ? (
+                            <a className={styles.mono} href={c.url} target="_blank" rel="noreferrer">
+                              {c.url}
+                            </a>
+                          ) : (
+                            <span className={styles.mono}>{c.url}</span>
+                          )}
+                        </span>
+                      ))}
                     </li>
                   ))}
                 </ul>
