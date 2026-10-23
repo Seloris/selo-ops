@@ -55,7 +55,7 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 - **FR-20** — « Ouvrir dans Claude Code » opens a session the desktop app started directly in the Claude app (`session` BR-11), with a toast reading only « Ouvert dans Claude »; any other session gets `claude --resume {id}` copied and a toast reminding to run it in the session's folder, named; when the copy is refused, the toast shows the command selected for a manual copy.
 - **FR-21** — « Action suivante », shown only when the export proposes a selo command, displays it in full and copies it on « Copier »; nothing is run.
 - **FR-26** — An archived session offers no « Action suivante ».
-- **FR-22** — « Archiver », offered on every session not archived yet, moves the session to « Archivées » with a toast saying where to find it; on a session whose state is neither « Terminé » nor « Tour terminé » (`session` BR-07), a confirmation naming the state comes first and nothing is archived until « Archiver quand même ».
+- **FR-22** — « Archiver », offered on every session not archived yet, moves the session to « Archivées » with a toast saying where to find it; on a session whose state is neither « ✅ Job done » nor « Tour terminé » (`session` BR-07), a confirmation naming the state comes first and nothing is archived until « Archiver quand même ».
 - **FR-23** — « Désarchiver », in an archived session's detail, puts it back in the list.
 
 ## Non-goals
