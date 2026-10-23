@@ -1,5 +1,8 @@
+import { useState } from "react";
 import {
   commitPlaces,
+  helpTabs,
+  type HelpTab,
   decisionGuide,
   lanes,
   lanesById,
@@ -8,12 +11,15 @@ import {
   sectionOrder,
   sections,
   skills,
+  specTopics,
   vocabulary,
 } from "../content.ts";
 import {
+  CodeList,
   DecisionGuideList,
   Glossary,
   HelpSection,
+  HelpTabs,
   LaneList,
   LifecycleList,
   Note,
@@ -24,8 +30,34 @@ import {
   TextList,
 } from "./HelpParts.tsx";
 
-// help FR-01 to FR-08: the same content on the page and in the popup (help FR-10).
+// help FR-12: the same tabs on the page and in the popup (help FR-10), the guide first.
 export function HelpContent() {
+  const [tab, setTab] = useState<HelpTab>("guide");
+  return (
+    <>
+      <HelpTabs tabs={helpTabs} value={tab} onChange={setTab} />
+      {tab === "guide" ? <GuideTab /> : <SpecsTab />}
+    </>
+  );
+}
+
+// help FR-13.
+function SpecsTab() {
+  return (
+    <>
+      <Note text="help.specs.intro" />
+      {specTopics.map((topic) => (
+        <HelpSection key={topic.section.id} section={topic.section}>
+          <TextList items={topic.points} />
+          {topic.examples.length > 0 && <CodeList label="help.specs.examples" items={topic.examples} />}
+        </HelpSection>
+      ))}
+    </>
+  );
+}
+
+// help FR-01 to FR-08.
+function GuideTab() {
   return (
     <>
       <TableOfContents title="help.toc.title" sections={sectionOrder} />

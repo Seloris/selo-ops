@@ -254,3 +254,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* In the content's grid, the tab switcher keeps its own width. */
+.tabs {
+  justify-self: start;
+}

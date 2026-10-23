@@ -4,9 +4,13 @@ Route: `/help` · Domain: `app`
 
 A static page that explains how selo works, so that a person picks a lane and reads the dashboard's vocabulary without opening the plugin.
 
+## Tabs
+
+- **FR-12** — The page opens on two tabs, « Guide » and « Specs », « Guide » selected each time the page or the popup opens: « Guide » holds the sections of FR-01 to FR-08, « Specs » the explanation of FR-13.
+
 ## Table of contents
 
-- **FR-01** — The page opens with a short table of contents linking to its four sections, in this order: choosing a lane, the lifecycle of a piece of work, skills and agents, specs and vocabulary.
+- **FR-01** — The « Guide » tab opens with a short table of contents linking to its four sections, in this order: choosing a lane, the lifecycle of a piece of work, skills and agents, specs and vocabulary.
 
 ## Choosing a lane
 
@@ -26,6 +30,10 @@ A static page that explains how selo works, so that a person picks a lane and re
 ## Specs and vocabulary
 
 - **FR-08** — The "specs and vocabulary" section defines page spec, page stub, domain sheet, FR, BR, Q, spec delta, blueprint, stage, `Spec:` line and done footer, each in one or two sentences.
+
+## Specs tab
+
+- **FR-13** — The « Specs » tab explains how selo manages specs, one section each, in this order: page specs (one per route under `.planning/pages`, FRs grouped by zone), domain sheets (`.planning/domain`, glossary, BRs, the `app` sheet for the shell, which file gets a rule), ids (FR, BR, US, Q per file, append-only, the `Retired:` line, a doubt as a Q), page stubs and their bootstrap from the code, the spec following the code (the fastlane's delta in the commit of the code, the blueprint's Spec delta merged by the build), the `Spec:` line of commit bodies and the spec-check script.
 
 ## Whole page
 

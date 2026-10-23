@@ -202,3 +202,56 @@ export interface Term {
 export const vocabulary: Term[] = (
   ["pageSpec", "pageStub", "domainSheet", "fr", "br", "q", "specDelta", "blueprint", "stage", "specLine", "doneFooter"] as const
 ).map((term) => ({ term: `help.vocabulary.${term}.term`, definition: `help.vocabulary.${term}.definition` }));
+
+// help FR-12: the two tabs of the page and of the popup.
+export type HelpTab = "guide" | "specs";
+
+export const helpTabs: { value: HelpTab; label: MessageKey }[] = [
+  { value: "guide", label: "help.tabs.guide" },
+  { value: "specs", label: "help.tabs.specs" },
+];
+
+export interface SpecTopic {
+  section: Section;
+  points: MessageKey[];
+  examples: MessageKey[];
+}
+
+// help FR-13: how selo manages specs, in this order.
+export const specTopics: SpecTopic[] = [
+  {
+    section: { id: "specs-pages", title: "help.specs.pages.title" },
+    points: ["help.specs.pages.point1", "help.specs.pages.point2", "help.specs.pages.point3", "help.specs.pages.point4"],
+    examples: ["help.specs.pages.example1"],
+  },
+  {
+    section: { id: "specs-domain", title: "help.specs.domain.title" },
+    points: ["help.specs.domain.point1", "help.specs.domain.point2", "help.specs.domain.point3", "help.specs.domain.point4"],
+    examples: ["help.specs.domain.example1"],
+  },
+  {
+    section: { id: "specs-ids", title: "help.specs.ids.title" },
+    points: ["help.specs.ids.point1", "help.specs.ids.point2", "help.specs.ids.point3", "help.specs.ids.point4"],
+    examples: [],
+  },
+  {
+    section: { id: "specs-stubs", title: "help.specs.stubs.title" },
+    points: ["help.specs.stubs.point1", "help.specs.stubs.point2", "help.specs.stubs.point3", "help.specs.stubs.point4"],
+    examples: ["help.specs.stubs.example1"],
+  },
+  {
+    section: { id: "specs-follows", title: "help.specs.follows.title" },
+    points: ["help.specs.follows.point1", "help.specs.follows.point2", "help.specs.follows.point3", "help.specs.follows.point4", "help.specs.follows.point5"],
+    examples: [],
+  },
+  {
+    section: { id: "specs-specLine", title: "help.specs.specLine.title" },
+    points: ["help.specs.specLine.point1", "help.specs.specLine.point2", "help.specs.specLine.point3"],
+    examples: ["help.specs.specLine.example1", "help.specs.specLine.example2", "help.specs.specLine.example3"],
+  },
+  {
+    section: { id: "specs-specCheck", title: "help.specs.specCheck.title" },
+    points: ["help.specs.specCheck.point1", "help.specs.specCheck.point2", "help.specs.specCheck.point3", "help.specs.specCheck.point4"],
+    examples: ["help.specs.specCheck.example1", "help.specs.specCheck.example2"],
+  },
+];

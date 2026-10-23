@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { Card } from "../../../shared/ui/Card.tsx";
+import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
-import type { DecisionGuide, Lane, LaneId, LifecycleStep, Role, Section, Skill, Term } from "../content.ts";
+import type { DecisionGuide, HelpTab, Lane, LaneId, LifecycleStep, Role, Section, Skill, Term } from "../content.ts";
 import styles from "./HelpParts.module.css";
 
 // help FR-11: a lane's class sets --lane, which its card, name and dot read.
@@ -217,4 +218,23 @@ export function Glossary({ terms }: { terms: Term[] }) {
 
 export function Note({ text }: { text: MessageKey }) {
   return <p className={styles.muted}>{t(text)}</p>;
+}
+
+export function CodeList({ label, items }: { label: MessageKey; items: MessageKey[] }) {
+  return (
+    <div className={styles.codes} aria-label={t(label)}>
+      {items.map((item) => (
+        <Code key={item} text={item} />
+      ))}
+    </div>
+  );
+}
+
+// help FR-12: pressed buttons rather than ARIA tabs, which would also need arrow-key navigation.
+export function HelpTabs({ tabs, value, onChange }: { tabs: { value: HelpTab; label: MessageKey }[]; value: HelpTab; onChange(tab: HelpTab): void }) {
+  return (
+    <div className={styles.tabs}>
+      <Segmented label={t("help.tabs.label")} options={tabs.map((tab) => ({ value: tab.value, label: t(tab.label) }))} value={value} onChange={onChange} />
+    </div>
+  );
 }
