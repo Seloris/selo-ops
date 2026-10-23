@@ -263,7 +263,8 @@
   /* A sticky box stops at the scroller's padding: a negative top lifts it to the very edge. */
   top: calc(-1 * var(--help-top, 0px));
   z-index: 2;
-  margin-inline: calc(-1 * var(--help-bleed, var(--panel-pad)));
+  /* Up over the top padding and the 28px row gap after the empty scroll marker before it. */
+  margin: calc(-28px - var(--help-top, 0px)) calc(-1 * var(--help-bleed, var(--panel-pad))) 0;
   padding: 10px var(--help-bleed, var(--panel-pad));
   background: var(--pop-bg);
   border-bottom: var(--border-width) solid var(--border);
