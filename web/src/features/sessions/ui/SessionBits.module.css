@@ -1,11 +1,36 @@
+/* The state's badge: a pill tinted with the state's colour (--tone). */
 .state {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
   min-width: 0;
+  max-width: 100%;
+  height: 22px;
+  padding: 0 10px 0 8px;
   overflow: hidden;
+  font-size: 0.86em;
   font-weight: 600;
   white-space: nowrap;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  border-radius: var(--radius-pill);
+}
+
+.tone-warn { --tone: var(--warn); }
+.tone-danger { --tone: var(--danger); }
+.tone-pulse { --tone: var(--working); }
+.tone-done { --tone: var(--done); }
+
+/* A turn ended: the job-done green, lighter. */
+.tone-turn {
+  --tone: var(--done);
+  background: color-mix(in srgb, var(--done) 7%, transparent);
+}
+
+.tone-idle,
+.tone-off {
+  --tone: var(--text-muted);
+  font-weight: 500;
 }
 
 .stateText {
@@ -13,11 +38,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.calm {
-  font-weight: 400;
-  color: var(--text-muted);
 }
 
 .age {
@@ -76,18 +96,6 @@
 
 .muted {
   color: var(--text-muted);
-}
-
-.lane-free {
-  color: var(--lane-free);
-}
-
-.lane-fastlane {
-  color: var(--lane-fastlane);
-}
-
-.lane-autopilot {
-  color: var(--lane-autopilot);
 }
 
 .note {

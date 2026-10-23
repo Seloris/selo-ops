@@ -36,7 +36,7 @@ import { parseFoldedSections, toggleSection, type FoldedSections } from "../ui/d
 import { SessionDetail } from "../ui/SessionDetail.tsx";
 import { NoteDialog } from "../ui/NoteDialog.tsx";
 import { ArchivedToggle, ClosedHeader, ProjectHeader, SessionGroup, StatusHeader } from "../ui/SessionGroup.tsx";
-import { ColumnHead, SessionList, type SessionActions } from "../ui/SessionList.tsx";
+import { SessionList, type SessionActions } from "../ui/SessionList.tsx";
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
 import { SettingsBar, type View } from "../ui/SettingsBar.tsx";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../ui/panelWidth.ts";
@@ -335,7 +335,6 @@ export function SessionsLivePage() {
           ) : (
             <>
               {query.isError && <ErrorMessage>{t("sessions.page.refreshError", { message: query.error.message || t("sessions.page.errorUnknown") })}</ErrorMessage>}
-              {isList && <ColumnHead showProject={settings.grouping !== "project"} isNarrow={isPanelOpen} />}
               {blocks.length === 0 && <EmptyState>{emptyText}</EmptyState>}
               {blocks.map((b) => (
                 <SessionGroup key={b.key} header={blockHeader(b, projectsById.get(b.key))}>

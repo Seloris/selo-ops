@@ -5,7 +5,6 @@ import {
   countsOf,
   groupSessions,
   isFinished,
-  isStale,
   matches,
   openCountByProject,
   sortSessions,
@@ -231,33 +230,6 @@ describe("closedSessions and archivedSessions", () => {
     // Assert
     expect(ids(closed)).toEqual(["closed"]);
     expect(ids(archived)).toEqual(["archived", "closed-archived"]);
-  });
-});
-
-describe("isStale", () => {
-  it.each([
-    ["working", 30, true],
-    ["job-done", 31, true],
-    ["awaiting-commit", 29, false],
-  ] as const)("a %s session updated %i min ago is stale: %s", (state, minutes, expected) => {
-    // Arrange
-    const session = buildSession({ state, updatedAt: ago(minutes) });
-
-    // Act
-    const stale = isStale(session, NOW);
-
-    // Assert
-    expect(stale).toBe(expected);
-  });
-
-  it("never marks a closed or archived session stale", () => {
-    // Arrange
-    const closed = buildSession({ isClosed: true, updatedAt: ago(90) });
-    const archived = buildSession({ isArchived: true, updatedAt: ago(90) });
-
-    // Act, Assert
-    expect(isStale(closed, NOW)).toBe(false);
-    expect(isStale(archived, NOW)).toBe(false);
   });
 });
 

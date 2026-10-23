@@ -14,12 +14,13 @@
 }
 
 .pulse {
-  background: var(--lane-free);
+  background: var(--working);
   animation: pulse 1.6s ease-in-out infinite;
 }
 
+/* Hollow: a ring, the centre transparent. */
 .turn {
-  background: var(--hue-next);
+  box-shadow: inset 0 0 0 1.5px var(--done);
 }
 
 .idle {
@@ -28,6 +29,10 @@
 
 .done {
   background: var(--done);
+}
+
+.off {
+  box-shadow: inset 0 0 0 1.5px var(--text-muted);
 }
 
 @keyframes pulse {

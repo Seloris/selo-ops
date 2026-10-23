@@ -337,7 +337,8 @@
    as its own cards; the wide stack holds the usage and the files. A folded card shrinks to its title. */
 .cards {
   display: grid;
-  grid-template-columns: minmax(340px, 1fr) minmax(0, 2fr);
+  grid-template-columns: minmax(340px, 650px) minmax(0, 768px);
+  justify-content: start;
   align-items: start;
   gap: 16px;
   padding: 16px 20px 24px;

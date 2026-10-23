@@ -3,9 +3,9 @@ import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { ArchiveIcon, NoteIcon, OpenIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
-import { AgeLabel, AwaitedIcon, LaneLabel, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
+import { AgeLabel, AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { awaitedOf, calmText, closeText, modelText, requestText } from "./sessionText.ts";
+import { awaitedOf, calmText, closeText, modelText, requestText, sessionLaneLabel } from "./sessionText.ts";
 import { exactTokens, totalTokens } from "./usage.ts";
 import styles from "./SessionCards.module.css";
 
@@ -42,7 +42,7 @@ export function SessionCards({
               <span className={styles.head}>
                 <StateLabel session={s} />
                 {showProject && <span className={styles.meta}>· {projectName(s.projectId)}</span>}
-                <span className={`${styles.meta} ${styles.mono}`}>· <LaneLabel session={s} /></span>
+                <span className={`${styles.meta} ${styles.mono}`}>· {sessionLaneLabel(s)}</span>
                 <span className={styles.end}>
                   <AgeLabel session={s} now={now} />
                   {outdatedIds.has(s.id) && <PluginWarning session={s} />}

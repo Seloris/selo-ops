@@ -1,48 +1,7 @@
-/* State, project and type give way first when the list runs short of room, so the age never spills over the open button. */
-.withProject {
-  --cols: minmax(0, 176px) minmax(0, 124px) minmax(0, 84px) minmax(0, 1fr) minmax(0, 1.2fr) 44px 190px 56px;
-  --col-gap: 16px;
-}
-
-.noProject {
-  --cols: minmax(0, 176px) minmax(0, 84px) minmax(0, 1fr) minmax(0, 1.2fr) 44px 190px 56px;
-  --col-gap: 16px;
-}
-
-.withProject.narrow {
-  --cols: minmax(0, 150px) minmax(0, 108px) minmax(0, 72px) minmax(0, 1fr) minmax(0, 1.1fr) 40px 170px 52px;
-  --col-gap: 12px;
-}
-
-.noProject.narrow {
-  --cols: minmax(0, 150px) minmax(0, 72px) minmax(0, 1fr) minmax(0, 1.1fr) 40px 170px 52px;
-  --col-gap: 12px;
-}
-
-.head {
-  display: grid;
-  grid-template-columns: var(--cols);
-  column-gap: var(--col-gap);
-  align-items: center;
-  height: 28px;
-  padding: 0 88px 0 22px;
-  font-size: 0.8em;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.head > span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.end {
-  justify-self: end;
-}
-
+/* sessions-live FR-11: two lines on three columns — the badge column fixed, the request and the context flexible,
+   the age and the counts at the end; the buttons after them, across both lines. */
 .rows {
+  --badge-col: 150px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -51,10 +10,14 @@
   list-style: none;
 }
 
+/* The detail is open: the badge column narrows (sessions-live FR-18). */
+.narrow {
+  --badge-col: 128px;
+}
+
 .row {
   display: flex;
   align-items: center;
-  height: 36px;
   border-radius: calc(var(--radius-control) - 2px);
 }
 
@@ -83,12 +46,13 @@
 .main {
   flex: 1;
   min-width: 0;
-  height: 100%;
   display: grid;
-  grid-template-columns: var(--cols);
-  column-gap: var(--col-gap);
+  grid-template-columns: var(--badge-col) minmax(0, 1fr) auto;
+  grid-template-areas: "badge request age" "meta context counts";
+  column-gap: 14px;
+  row-gap: 4px;
   align-items: center;
-  padding: 0 10px 0 14px;
+  padding: 7px 10px 7px 12px;
   font: inherit;
   font-size: 0.9em;
   text-align: left;
@@ -99,35 +63,28 @@
   cursor: pointer;
 }
 
-.row > button:last-child {
-  margin: 0 4px 0 0;
-}
-
-.row > :nth-last-child(2) {
-  margin-left: 6px;
-}
-
-.tip {
-  display: grid;
-  gap: 2px;
-}
-
-.tipTitle {
-  font-size: 0.8em;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--mark);
-}
-
-.state {
+.badge {
+  grid-area: badge;
   min-width: 0;
   display: flex;
-  overflow: hidden;
 }
 
-.muted,
-.type,
+.request {
+  grid-area: request;
+  font-size: 1.04em;
+  font-weight: 500;
+}
+
+.meta {
+  grid-area: meta;
+  padding-left: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.84em;
+  color: var(--text-muted);
+}
+
 .request,
+.meta,
 .text {
   min-width: 0;
   overflow: hidden;
@@ -135,48 +92,53 @@
   white-space: nowrap;
 }
 
-.muted {
-  color: var(--text-muted);
-}
-
-.type {
-  font-family: var(--font-mono);
-  font-size: 0.89em;
-  color: var(--text-muted);
-}
-
-.awaited {
+.context {
+  grid-area: context;
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   overflow: hidden;
+  font-size: 0.93em;
+}
+
+.warnText {
   font-weight: 500;
+  color: var(--warn);
 }
 
-.key {
+.dangerText {
+  font-weight: 500;
+  color: var(--danger);
+}
+
+.calm {
+  color: var(--text-muted);
+}
+
+/* The next action: a violet chip with the command in mono (its button, at the end, copies it: FR-21). */
+.chip {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 9px 0 7px;
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  color: var(--hue-next);
+  background: color-mix(in srgb, var(--hue-next) 13%, transparent);
+  border-radius: var(--radius-pill);
+}
+
+.chip svg {
   flex: none;
-  font-weight: 400;
-  color: var(--text-muted);
-}
-
-/* Its own column, so the counts line up whatever the width of the age. */
-.files {
-  justify-self: end;
-  min-width: 0;
-  display: flex;
-}
-
-.tokens {
-  justify-self: end;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-muted);
+  width: 13px;
+  height: 13px;
 }
 
 .age {
+  grid-area: age;
   justify-self: end;
   min-width: 0;
   display: flex;
@@ -192,32 +154,51 @@
   place-items: center;
 }
 
-/* Narrow screens: state and age on the first line, the request below; the other columns go. */
+.counts {
+  grid-area: counts;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 24px;
+}
+
+.tokens {
+  white-space: nowrap;
+  font-size: 0.93em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  margin-right: 4px;
+}
+
+.tip {
+  display: grid;
+  gap: 2px;
+}
+
+.tipTitle {
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--mark);
+}
+
+/* Narrow screens: the badge and the age, the request on its own line, then only the context. */
 @media (max-width: 900px) {
-  .head {
-    display: none;
-  }
-
-  .row {
-    height: auto;
-  }
-
   .main {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "state age" "request request";
-    row-gap: 2px;
-    padding: 8px 10px 8px 14px;
+    grid-template-areas: "badge age" "request request" "context context";
+    column-gap: 10px;
   }
 
-  .state { grid-area: state; }
-  .age { grid-area: age; }
-  .request { grid-area: request; }
-
-  .main > .muted,
-  .main > .type,
-  .main > .awaited,
-  .main > .files,
-  .main > .tokens {
+  .meta,
+  .counts {
     display: none;
   }
 }

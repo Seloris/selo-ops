@@ -1,10 +1,8 @@
-/* The row's slot, as wide as an icon button. The row gives the « Note » button after it a 6px left margin
-   (SessionList.module.css): the negative right margin cancels it, so the icons sit together, 6px after the row. */
+/* The row's slot, as wide as an icon button. */
 .slot {
   flex: none;
   display: inline-grid;
   width: calc(var(--control-h) - 8px);
-  margin: 0 -6px 0 6px;
 }
 
 .tip {

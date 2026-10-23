@@ -12,10 +12,10 @@ import {
   createdText,
   desktopLinkOf,
   isPluginOutdated,
-  laneTone,
   modelText,
   pluginsText,
   requestText,
+  rowContext,
   sessionLaneLabel,
   shownBlockers,
   toneOf,
@@ -160,7 +160,7 @@ describe("awaitedOf", () => {
     const awaited = awaitedOf(buildSession({ state: "awaiting-permission", permissionTool: "npm run build && npm test" }));
 
     // Assert
-    expect(awaited).toMatchObject({ kind: "permission", key: "Permission", label: "Permission demandée", text: "Autoriser : npm run build && npm test", full: "Autoriser : npm run build && npm test", isCode: true });
+    expect(awaited).toMatchObject({ kind: "permission", label: "Permission demandée", text: "Autoriser : npm run build && npm test", full: "Autoriser : npm run build && npm test", isCode: true });
   });
 
   it("says Claude awaits a permission when the transcript names no tool", () => {
@@ -190,17 +190,48 @@ describe("toneOf", () => {
   it.each([
     [{ state: "awaiting-answer" }, "warn"],
     [{ state: "awaiting-permission" }, "warn"],
-    [{ state: "awaiting-permission", isClosed: true }, "idle"],
+    [{ state: "awaiting-permission", isClosed: true }, "off"],
     [{ state: "awaiting-commit" }, "warn"],
     [{ state: "stopped" }, "danger"],
-    [{ state: "stopped", isClosed: true }, "idle"],
+    [{ state: "stopped", isClosed: true }, "off"],
     [{ state: "working" }, "pulse"],
     [{ state: "turn-ended" }, "turn"],
-    [{ state: "turn-ended", isClosed: true }, "idle"],
+    [{ state: "turn-ended", isClosed: true }, "off"],
     [{ state: "job-done" }, "done"],
+    [{ state: "job-done", isClosed: true }, "off"],
+    [{ state: "job-done", isArchived: true }, "off"],
+    [{ state: "working", isArchived: true }, "off"],
   ] as const)("colours %o as %s", (overrides, tone) => {
     // Act, Assert
     expect(toneOf(buildSession(overrides))).toBe(tone);
+  });
+});
+
+describe("rowContext", () => {
+  it("gives what is awaited first, in a session to handle", () => {
+    // Act
+    const context = rowContext(buildSession({ state: "awaiting-answer", question: "A or B?", nextAction: "/selo:build x" }));
+
+    // Assert
+    expect(context).toMatchObject({ kind: "awaited", awaited: { kind: "question", text: "A or B?" } });
+  });
+
+  it("gives the step of a working session, capitalised", () => {
+    // Act, Assert
+    expect(rowContext(buildSession({ state: "working", step: "stage:2", substep: "tests du web" }))).toEqual({ kind: "step", text: "Étape 2 · tests du web" });
+  });
+
+  it("gives the next action when nothing is awaited and no step runs", () => {
+    // Act, Assert
+    expect(rowContext(buildSession({ state: "job-done", nextAction: "/selo:review" }))).toEqual({ kind: "next", command: "/selo:review" });
+    expect(rowContext(buildSession({ state: "working", nextAction: "/selo:review" }))).toEqual({ kind: "next", command: "/selo:review" });
+  });
+
+  it("gives nothing for an archived session's next action, a closed session's awaited item or a calm session", () => {
+    // Act, Assert
+    expect(rowContext(buildSession({ state: "job-done", nextAction: "/selo:review", isArchived: true }))).toEqual({ kind: "none" });
+    expect(rowContext(buildSession({ state: "awaiting-answer", question: "A?", isClosed: true }))).toEqual({ kind: "none" });
+    expect(rowContext(buildSession({ state: "turn-ended" }))).toEqual({ kind: "none" });
   });
 });
 
@@ -254,25 +285,11 @@ describe("blockers", () => {
   });
 });
 
-describe("laneTone", () => {
-  it("gives libre, fastlane and autopilot their own colour", () => {
-    expect(laneTone("free")).toBe("free");
-    expect(laneTone("fastlane")).toBe("fastlane");
-    expect(laneTone("autopilot")).toBe("autopilot");
-  });
-
-  it("leaves the other lanes neutral", () => {
-    expect(laneTone("build")).toBeNull();
-    expect(laneTone("blueprint")).toBeNull();
-  });
-});
-
 describe("sessions outside selo", () => {
   const outside = (overrides: Partial<Session> = {}) => buildSession({ lane: "outside", isOutsideSelo: true, ...overrides });
 
   it("names their type of work « hors selo », neutral, and keeps the others' labels", () => {
     expect(sessionLaneLabel(outside())).toBe("hors selo");
-    expect(laneTone(outside().lane)).toBeNull();
     expect(sessionLaneLabel(buildSession({ lane: "free" }))).toBe("libre");
     expect(sessionLaneLabel(buildSession({ lane: "build" }))).toBe("build");
   });

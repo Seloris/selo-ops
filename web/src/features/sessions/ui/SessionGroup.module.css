@@ -8,6 +8,16 @@
   backdrop-filter: var(--blur);
 }
 
+/* The group's stacking context (backdrop-filter) would hide a button's tip under the next group. */
+.group {
+  position: relative;
+}
+
+.group:hover,
+.group:focus-within {
+  z-index: 1;
+}
+
 .flat {
   padding: 0;
   background: transparent;

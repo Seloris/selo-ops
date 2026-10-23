@@ -1,26 +1,22 @@
 import { t, tn } from "../../../shared/lib/i18n/index.ts";
-import { ClockIcon, CommitIcon, FileIcon, NoteIcon, QuestionIcon, ShieldIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { CommitIcon, FileIcon, NoteIcon, QuestionIcon, ShieldIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
-import { isTodo, type Session } from "../data/sessionView.ts";
-import { ageDisplay, laneTone, sessionLaneLabel, stateLabel, toneOf, type AwaitedKind } from "./sessionText.ts";
+import type { Session } from "../data/sessionView.ts";
+import { ageDisplay, stateLabel, toneOf, type AwaitedKind } from "./sessionText.ts";
 import styles from "./SessionBits.module.css";
 
 // The pieces a row, a card and the detail share.
 
+// sessions-live FR-10: the state's badge, its dot and a tint of the state's colour.
 export function StateLabel({ session }: { session: Session }) {
+  const tone = toneOf(session);
   return (
-    <span className={`${styles.state} ${isTodo(session) ? "" : styles.calm}`}>
-      <StatusDot tone={toneOf(session)} />
+    <span className={`${styles.state} ${styles[`tone-${tone}`]}`}>
+      <StatusDot tone={tone} />
       <span className={styles.stateText}>{stateLabel(session)}</span>
     </span>
   );
-}
-
-// sessions-live FR-29: the type of work, coloured for libre, fastlane and autopilot.
-export function LaneLabel({ session }: { session: Session }) {
-  const tone = session.isOutsideSelo ? null : laneTone(session.lane);
-  return <span className={tone ? styles[`lane-${tone}`] : undefined}>{sessionLaneLabel(session)}</span>;
 }
 
 // sessions-live FR-39: a small warning on a session written by another selo-ops version than the installed one.
@@ -50,7 +46,7 @@ export function FilesCount({ session }: { session: Session }) {
 export function AgeLabel({ session, now }: { session: Session; now: number }) {
   const age = ageDisplay(session, now);
   if (!age.isTag) return <span className={styles.age}>{age.text}</span>;
-  return <Tag icon={age.isStale ? <ClockIcon /> : undefined}>{age.text}</Tag>;
+  return <Tag>{age.text}</Tag>;
 }
 
 // `isMuted`: a closed or archived session waits on nobody, so no state colour (sessions-live FR-10).

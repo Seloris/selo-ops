@@ -11,9 +11,9 @@ import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
 import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
-import { AwaitedIcon, LaneLabel, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
+import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, sessionLaneLabel, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 import extras from "./NextAction.module.css";
 
@@ -192,7 +192,7 @@ export function SessionDetail({
               <span className={styles.mono}>{s.branch}</span>
             </span>
           )}
-          <span className={styles.mono}><LaneLabel session={s} /></span>
+          <span className={styles.mono}>{sessionLaneLabel(s)}</span>
           {(s.model || s.effort) && <span className={styles.mono}>{[s.model, s.effort].filter(Boolean).join(" · ")}</span>}
           <span>{createdText(s.createdAt, now)}</span>
           <span>{t("sessions.detail.updated", { age: age(ageMs({ ...s, isArchived: false }, now)) })}</span>

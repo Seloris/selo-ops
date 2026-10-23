@@ -2,7 +2,7 @@ import { dayTime } from "../../../shared/lib/dayTime.ts";
 import { formatAge } from "../../../shared/lib/formatAge.ts";
 import { t, tn, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import type { DotTone } from "../../../shared/ui/StatusDot.tsx";
-import { ageMs, bucketOf, isTodo, type InstalledPlugin, type Project, type Session } from "../data/sessionView.ts";
+import { ageMs, bucketOf, isOpen, isTodo, type InstalledPlugin, type Project, type Session } from "../data/sessionView.ts";
 import { formatTokens, totalTokens } from "./usage.ts";
 
 // The words and tones a session shows, shared by its row, its card and its detail.
@@ -24,13 +24,6 @@ export const laneLabel = (lane: string) => (lane === "free" ? t("sessions.lane.f
 // sessions-live FR-11: a session outside selo (`session` BR-12) reads « hors selo », whatever its lane.
 export const sessionLaneLabel = (s: Session) => (s.isOutsideSelo ? t("sessions.lane.outside") : laneLabel(s.lane));
 
-// sessions-live FR-29: libre, fastlane and autopilot each have their colour; the other lanes stay neutral.
-export type LaneTone = "free" | "fastlane" | "autopilot";
-
-export function laneTone(lane: string): LaneTone | null {
-  return lane === "free" || lane === "fastlane" || lane === "autopilot" ? lane : null;
-}
-
 export const blockerLabel = (b: Session["blockers"][number]) => t(`sessions.blocker.${b}` as MessageKey);
 
 // sessions-live FR-28: what clears a blocker; amber only for those that wait on the person.
@@ -49,11 +42,12 @@ export function blockerTone(b: Session["blockers"][number]): DotTone {
   return "idle";
 }
 
-// sessions-live FR-10: colour only on sessions to handle.
+// sessions-live FR-10: one colour per meaning; a closed or archived session waits on nobody, whatever its state.
 export function toneOf(s: Session): DotTone {
+  if (!isOpen(s)) return "off";
   if (isTodo(s)) return s.state === "stopped" ? "danger" : "warn";
-  if (s.state === "working" && !s.isClosed && !s.isArchived) return "pulse";
-  if (s.state === "turn-ended" && !s.isClosed && !s.isArchived) return "turn";
+  if (s.state === "working") return "pulse";
+  if (s.state === "turn-ended") return "turn";
   return s.state === "job-done" ? "done" : "idle";
 }
 
@@ -61,8 +55,7 @@ export type AwaitedKind = "question" | "permission" | "commit" | "error";
 
 export interface Awaited {
   kind: AwaitedKind;
-  // A short key for the list row, a label for the card and the detail.
-  key: string;
+  // The label of the card and the detail.
   label: string;
   text: string;
   // The whole text: a commit with its body.
@@ -76,21 +69,21 @@ export function awaitedOf(s: Session): Awaited | null {
   if (s.state === "awaiting-answer") {
     // A session outside selo, or a question the export missed, gives no text: Claude Code only says it awaits an answer.
     const text = s.question ?? t("sessions.awaited.outsideQuestion");
-    return { kind: "question", key: t("sessions.awaited.questionKey"), label: t("sessions.awaited.question"), text, full: text, isCode: false };
+    return { kind: "question", label: t("sessions.awaited.question"), text, full: text, isCode: false };
   }
   if (s.state === "awaiting-permission") {
     // The transcript names no tool when it is a subagent's, or when its call left the tail.
     const tool = s.permissionTool;
     const text = tool === null ? t("sessions.awaited.permissionUnknown") : t("sessions.awaited.permissionTool", { tool });
-    return { kind: "permission", key: t("sessions.awaited.permissionKey"), label: t("sessions.awaited.permission"), text, full: text, isCode: tool !== null };
+    return { kind: "permission", label: t("sessions.awaited.permission"), text, full: text, isCode: tool !== null };
   }
   if (s.state === "awaiting-commit") {
     const subject = s.pendingCommit?.subject ?? "";
     const body = s.pendingCommit?.body ?? "";
-    return { kind: "commit", key: t("sessions.awaited.commitKey"), label: t("sessions.awaited.commit"), text: subject, full: body ? `${subject}\n\n${body}` : subject, isCode: true };
+    return { kind: "commit", label: t("sessions.awaited.commit"), text: subject, full: body ? `${subject}\n\n${body}` : subject, isCode: true };
   }
   const text = s.error ?? t("sessions.awaited.interrupted");
-  return { kind: "error", key: t("sessions.awaited.errorKey"), label: t("sessions.awaited.error"), text, full: text, isCode: s.error !== null };
+  return { kind: "error", label: t("sessions.awaited.error"), text, full: text, isCode: s.error !== null };
 }
 
 export function stepText(s: Session): string | null {
@@ -98,6 +91,18 @@ export function stepText(s: Session): string | null {
   const step = stage ? t("sessions.step.stage", { number: stage }) : null;
   if (step && s.substep) return `${step} · ${s.substep}`;
   return step ?? s.substep;
+}
+
+export type RowContext = { kind: "awaited"; awaited: Awaited } | { kind: "step"; text: string } | { kind: "next"; command: string } | { kind: "none" };
+
+// sessions-live FR-11: the second line of a row says what is awaited, else the step at work, else the next action.
+export function rowContext(s: Session): RowContext {
+  const awaited = isTodo(s) ? awaitedOf(s) : null;
+  if (awaited) return { kind: "awaited", awaited };
+  const step = s.state === "working" && isOpen(s) ? stepText(s) : null;
+  if (step) return { kind: "step", text: step.charAt(0).toUpperCase() + step.slice(1) };
+  if (s.nextAction && !s.isArchived) return { kind: "next", command: s.nextAction };
+  return { kind: "none" };
 }
 
 // What a session does when nothing is awaited from the person.
