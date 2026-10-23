@@ -143,8 +143,8 @@ export function SessionDetail({
             </span>
             <span className={styles.line}>{[l.entry.skill, l.stepText].filter(Boolean).join(" · ")}</span>
             <span className={styles.status}>
-              {!l.isPastWork && <StateLabel session={{ ...s, state: l.entry.phase, isClosed: false, isArchived: false }} />}
-              {/* Always there, empty on the newest line, so every line fills the grid's five columns. */}
+              {l.isPastWork ? <span /> : <StateLabel session={{ ...s, state: l.entry.phase, isClosed: false, isArchived: false }} />}
+              {/* Both always there, empty when they have nothing to say, so every line fills the grid's five columns. */}
               <span className={styles.duration}>{l.durationText}</span>
             </span>
           </li>
