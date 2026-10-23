@@ -16,7 +16,7 @@ import {
   pluginsText,
   requestText,
   rowContext,
-  sessionLaneLabel,
+  workLabel,
   shownBlockers,
   toneOf,
   writtenByText,
@@ -31,7 +31,10 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     projectId: "p",
     branch: null,
     folder: "~/code/p",
-    lane: "free",
+    flow: "free",
+    skill: null,
+    trail: [],
+    isTrailCut: false,
     request: "Fix the build",
     isRequestCut: false,
     isRequestImage: false,
@@ -288,12 +291,12 @@ describe("blockers", () => {
 });
 
 describe("sessions outside selo", () => {
-  const outside = (overrides: Partial<Session> = {}) => buildSession({ lane: "outside", isOutsideSelo: true, ...overrides });
+  const outside = (overrides: Partial<Session> = {}) => buildSession({ isOutsideSelo: true, ...overrides });
 
   it("names their type of work « hors selo », neutral, and keeps the others' labels", () => {
-    expect(sessionLaneLabel(outside())).toBe("hors selo");
-    expect(sessionLaneLabel(buildSession({ lane: "free" }))).toBe("libre");
-    expect(sessionLaneLabel(buildSession({ lane: "build" }))).toBe("build");
+    expect(workLabel(outside())).toBe("hors selo");
+    expect(workLabel(buildSession({ flow: "free" }))).toBe("libre");
+    expect(workLabel(buildSession({ flow: "blueprint", skill: "build" }))).toBe("blueprint › build");
   });
 
   it("says whether they can be closed is unknown, whatever their blockers", () => {
@@ -374,5 +377,17 @@ describe("isPluginOutdated", () => {
   it("stays quiet with no version in the export or no selo-ops installed", () => {
     expect(isPluginOutdated(buildSession(), installed)).toBe(false);
     expect(isPluginOutdated(buildSession({ writtenBy: "2.1.0" }), [{ name: "selo", versions: ["2.2.0"] }] satisfies InstalledPlugin[])).toBe(false);
+  });
+});
+
+describe("workLabel", () => {
+  it.each([
+    ["autopilot", "build", "autopilot › build"],
+    ["fastlane", "fastlane", "fastlane"],
+    ["fastlane", null, "fastlane"],
+    ["free", "review", "libre › review"],
+    ["free", null, "libre"],
+  ] as const)("reads flow %s and skill %s as « %s »", (flow, skill, label) => {
+    expect(workLabel(buildSession({ flow, skill }))).toBe(label);
   });
 });

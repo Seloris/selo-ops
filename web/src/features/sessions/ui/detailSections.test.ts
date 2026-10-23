@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseFoldedSections, toggleSection } from "./detailSections.ts";
 
-const DEFAULTS = { panel: ["files", "usage", "agents", "settings"], fullscreen: [] };
+const DEFAULTS = { panel: ["trail", "files", "usage", "agents", "settings"], fullscreen: [] };
 
 describe("parseFoldedSections", () => {
   it("keeps the known sections of each layout, once each", () => {

@@ -179,6 +179,7 @@
 .hueAgents { --hue: var(--hue-agents); }
 .hueFiles { --hue: var(--hue-files); }
 .hueUsage { --hue: var(--hue-usage); }
+.hueTrail { --hue: var(--hue-trail); }
 
 .count {
   padding: 0 7px;
@@ -320,6 +321,19 @@
   margin-left: auto;
   font-size: 0.93em;
   color: var(--text-muted);
+}
+
+/* sessions-live FR-41: the badge, then how long the line lasted, aligned across lines. */
+.status:has(.duration) {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.duration {
+  min-width: 4.5em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .kv {

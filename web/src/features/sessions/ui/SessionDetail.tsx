@@ -3,17 +3,19 @@ import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { useId, type ReactNode } from "react";
-import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, NoteIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, NoteIcon, TrailIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
+import { hasTrail, trailLines, waitingText } from "./trail.ts";
+import { dayTime } from "../../../shared/lib/dayTime.ts";
 import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, sessionLaneLabel, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, workLabel, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 import extras from "./NextAction.module.css";
 
@@ -106,6 +108,24 @@ export function SessionDetail({
       )}
     </Section>
   );
+  // sessions-live FR-41: absent outside selo and for an export older than 2.5.0, which writes no trail.
+  const trailSection = hasTrail(s) && (
+    <Section icon={<TrailIcon />} hue="trail" count={s.trail.length} title={t("sessions.detail.trail")} aside={waitingText(s.trail)} {...fold("trail")}>
+      <ul className={styles.lines}>
+        {s.isTrailCut && <li className={styles.muted}>{t("sessions.trail.cut")}</li>}
+        {trailLines(s.trail).map((l, i) => (
+          <li key={i}>
+            <span className={styles.hash}>{dayTime(l.entry.at, now).time}</span>
+            <span className={styles.line}>{[l.entry.skill, l.stepText].filter(Boolean).join(" · ")}</span>
+            <span className={styles.status}>
+              <StateLabel session={{ ...s, state: l.entry.phase, isClosed: false, isArchived: false }} />
+              {l.durationText && <span className={styles.duration}>{l.durationText}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
   const agentsSection = !s.isOutsideSelo && (
     <Section icon={<RobotIcon />} hue="agents" count={s.subagents.length} title={t("sessions.detail.subagents")} summary={s.subagents.length ? [...new Set(s.subagents.map((a) => a.type))].join(" · ") : t("sessions.detail.none")} {...fold("agents", s.subagents.length === 0)}>
       <ul className={styles.lines}>
@@ -192,7 +212,7 @@ export function SessionDetail({
               <span className={styles.mono}>{s.branch}</span>
             </span>
           )}
-          <span className={styles.mono}>{sessionLaneLabel(s)}</span>
+          <span className={styles.mono}>{workLabel(s)}</span>
           {(s.model || s.effort) && <span className={styles.mono}>{[s.model, s.effort].filter(Boolean).join(" · ")}</span>}
           <span>{createdText(s.createdAt, now)}</span>
           <span>{t("sessions.detail.updated", { age: age(ageMs({ ...s, isArchived: false }, now)) })}</span>
@@ -234,6 +254,7 @@ export function SessionDetail({
             {nextSection}
             {closeSection}
             {recapSection}
+            {trailSection}
             {filesSection}
           </div>
           <div className={styles.stack}>
@@ -248,6 +269,7 @@ export function SessionDetail({
           {nextSection}
           {closeSection}
           {recapSection}
+          {trailSection}
           {filesSection}
           {usageSection}
           {agentsSection}
@@ -267,6 +289,7 @@ const HUES = {
   agents: styles.hueAgents,
   files: styles.hueFiles,
   usage: styles.hueUsage,
+  trail: styles.hueTrail,
   next: extras.hueNext,
 };
 
@@ -278,6 +301,7 @@ function Section({
   title,
   count,
   summary,
+  aside,
   isEmpty,
   isFolded,
   onToggle,
@@ -289,6 +313,8 @@ function Section({
   count?: number;
   // What the heading keeps showing while the section is folded.
   summary?: string | null;
+  // What the heading shows folded or not.
+  aside?: string | null;
   // Nothing more than the summary to show: the heading alone, with no chevron.
   isEmpty: boolean;
   isFolded: boolean;
@@ -316,6 +342,7 @@ function Section({
           <span className={`${styles.chip} ${HUES[hue]}`}>{icon}</span>
           {title}
           {count ? <span className={styles.count}>{count}</span> : null}
+          {aside ? <span className={styles.summary}>{aside}</span> : null}
           {isFolded && summary ? <span className={styles.summary}>{summary}</span> : null}
           <span className={styles.fold}>{isFolded ? <ChevronRightIcon /> : <ChevronDownIcon />}</span>
         </button>

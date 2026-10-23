@@ -1,7 +1,7 @@
 // sessions-live FR-31: the sections of the detail the person folded, remembered in the browser for every session,
 // one set for the side panel and one for the full screen.
 
-export const DETAIL_SECTIONS = ["awaited", "next", "close", "recap", "agents", "usage", "files", "settings"] as const;
+export const DETAIL_SECTIONS = ["awaited", "next", "close", "recap", "trail", "agents", "usage", "files", "settings"] as const;
 export type DetailSection = (typeof DETAIL_SECTIONS)[number];
 
 export type DetailLayout = "panel" | "fullscreen";
@@ -9,7 +9,7 @@ export type FoldedSections = Record<DetailLayout, DetailSection[]>;
 
 // The side panel opens what to do with the session and folds how it ran; the full screen has room for everything.
 export const DEFAULT_FOLDED: Readonly<Record<DetailLayout, readonly DetailSection[]>> = {
-  panel: ["files", "usage", "agents", "settings"],
+  panel: ["trail", "files", "usage", "agents", "settings"],
   fullscreen: [],
 };
 

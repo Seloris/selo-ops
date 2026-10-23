@@ -425,7 +425,10 @@ export interface components {
             projectId: string;
             branch: string | null;
             folder: string;
-            lane: string;
+            flow: string;
+            skill: string | null;
+            trail: components["schemas"]["TrailEntry"][];
+            isTrailCut: boolean;
             request: string;
             isRequestCut: boolean;
             isRequestImage: boolean;
@@ -482,6 +485,14 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        TrailEntry: {
+            /** Format: date-time */
+            at: string;
+            skill: string | null;
+            step: string | null;
+            substep: string | null;
+            phase: components["schemas"]["SessionState"];
         };
         /** @enum {string} */
         SessionState: "awaiting-answer" | "awaiting-permission" | "awaiting-commit" | "stopped" | "working" | "turn-ended" | "job-done";

@@ -41,7 +41,7 @@ import { SessionList, type SessionActions } from "../ui/SessionList.tsx";
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
 import { SettingsBar, type View } from "../ui/SettingsBar.tsx";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../ui/panelWidth.ts";
-import { desktopLinkOf, laneLabel, outdatedIdsOf, pluginsText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
+import { desktopLinkOf, workLabel, outdatedIdsOf, pluginsText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
 import styles from "./SessionsLivePage.module.css";
 
 // sessions-live FR-08, FR-27 and FR-31: the view, the grouping, the detail's width and its folded sections are
@@ -232,7 +232,7 @@ export function SessionsLivePage() {
         return next;
       }),
     onCopyNext: (s) =>
-      void copy(s.nextAction ?? "", t("sessions.toast.nextCopied"), t("sessions.toast.nextHint", { project: projectName(s.projectId), lane: laneLabel(s.lane) })),
+      void copy(s.nextAction ?? "", t("sessions.toast.nextCopied"), t("sessions.toast.nextHint", { project: projectName(s.projectId), lane: workLabel(s) })),
     onArchive: (s) => {
       // sessions-live FR-22: a finished session archives at once, unless it holds a note.
       if (isFinished(s) && !s.note) archiveNow(s.id);

@@ -242,6 +242,18 @@ export function HourglassIcon() {
   );
 }
 
+// A timeline: dots on a line, the run's steps one after the other.
+export function TrailIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M6 4v16" />
+      <circle cx="6" cy="6" r="2" />
+      <circle cx="6" cy="18" r="2" />
+      <path d="M11 6h9M11 12h7M11 18h9" />
+    </svg>
+  );
+}
+
 export function DoorIcon() {
   return (
     <svg {...iconProps}>

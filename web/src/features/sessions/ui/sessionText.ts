@@ -19,10 +19,15 @@ export function createdText(iso: string, now: number): string {
 
 export const stateLabel = (s: Session) => t(`sessions.state.${s.state}` as MessageKey);
 
-export const laneLabel = (lane: string) => (lane === "free" ? t("sessions.lane.free") : lane);
+const flowLabel = (flow: string) => (flow === "free" ? t("sessions.lane.free") : flow);
 
-// sessions-live FR-11: a session outside selo (`session` BR-12) reads « hors selo », whatever its lane.
-export const sessionLaneLabel = (s: Session) => (s.isOutsideSelo ? t("sessions.lane.outside") : laneLabel(s.lane));
+// `session` BR-22: the run's flow, then the skill running when it is another; a session outside selo (`session` BR-12)
+// reads « hors selo ».
+export function workLabel(s: Pick<Session, "isOutsideSelo" | "flow" | "skill">): string {
+  if (s.isOutsideSelo) return t("sessions.lane.outside");
+  const flow = flowLabel(s.flow);
+  return s.skill && s.skill !== s.flow ? `${flow} › ${s.skill}` : flow;
+}
 
 export const blockerLabel = (b: Session["blockers"][number]) => t(`sessions.blocker.${b}` as MessageKey);
 
@@ -86,7 +91,7 @@ export function awaitedOf(s: Session): Awaited | null {
   return { kind: "error", label: t("sessions.awaited.error"), text, full: text, isCode: s.error !== null };
 }
 
-export function stepText(s: Session): string | null {
+export function stepText(s: Pick<Session, "step" | "substep">): string | null {
   const stage = /^stage:(\d+)$/.exec(s.step ?? "")?.[1];
   const step = stage ? t("sessions.step.stage", { number: stage }) : null;
   if (step && s.substep) return `${step} · ${s.substep}`;

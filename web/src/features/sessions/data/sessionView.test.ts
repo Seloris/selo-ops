@@ -23,7 +23,10 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     projectId: "p-ledger",
     branch: "main",
     folder: "~/code/ledger-api",
-    lane: "free",
+    flow: "free",
+    skill: null,
+    trail: [],
+    isTrailCut: false,
     request: "Fix the build",
     isRequestCut: false,
     isRequestImage: false,
@@ -237,7 +240,7 @@ describe("closedSessions and archivedSessions", () => {
 describe("sessions outside selo", () => {
   // `session` BR-12: a session outside selo is a session like any other in the counts, the groups and the filters.
   const outside = (overrides: Partial<Session> = {}) =>
-    buildSession({ lane: "outside", isOutsideSelo: true, blockers: [], effort: null, permissionMode: null, ...overrides });
+    buildSession({ isOutsideSelo: true, blockers: [], effort: null, permissionMode: null, ...overrides });
 
   it("counts open sessions outside selo, and those waiting for an answer as to handle", () => {
     // Arrange

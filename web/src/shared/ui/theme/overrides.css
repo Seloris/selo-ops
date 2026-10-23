@@ -9,7 +9,7 @@
    --lane-fastlane, --lane-autopilot   the lanes on the help page: lime, violet (help FR-11)
    --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
    --mark                a control that holds something of the person's (the session's note button): blue
-   --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage, --hue-next   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia, violet; --hue-next is also the next action's chip and button in the list (sessions-live FR-10)
+   --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage, --hue-next, --hue-trail   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia, violet, lime; --hue-next is also the next action's chip and button in the list (sessions-live FR-10)
 
    --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
    --bp-draft, --bp-ready, --bp-building, --bp-review, --bp-merging, --bp-done, --bp-legacy   a blueprint's state, the same in bars, legends, tags and tracks: lime, cyan, blue, violet, fuchsia, green, grey (projects FR-14); none is --mark, amber or rose
@@ -33,6 +33,7 @@
   --hue-files: #4338ca;
   --hue-usage: #a21caf;
   --hue-next: #7c3aed;
+  --hue-trail: #4d7c0f;
   --kind-input: #2563eb;
   --kind-cache-read: #a8a29e;
   --kind-cache-write: #7c3aed;
@@ -70,6 +71,7 @@
     --hue-files: #a5b4fc;
     --hue-usage: #f0abfc;
     --hue-next: #c4b5fd;
+    --hue-trail: #bef264;
     --kind-input: #60a5fa;
     --kind-cache-read: #a8a29e;
     --kind-cache-write: #a78bfa;
@@ -126,6 +128,7 @@
   --hue-files: #4338ca;
   --hue-usage: #a21caf;
   --hue-next: #7c3aed;
+  --hue-trail: #4d7c0f;
   --kind-input: #2563eb;
   --kind-cache-read: #a8a29e;
   --kind-cache-write: #7c3aed;
@@ -182,6 +185,7 @@
   --hue-files: #a5b4fc;
   --hue-usage: #f0abfc;
   --hue-next: #c4b5fd;
+  --hue-trail: #bef264;
   --kind-input: #60a5fa;
   --kind-cache-read: #a8a29e;
   --kind-cache-write: #a78bfa;

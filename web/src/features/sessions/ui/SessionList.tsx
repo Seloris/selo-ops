@@ -3,7 +3,7 @@ import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { NoteIcon, OpenIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
 import { AgeLabel, AwaitedIcon, FilesCount, PluginWarning, StateLabel } from "./SessionBits.tsx";
-import { requestText, rowContext, sessionLaneLabel } from "./sessionText.ts";
+import { requestText, rowContext, workLabel } from "./sessionText.ts";
 import { NextButton } from "./NextAction.tsx";
 import { totalTokens } from "./usage.ts";
 import { TokenCount } from "./UsageParts.tsx";
@@ -56,7 +56,7 @@ export function SessionList({
                 <span className={styles.warningSlot}>{outdatedIds.has(s.id) && <PluginWarning session={s} />}</span>
               </span>
               <span className={styles.meta}>
-                {sessionLaneLabel(s)}
+                {workLabel(s)}
                 {showProject && ` · ${projectName(s.projectId)}`}
               </span>
               <RowContext session={s} />
