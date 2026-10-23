@@ -337,7 +337,7 @@
 }
 
 /* sessions-live FR-41: a vertical timeline, each dot joined to the next by a line in its state's colour, as long as
-   the square root of how long the step lasted, bounded (120px = MAX_WEIGHT in trail.ts × 1.5px). */
+   the square root of how long the step lasted, bounded at 48px (about 17 min) so a long wait keeps the lines together. */
 .rail-pulse { --tone: var(--working); }
 .rail-done,
 .rail-turn { --tone: var(--done); }
@@ -386,7 +386,7 @@
 .node::after {
   content: "";
   width: 2px;
-  height: clamp(8px, calc(var(--weight) * 1.5px), 120px);
+  height: clamp(8px, calc(var(--weight) * 1.5px), 48px);
   margin-bottom: 3px;
   background: var(--tone);
 }

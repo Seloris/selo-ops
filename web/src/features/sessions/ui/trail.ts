@@ -15,7 +15,7 @@ export interface TrailLine {
   weight: number;
 }
 
-// The longest connector's weight (SessionDetail.module.css): a line older than that, the last one most of all, weighs no more.
+// Past about 1 h 47 a line, the last one most of all, weighs no more in the folded ribbon.
 export const MAX_WEIGHT = 80;
 
 const WAITS: ReadonlySet<TrailEntry["phase"]> = new Set(["awaiting-answer", "awaiting-commit"]);
