@@ -4,13 +4,13 @@
   container-type: inline-size;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .dashboard section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .mono {
@@ -73,13 +73,14 @@
 .tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
+  gap: 6px 10px;
 }
 
 /* A bar on its track. */
 .track {
   min-width: 0;
-  height: 8px;
+  height: 6px;
   border-radius: var(--radius-pill);
   background: var(--border);
   overflow: hidden;
@@ -96,8 +97,8 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 14px 24px;
-  padding: 14px 16px;
+  gap: 10px 24px;
+  padding: 10px 14px;
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius-control);
   background: var(--item-bg);
@@ -170,42 +171,41 @@
 }
 
 .kinds {
-  gap: 10px;
+  gap: 6px;
 }
 
 .kind {
   display: grid;
-  grid-template-columns: minmax(0, 15em) minmax(60px, 1fr) 4.5em 3.5em;
+  grid-template-columns: minmax(0, 26em) minmax(60px, 1fr) 4.5em 3.5em;
   align-items: center;
   gap: 12px;
   font-size: 0.9em;
 }
 
+/* The name and what it is on one line, the explanation cut first. */
 .kindName {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   gap: 8px;
   min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .kindName .dot {
-  margin-top: 0.3em;
-}
-
-.kindName > span:last-child {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+  align-self: center;
 }
 
 .kindHint {
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 0.85em;
   color: var(--text-muted);
 }
 
 /* A list of bars: a name, the bar on the room left, the figure and its detail. */
 .rows {
-  gap: 8px;
+  gap: 3px;
 }
 
 .row {
@@ -227,13 +227,13 @@
 .columns {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 16px 28px;
+  gap: 10px 28px;
 }
 
 .columns > div {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .ranked {
@@ -244,9 +244,11 @@
   font-size: 0.88em;
 }
 
+/* The name and how it was loaded on one line, the name cut first. */
 .rankedName {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -257,13 +259,14 @@
 }
 
 .rankedName .muted {
+  flex: none;
   font-size: 0.85em;
 }
 
 .activity {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 /* The runs: one line each, unfolding into the run's figures. */
@@ -287,7 +290,7 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 10px 12px;
+  padding: 7px 12px;
   border: 0;
   background: none;
   color: var(--text);
@@ -329,8 +332,8 @@
 .runBody {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 4px 14px 16px 38px;
+  gap: 10px;
+  padding: 2px 14px 12px 38px;
 }
 
 .runBody[hidden] {
@@ -347,13 +350,13 @@
 .kindLine {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .split {
   display: flex;
   gap: 2px;
-  height: 8px;
+  height: 6px;
   border-radius: var(--radius-pill);
   overflow: hidden;
 }

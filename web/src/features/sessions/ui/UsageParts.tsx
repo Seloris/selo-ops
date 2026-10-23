@@ -77,10 +77,8 @@ function KindRows({ tokens }: { tokens: Tokens }) {
         <li key={s.kind} className={styles.kind}>
           <span className={styles.kindName} title={t(`sessions.usage.kindHint.${s.kind}`)}>
             <span className={`${styles.dot} ${styles[s.kind]}`} />
-            <span>
-              <b>{t(`sessions.usage.kind.${s.kind}`)}</b>
-              <span className={styles.kindHint}>{t(`sessions.usage.kindHint.${s.kind}`)}</span>
-            </span>
+            <b>{t(`sessions.usage.kind.${s.kind}`)}</b>
+            <span className={styles.kindHint}>{t(`sessions.usage.kindHint.${s.kind}`)}</span>
           </span>
           <Meter percent={s.ratio * 100} kind={s.kind} />
           <b className={styles.figure}><TokenCount count={s.count} /></b>
@@ -185,12 +183,12 @@ function RunActivity({ run }: { run: RunUsage }) {
   const maxPrompt = Math.max(0, ...run.prompts.map((p) => totalTokens(p.tokens)));
   return (
     <div className={styles.activity}>
-      {(!run.settled || run.partial) && (
-        <div className={styles.tags}>
-          {!run.settled && <span title={t("sessions.usage.provisionalHint")}><Tag>{t("sessions.usage.provisional")}</Tag></span>}
-          {run.partial && <span title={t("sessions.usage.partialHint")}><Tag>{t("sessions.usage.partial")}</Tag></span>}
-        </div>
-      )}
+      {/* The tags sit on the heading's line, to save a line of height. */}
+      <div className={styles.tags}>
+        <Heading>{t("sessions.usage.activity")}</Heading>
+        {!run.settled && <span title={t("sessions.usage.provisionalHint")}><Tag>{t("sessions.usage.provisional")}</Tag></span>}
+        {run.partial && <span title={t("sessions.usage.partialHint")}><Tag>{t("sessions.usage.partial")}</Tag></span>}
+      </div>
       <ToolsAndSkills tools={run.tools} skills={run.skills} />
       {run.prompts.length > 0 && (
         <section>
@@ -261,12 +259,7 @@ function RunRow({ run, max, sessionTotal, current, isOpenAtFirst, now }: {
         ) : (
           <p className={styles.muted}>{t("sessions.usage.noRunUsage")}</p>
         )}
-        {activity && (
-          <>
-            <Heading>{t("sessions.usage.activity")}</Heading>
-            <RunActivity run={activity} />
-          </>
-        )}
+        {activity && <RunActivity run={activity} />}
       </div>
     </li>
   );
@@ -318,7 +311,6 @@ export function UsageDashboard({ usage, runs, isRunListCut, runUsage, now }: {
         </section>
       ) : runUsage ? (
         <section>
-          <Heading>{t("sessions.usage.activity")}</Heading>
           <RunActivity run={runUsage} />
         </section>
       ) : (
