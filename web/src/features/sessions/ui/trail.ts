@@ -13,7 +13,7 @@ export interface TrailLine {
   durationText: string | null;
   // Square root of its seconds, the last line running until now: a few seconds stay visible beside an hour.
   weight: number;
-  // A working line followed by another is finished: no badge, no pulse, its duration alone.
+  // A working line followed by another is finished: no badge, no pulse.
   isPastWork: boolean;
 }
 

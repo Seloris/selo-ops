@@ -140,16 +140,23 @@ export function SessionDetail({
               style={{ "--weight": earlier?.weight ?? 0 } as CSSProperties}
             >
               <StatusDot tone={l.tone} />
+              {/* How long the earlier step lasted, beside the line that stands for it. */}
+              {earlier?.durationText && (
+                <span className={styles.gap} aria-hidden="true">
+                  {earlier.durationText}
+                </span>
+              )}
             </span>
             <span className={styles.line}>
               <span style={{ color: skillColor(l.entry.skill) }}>{l.entry.skill}</span>
               {l.entry.skill && l.stepText && " · "}
               {l.stepText}
+              {/* Read with its own line, where the eye finds it beside the line below. */}
+              {l.durationText && <span className={styles.srOnly}>{`, ${l.durationText}`}</span>}
             </span>
             <span className={styles.status}>
+              {/* Always there, empty for past work, so every line fills the grid's four columns. */}
               {l.isPastWork ? <span /> : <StateLabel session={{ ...s, state: l.entry.phase, isClosed: false, isArchived: false }} />}
-              {/* Both always there, empty when they have nothing to say, so every line fills the grid's five columns. */}
-              <span className={styles.duration}>{l.durationText}</span>
             </span>
           </li>
         ))}
