@@ -21,6 +21,7 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 ## Sessions
 
 - **FR-09** — Sessions sort by state (`session` BR-02), then the most recently updated first; by project, the project holding the most urgent session comes first.
+- **FR-39** — A session written by a selo-ops version that is not one the header lists shows a small amber warning, « Écrite par selo-ops 2.1.0, autre version que celle installée », beside its state in the list and the cards and beside « Écrit par » in the detail; nothing shows when the export gives no version or Claude Code lists no selo-ops.
 - **FR-10** — Only sessions « à traiter » are coloured: an amber row for « Attend ta réponse », « Attend ta permission » and « Commit à valider », a rose one for « Arrêtée »; « En cours » has a pulsing neutral dot, the others a grey one.
 - **FR-11** — A row shows the state, the project (unless grouped by project), the type of work (« libre », « hors selo » for a session outside selo (`session` BR-12), fastlane, blueprint, build, autopilot…), the cut request, what is awaited when the session is « à traiter », the age and an « Ouvrir dans Claude Code » icon button.
 - **FR-29** — The type of work has its own colour for « libre » (sky), fastlane (lime) and autopilot (violet), in the row, the card and the detail; the other types stay neutral.

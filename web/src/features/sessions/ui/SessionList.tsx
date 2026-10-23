@@ -2,7 +2,7 @@ import { t } from "../../../shared/lib/i18n/index.ts";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { OpenIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
-import { AgeLabel, AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
+import { AgeLabel, AwaitedIcon, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import { awaitedOf, requestText } from "./sessionText.ts";
 import styles from "./SessionList.module.css";
 
@@ -42,6 +42,7 @@ export function SessionList({
   projectName,
   now,
   selectedId,
+  outdatedIds,
   actions,
   ...layout
 }: Layout & {
@@ -49,6 +50,7 @@ export function SessionList({
   projectName: (projectId: string) => string;
   now: number;
   selectedId: string | null;
+  outdatedIds: ReadonlySet<string>;
   actions: SessionActions;
 }) {
   return (
@@ -61,6 +63,7 @@ export function SessionList({
             <button type="button" className={styles.main} onClick={() => actions.onOpen(s.id)} title={requestText(s)} aria-current={s.id === selectedId || undefined}>
               <span className={styles.state}>
                 <StateLabel session={s} />
+                {outdatedIds.has(s.id) && <PluginWarning session={s} />}
               </span>
               {layout.showProject && <span className={styles.muted}>{projectName(s.projectId)}</span>}
               <span className={styles.type}><LaneLabel session={s} /></span>

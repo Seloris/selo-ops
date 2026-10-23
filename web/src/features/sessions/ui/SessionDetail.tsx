@@ -10,7 +10,7 @@ import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
 import { totalTokens } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
-import { AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
+import { AwaitedIcon, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
@@ -22,6 +22,7 @@ export function SessionDetail({
   projectName,
   now,
   isNextOpen,
+  isPluginOutdated,
   foldedSections,
   actions,
   isFullscreen,
@@ -33,6 +34,7 @@ export function SessionDetail({
   projectName: string;
   now: number;
   isNextOpen: boolean;
+  isPluginOutdated: boolean;
   foldedSections: readonly DetailSection[];
   actions: SessionActions;
   isFullscreen: boolean;
@@ -167,7 +169,10 @@ export function SessionDetail({
         <span className={styles.key}>{t("sessions.detail.session")}</span>
         <span className={styles.mono}>{s.id}</span>
         <span className={styles.key}>{t("sessions.detail.writtenBy")}</span>
-        <span className={styles.mono}>{writtenByText(s)}</span>
+        <span className={styles.mono}>
+          {writtenByText(s)}
+          {isPluginOutdated && <PluginWarning session={s} />}
+        </span>
       </div>
     </Section>
   );

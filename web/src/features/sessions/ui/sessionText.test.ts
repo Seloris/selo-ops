@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Session } from "../data/sessionView.ts";
+import type { InstalledPlugin, Session } from "../data/sessionView.ts";
 import {
   ageDisplay,
   awaitedOf,
@@ -11,6 +11,7 @@ import {
   closeText,
   createdText,
   desktopLinkOf,
+  isPluginOutdated,
   laneTone,
   modelText,
   pluginsText,
@@ -334,5 +335,23 @@ describe("pluginsText", () => {
 
   it("gives nothing when no plugin is known", () => {
     expect(pluginsText([])).toBeNull();
+  });
+});
+
+describe("isPluginOutdated", () => {
+  const installed: InstalledPlugin[] = [{ name: "selo-ops", versions: ["2.2.1"] }];
+
+  it("warns when the session was written by another version than the installed one", () => {
+    expect(isPluginOutdated(buildSession({ writtenBy: "2.1.0" }), installed)).toBe(true);
+  });
+
+  it("stays quiet on an installed version, whichever of several", () => {
+    expect(isPluginOutdated(buildSession({ writtenBy: "2.2.1" }), installed)).toBe(false);
+    expect(isPluginOutdated(buildSession({ writtenBy: "2.1.0" }), [{ name: "selo-ops", versions: ["2.2.1", "2.1.0"] }] satisfies InstalledPlugin[])).toBe(false);
+  });
+
+  it("stays quiet with no version in the export or no selo-ops installed", () => {
+    expect(isPluginOutdated(buildSession(), installed)).toBe(false);
+    expect(isPluginOutdated(buildSession({ writtenBy: "2.1.0" }), [{ name: "selo", versions: ["2.2.0"] }] satisfies InstalledPlugin[])).toBe(false);
   });
 });

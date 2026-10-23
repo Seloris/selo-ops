@@ -3,7 +3,7 @@ import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { ArchiveIcon, OpenIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
-import { AgeLabel, AwaitedIcon, LaneLabel, StateLabel } from "./SessionBits.tsx";
+import { AgeLabel, AwaitedIcon, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { awaitedOf, calmText, closeText, modelText, requestText } from "./sessionText.ts";
 import { exactTokens, totalTokens } from "./usage.ts";
@@ -17,6 +17,7 @@ export function SessionCards({
   now,
   selectedId,
   nextShown,
+  outdatedIds,
   actions,
 }: {
   sessions: Session[];
@@ -25,6 +26,7 @@ export function SessionCards({
   now: number;
   selectedId: string | null;
   nextShown: Set<string>;
+  outdatedIds: ReadonlySet<string>;
   actions: SessionActions;
 }) {
   return (
@@ -39,6 +41,7 @@ export function SessionCards({
             <button type="button" className={styles.main} onClick={() => actions.onOpen(s.id)} aria-current={s.id === selectedId || undefined}>
               <span className={styles.head}>
                 <StateLabel session={s} />
+                {outdatedIds.has(s.id) && <PluginWarning session={s} />}
                 {showProject && <span className={styles.meta}>· {projectName(s.projectId)}</span>}
                 <span className={`${styles.meta} ${styles.mono}`}>· <LaneLabel session={s} /></span>
                 <span className={styles.end}>

@@ -37,7 +37,7 @@ import { ColumnHead, SessionList, type SessionActions } from "../ui/SessionList.
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
 import { SettingsBar, type View } from "../ui/SettingsBar.tsx";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../ui/panelWidth.ts";
-import { desktopLinkOf, laneLabel, pluginsText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
+import { desktopLinkOf, laneLabel, outdatedIdsOf, pluginsText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
 import styles from "./SessionsLivePage.module.css";
 
 // sessions-live FR-08, FR-27 and FR-31: the view, the grouping, the detail's width and its folded sections are
@@ -240,6 +240,7 @@ export function SessionsLivePage() {
   const filters: Filters = { projectIds, search };
   const counts = query.data ? countsOf(sessions) : null;
   const openByProject = openCountByProject(sessions);
+  const outdatedIds = outdatedIdsOf(sessions, query.data?.plugins ?? []);
   const blocks = groupSessions(sessions, settings.grouping, filters, projectsById);
   const closed = closedSessions(sessions, filters, projectsById);
   const closedTotal = sessions.filter((s) => s.isClosed && !s.isArchived).length;
@@ -250,9 +251,9 @@ export function SessionsLivePage() {
 
   const renderSessions = (list: Session[], showProject: boolean) =>
     isList ? (
-      <SessionList sessions={list} showProject={showProject} isNarrow={isPanelOpen} projectName={projectName} now={now} selectedId={selectedId} actions={actions} />
+      <SessionList sessions={list} showProject={showProject} isNarrow={isPanelOpen} projectName={projectName} now={now} selectedId={selectedId} outdatedIds={outdatedIds} actions={actions} />
     ) : (
-      <SessionCards sessions={list} showProject={showProject} projectName={projectName} now={now} selectedId={selectedId} nextShown={nextShown} actions={actions} />
+      <SessionCards sessions={list} showProject={showProject} projectName={projectName} now={now} selectedId={selectedId} nextShown={nextShown} outdatedIds={outdatedIds} actions={actions} />
     );
 
   const blockHeader = (b: Block, project: Project | undefined) => {
@@ -345,6 +346,7 @@ export function SessionsLivePage() {
               projectName={projectName(selected.projectId)}
               now={now}
               isNextOpen={nextShown.has(selected.id)}
+              isPluginOutdated={outdatedIds.has(selected.id)}
               foldedSections={settings.foldedSections}
               actions={actions}
               isFullscreen={isFullscreen}

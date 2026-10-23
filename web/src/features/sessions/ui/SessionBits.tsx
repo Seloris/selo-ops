@@ -1,3 +1,4 @@
+import { t } from "../../../shared/lib/i18n/index.ts";
 import { ClockIcon, CommitIcon, QuestionIcon, ShieldIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
@@ -20,6 +21,17 @@ export function StateLabel({ session }: { session: Session }) {
 export function LaneLabel({ session }: { session: Session }) {
   const tone = session.isOutsideSelo ? null : laneTone(session.lane);
   return <span className={tone ? styles[`lane-${tone}`] : undefined}>{sessionLaneLabel(session)}</span>;
+}
+
+// sessions-live FR-39: a small warning on a session written by another selo-ops version than the installed one.
+export function PluginWarning({ session }: { session: Session }) {
+  if (!session.writtenBy) return null;
+  const text = t("sessions.pluginOutdated", { version: session.writtenBy });
+  return (
+    <span className={styles.versionWarning} title={text} role="img" aria-label={text}>
+      <WarningIcon />
+    </span>
+  );
 }
 
 export function AgeLabel({ session, now }: { session: Session; now: number }) {

@@ -31,6 +31,18 @@
   height: 15px;
 }
 
+.versionWarning {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  color: var(--warn);
+}
+
+.versionWarning svg {
+  width: 14px;
+  height: 14px;
+}
+
 .warn {
   color: var(--warn);
 }

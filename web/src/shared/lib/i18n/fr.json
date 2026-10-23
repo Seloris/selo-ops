@@ -165,6 +165,7 @@
   "sessions.detail.session": "Session",
   "sessions.detail.writtenBy": "Écrit par",
   "sessions.detail.writtenByValue": "selo-ops {version}",
+  "sessions.pluginOutdated": "Écrite par selo-ops {version}, autre version que celle installée",
   "sessions.detail.usage": "Consommation",
   "sessions.facts.modelTokens": "{model} · {tokens} tokens",
   "sessions.usage.calls": "Appels API",

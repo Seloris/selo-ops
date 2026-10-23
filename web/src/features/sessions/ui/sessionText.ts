@@ -150,6 +150,16 @@ export function pluginsText(plugins: InstalledPlugin[]): string | null {
   return plugins.map((p) => `${p.name} ${p.versions.join(" / ")}`).join(" · ");
 }
 
+// sessions-live FR-39: the session was written by a selo-ops version other than the installed ones (the header's).
+// Nothing to compare when the export gives no version or Claude Code lists no selo-ops.
+export function isPluginOutdated(s: Session, plugins: InstalledPlugin[]): boolean {
+  const installed = plugins.find((p) => p.name === "selo-ops");
+  return Boolean(s.writtenBy && installed && !installed.versions.includes(s.writtenBy));
+}
+
+export const outdatedIdsOf = (sessions: Session[], plugins: InstalledPlugin[]): Set<string> =>
+  new Set(sessions.filter((s) => isPluginOutdated(s, plugins)).map((s) => s.id));
+
 // sessions-live FR-13: the model with the session's total tokens (`session` BR-18, « — » with no usage), then the effort.
 export function modelText(s: Session): string {
   const tokens = s.usage ? formatTokens(totalTokens(s.usage.tokens)) : t("sessions.facts.unknown");
