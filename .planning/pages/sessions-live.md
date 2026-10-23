@@ -12,7 +12,7 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 ## Settings bar
 
 - **FR-03** — « Affichage » switches between Liste (one 36 px row per session) and Cartes (a grid of cards with every detail), Liste by default.
-- **FR-04** — « Regrouper » offers Par projet (one block per project), Par statut (À traiter, En cours, Au repos, ✅ Job done) and Aucun (one list), Par projet by default.
+- **FR-04** — « Regrouper » offers Par projet (one block per project), Par statut (À traiter, En cours, Au repos, Job done) and Aucun (one list), Par projet by default.
 - **FR-05** — « Projets » is a checklist of the projects with « Tous », each with its count of open sessions, all checked by default.
 - **FR-06** — « Afficher les fermées », unchecked by default, with its count, adds a « Fermées » block of the closed sessions not archived (`session` BR-03).
 - **FR-07** — The search filters on the request, the blueprint, the branch and the project, in every block.
@@ -55,7 +55,7 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 - **FR-20** — « Ouvrir dans Claude Code » opens a session the desktop app started directly in the Claude app (`session` BR-11), with a toast reading only « Ouvert dans Claude »; any other session gets `claude --resume {id}` copied and a toast reminding to run it in the session's folder, named; when the copy is refused, the toast shows the command selected for a manual copy.
 - **FR-21** — « Action suivante », shown only when the export proposes a selo command, displays it in full and copies it on « Copier »; nothing is run.
 - **FR-26** — An archived session offers no « Action suivante ».
-- **FR-22** — « Archiver », offered on every session not archived yet, moves the session to « Archivées » with a toast saying where to find it; on a session whose state is neither « ✅ Job done » nor « Tour terminé » (`session` BR-07), a confirmation naming the state comes first and nothing is archived until « Archiver quand même ».
+- **FR-22** — « Archiver », offered on every session not archived yet, moves the session to « Archivées » with a toast saying where to find it; on a session whose state is neither « Job done » nor « Tour terminé » (`session` BR-07), a confirmation naming the state comes first and nothing is archived until « Archiver quand même ».
 - **FR-23** — « Désarchiver », in an archived session's detail, puts it back in the list.
 
 ## Non-goals
