@@ -1,20 +1,20 @@
 .withProject {
-  --cols: 176px 124px 84px minmax(0, 1fr) minmax(0, 1.2fr) 220px;
+  --cols: 176px 124px 84px minmax(0, 1fr) minmax(0, 1.2fr) 44px 220px;
   --col-gap: 16px;
 }
 
 .noProject {
-  --cols: 176px 84px minmax(0, 1fr) minmax(0, 1.2fr) 220px;
+  --cols: 176px 84px minmax(0, 1fr) minmax(0, 1.2fr) 44px 220px;
   --col-gap: 16px;
 }
 
 .withProject.narrow {
-  --cols: 150px 108px 72px minmax(0, 1fr) minmax(0, 1.1fr) 196px;
+  --cols: 150px 108px 72px minmax(0, 1fr) minmax(0, 1.1fr) 40px 196px;
   --col-gap: 12px;
 }
 
 .noProject.narrow {
-  --cols: 150px 72px minmax(0, 1fr) minmax(0, 1.1fr) 196px;
+  --cols: 150px 72px minmax(0, 1fr) minmax(0, 1.1fr) 40px 196px;
   --col-gap: 12px;
 }
 
@@ -142,6 +142,13 @@
   color: var(--text-muted);
 }
 
+/* Its own column, so the counts line up whatever the width of the age. */
+.files {
+  justify-self: end;
+  min-width: 0;
+  display: flex;
+}
+
 .age {
   justify-self: end;
   min-width: 0;
@@ -181,7 +188,8 @@
 
   .main > .muted,
   .main > .type,
-  .main > .awaited {
+  .main > .awaited,
+  .main > .files {
     display: none;
   }
 }

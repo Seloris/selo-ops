@@ -20,6 +20,22 @@
   color: var(--text-muted);
 }
 
+.filesCount {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.93em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.filesCount svg {
+  width: 13px;
+  height: 13px;
+}
+
 .icon {
   flex: none;
   display: inline-grid;

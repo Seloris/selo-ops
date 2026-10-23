@@ -166,6 +166,8 @@
   "sessions.detail.session": "Session",
   "sessions.detail.writtenBy": "Écrit par",
   "sessions.detail.writtenByValue": "selo-ops {version}",
+  "sessions.filesCount_one": "{count} fichier modifié",
+  "sessions.filesCount_other": "{count} fichiers modifiés",
   "sessions.pluginOutdated": "Écrite par selo-ops {version}, autre version que celle installée",
   "sessions.detail.usage": "Consommation",
   "sessions.detail.usageSummary": "{tokens} tokens consommés",

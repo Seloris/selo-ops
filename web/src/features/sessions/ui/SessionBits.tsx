@@ -1,5 +1,5 @@
-import { t } from "../../../shared/lib/i18n/index.ts";
-import { ClockIcon, CommitIcon, QuestionIcon, ShieldIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { t, tn } from "../../../shared/lib/i18n/index.ts";
+import { ClockIcon, CommitIcon, FileIcon, QuestionIcon, ShieldIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { isTodo, type Session } from "../data/sessionView.ts";
@@ -30,6 +30,19 @@ export function PluginWarning({ session }: { session: Session }) {
   return (
     <span className={styles.versionWarning} title={text} role="img" aria-label={text}>
       <WarningIcon />
+    </span>
+  );
+}
+
+// sessions-live FR-11: the count of files the session modified; nothing at 0 or outside selo (FR-30).
+export function FilesCount({ session }: { session: Session }) {
+  const count = session.touchedFiles.length;
+  if (session.isOutsideSelo || count === 0) return null;
+  const text = tn("sessions.filesCount", count);
+  return (
+    <span className={styles.filesCount} title={text} role="img" aria-label={text}>
+      <FileIcon />
+      {count}
     </span>
   );
 }

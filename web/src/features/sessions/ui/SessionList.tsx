@@ -2,7 +2,7 @@ import { t } from "../../../shared/lib/i18n/index.ts";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { OpenIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
-import { AgeLabel, AwaitedIcon, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
+import { AgeLabel, AwaitedIcon, FilesCount, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import { awaitedOf, requestText } from "./sessionText.ts";
 import styles from "./SessionList.module.css";
 
@@ -31,6 +31,7 @@ export function ColumnHead(layout: Layout) {
       <span>{t("sessions.columns.type")}</span>
       <span>{t("sessions.columns.request")}</span>
       <span>{t("sessions.columns.awaited")}</span>
+      <span />
       <span className={styles.end}>{t("sessions.columns.age")}</span>
     </div>
   );
@@ -76,6 +77,7 @@ export function SessionList({
                   </>
                 )}
               </span>
+              <span className={styles.files}><FilesCount session={s} /></span>
               <span className={styles.age}>
                 <AgeLabel session={s} now={now} />
                 <span className={styles.warningSlot}>{outdatedIds.has(s.id) && <PluginWarning session={s} />}</span>
