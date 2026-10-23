@@ -11,6 +11,9 @@ import {
   sectionOrder,
   sections,
   skills,
+  planningTree,
+  sampleSpec,
+  specFlows,
   specTopics,
   vocabulary,
 } from "../content.ts";
@@ -23,8 +26,11 @@ import {
   LaneList,
   LifecycleList,
   Note,
+  PlanningTree,
   RoleCards,
   SkillCards,
+  SpecFlows,
+  SpecSample,
   SubTitle,
   TableOfContents,
   TextList,
@@ -41,15 +47,20 @@ export function HelpContent() {
   );
 }
 
-// help FR-13.
+// help FR-13, its figures FR-14.
 function SpecsTab() {
   return (
     <>
       <Note text="help.specs.intro" />
+      <PlanningTree caption="help.specs.tree.caption" root={planningTree} />
       {specTopics.map((topic) => (
         <HelpSection key={topic.section.id} section={topic.section}>
           <TextList items={topic.points} />
           {topic.examples.length > 0 && <CodeList label="help.specs.examples" items={topic.examples} />}
+          {topic.section.id === "specs-pages" && <SpecSample caption="help.specs.sample.caption" text={sampleSpec} />}
+          {topic.section.id === "specs-follows" && (
+            <SpecFlows caption="help.specs.flow.caption" flows={specFlows} lanesById={lanesById} />
+          )}
         </HelpSection>
       ))}
     </>

@@ -34,6 +34,7 @@ A static page that explains how selo works, so that a person picks a lane and re
 ## Specs tab
 
 - **FR-13** — The « Specs » tab explains how selo manages specs, one section each, in this order: page specs (one per route under `.planning/pages`, FRs grouped by zone), domain sheets (`.planning/domain`, glossary, BRs, the `app` sheet for the shell, which file gets a rule), ids (FR, BR, US, Q per file, append-only, the `Retired:` line, a doubt as a Q), page stubs and their bootstrap from the code, the spec following the code (the fastlane's delta in the commit of the code, the blueprint's Spec delta merged by the build), the `Spec:` line of commit bodies and the spec-check script.
+- **FR-14** — The « Specs » tab shows three figures: the tree of `.planning/` with one note per folder and file, above its first section; a sample page spec with its ids highlighted, in the page specs section; and, in the section on the spec following the code, the steps from a request to the updated spec, one row per lane in its colour (fastlane, blueprint).
 
 ## Whole page
 

@@ -3,7 +3,7 @@ import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { Card } from "../../../shared/ui/Card.tsx";
 import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
-import type { DecisionGuide, HelpTab, Lane, LaneId, LifecycleStep, Role, Section, Skill, Term } from "../content.ts";
+import type { DecisionGuide, FlowStep, HelpTab, Lane, LaneId, LifecycleStep, Role, Section, Skill, Term, TreeNode } from "../content.ts";
 import styles from "./HelpParts.module.css";
 
 // help FR-11: a lane's class sets --lane, which its card, name and dot read.
@@ -236,5 +236,74 @@ export function HelpTabs({ tabs, value, onChange }: { tabs: { value: HelpTab; la
     <div className={styles.tabs}>
       <Segmented label={t("help.tabs.label")} options={tabs.map((tab) => ({ value: tab.value, label: t(tab.label) }))} value={value} onChange={onChange} />
     </div>
+  );
+}
+
+function TreeItems({ nodes }: { nodes: TreeNode[] }) {
+  return (
+    <ul className={styles.treeList}>
+      {nodes.map((node) => (
+        <li key={node.name} className={styles.treeItem}>
+          <span className={node.children ? styles.treeFolder : styles.treeFile}>{node.name}</span>
+          {node.note && <span className={styles.treeNote}>{t(node.note)}</span>}
+          {node.children && <TreeItems nodes={node.children} />}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// help FR-14.
+export function PlanningTree({ caption, root }: { caption: MessageKey; root: TreeNode }) {
+  return (
+    <figure className={styles.figure}>
+      <figcaption className={styles.figureCaption}>{t(caption)}</figcaption>
+      <div className={styles.tree}>
+        <span className={styles.treeFolder}>{root.name}</span>
+        <TreeItems nodes={root.children ?? []} />
+      </div>
+    </figure>
+  );
+}
+
+// help FR-14: the ids of a sample spec stand out, as a reader looks for them first.
+export function SpecSample({ caption, text }: { caption: MessageKey; text: string }) {
+  return (
+    <figure className={styles.figure}>
+      <figcaption className={styles.figureCaption}>{t(caption)}</figcaption>
+      <pre className={styles.sample}>
+        {text.split(/\b((?:FR|BR|US|Q)-\d+)\b/).map((part, index) =>
+          index % 2 === 1 ? (
+            <mark key={index} className={styles.sampleId}>
+              {part}
+            </mark>
+          ) : (
+            part
+          ),
+        )}
+      </pre>
+    </figure>
+  );
+}
+
+// help FR-14: one row of steps per lane, in its colour.
+export function SpecFlows({ caption, flows, lanesById }: { caption: MessageKey; flows: { lane: LaneId; steps: FlowStep[] }[]; lanesById: Record<LaneId, Lane> }) {
+  return (
+    <figure className={styles.figure}>
+      <figcaption className={styles.figureCaption}>{t(caption)}</figcaption>
+      {flows.map((flow) => (
+        <div key={flow.lane} className={`${styles.flow} ${laneClass(flow.lane)}`}>
+          <LaneName lane={lanesById[flow.lane]} />
+          <ol className={styles.flowSteps}>
+            {flow.steps.map((step) => (
+              <li key={step.label} className={styles.flowStep}>
+                <span>{t(step.label)}</span>
+                {step.code && <Code text={step.code} />}
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+    </figure>
   );
 }

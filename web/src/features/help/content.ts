@@ -255,3 +255,87 @@ export const specTopics: SpecTopic[] = [
     examples: ["help.specs.specCheck.example1", "help.specs.specCheck.example2"],
   },
 ];
+
+export interface TreeNode {
+  name: string;
+  note?: MessageKey;
+  children?: TreeNode[];
+}
+
+// help FR-14: where the specs live, as a project lays them out.
+export const planningTree: TreeNode = {
+  name: ".planning/",
+  children: [
+    {
+      name: "pages/",
+      note: "help.specs.tree.pages",
+      children: [
+        { name: "home.md", note: "help.specs.tree.home" },
+        { name: "todo-detail.md", note: "help.specs.tree.todoDetail" },
+      ],
+    },
+    {
+      name: "domain/",
+      note: "help.specs.tree.domain",
+      children: [
+        { name: "todo.md", note: "help.specs.tree.todo" },
+        { name: "app.md", note: "help.specs.tree.app" },
+      ],
+    },
+    {
+      name: "blueprints/",
+      note: "help.specs.tree.blueprints",
+      children: [{ name: "2026-10-21-due-date.md", note: "help.specs.tree.blueprint" }],
+    },
+    { name: "ideas.md", note: "help.specs.tree.ideas" },
+    { name: "technical-debt.md", note: "help.specs.tree.debt" },
+  ],
+};
+
+// help FR-14: a sample page spec, in the repository's language like the real files.
+export const sampleSpec = `# Home
+
+Route: \`/\` · Domain: \`todo\`
+
+The list of todos, so that a person sees what is left to do.
+
+## Filters
+
+- **FR-01** — « À faire » shows only the open todos.
+
+## List
+
+- **FR-02** — Each row shows its title and its due date (\`todo\` BR-01).
+- **FR-03** — A click on a row opens its detail.
+
+## Open questions
+
+- **Q-01** — Should a done todo stay in the list?
+
+Retired: FR-04`;
+
+export interface FlowStep {
+  label: MessageKey;
+  code?: MessageKey;
+}
+
+// help FR-14: how the spec follows the code, lane by lane.
+export const specFlows: { lane: LaneId; steps: FlowStep[] }[] = [
+  {
+    lane: "fastlane",
+    steps: [
+      { label: "help.specs.flow.request" },
+      { label: "help.specs.flow.codeAndDelta" },
+      { label: "help.specs.flow.oneCommit", code: "help.specs.specLine.example1" },
+    ],
+  },
+  {
+    lane: "blueprint",
+    steps: [
+      { label: "help.specs.flow.blueprint", code: "help.specs.flow.deltaLine" },
+      { label: "help.specs.flow.stages", code: "help.specs.flow.pending" },
+      { label: "help.specs.flow.merge", code: "help.specs.specCheck.example2" },
+      { label: "help.specs.flow.merged", code: "help.specs.flow.mergedCommit" },
+    ],
+  },
+];

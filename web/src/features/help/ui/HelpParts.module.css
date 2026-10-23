@@ -259,3 +259,150 @@
 .tabs {
   justify-self: start;
 }
+
+/* help FR-14: the figures of the « Specs » tab. */
+.figure {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.figureCaption {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.tree,
+.sample {
+  margin: 0;
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  line-height: 1.6;
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--item-radius);
+  overflow-x: auto;
+}
+
+/* Each level hangs from a vertical line, each entry from a short horizontal one. */
+.treeList {
+  list-style: none;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.treeItem {
+  position: relative;
+  padding-left: 14px;
+}
+
+.treeItem::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 0.8em;
+  border-left: var(--border-width) solid var(--text-muted);
+  border-bottom: var(--border-width) solid var(--text-muted);
+}
+
+.treeItem:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 0.8em;
+  bottom: 0;
+  left: 0;
+  border-left: var(--border-width) solid var(--text-muted);
+}
+
+.treeFolder {
+  font-weight: 600;
+  color: var(--hue-files);
+}
+
+.treeNote {
+  margin-left: 12px;
+  font-family: var(--font-sans);
+  color: var(--text-muted);
+}
+
+.treeNote::before {
+  content: "— ";
+}
+
+.sample {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sampleId {
+  padding: 0 4px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.flow {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--item-radius);
+  border-left: 3px solid var(--lane);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--lane) 12%, transparent), transparent 80%);
+}
+
+.flowSteps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* One row of equal boxes, never wrapped: a wrapped row would leave an arrow pointing at nothing. */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 28px;
+}
+
+/* Boxes joined by an arrow in the lane's colour. */
+.flowStep {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.flowStep:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  top: 50%;
+  right: -22px;
+  transform: translateY(-50%);
+  color: var(--lane);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .flowSteps {
+    grid-auto-flow: row;
+    gap: 22px;
+  }
+
+  .flowStep:not(:last-child)::after {
+    content: "↓";
+    top: auto;
+    right: auto;
+    bottom: -20px;
+    left: 16px;
+    transform: none;
+  }
+}
