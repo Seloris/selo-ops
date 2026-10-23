@@ -146,7 +146,7 @@ function toSession(
       .sort((a, b) => Date.parse(a.since) - Date.parse(b.since))
       .map((r) => {
         const request = cleanRequest(r.request ?? "");
-        return { since: r.since, request: request.text, isRequestCut: request.isCut, usage: usageOf(r.usage) };
+        return { since: r.since, request: request.text, isRequestCut: request.isCut, usage: r.usage ?? null };
       }),
     isRunListCut: file.runs.length >= EXPORT_MAX_RUNS,
     touchedFiles: file.touchedFiles ?? [],

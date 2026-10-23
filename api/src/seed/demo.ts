@@ -241,6 +241,16 @@ function runUsageOf(u: DemoUsage, at: (secondsAgo: number) => string, age: numbe
   };
 }
 
+// An earlier main run: fewer tools than the current one, a skill and a prompt of its own (sessions-live FR-33, FR-38).
+function earlierUsageOf(model: string, scale: number, prompt: string): ExportRunUsage {
+  const tokens = tokensOf(scale);
+  return {
+    calls: 7, tokens, byModel: [{ model, calls: 7, tokens }],
+    tools: [{ name: "Edit", count: 4 }, { name: "Grep", count: 2 }, { name: "Read", count: 1 }],
+    skills: [{ name: "selo:fastlane", count: 1, how: "command" }], prompts: [{ at: prompt, calls: 7, tokens }], settled: true, partial: false,
+  };
+}
+
 function agentUsageOf(model: string, scale: number): ExportRunUsage {
   const tokens = tokensOf(scale);
   return {
@@ -358,7 +368,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
       ...current, id: `${s.id}:0-${i}`, request, phase: "job-done", blueprint: null, pendingCommit: null, question: null, error: null,
       recap: null, commits: [], resumePrompt: null,
       since: at(s.age + 600 + (all.length - i) * 900), updatedAt: at(s.age + 540 + (all.length - i) * 900),
-      ...(usage ? { usage: agentUsageOf(usage.model, 60_000 + i * 25_000) } : {}),
+      ...(usage ? { usage: earlierUsageOf(usage.model, 60_000 + i * 25_000, at(s.age + 590 + (all.length - i) * 900)) } : {}),
     }));
     const root = rootOf(s);
     const file: SessionFile = {

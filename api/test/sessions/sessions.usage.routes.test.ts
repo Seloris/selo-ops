@@ -177,10 +177,17 @@ describe("sessions usage", () => {
       expect(session).toMatchObject({ isOutsideSelo: true, model: SONNET, usage: null, runUsage: null, runs: [], isRunListCut: false });
     });
 
-    it("lists every main run of the session, oldest first, with its cleaned request and usage, never a subagent", async () => {
+    it("lists every main run of the session, oldest first, with its cleaned request and its usage and activity, never a subagent", async () => {
       // Arrange
       const tokens = buildTokens({ output: 7 });
-      const runUsage = buildRunUsage({ calls: 3, tokens, byModel: [{ model: SONNET, calls: 3, tokens }] });
+      const runUsage = buildRunUsage({
+        calls: 3,
+        tokens,
+        byModel: [{ model: SONNET, calls: 3, tokens }],
+        tools: [{ name: "Read", count: 2 }],
+        skills: [{ name: "selo:build", count: 1, how: "command" }],
+        prompts: [{ at: "2026-01-01T08:01:00.000Z", calls: 3, tokens }],
+      });
       const first = buildRun({ since: "2026-01-01T08:00:00.000Z", request: "<ide_selection>x</ide_selection>Why one prompt?", usage: runUsage });
       const unreadable = buildRun({ since: "2026-01-01T08:30:00.000Z", request: null, usage: null });
       const current = buildRun({ since: "2026-01-01T09:00:00.000Z", request: "x".repeat(200), usage: runUsage });
@@ -192,9 +199,9 @@ describe("sessions usage", () => {
 
       // Assert
       expect(session.runs).toEqual([
-        { since: "2026-01-01T08:00:00.000Z", request: "Why one prompt?", isRequestCut: false, usage: { calls: 3, tokens, byModel: [{ model: SONNET, calls: 3, tokens }] } },
+        { since: "2026-01-01T08:00:00.000Z", request: "Why one prompt?", isRequestCut: false, usage: runUsage },
         { since: "2026-01-01T08:30:00.000Z", request: "", isRequestCut: false, usage: null },
-        { since: "2026-01-01T09:00:00.000Z", request: "x".repeat(200), isRequestCut: true, usage: { calls: 3, tokens, byModel: [{ model: SONNET, calls: 3, tokens }] } },
+        { since: "2026-01-01T09:00:00.000Z", request: "x".repeat(200), isRequestCut: true, usage: runUsage },
       ]);
       expect(session.isRunListCut).toBe(false);
     });

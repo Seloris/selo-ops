@@ -218,7 +218,7 @@
                   "type": "boolean"
                 },
                 "usage": {
-                  "$ref": "#/components/schemas/Usage"
+                  "$ref": "#/components/schemas/RunUsage"
                 }
               },
               "required": [
