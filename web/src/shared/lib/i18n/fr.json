@@ -66,6 +66,7 @@
   "sessions.bucket.todo": "À traiter",
   "sessions.bucket.run": "En cours",
   "sessions.bucket.rest": "Au repos",
+  "sessions.bucket.done": "✅ Job done",
   "sessions.lane.free": "libre",
   "sessions.lane.outside": "hors selo",
 

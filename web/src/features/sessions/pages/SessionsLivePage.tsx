@@ -20,6 +20,7 @@ import {
   isFinished,
   openCountByProject,
   type Block,
+  type Bucket,
   type Filters,
   type Grouping,
   type Project,
@@ -263,7 +264,7 @@ export function SessionsLivePage() {
 
   const blockHeader = (b: Block, project: Project | undefined) => {
     if (b.kind === "project" && project) return <ProjectHeader project={project} count={b.sessions.length} todoCount={b.todoCount} />;
-    if (b.kind === "status") return <StatusHeader bucket={b.key as "todo" | "run" | "rest"} count={b.sessions.length} />;
+    if (b.kind === "status") return <StatusHeader bucket={b.key as Bucket} count={b.sessions.length} />;
     return null;
   };
 

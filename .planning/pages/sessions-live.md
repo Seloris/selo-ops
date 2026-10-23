@@ -12,7 +12,7 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 ## Settings bar
 
 - **FR-03** — « Affichage » switches between Liste (one 36 px row per session) and Cartes (a grid of cards with every detail), Liste by default.
-- **FR-04** — « Regrouper » offers Par projet (one block per project), Par statut (À traiter, En cours, Au repos) and Aucun (one list), Par projet by default.
+- **FR-04** — « Regrouper » offers Par projet (one block per project), Par statut (À traiter, En cours, Au repos, ✅ Job done) and Aucun (one list), Par projet by default.
 - **FR-05** — « Projets » is a checklist of the projects with « Tous », each with its count of open sessions, all checked by default.
 - **FR-06** — « Afficher les fermées », unchecked by default, with its count, adds a « Fermées » block of the closed sessions not archived (`session` BR-03).
 - **FR-07** — The search filters on the request, the blueprint, the branch and the project, in every block.

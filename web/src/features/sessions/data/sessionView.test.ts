@@ -178,7 +178,7 @@ describe("groupSessions", () => {
     ]);
   });
 
-  it("by status, gives the non-empty blocks À traiter, En cours and Au repos in that order", () => {
+  it("by status, gives the non-empty blocks À traiter, En cours, Au repos and Job done in that order", () => {
     // Arrange
     const sessions = [
       buildSession({ id: "done", state: "job-done" }),
@@ -193,7 +193,8 @@ describe("groupSessions", () => {
     // Assert
     expect(blocks.map((b) => [b.key, ids(b.sessions)])).toEqual([
       ["todo", ["permission", "stopped"]],
-      ["rest", ["turn", "done"]],
+      ["rest", ["turn"]],
+      ["done", ["done"]],
     ]);
   });
 

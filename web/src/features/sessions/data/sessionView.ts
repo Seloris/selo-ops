@@ -6,7 +6,7 @@ export type Session = components["schemas"]["Session"];
 export type Project = components["schemas"]["Project"];
 export type InstalledPlugin = components["schemas"]["InstalledPlugin"];
 export type SessionState = components["schemas"]["SessionState"];
-export type Bucket = "todo" | "run" | "rest";
+export type Bucket = "todo" | "run" | "rest" | "done";
 export type Grouping = "project" | "status" | "none";
 
 // `session` BR-02: the order of urgency.
@@ -27,15 +27,15 @@ const BUCKET: Record<SessionState, Bucket> = {
   stopped: "todo",
   working: "run",
   "turn-ended": "rest",
-  "job-done": "rest",
+  "job-done": "done",
 };
 
-export const BUCKETS: Bucket[] = ["todo", "run", "rest"];
+export const BUCKETS: Bucket[] = ["todo", "run", "rest", "done"];
 export const STALE_AFTER_MS = 30 * 60_000;
 
 export const bucketOf = (state: SessionState): Bucket => BUCKET[state];
 // `session` BR-07: only a run that waits on nobody is archived without a question.
-export const isFinished = (s: Session) => bucketOf(s.state) === "rest";
+export const isFinished = (s: Session) => bucketOf(s.state) === "rest" || bucketOf(s.state) === "done";
 export const isOpen = (s: Session) => !s.isClosed && !s.isArchived;
 // `session` BR-04.
 export const isTodo = (s: Session) => isOpen(s) && bucketOf(s.state) === "todo";
