@@ -3,7 +3,7 @@
 Pages: `projects` (new, `Route: /projects`) · Domain: `project` (new), `session`, `app` · Components: `api`, `web`
 
 ## Spec delta
-- project + BR-01 — A project is a repository the export holds a project file of (`session` BR-05); its specs, ideas and technical debt are read from its base checkout (the folder whose repository is its own), and a blueprint only a worktree holds is added with that worktree's branch, so that work in flight in a worktree shows; a folder inside the base checkout, on its branch, that the export holds a file of is a project of its own.
+- project + BR-01 — A project is a repository the export holds a project file of (`session` BR-05); its specs, ideas and technical debt are read from its base checkout (the folder whose repository is its own), and a blueprint only a worktree holds is added with that worktree's branch, so that work in flight in a worktree shows; a folder inside a checkout, on that checkout's branch, that the export holds a file of is a project of its own.
 - project + BR-02 — A blueprint's state is the export's, shown as « Brouillon » (written, not committed), « Prêt », « En construction », « À revoir », « À fusionner », « Terminé » and « Legacy », in that order; a blueprint is open unless « Terminé » or « Legacy ».
 - project + BR-03 — A blueprint's progress is its stages, each ticked or not and named by its component, then its review, then its spec merged, as the export gives them; a legacy blueprint has no progress.
 - project + BR-04 — A project whose export holds no selo planning (no spec nor blueprint read, and no manifest read without error) is still listed, with its git counts only; an export error with its planning read leaves the project open, the error shown.
@@ -37,7 +37,7 @@ Pages: `projects` (new, `Route: /projects`) · Domain: `project` (new), `session
 
 ### Decided during build
 - A project whose export reports an error yet read its planning (selo-ops' own export: unknown skin) → open, the error in its view; dimmed only with no spec, no blueprint and no clean manifest; `project` BR-04 reworded (read literally, « or an error » dims selo-ops itself, while FR-05 shows the error in the project's view)
-- A folder inside a repository's base checkout, on its branch, with its own export file (`samples/todo-app` in `webapp-factory`) → a project of its own, not a worktree; `project` BR-01 completed (git never checks one branch out twice; as a worktree its specs would vanish)
+- A folder inside a repository's checkout (base or worktree), on that checkout's branch, with its own export file (`samples/todo-app` in `webapp-factory`) → a project of its own, not a worktree; `project` BR-01 completed (git never checks one branch out twice; as a worktree its specs would vanish)
 
 ## Technical defaults
 - Contract → `GET /v1/projects` (projects merged per repository, sheets, blueprints, idea and debt counts, live session ids per blueprint) and `GET /v1/projects/{id}/file?path=` (raw Markdown); id = the export key of the base checkout
@@ -54,6 +54,13 @@ Pages: `projects` (new, `Route: /projects`) · Domain: `project` (new), `session
 - Live sessions of a project and of a blueprint → the export's live session files whose folder is one of the project's checkouts, matched on their run's blueprint, not the project file's `sessions` (written only when the project is scanned)
 - Idea and debt counts → the files' top-level `- ` items
 - Demo → `weather-cli` is the project without selo; `atelier-web`'s worktree `one-step-checkout` holds the worktree-only blueprint
+- Open blueprints touching a sheet → computed by the API from every merged blueprint (header or delta), a worktree's own included, not the export's per-checkout list
+- A blueprint two worktrees hold → the first one listed, its branch shown and its file read from it
+- State colours → lime, cyan, blue, violet, fuchsia, green, grey: none is `--mark`, amber or rose; the delta's bars and signs neutral (beside a state-coloured track, a coloured delta read as a state)
+- Live sessions → read from the sessions' own query (`useSessionsQuery`, one cache) and shown with their state dot and request, each a link to its detail on Sessions live (`/?session=`); the only cross-feature imports, noted in web's CLAUDE.md
+- Panel width → remembered under its own key, apart from Sessions live's
+- A blueprint panel's pages and domain sheets → one line (the export merges them)
+- A project with no selo planning reached by its address → « Ce projet n’est plus dans l’export ops. », not its view (FR-03)
 
 ## Stages
 1. api — `feat(projects-page): api — projects, their specs and blueprints read from the export`
@@ -66,7 +73,7 @@ Pages: `projects` (new, `Route: /projects`) · Domain: `project` (new), `session
 
 ## Progress
 - [x] Stage 1 — api
-- [ ] Stage 2 — web
-- [ ] Review
-- [ ] Browser test
+- [x] Stage 2 — web
+- [x] Review
+- [x] Browser test
 - [ ] Spec merged

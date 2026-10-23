@@ -25,7 +25,7 @@ export function AppHeader({
         label={t("app.nav.label")}
         tabs={[
           { label: t("app.nav.live"), to: "/", end: true },
-          { label: t("app.nav.projects"), note: t("app.nav.soon") },
+          { label: t("app.nav.projects"), to: "/projects" },
           { label: t("app.nav.debug"), note: t("app.nav.soon") },
         ]}
       />

@@ -12,6 +12,8 @@
    --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage, --hue-next   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia, violet; --hue-next is also the next action's chip and button in the list (sessions-live FR-10)
 
    --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
+   --bp-draft, --bp-ready, --bp-building, --bp-review, --bp-merging, --bp-done, --bp-legacy   a blueprint's state, the same in bars, legends, tags and tracks: lime, cyan, blue, violet, fuchsia, green, grey (projects FR-14); none is --mark, amber or rose
+   --hue-progress, --hue-blueprints, --hue-specs, --hue-ideas, --hue-debt   the icons of the projects page's sections: orange, teal, emerald, sky, stone
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
    of that scheme, so the choice wins over the system's prefers-color-scheme. */
 :root {
@@ -34,6 +36,18 @@
   --kind-cache-read: #a8a29e;
   --kind-cache-write: #7c3aed;
   --kind-output: #16a34a;
+    --bp-draft: #65a30d;
+    --bp-ready: #0891b2;
+    --bp-building: #1d4ed8;
+    --bp-review: #7c3aed;
+    --bp-merging: #c026d3;
+    --bp-done: #16a34a;
+    --bp-legacy: #94a3b8;
+    --hue-progress: #ea580c;
+    --hue-blueprints: #0d9488;
+    --hue-specs: #047857;
+    --hue-ideas: #0369a1;
+    --hue-debt: #78716c;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -56,6 +70,18 @@
     --kind-cache-read: #a8a29e;
     --kind-cache-write: #a78bfa;
     --kind-output: #4ade80;
+    --bp-draft: #a3e635;
+    --bp-ready: #22d3ee;
+    --bp-building: #60a5fa;
+    --bp-review: #a78bfa;
+    --bp-merging: #e879f9;
+    --bp-done: #4ade80;
+    --bp-legacy: #64748b;
+    --hue-progress: #fdba74;
+    --hue-blueprints: #5eead4;
+    --hue-specs: #6ee7b7;
+    --hue-ideas: #7dd3fc;
+    --hue-debt: #d6d3d1;
   }
 }
 
@@ -97,6 +123,18 @@
   --kind-cache-read: #a8a29e;
   --kind-cache-write: #7c3aed;
   --kind-output: #16a34a;
+  --bp-draft: #65a30d;
+  --bp-ready: #0891b2;
+  --bp-building: #1d4ed8;
+  --bp-review: #7c3aed;
+  --bp-merging: #c026d3;
+  --bp-done: #16a34a;
+  --bp-legacy: #94a3b8;
+  --hue-progress: #ea580c;
+  --hue-blueprints: #0d9488;
+  --hue-specs: #047857;
+  --hue-ideas: #0369a1;
+  --hue-debt: #78716c;
   color-scheme: light;
 }
 
@@ -138,5 +176,17 @@
   --kind-cache-read: #a8a29e;
   --kind-cache-write: #a78bfa;
   --kind-output: #4ade80;
+  --bp-draft: #a3e635;
+  --bp-ready: #22d3ee;
+  --bp-building: #60a5fa;
+  --bp-review: #a78bfa;
+  --bp-merging: #e879f9;
+  --bp-done: #4ade80;
+  --bp-legacy: #64748b;
+  --hue-progress: #fdba74;
+  --hue-blueprints: #5eead4;
+  --hue-specs: #6ee7b7;
+  --hue-ideas: #7dd3fc;
+  --hue-debt: #d6d3d1;
   color-scheme: dark;
 }

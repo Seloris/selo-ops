@@ -1,0 +1,175 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 20px 12px;
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tags {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Below 900px the panel already covers the screen. */
+@media (max-width: 900px) {
+  .fullscreen {
+    display: none;
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 1.12em;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.body {
+  flex: 1;
+  overflow: auto;
+  padding: 4px 20px 20px;
+}
+
+/* Full screen: the text keeps a readable measure. */
+.wide {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 14px;
+  margin: 12px 0 0;
+  font-size: 0.88em;
+}
+
+.facts dt {
+  color: var(--text-muted);
+}
+
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.muted {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.block:last-child {
+  border-bottom: 0;
+}
+
+.blockTitle {
+  margin: 0;
+  font-size: 0.83em;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.groupTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.delta,
+.decisions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.88em;
+  line-height: 1.45;
+}
+
+.delta li {
+  display: grid;
+  grid-template-columns: 18px max-content minmax(0, 1fr);
+  gap: 8px;
+}
+
+.decisions {
+  padding-left: 18px;
+  list-style: disc;
+}
+
+.op {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+}
+
+.add,
+.change {
+  color: var(--text);
+}
+
+.remove {
+  color: var(--text-muted);
+}
+
+.id {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.text {
+  overflow-wrap: anywhere;
+}
+
+.text code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}

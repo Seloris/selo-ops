@@ -1,0 +1,155 @@
+/* The same frame as Sessions live: the content scrolls beside the side panel (sessions-live FR-18, FR-27, FR-37). */
+.app {
+  --drawer-w: clamp(420px, 40vw, 680px);
+  height: calc(100vh - var(--app-header-h, 0px));
+  min-height: 640px;
+  display: flex;
+  flex-direction: column;
+  /* clip, not hidden: a closed drawer parked off-screen must never be scrolled into view. */
+  overflow: clip;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  padding: 18px 32px 14px;
+}
+
+.brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  min-width: 0;
+}
+
+.sub {
+  margin: 0;
+  font-size: 0.93em;
+  color: var(--text-muted);
+}
+
+.sub b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.grow {
+  flex: 1;
+}
+
+.updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.87em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.updated svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.spin {
+  animation: spin 0.9s ease-in-out 1;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: clip;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  overflow: auto;
+  padding: 0 32px 48px;
+  transition: margin-right 0.22s ease;
+}
+
+.content > button {
+  align-self: flex-start;
+}
+
+.withPanel .content {
+  margin-right: var(--drawer-w);
+}
+
+.sized {
+  --drawer-w: clamp(360px, var(--drawer-chosen-w), calc(100vw - 560px));
+}
+
+.fullscreen,
+.fullscreen.sized {
+  --drawer-w: 100%;
+  height: 100vh;
+  min-height: 0;
+  background-color: var(--bg);
+  background-image: var(--bg-image);
+}
+
+.fullscreen .content {
+  visibility: hidden;
+}
+
+.resizing .content {
+  transition: none;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 28px 16px;
+}
+
+.hint {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .app {
+    --drawer-w: 100%;
+    height: auto;
+    min-height: 0;
+  }
+
+  .top {
+    padding: 14px 16px 8px;
+  }
+
+  .content {
+    overflow: visible;
+    padding: 0 16px 32px;
+  }
+
+  .withPanel .content {
+    margin-right: 0;
+  }
+
+  .sized {
+    --drawer-w: 100%;
+  }
+}

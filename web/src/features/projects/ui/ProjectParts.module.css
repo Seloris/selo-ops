@@ -1,0 +1,314 @@
+/* projects FR-14: each part reads its state's colour from --bp, set inline from the --bp-* tokens. */
+
+.stateBar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bar {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+}
+
+.segment {
+  flex-basis: 0;
+  min-width: 6px;
+  background: var(--bp);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend b {
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bp);
+}
+
+/* The small track: pips, then the review and the merge as short labels. */
+.track {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.pip {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--bp);
+  background: transparent;
+}
+
+.pip.filled {
+  background: var(--bp);
+}
+
+.milestone {
+  padding: 0 7px;
+  font-size: 0.75em;
+  line-height: 18px;
+  white-space: nowrap;
+  color: var(--text-muted);
+  border: var(--border-width) dashed var(--border);
+  border-radius: var(--radius-pill);
+}
+
+.milestone.filled {
+  color: var(--bp);
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--bp) 45%, transparent);
+  background: color-mix(in srgb, var(--bp) 10%, transparent);
+}
+
+/* The large track: one line per step, joined by a rule. */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 14px auto 1fr;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 6px 0;
+}
+
+.steps li .pip {
+  width: 14px;
+  height: 14px;
+  align-self: center;
+}
+
+.steps li + li::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 6px;
+  height: 12px;
+  border-left: 2px solid color-mix(in srgb, var(--bp) 40%, transparent);
+}
+
+.stepName {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.commit {
+  min-width: 0;
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
+}
+
+.mono,
+.sha {
+  font-family: var(--font-mono);
+}
+
+.sha {
+  color: var(--text-muted);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+/* projects FR-08: neutral shades, darkest for added lines, so no part reads as a state colour. */
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deltaBar {
+  display: flex;
+  gap: 2px;
+  width: 64px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+}
+
+.deltaBar span {
+  flex-basis: 0;
+}
+
+.added {
+  background: var(--text);
+}
+
+.changed {
+  background: var(--text-muted);
+}
+
+.removed {
+  background: color-mix(in srgb, var(--text-muted) 40%, transparent);
+}
+
+.figures {
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.size {
+  display: flex;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+}
+
+.fr {
+  background: var(--hue-specs);
+}
+
+.br {
+  background: var(--hue-blueprints);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: calc(var(--radius-control) / 2);
+  color: var(--hue);
+  background: color-mix(in srgb, var(--hue) 16%, transparent);
+}
+
+.chip svg {
+  width: 14px;
+  height: 14px;
+}
+
+.hueProgress { --hue: var(--hue-progress); }
+.hueBlueprints { --hue: var(--hue-blueprints); }
+.hueSpecs { --hue: var(--hue-specs); }
+.hueIdeas { --hue: var(--hue-ideas); }
+.hueDebt { --hue: var(--hue-debt); }
+
+.count {
+  padding: 0 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.live {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-self: stretch;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85em;
+}
+
+.liveLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.liveLink:hover {
+  color: var(--text);
+}
+
+.liveText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--item-pad);
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--item-radius);
+}
+
+.tileValue {
+  font-size: 1.9em;
+  font-weight: 500;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.tileLabel {
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
