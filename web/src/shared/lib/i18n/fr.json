@@ -203,7 +203,7 @@
   "sessions.usage.how.preloaded": "préchargée",
   "sessions.usage.prompts": "Prompts",
   "sessions.usage.promptsCut": "Seuls les 50 derniers prompts sont listés ; les totaux du tour restent exacts.",
-  "sessions.usage.runs": "Tours",
+  "sessions.usage.runs": "Prompts",
   "sessions.usage.runsCut": "L’export ne garde que les 100 derniers tours : les plus anciens peuvent manquer, les totaux de la session restent exacts.",
 
   "sessions.toast.resumeCopied": "Commande copiée",
