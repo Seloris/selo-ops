@@ -336,6 +336,90 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* sessions-live FR-41: a vertical timeline, each dot joined to the next by a line in its state's colour, as long as
+   the square root of how long the step lasted, bounded (120px = MAX_WEIGHT in trail.ts × 1.5px). */
+.rail-pulse { --tone: var(--working); }
+.rail-done,
+.rail-turn { --tone: var(--done); }
+.rail-warn { --tone: var(--warn); }
+.rail-danger { --tone: var(--danger); }
+.rail-idle,
+.rail-off { --tone: var(--text-muted); }
+
+/* Columns as wide as their content, so the badge and the duration sit next to the text, aligned across lines. */
+.trail {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, max-content) auto auto;
+  justify-content: start;
+  justify-items: start;
+  align-items: baseline;
+  gap: 0 10px;
+}
+
+.trail li,
+.trail .status {
+  display: contents;
+}
+
+.trail li.muted {
+  display: block;
+  grid-column: 1 / -1;
+}
+
+.trail .duration {
+  justify-self: end;
+  min-width: 0;
+}
+
+
+.node {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  align-self: flex-start;
+  gap: 3px;
+  width: 8px;
+  padding-top: 0.45em;
+}
+
+.node::after {
+  content: "";
+  width: 2px;
+  height: clamp(8px, calc(var(--weight) * 1.5px), 120px);
+  margin-bottom: 3px;
+  background: var(--tone);
+}
+
+/* A wait on the person: the line dashed. */
+.node.rail-warn::after,
+.node.rail-danger::after {
+  background: repeating-linear-gradient(var(--tone) 0 4px, transparent 4px 7px);
+}
+
+.trail li:last-child .node::after {
+  display: none;
+}
+
+/* Only the dot of the line still running pulses. */
+.trail li:not(:last-child) .node > span {
+  animation: none;
+}
+
+/* Folded: the same run as a ribbon, one segment per line. */
+.ribbon {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+}
+
+.ribbon > span {
+  flex-basis: 3px;
+  background: var(--tone);
+}
+
 .kv {
   display: grid;
   grid-template-columns: 110px minmax(0, 1fr);

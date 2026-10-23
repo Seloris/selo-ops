@@ -11,7 +11,12 @@ export interface TrailLine {
   stepText: string | null;
   // Until the next line; null on the last, still running.
   durationText: string | null;
+  // Square root of its seconds, the last line running until now: a few seconds stay visible beside an hour.
+  weight: number;
 }
+
+// The longest connector's weight (SessionDetail.module.css): a line older than that, the last one most of all, weighs no more.
+export const MAX_WEIGHT = 80;
 
 const WAITS: ReadonlySet<TrailEntry["phase"]> = new Set(["awaiting-answer", "awaiting-commit"]);
 
@@ -23,11 +28,12 @@ const durationsOf = (trail: TrailEntry[]) =>
 
 export const hasTrail = (s: Session) => !s.isOutsideSelo && s.trail.length > 0;
 
-export function trailLines(trail: TrailEntry[]): TrailLine[] {
+export function trailLines(trail: TrailEntry[], now: number): TrailLine[] {
   const durations = durationsOf(trail);
   return trail.map((entry, i) => {
     const ms = durations[i] ?? null;
-    return { entry, stepText: stepText(entry), durationText: ms === null ? null : age(ms) };
+    const lasted = Math.max(0, ms ?? now - Date.parse(entry.at));
+    return { entry, stepText: stepText(entry), durationText: ms === null ? null : age(ms), weight: Math.min(MAX_WEIGHT, Math.sqrt(lasted / 1000)) };
   });
 }
 

@@ -2,7 +2,7 @@ import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
-import { useId, type ReactNode } from "react";
+import { useId, type CSSProperties, type ReactNode } from "react";
 import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, NoteIcon, TrailIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
@@ -15,7 +15,7 @@ import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, workLabel, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, toneOf, workLabel, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 import extras from "./NextAction.module.css";
 
@@ -109,13 +109,35 @@ export function SessionDetail({
     </Section>
   );
   // sessions-live FR-41: absent outside selo and for an export older than 2.5.0, which writes no trail.
+  // A past line reads as open; the last one keeps the session's closed or archived state, so it never pulses then.
+  const trail = trailLines(s.trail, now).map((l, i, all) => {
+    const isLast = i === all.length - 1;
+    return { ...l, tone: toneOf({ ...s, state: l.entry.phase, isClosed: isLast && s.isClosed, isArchived: isLast && s.isArchived }) };
+  });
   const trailSection = hasTrail(s) && (
-    <Section icon={<TrailIcon />} hue="trail" count={s.trail.length} title={t("sessions.detail.trail")} aside={waitingText(s.trail)} {...fold("trail")}>
-      <ul className={styles.lines}>
+    <Section
+      icon={<TrailIcon />}
+      hue="trail"
+      count={s.trail.length}
+      title={t("sessions.detail.trail")}
+      aside={waitingText(s.trail)}
+      summary={
+        <span className={styles.ribbon} aria-hidden="true">
+          {trail.map((l, i) => (
+            <span key={i} className={styles[`rail-${l.tone}`]} style={{ flexGrow: l.weight }} />
+          ))}
+        </span>
+      }
+      {...fold("trail")}
+    >
+      <ul className={`${styles.lines} ${styles.trail}`}>
         {s.isTrailCut && <li className={styles.muted}>{t("sessions.trail.cut")}</li>}
-        {trailLines(s.trail).map((l, i) => (
+        {trail.map((l, i) => (
           <li key={i}>
             <span className={styles.hash}>{dayTime(l.entry.at, now).time}</span>
+            <span className={`${styles.node} ${styles[`rail-${l.tone}`]}`} style={{ "--weight": l.weight } as CSSProperties}>
+              <StatusDot tone={l.tone} />
+            </span>
             <span className={styles.line}>{[l.entry.skill, l.stepText].filter(Boolean).join(" · ")}</span>
             <span className={styles.status}>
               <StateLabel session={{ ...s, state: l.entry.phase, isClosed: false, isArchived: false }} />
@@ -312,7 +334,7 @@ function Section({
   title: string;
   count?: number;
   // What the heading keeps showing while the section is folded.
-  summary?: string | null;
+  summary?: ReactNode;
   // What the heading shows folded or not.
   aside?: string | null;
   // Nothing more than the summary to show: the heading alone, with no chevron.
