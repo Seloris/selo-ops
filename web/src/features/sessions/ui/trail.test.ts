@@ -14,6 +14,17 @@ const entry = (minutes: number, phase: TrailEntry["phase"], overrides: Partial<T
 });
 
 describe("trailLines", () => {
+  it("marks past working lines only, never a wait nor the last line", () => {
+    // Arrange
+    const trail = [entry(0, "working"), entry(3, "awaiting-answer"), entry(5, "working"), entry(9, "working")];
+
+    // Act
+    const lines = trailLines(trail, T0);
+
+    // Assert
+    expect(lines.map((l) => l.isPastWork)).toEqual([true, false, true, false]);
+  });
+
   it("gives each line how long it lasted until the next, none on the last", () => {
     // Arrange
     const trail = [entry(0, "working"), entry(3, "awaiting-commit"), entry(9, "working")];

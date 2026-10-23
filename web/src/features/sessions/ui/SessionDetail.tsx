@@ -4,7 +4,7 @@ import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { useId, type CSSProperties, type ReactNode } from "react";
 import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, NoteIcon, TrailIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
-import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
+import { StatusDot, type DotTone } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
@@ -108,10 +108,11 @@ export function SessionDetail({
     </Section>
   );
   // sessions-live FR-41: absent outside selo and for an export older than 2.5.0, which writes no trail.
-  // A past line reads as open; the last one keeps the session's closed or archived state, so it never pulses then.
+  // A past wait reads as open; past work is muted; the last line keeps the session's closed or archived state, so it never pulses then.
   const trail = trailLines(s.trail, now).map((l, i, all) => {
     const isLast = i === all.length - 1;
-    return { ...l, tone: toneOf({ ...s, state: l.entry.phase, isClosed: isLast && s.isClosed, isArchived: isLast && s.isArchived }) };
+    const tone: DotTone = l.isPastWork ? "idle" : toneOf({ ...s, state: l.entry.phase, isClosed: isLast && s.isClosed, isArchived: isLast && s.isArchived });
+    return { ...l, tone };
   });
   const trailSection = hasTrail(s) && (
     <Section
@@ -142,7 +143,7 @@ export function SessionDetail({
             </span>
             <span className={styles.line}>{[l.entry.skill, l.stepText].filter(Boolean).join(" · ")}</span>
             <span className={styles.status}>
-              <StateLabel session={{ ...s, state: l.entry.phase, isClosed: false, isArchived: false }} />
+              {!l.isPastWork && <StateLabel session={{ ...s, state: l.entry.phase, isClosed: false, isArchived: false }} />}
               {/* Always there, empty on the newest line, so every line fills the grid's five columns. */}
               <span className={styles.duration}>{l.durationText}</span>
             </span>
