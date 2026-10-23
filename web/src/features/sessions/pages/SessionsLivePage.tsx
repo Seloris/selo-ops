@@ -30,7 +30,7 @@ import { useSessionsQuery } from "../data/useSessionsQuery.ts";
 import { useUnarchiveSessionMutation } from "../data/useUnarchiveSessionMutation.ts";
 import { BlockedCommand } from "../ui/BlockedCommand.tsx";
 import { SessionCards } from "../ui/SessionCards.tsx";
-import { parseFoldedSections, toggleSection, type DetailSection } from "../ui/detailSections.ts";
+import { parseFoldedSections, toggleSection, type FoldedSections } from "../ui/detailSections.ts";
 import { SessionDetail } from "../ui/SessionDetail.tsx";
 import { ArchivedToggle, ClosedHeader, ProjectHeader, SessionGroup, StatusHeader } from "../ui/SessionGroup.tsx";
 import { ColumnHead, SessionList, type SessionActions } from "../ui/SessionList.tsx";
@@ -47,7 +47,7 @@ interface Settings {
   view: View;
   grouping: Grouping;
   panelWidth: number | null;
-  foldedSections: DetailSection[];
+  foldedSections: FoldedSections;
   // The unchecked projects, not the checked ones: a project that appears later shows by default.
   hiddenProjectIds: string[];
 }
@@ -352,12 +352,12 @@ export function SessionsLivePage() {
               now={now}
               isNextOpen={nextShown.has(selected.id)}
               isPluginOutdated={outdatedIds.has(selected.id)}
-              foldedSections={settings.foldedSections}
+              foldedSections={settings.foldedSections[isFullscreen ? "fullscreen" : "panel"]}
               actions={actions}
               isFullscreen={isFullscreen}
               onClose={closeDetail}
               onToggleFullscreen={toggleFullscreen}
-              onToggleSection={(section) => updateSettings({ foldedSections: toggleSection(settings.foldedSections, section) })}
+              onToggleSection={(section) => updateSettings({ foldedSections: toggleSection(settings.foldedSections, isFullscreen ? "fullscreen" : "panel", section) })}
             />
           )}
         </Drawer>

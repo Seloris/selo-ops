@@ -2,7 +2,7 @@ import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { useId, type ReactNode } from "react";
-import { ArchiveIcon, BranchIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
@@ -46,10 +46,11 @@ export function SessionDetail({
   const blockers = shownBlockers(s);
   const tag = ageDisplay(s, now);
   const unknown = t("sessions.facts.unknown");
-  const fold = (section: DetailSection) => ({ isFolded: foldedSections.includes(section), onToggle: () => onToggleSection(section) });
+  // An empty section says it all in its heading: it neither folds nor unfolds.
+  const fold = (section: DetailSection, isEmpty = false) => ({ isEmpty, isFolded: foldedSections.includes(section), onToggle: () => onToggleSection(section) });
   const awaitedSection = (
-    <Section icon={<HourglassIcon />} hue={!awaited || !isTodo(s) ? "muted" : awaited.kind === "error" ? "danger" : "warn"} title={t("sessions.detail.awaited")} summary={awaited ? `${awaited.label} · ${awaited.text}` : calmText(s)} {...fold("awaited")}>
-      {awaited ? (
+    <Section icon={<HourglassIcon />} hue={!awaited || !isTodo(s) ? "muted" : awaited.kind === "error" ? "danger" : "warn"} title={t("sessions.detail.awaited")} summary={awaited ? `${awaited.label} · ${awaited.text}` : calmText(s)} {...fold("awaited", !awaited)}>
+      {awaited && (
         <div className={`${styles.ask} ${!isTodo(s) ? styles.neutral : awaited.kind === "error" ? styles.danger : styles.warn}`}>
           <AwaitedIcon kind={awaited.kind} isMuted={!isTodo(s)} />
           <div>
@@ -57,24 +58,12 @@ export function SessionDetail({
             <p className={`${styles.pre} ${awaited.isCode ? styles.mono : ""}`}>{awaited.full}</p>
           </div>
         </div>
-      ) : (
-        <p className={styles.muted}>{calmText(s)}</p>
       )}
     </Section>
   );
   const closeSection = (
-    <Section icon={<DoorIcon />} hue="close" title={t("sessions.detail.canClose")} summary={closeText(s)} {...fold("close")}>
-      {s.isOutsideSelo ? (
-        <div className={`${styles.verdict} ${styles.neutral}`}>
-          <WarningIcon />
-          <b>{closeText(s)}</b>
-        </div>
-      ) : s.blockers.length === 0 ? (
-        <div className={`${styles.verdict} ${styles.neutral}`}>
-          <CheckIcon />
-          <b>{t("sessions.close.yes")}</b>
-        </div>
-      ) : (
+    <Section icon={<DoorIcon />} hue="close" title={t("sessions.detail.canClose")} summary={closeText(s)} {...fold("close", s.isOutsideSelo || blockers.length === 0)}>
+      {blockers.length > 0 && (
         <>
           <div className={`${styles.verdict} ${styles.neutral}`}>
             <WarningIcon />
@@ -112,23 +101,19 @@ export function SessionDetail({
     </Section>
   );
   const agentsSection = !s.isOutsideSelo && (
-    <Section icon={<RobotIcon />} hue="agents" count={s.subagents.length} title={t("sessions.detail.subagents")} summary={s.subagents.length ? [...new Set(s.subagents.map((a) => a.type))].join(" · ") : t("sessions.detail.none")} {...fold("agents")}>
-      {s.subagents.length ? (
-        <ul className={styles.lines}>
-          {s.subagents.map((a, i) => (
-            <li key={i}>
-              <span className={styles.hash}>{a.type}</span>
-              <span className={styles.line}>{a.task ?? ""}</span>
-              <span className={styles.status}>
-                {stateLabel({ ...s, state: a.state })} · {a.model ?? unknown} ·{" "}
-                {a.usage ? <TokenCount count={totalTokens(a.usage.tokens)} /> : unknown}
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className={styles.muted}>{t("sessions.detail.none")}</p>
-      )}
+    <Section icon={<RobotIcon />} hue="agents" count={s.subagents.length} title={t("sessions.detail.subagents")} summary={s.subagents.length ? [...new Set(s.subagents.map((a) => a.type))].join(" · ") : t("sessions.detail.none")} {...fold("agents", s.subagents.length === 0)}>
+      <ul className={styles.lines}>
+        {s.subagents.map((a, i) => (
+          <li key={i}>
+            <span className={styles.hash}>{a.type}</span>
+            <span className={styles.line}>{a.task ?? ""}</span>
+            <span className={styles.status}>
+              {stateLabel({ ...s, state: a.state })} · {a.model ?? unknown} ·{" "}
+              {a.usage ? <TokenCount count={totalTokens(a.usage.tokens)} /> : unknown}
+            </span>
+          </li>
+        ))}
+      </ul>
     </Section>
   );
   const usageSection = (
@@ -141,12 +126,8 @@ export function SessionDetail({
     </Section>
   );
   const filesSection = !s.isOutsideSelo && (
-    <Section icon={<FolderIcon />} hue="files" count={s.touchedFiles.length} title={t("sessions.detail.files")} summary={s.touchedFiles.length ? s.touchedFiles.map((f) => f.split("/").pop()).join(" · ") : t("sessions.detail.none")} {...fold("files")}>
-      {s.touchedFiles.length ? (
-        <FileTree paths={s.touchedFiles} />
-      ) : (
-        <p className={styles.muted}>{t("sessions.detail.none")}</p>
-      )}
+    <Section icon={<FolderIcon />} hue="files" count={s.touchedFiles.length} title={t("sessions.detail.files")} summary={s.touchedFiles.length ? s.touchedFiles.map((f) => f.split("/").pop()).join(" · ") : t("sessions.detail.none")} {...fold("files", s.touchedFiles.length === 0)}>
+      <FileTree paths={s.touchedFiles} />
     </Section>
   );
   const settingsSection = (
@@ -287,6 +268,7 @@ function Section({
   title,
   count,
   summary,
+  isEmpty,
   isFolded,
   onToggle,
   children,
@@ -297,11 +279,26 @@ function Section({
   count?: number;
   // What the heading keeps showing while the section is folded.
   summary?: string | null;
+  // Nothing more than the summary to show: the heading alone, with no chevron.
+  isEmpty: boolean;
   isFolded: boolean;
   onToggle: () => void;
   children: ReactNode;
 }) {
   const bodyId = useId();
+  if (isEmpty) {
+    return (
+      <section className={styles.section}>
+        <h3 className={styles.sectionTitle}>
+          <span className={`${styles.sectionToggle} ${styles.still}`}>
+            <span className={`${styles.chip} ${HUES[hue]}`}>{icon}</span>
+            {title}
+            {summary ? <span className={styles.summary}>{summary}</span> : null}
+          </span>
+        </h3>
+      </section>
+    );
+  }
   return (
     <section className={styles.section}>
       <h3 className={styles.sectionTitle}>

@@ -113,6 +113,16 @@
   cursor: pointer;
 }
 
+/* An empty section's heading: the same line, but nothing to fold. */
+.still {
+  cursor: default;
+}
+
+/* With no body below, its summary wraps instead of being cut. */
+.still .summary {
+  white-space: normal;
+}
+
 .sectionToggle:hover .fold {
   color: var(--text);
 }

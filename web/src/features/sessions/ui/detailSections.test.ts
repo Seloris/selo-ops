@@ -1,32 +1,41 @@
 import { describe, expect, it } from "vitest";
 import { parseFoldedSections, toggleSection } from "./detailSections.ts";
 
-describe("parseFoldedSections", () => {
-  it("keeps the known sections, once each", () => {
-    expect(parseFoldedSections(["files", "agents", "files"])).toEqual(["files", "agents"]);
-  });
+const DEFAULTS = { panel: ["files", "usage", "agents", "settings"], fullscreen: [] };
 
-  it("keeps the usage section and drops the former run section", () => {
-    expect(parseFoldedSections(["runUsage", "usage"])).toEqual(["usage"]);
+describe("parseFoldedSections", () => {
+  it("keeps the known sections of each layout, once each", () => {
+    expect(parseFoldedSections({ panel: ["files", "agents", "files"], fullscreen: ["usage"] })).toEqual({ panel: ["files", "agents"], fullscreen: ["usage"] });
   });
 
   it("drops what is not a known section", () => {
-    expect(parseFoldedSections(["files", "nope", 3, null])).toEqual(["files"]);
+    expect(parseFoldedSections({ panel: ["files", "nope", 3, null], fullscreen: [] }).panel).toEqual(["files"]);
   });
 
-  it("reads anything but a list as no folded section", () => {
-    expect(parseFoldedSections(null)).toEqual([]);
-    expect(parseFoldedSections("files")).toEqual([]);
-    expect(parseFoldedSections({ files: true })).toEqual([]);
+  it("folds the technical sections of the panel and nothing in full screen by default", () => {
+    expect(parseFoldedSections(undefined)).toEqual(DEFAULTS);
+    expect(parseFoldedSections("files")).toEqual(DEFAULTS);
+  });
+
+  it("reads the former single list as the defaults", () => {
+    expect(parseFoldedSections(["recap", "close"])).toEqual(DEFAULTS);
+  });
+
+  it("keeps an empty list as nothing folded, and defaults a missing layout", () => {
+    expect(parseFoldedSections({ panel: [] })).toEqual({ panel: [], fullscreen: [] });
+    expect(parseFoldedSections({ fullscreen: ["usage"] })).toEqual({ panel: DEFAULTS.panel, fullscreen: ["usage"] });
   });
 });
 
 describe("toggleSection", () => {
-  it("folds an open section", () => {
-    expect(toggleSection(["files"], "agents")).toEqual(["files", "agents"]);
+  const folded = { panel: ["files" as const], fullscreen: [] };
+
+  it("folds an open section of one layout only", () => {
+    expect(toggleSection(folded, "panel", "agents")).toEqual({ panel: ["files", "agents"], fullscreen: [] });
+    expect(toggleSection(folded, "fullscreen", "agents")).toEqual({ panel: ["files"], fullscreen: ["agents"] });
   });
 
   it("opens a folded section", () => {
-    expect(toggleSection(["files", "agents"], "files")).toEqual(["agents"]);
+    expect(toggleSection(folded, "panel", "files")).toEqual({ panel: [], fullscreen: [] });
   });
 });
