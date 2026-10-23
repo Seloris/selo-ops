@@ -248,15 +248,17 @@ export function ProjectView({
               <ul className={styles.openList}>
                 {open.map((b) => (
                   <li key={b.name} className={styles.openItem}>
-                    <button type="button" className={styles.openTitle} onClick={() => onOpenFile(b.file)}>
-                      <SpecChip kind="blueprint" />
-                      {b.title}
-                    </button>
-                    <span className={styles.rowMeta}>
-                      <StateTag state={b.state} />
-                      {b.worktreeBranch && <Tag icon={<BranchIcon />}>{t("projects.worktree", { branch: b.worktreeBranch })}</Tag>}
-                    </span>
-                    <ProgressTrack blueprint={b} />
+                    <div className={styles.openHead}>
+                      <button type="button" className={styles.openTitle} onClick={() => onOpenFile(b.file)}>
+                        <SpecChip kind="blueprint" />
+                        {b.title}
+                      </button>
+                      <span className={styles.rowMeta}>
+                        <StateTag state={b.state} />
+                        {b.worktreeBranch && <Tag icon={<BranchIcon />}>{t("projects.worktree", { branch: b.worktreeBranch })}</Tag>}
+                      </span>
+                      <ProgressTrack blueprint={b} />
+                    </div>
                     <LiveSessions items={liveOf(b.sessionIds)} />
                     {b.nextPrompt && <CommandBox command={b.nextPrompt} copyLabel={t("projects.next.copy")} onCopy={() => onCopy(b.nextPrompt ?? "")} />}
                   </li>

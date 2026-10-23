@@ -2,12 +2,16 @@
 
 .stateBar {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
 }
 
+/* Capped: a bar as wide as the page reads as nothing. */
 .bar {
   display: flex;
+  flex: 1 1 200px;
+  max-width: 320px;
   gap: 2px;
   height: 8px;
   overflow: hidden;
