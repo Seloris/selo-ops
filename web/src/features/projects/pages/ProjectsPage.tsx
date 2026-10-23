@@ -13,6 +13,7 @@ import { LoadingState } from "../../../shared/ui/LoadingState.tsx";
 import { PageTitle } from "../../../shared/ui/PageTitle.tsx";
 import { Toast } from "../../../shared/ui/Toast.tsx";
 import { useSessionsQuery } from "../../sessions/data/useSessionsQuery.ts";
+import { isOpen } from "../../sessions/data/sessionView.ts";
 import { age, requestText, toneOf } from "../../sessions/ui/sessionText.ts";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../../sessions/ui/panelWidth.ts";
 import { blueprintsTouching, pageCounts, sortProjects, type ProjectOverview } from "../data/projectView.ts";
@@ -71,7 +72,8 @@ export function ProjectsPage() {
     (ids: string[]): LiveItem[] =>
       ids.flatMap((id) => {
         const s = sessionsById.get(id);
-        return s ? [{ id, tone: toneOf(s), text: requestText(s) }] : [];
+        // A closed session is no longer live: left out.
+        return s && isOpen(s) ? [{ id, tone: toneOf(s), text: requestText(s) }] : [];
       }),
     [sessionsById],
   );
