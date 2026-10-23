@@ -89,7 +89,7 @@ export function runTimeText(iso: string, now: number): string {
 
 // sessions-live FR-36, `session` BR-10: « … » when the export cut the request; an unreadable one says so.
 export function runRequestText(run: SessionRun): string {
-  if (!run.request) return t("sessions.request.empty");
+  if (!run.request) return t(run.isRequestImage ? "sessions.request.image" : "sessions.request.empty");
   return run.isRequestCut ? `${run.request}…` : run.request;
 }
 

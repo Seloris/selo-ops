@@ -143,7 +143,13 @@ describe("runTimeText", () => {
 });
 
 describe("runRequestText", () => {
-  const run = (request: string, isRequestCut = false) => ({ since: "2026-10-22T22:30:00.000Z", request, isRequestCut, usage: null });
+  const run = (request: string, isRequestCut = false, isRequestImage = false) => ({
+    since: "2026-10-22T22:30:00.000Z",
+    request,
+    isRequestCut,
+    isRequestImage,
+    usage: null,
+  });
 
   it("writes the request, with « … » when the export cut it", () => {
     expect(runRequestText(run("fait un .bat stp"))).toBe("fait un .bat stp");
@@ -152,6 +158,10 @@ describe("runRequestText", () => {
 
   it("says an empty request is unreadable", () => {
     expect(runRequestText(run(""))).toBe("Demande non lisible dans l’export");
+  });
+
+  it("says an empty request whose prompt is an image alone", () => {
+    expect(runRequestText(run("", false, true))).toBe("Image seule, sans texte");
   });
 });
 
@@ -192,7 +202,7 @@ describe("listsRuns", () => {
 describe("sessionActivity", () => {
   const tokens = { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 };
   const run = (tools: RunUsage["tools"], skills: RunUsage["skills"]) =>
-    ({ since: "2026-10-23T01:10:00Z", request: "", isRequestCut: false, usage: { calls: 1, tokens, byModel: [], tools, skills, prompts: [], settled: true, partial: false } }) as SessionRun;
+    ({ since: "2026-10-23T01:10:00Z", request: "", isRequestCut: false, isRequestImage: false, usage: { calls: 1, tokens, byModel: [], tools, skills, prompts: [], settled: true, partial: false } }) as SessionRun;
 
   it("sums each tool and each skill over the runs, the most used first", () => {
     const runs = [
@@ -207,7 +217,7 @@ describe("sessionActivity", () => {
   });
 
   it("skips the runs with no usage", () => {
-    const empty = { since: "2026-10-23T01:10:00Z", request: "", isRequestCut: false, usage: null } as SessionRun;
+    const empty = { since: "2026-10-23T01:10:00Z", request: "", isRequestCut: false, isRequestImage: false, usage: null } as SessionRun;
 
     expect(sessionActivity([empty, run([{ name: "Bash", count: 1 }], [])])).toEqual({ tools: [{ name: "Bash", count: 1 }], skills: [] });
   });

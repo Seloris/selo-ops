@@ -26,6 +26,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     lane: "free",
     request: "Fix the build",
     isRequestCut: false,
+    isRequestImage: false,
     blueprint: null,
     step: null,
     substep: null,

@@ -427,6 +427,7 @@ export interface components {
             lane: string;
             request: string;
             isRequestCut: boolean;
+            isRequestImage: boolean;
             blueprint: string | null;
             step: string | null;
             substep: string | null;
@@ -468,6 +469,7 @@ export interface components {
                 since: string;
                 request: string;
                 isRequestCut: boolean;
+                isRequestImage: boolean;
                 usage: components["schemas"]["RunUsage"];
             }[];
             isRunListCut: boolean;

@@ -131,9 +131,9 @@ export function ageDisplay(s: Session, now: number): AgeDisplay {
   return { text, isTag: false };
 }
 
-// `session` BR-10: « … » when the export cut the request.
+// `session` BR-10: « … » when the export cut the request; an image with no text says so.
 export function requestText(s: Session): string {
-  if (!s.request) return t("sessions.request.empty");
+  if (!s.request) return t(s.isRequestImage ? "sessions.request.image" : "sessions.request.empty");
   return s.isRequestCut ? `${s.request}…` : s.request;
 }
 

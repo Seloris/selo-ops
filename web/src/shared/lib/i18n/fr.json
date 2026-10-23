@@ -91,6 +91,7 @@
   "sessions.age.finished": "il y a {age}",
   "sessions.age.archived": "Archivée · {age}",
   "sessions.request.empty": "Demande non lisible dans l’export",
+  "sessions.request.image": "Image seule, sans texte",
   "sessions.blocker.not-done": "Travail pas terminé",
   "sessions.blocker.pending-commit": "Commit en attente",
   "sessions.blocker.question": "Question ouverte",

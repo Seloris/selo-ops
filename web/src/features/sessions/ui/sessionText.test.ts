@@ -34,6 +34,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     lane: "free",
     request: "Fix the build",
     isRequestCut: false,
+    isRequestImage: false,
     blueprint: null,
     step: null,
     substep: null,
@@ -240,6 +241,7 @@ describe("requestText", () => {
     // Act, Assert
     expect(requestText(buildSession({ request: "Refais le header", isRequestCut: true }))).toBe("Refais le header…");
     expect(requestText(buildSession({ request: "" }))).toBe("Demande non lisible dans l’export");
+    expect(requestText(buildSession({ request: "", isRequestImage: true }))).toBe("Image seule, sans texte");
   });
 });
 
