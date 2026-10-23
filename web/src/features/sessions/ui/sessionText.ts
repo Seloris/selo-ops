@@ -105,7 +105,7 @@ export function rowContext(s: Session): RowContext {
   const awaited = isTodo(s) ? awaitedOf(s) : null;
   if (awaited) return { kind: "awaited", awaited };
   const step = s.state === "working" && isOpen(s) ? stepText(s) : null;
-  if (step) return { kind: "step", text: step.charAt(0).toUpperCase() + step.slice(1) };
+  if (step) return { kind: "step", text: step };
   if (s.nextAction && !s.isArchived) return { kind: "next", command: s.nextAction };
   return { kind: "none" };
 }

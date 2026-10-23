@@ -186,7 +186,7 @@ describe("awaitedOf", () => {
   it("gives nothing for a session that waits on nobody", () => {
     // Act, Assert
     expect(awaitedOf(buildSession({ state: "turn-ended" }))).toBeNull();
-    expect(calmText(buildSession({ state: "working", step: "stage:2", substep: "tests" }))).toBe("Rien : Claude travaille (étape 2 · tests).");
+    expect(calmText(buildSession({ state: "working", step: "stage:2", substep: "tests" }))).toBe("Rien : Claude travaille (Étape 2 · tests).");
   });
 });
 
@@ -220,7 +220,7 @@ describe("rowContext", () => {
     expect(context).toMatchObject({ kind: "awaited", awaited: { kind: "question", text: "A or B?" } });
   });
 
-  it("gives the step of a working session, capitalised", () => {
+  it("gives the step of a working session", () => {
     // Act, Assert
     expect(rowContext(buildSession({ state: "working", step: "stage:2", substep: "tests du web" }))).toEqual({ kind: "step", text: "Étape 2 · tests du web" });
   });

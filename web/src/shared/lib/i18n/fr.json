@@ -86,7 +86,7 @@
   "sessions.calm.jobDone": "Rien : travail terminé (JOB DONE).",
   "sessions.calm.none": "Rien.",
   "sessions.row.nothing": "Rien d’attendu",
-  "sessions.step.stage": "étape {number}",
+  "sessions.step.stage": "Étape {number}",
   "sessions.age.closed": "Fermée · {age}",
   "sessions.age.finished": "il y a {age}",
   "sessions.age.archived": "Archivée · {age}",

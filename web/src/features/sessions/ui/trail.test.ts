@@ -30,7 +30,7 @@ describe("trailLines", () => {
     const [line] = trailLines([entry(0, "working", { step: "stage:2", substep: "tests" })]);
 
     // Assert
-    expect(line?.stepText).toBe("étape 2 · tests");
+    expect(line?.stepText).toBe("Étape 2 · tests");
   });
 });
 
