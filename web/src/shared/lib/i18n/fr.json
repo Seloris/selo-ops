@@ -181,7 +181,7 @@
   "sessions.usage.kindHint.cacheRead": "Contexte relu depuis le cache",
   "sessions.usage.kindHint.cacheWrite": "Contexte mis en cache pour la suite",
   "sessions.usage.kindHint.output": "Ce que le modèle a écrit",
-  "sessions.usage.activity": "Activité du tour",
+  "sessions.usage.activity": "Activité du prompt",
   "sessions.usage.sessionActivity": "Activité de la session",
   "sessions.usage.noRunUsage": "Pas de consommation dans l’export pour ce tour.",
   "sessions.usage.kind.input": "Entrée",
