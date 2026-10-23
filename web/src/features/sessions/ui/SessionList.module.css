@@ -25,7 +25,7 @@
   column-gap: var(--col-gap);
   align-items: center;
   height: 28px;
-  padding: 0 56px 0 22px;
+  padding: 0 88px 0 22px;
   font-size: 0.8em;
   font-weight: 500;
   color: var(--text-muted);
@@ -100,7 +100,30 @@
 }
 
 .row > button:last-child {
-  margin: 0 4px 0 6px;
+  margin: 0 4px 0 0;
+}
+
+.row > button:nth-last-child(2) {
+  margin-left: 6px;
+}
+
+/* The note takes at most half the cell, the request the rest (sessions-live FR-11). */
+.requestCell {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Basis 0: a long request takes only the room the note leaves. */
+.requestCell > .request {
+  flex: 1 1 0;
+}
+
+.requestCell > :last-child:not(.request) {
+  flex: 0 1 auto;
+  max-width: 50%;
+  font-size: 0.93em;
 }
 
 .state {
@@ -195,7 +218,7 @@
 
   .state { grid-area: state; }
   .age { grid-area: age; }
-  .request { grid-area: request; }
+  .requestCell { grid-area: request; }
 
   .main > .muted,
   .main > .type,

@@ -2,7 +2,7 @@ import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { useId, type ReactNode } from "react";
-import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, NoteIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
@@ -10,7 +10,7 @@ import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
 import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
-import { AwaitedIcon, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
+import { AwaitedIcon, LaneLabel, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, requestText, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
@@ -179,6 +179,7 @@ export function SessionDetail({
           </span>
         </div>
         <h2 className={styles.title}>{requestText(s)}</h2>
+        {s.note && <NoteText note={s.note} />}
         <div className={styles.meta}>
           <span>{projectName}</span>
           {s.branch && (
@@ -202,6 +203,10 @@ export function SessionDetail({
               {t("sessions.actions.next")}
             </Button>
           )}
+          <Button size="sm" onClick={() => actions.onEditNote(s)}>
+            <NoteIcon />
+            {t("sessions.actions.note")}
+          </Button>
           {s.canArchive && (
             <Button size="sm" onClick={() => actions.onArchive(s)}>
               <ArchiveIcon />

@@ -1,5 +1,5 @@
 import { t, tn } from "../../../shared/lib/i18n/index.ts";
-import { ClockIcon, CommitIcon, FileIcon, QuestionIcon, ShieldIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { ClockIcon, CommitIcon, FileIcon, NoteIcon, QuestionIcon, ShieldIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { isTodo, type Session } from "../data/sessionView.ts";
@@ -58,6 +58,16 @@ export function AwaitedIcon({ kind, isMuted = false }: { kind: AwaitedKind; isMu
   return (
     <span className={`${styles.icon} ${isMuted ? styles.muted : kind === "error" ? styles.danger : styles.warn}`}>
       {kind === "question" ? <QuestionIcon /> : kind === "permission" ? <ShieldIcon /> : kind === "commit" ? <CommitIcon /> : <WarningIcon />}
+    </span>
+  );
+}
+
+// sessions-live FR-40: the person's note, cut to one line with `isOneLine` (whole in its tooltip).
+export function NoteText({ note, isOneLine = false }: { note: string; isOneLine?: boolean }) {
+  return (
+    <span className={`${styles.note} ${isOneLine ? styles.noteOneLine : ""}`} title={isOneLine ? note : undefined}>
+      <NoteIcon />
+      <span className={styles.noteText}>{note}</span>
     </span>
   );
 }

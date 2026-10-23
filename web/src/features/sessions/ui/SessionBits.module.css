@@ -89,3 +89,35 @@
 .lane-autopilot {
   color: var(--lane-autopilot);
 }
+
+.note {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.note > svg {
+  flex: none;
+  margin-top: 0.15em;
+  width: 14px;
+  height: 14px;
+}
+
+.noteOneLine {
+  align-items: center;
+  overflow: hidden;
+}
+
+.noteOneLine > svg {
+  margin-top: 0;
+}
+
+.noteOneLine > .noteText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

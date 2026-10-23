@@ -1,9 +1,9 @@
 import { t } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
-import { ArchiveIcon, OpenIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
+import { ArchiveIcon, NoteIcon, OpenIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
-import { AgeLabel, AwaitedIcon, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
+import { AgeLabel, AwaitedIcon, LaneLabel, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { awaitedOf, calmText, closeText, modelText, requestText } from "./sessionText.ts";
 import { exactTokens, totalTokens } from "./usage.ts";
@@ -49,6 +49,7 @@ export function SessionCards({
                 </span>
               </span>
               <span className={styles.request}>{requestText(s)}</span>
+              {s.note && <NoteText note={s.note} />}
               {awaited ? (
                 <span className={styles.awaited}>
                   <AwaitedIcon kind={awaited.kind} isMuted={!isTodo(s)} />
@@ -86,6 +87,10 @@ export function SessionCards({
                   {t("sessions.actions.next")}
                 </Button>
               )}
+              <Button size="sm" onClick={() => actions.onEditNote(s)}>
+                <NoteIcon />
+                {t("sessions.actions.note")}
+              </Button>
               {s.canArchive && (
                 <span className={styles.push}>
                   <Button size="sm" onClick={() => actions.onArchive(s)}>

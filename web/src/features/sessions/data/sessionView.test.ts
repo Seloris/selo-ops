@@ -35,6 +35,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     isArchived: false,
     archivedAt: null,
     canArchive: false,
+    note: null,
     question: null,
     permissionTool: null,
     pendingCommit: null,

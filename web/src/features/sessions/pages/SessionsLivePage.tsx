@@ -28,11 +28,13 @@ import {
 } from "../data/sessionView.ts";
 import { useArchiveSessionMutation } from "../data/useArchiveSessionMutation.ts";
 import { useSessionsQuery } from "../data/useSessionsQuery.ts";
+import { useSaveNoteMutation } from "../data/useSaveNoteMutation.ts";
 import { useUnarchiveSessionMutation } from "../data/useUnarchiveSessionMutation.ts";
 import { BlockedCommand } from "../ui/BlockedCommand.tsx";
 import { SessionCards } from "../ui/SessionCards.tsx";
 import { parseFoldedSections, toggleSection, type FoldedSections } from "../ui/detailSections.ts";
 import { SessionDetail } from "../ui/SessionDetail.tsx";
+import { NoteDialog } from "../ui/NoteDialog.tsx";
 import { ArchivedToggle, ClosedHeader, ProjectHeader, SessionGroup, StatusHeader } from "../ui/SessionGroup.tsx";
 import { ColumnHead, SessionList, type SessionActions } from "../ui/SessionList.tsx";
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
@@ -81,6 +83,7 @@ export function SessionsLivePage() {
   const query = useSessionsQuery();
   const archive = useArchiveSessionMutation();
   const unarchive = useUnarchiveSessionMutation();
+  const saveNote = useSaveNoteMutation();
   const now = useNow(1000);
   const [params, setParams] = useSearchParams();
   const selectedId = params.get("session");
@@ -94,6 +97,9 @@ export function SessionsLivePage() {
   const [toast, setToast] = useState<ToastState | null>(null);
   // sessions-live FR-28: the session whose archive waits for the person's confirmation.
   const [archiveAsked, setArchiveAsked] = useState<Session | null>(null);
+  // sessions-live FR-40: the session whose note is being written.
+  const [noteFor, setNoteFor] = useState<Session | null>(null);
+  const isDialogOpen = noteFor !== null || archiveAsked !== null;
 
   const [isResizing, setResizing] = useState(false);
   // sessions-live FR-37: the detail alone on the screen, header and settings hidden, the browser in full screen
@@ -161,17 +167,18 @@ export function SessionsLivePage() {
     void appRef.current?.requestFullscreen?.().catch(() => undefined);
   };
 
-  // Échap closes the projects' list first, then leaves the full screen, then closes the detail.
+  // Échap closes the projects' list first, then leaves the full screen, then closes the detail; an open dialog
+  // takes it for itself.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.key !== "Escape" || isDialogOpen) return;
       if (isProjectsOpen) setProjectsOpen(false);
       else if (isFullscreen) setFullscreen(false);
       else if (selectedId) closeDetail();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isProjectsOpen, isFullscreen, selectedId, closeDetail]);
+  }, [isProjectsOpen, isFullscreen, selectedId, closeDetail, isDialogOpen]);
 
   const toastId = useRef(0);
   const showToast = useCallback((next: Omit<ToastState, "id">) => {
@@ -231,6 +238,10 @@ export function SessionsLivePage() {
     },
     onUnarchive: (id) =>
       unarchive.mutate(id, { onSuccess: () => showToast({ title: t("sessions.toast.unarchived"), hint: t("sessions.toast.unarchivedHint") }), onError: failed }),
+    onEditNote: (s) => {
+      saveNote.reset();
+      setNoteFor(s);
+    },
   };
 
   // The checked projects; null while none is unchecked (every project, the ones to come included).
@@ -377,6 +388,16 @@ export function SessionsLivePage() {
           setArchiveAsked(null);
         }}
       />
+      {noteFor && (
+        <NoteDialog
+          key={noteFor.id}
+          note={noteFor.note}
+          isPending={saveNote.isPending}
+          error={saveNote.isError ? saveNote.error.message || t("sessions.toast.failedUnknown") : null}
+          onSave={(text) => saveNote.mutate({ id: noteFor.id, text }, { onSuccess: () => setNoteFor(null) })}
+          onClose={() => setNoteFor(null)}
+        />
+      )}
       {toast && (
         <Toast
           key={toast.id}
