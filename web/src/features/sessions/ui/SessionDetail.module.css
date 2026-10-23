@@ -361,6 +361,11 @@
   display: contents;
 }
 
+/* The timeline's node already carries the dot: the badge shows its label only. */
+.trail .status > span:first-child > [aria-hidden="true"] {
+  display: none;
+}
+
 .trail li.muted {
   display: block;
   grid-column: 1 / -1;
