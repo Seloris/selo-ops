@@ -22,6 +22,8 @@ export const sheetSchema = z
     isStub: z.boolean(),
     frCount: z.number().int(),
     brCount: z.number().int(),
+    // Its open questions: the `Q-NN` items its file still holds (a settled one is retired).
+    questionCount: z.number().int(),
     nextFr: z.string(),
     nextBr: z.string(),
     lastCommit: commitSchema.nullable(),

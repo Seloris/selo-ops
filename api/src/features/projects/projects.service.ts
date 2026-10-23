@@ -48,6 +48,8 @@ const touching = (s: ExportSheet, blueprints: Blueprint[]) => {
 };
 
 const STUB_LINE = /^Status: to bootstrap\s*$/m;
+// A defined question, as selo's spec-check reads it: the `Retired:` line names ids without the bold.
+const QUESTION = /^\s*-\s+\*\*Q-\d+\*\*/gm;
 
 const toSheet = (s: ExportSheet, blueprints: Blueprint[], text: string | null): SpecSheet => ({
   kind: s.kind,
@@ -59,6 +61,7 @@ const toSheet = (s: ExportSheet, blueprints: Blueprint[], text: string | null): 
   isStub: text !== null && STUB_LINE.test(text),
   frCount: s.ids.fr,
   brCount: s.ids.br,
+  questionCount: text?.match(QUESTION)?.length ?? 0,
   nextFr: s.ids.next.fr,
   nextBr: s.ids.next.br,
   lastCommit: s.lastCommit ?? null,

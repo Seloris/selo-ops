@@ -14,6 +14,7 @@ interface DemoSheet {
   intro: string;
   frs?: string[];
   brs?: string[];
+  questions?: string[];
   // A page stub: `Status: to bootstrap` under its route, nothing else.
   isStub?: boolean;
   // The last commit that touched it: its subject and how long ago, in seconds.
@@ -106,7 +107,8 @@ export const DEMO_PLANNING: Record<string, DemoPlanning> = {
   "atelier-web": {
     sheets: [
       { kind: "page", slug: "catalog", title: "Catalog", route: "/", intro: "The shop's catalog.", frs: ["Products show in a grid with their price.", "A size filter narrows the grid."], commit: ["feat(catalog): size filter", 9 * MINUTE] },
-      { kind: "page", slug: "cart", title: "Cart", route: "/cart", intro: "The customer's cart.", frs: ["The cart lists its lines with their quantity.", "A promo code field applies a discount."], commit: ["feat(cart): promo code", 6 * MINUTE] },
+      { kind: "page", slug: "cart", title: "Cart", route: "/cart", intro: "The customer's cart.", frs: ["The cart lists its lines with their quantity.", "A promo code field applies a discount."],
+        questions: ["Does a promo code stack with a sale price?", "Is the cart kept for a signed-out customer?"], commit: ["feat(cart): promo code", 6 * MINUTE] },
       { kind: "page", slug: "account", title: "Account", route: "/account", intro: "", isStub: true, commit: ["chore: set up selo", 3 * DAY] },
     ],
     blueprints: [
@@ -157,6 +159,7 @@ function sheetText(s: DemoSheet): string {
   if (s.isStub) return `# ${s.title}\n\nRoute: \`${s.route ?? ""}\`\nStatus: to bootstrap\n`;
   const frs = (s.frs ?? []).map((t, i) => `- **${id("FR", i)}** — ${t}`);
   const brs = (s.brs ?? []).map((t, i) => `- **${id("BR", i)}** — ${t}`);
+  const questions = (s.questions ?? []).map((t, i) => `- **${id("Q", i)}** — ${t}`);
   return [
     `# ${s.title}`,
     "",
@@ -165,6 +168,7 @@ function sheetText(s: DemoSheet): string {
     "",
     ...(brs.length ? ["## Business rules", "", ...brs, ""] : []),
     ...(frs.length ? [s.kind === "page" ? "## The page" : "## Functional requirements", "", ...frs, ""] : []),
+    ...(questions.length ? ["## Open questions", "", ...questions, ""] : []),
     "Retired:",
     "",
   ].join("\n");

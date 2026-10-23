@@ -198,6 +198,9 @@
           "brCount": {
             "type": "integer"
           },
+          "questionCount": {
+            "type": "integer"
+          },
           "nextFr": {
             "type": "string"
           },
@@ -243,6 +246,7 @@
           "isStub",
           "frCount",
           "brCount",
+          "questionCount",
           "nextFr",
           "nextBr",
           "lastCommit",

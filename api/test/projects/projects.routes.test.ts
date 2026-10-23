@@ -100,6 +100,7 @@ describe("projects", () => {
           isStub: false,
           frCount: 3,
           brCount: 0,
+          questionCount: 0,
           nextFr: "FR-04",
           nextBr: "BR-01",
           lastCommit: { sha: "a1b2c3d", subject: "feat(home): list", at: "2026-01-01T00:00:00.000Z" },
@@ -253,6 +254,31 @@ describe("projects", () => {
 
       // Assert
       expect(project?.sheets.map((s) => [s.slug, s.isStub])).toEqual([["home", false], ["balance", true]]);
+    });
+
+    it("counts a sheet's open questions from its file, retired ids left out", async () => {
+      // Arrange
+      const root = slash(ctx.code.repo("ledger-api"));
+      ctx.seed.project(buildProjectFile({ root, sheets: [buildExportSheet()] }));
+      writeFile(root, ".planning/pages/home.md", "# Home\n\n- **FR-01** — A list.\n\n## Open questions\n\n- **Q-02** — Sort?\n- **Q-03** — Paging?\n\nRetired: Q-01\n");
+
+      // Act
+      const [project] = await list();
+
+      // Assert
+      expect(project?.sheets[0]?.questionCount).toBe(2);
+    });
+
+    it("counts no open question when the sheet's file cannot be read", async () => {
+      // Arrange
+      const root = slash(ctx.code.repo("ledger-api"));
+      ctx.seed.project(buildProjectFile({ root, sheets: [buildExportSheet()] }));
+
+      // Act
+      const [project] = await list();
+
+      // Assert
+      expect(project?.sheets[0]?.questionCount).toBe(0);
     });
 
     it("counts the ideas and technical debts of the base checkout", async () => {
