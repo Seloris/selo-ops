@@ -98,3 +98,19 @@ export function listsRuns(runs: readonly SessionRun[], isRunListCut: boolean, se
   if (!only || !session) return false;
   return !only.usage || totalTokens(only.usage.tokens) !== totalTokens(session.tokens);
 }
+
+// sessions-live FR-38: what the whole session did, each tool and each skill (by its way of loading) summed over the
+// runs the export keeps, the most used first; a run with no usage adds nothing.
+export function sessionActivity(runs: readonly SessionRun[]): Pick<RunUsage, "tools" | "skills"> {
+  const tools = new Map<string, RunUsage["tools"][number]>();
+  const skills = new Map<string, RunUsage["skills"][number]>();
+  for (const { usage } of runs) {
+    for (const x of usage?.tools ?? []) tools.set(x.name, { name: x.name, count: (tools.get(x.name)?.count ?? 0) + x.count });
+    for (const x of usage?.skills ?? []) {
+      const key = `${x.how}:${x.name}`;
+      skills.set(key, { name: x.name, how: x.how, count: (skills.get(key)?.count ?? 0) + x.count });
+    }
+  }
+  const byCount = <T extends { count: number }>(xs: Iterable<T>) => [...xs].sort((a, b) => b.count - a.count);
+  return { tools: byCount(tools.values()), skills: byCount(skills.values()) };
+}

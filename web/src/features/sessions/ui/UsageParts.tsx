@@ -2,7 +2,7 @@ import { useId, useState, type ReactNode } from "react";
 import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { ChevronDownIcon, ChevronRightIcon } from "../../../shared/ui/icons.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
-import { cacheReuse, exactTokens, formatTokens, hasDroppedPrompts, kindShares, listsRuns, percentText, runRequestText, runTimeText, skillHowLabel, soleModel, topWithRest, totalTokens, widthPercent, type RunUsage, type SessionRun, type Tokens, type Usage } from "./usage.ts";
+import { cacheReuse, exactTokens, formatTokens, hasDroppedPrompts, kindShares, listsRuns, percentText, runRequestText, runTimeText, sessionActivity, skillHowLabel, soleModel, topWithRest, totalTokens, widthPercent, type RunUsage, type SessionRun, type Tokens, type Usage } from "./usage.ts";
 import styles from "./UsageParts.module.css";
 
 // sessions-live FR-32 to FR-36: what a session consumed, as one dashboard read top-down: the total and its key figures,
@@ -164,10 +164,24 @@ function RankedList({ title, items, rest }: { title: string; items: { key: strin
   );
 }
 
-// sessions-live FR-33, FR-34: what the current run did: its tags, its top tools and skills, then its prompts.
+// sessions-live FR-33, FR-38: the 5 most called tools and the 5 most loaded skills, then « + N autres ».
+function ToolsAndSkills({ tools: allTools, skills: allSkills }: Pick<RunUsage, "tools" | "skills">) {
+  const tools = topWithRest(allTools);
+  const skills = topWithRest(allSkills);
+  return (
+    <div className={styles.columns}>
+      <RankedList title={t("sessions.usage.tools")} items={tools.shown.map((x) => ({ key: x.name, name: x.name, count: x.count }))} rest={tools.rest} />
+      <RankedList
+        title={t("sessions.usage.skills")}
+        items={skills.shown.map((x) => ({ key: `${x.how}:${x.name}`, name: x.name, count: x.count, note: skillHowLabel(x.how) }))}
+        rest={skills.rest}
+      />
+    </div>
+  );
+}
+
+// sessions-live FR-33, FR-34: what a run did: its tags, its top tools and skills, then its prompts.
 function RunActivity({ run }: { run: RunUsage }) {
-  const tools = topWithRest(run.tools);
-  const skills = topWithRest(run.skills);
   const maxPrompt = Math.max(0, ...run.prompts.map((p) => totalTokens(p.tokens)));
   return (
     <div className={styles.activity}>
@@ -177,14 +191,7 @@ function RunActivity({ run }: { run: RunUsage }) {
           {run.partial && <span title={t("sessions.usage.partialHint")}><Tag>{t("sessions.usage.partial")}</Tag></span>}
         </div>
       )}
-      <div className={styles.columns}>
-        <RankedList title={t("sessions.usage.tools")} items={tools.shown.map((x) => ({ key: x.name, name: x.name, count: x.count }))} rest={tools.rest} />
-        <RankedList
-          title={t("sessions.usage.skills")}
-          items={skills.shown.map((x) => ({ key: `${x.how}:${x.name}`, name: x.name, count: x.count, note: skillHowLabel(x.how) }))}
-          rest={skills.rest}
-        />
-      </div>
+      <ToolsAndSkills tools={run.tools} skills={run.skills} />
       {run.prompts.length > 0 && (
         <section>
           <Heading count={run.prompts.length}>{t("sessions.usage.prompts")}</Heading>
@@ -209,7 +216,8 @@ function RunActivity({ run }: { run: RunUsage }) {
 }
 
 // sessions-live FR-36: one run of the list, a header line (time, request, bar against the biggest run, tokens, share of
-// the session) that unfolds into its split, calls and models; the current run adds its activity (FR-33).
+// the session) that unfolds into its split, calls and models, then its activity (FR-33); the current run's comes from
+// `runUsage`, the export's freshest copy of it.
 function RunRow({ run, max, sessionTotal, current, isOpenAtFirst, now }: {
   run: SessionRun;
   max: number;
@@ -222,6 +230,7 @@ function RunRow({ run, max, sessionTotal, current, isOpenAtFirst, now }: {
   const detailId = useId();
   const request = runRequestText(run);
   const usage = run.usage;
+  const activity = current ?? usage;
   const total = usage ? totalTokens(usage.tokens) : 0;
   const model = usage ? soleModel(usage) : null;
   return (
@@ -252,10 +261,10 @@ function RunRow({ run, max, sessionTotal, current, isOpenAtFirst, now }: {
         ) : (
           <p className={styles.muted}>{t("sessions.usage.noRunUsage")}</p>
         )}
-        {current && (
+        {activity && (
           <>
             <Heading>{t("sessions.usage.activity")}</Heading>
-            <RunActivity run={current} />
+            <RunActivity run={activity} />
           </>
         )}
       </div>
@@ -263,8 +272,8 @@ function RunRow({ run, max, sessionTotal, current, isOpenAtFirst, now }: {
   );
 }
 
-// sessions-live FR-32 to FR-36: the session's summary, split and models, then its runs, the latest first and unfolded;
-// a single run matching the session shows only what it did. The export details only the current run (`runUsage`).
+// sessions-live FR-32 to FR-38: the session's summary, split and models, what its runs did together, then its runs, the
+// latest first and unfolded; a single run matching the session shows only what it did.
 export function UsageDashboard({ usage, runs, isRunListCut, runUsage, now }: {
   usage: Usage | null;
   runs: SessionRun[];
@@ -278,6 +287,7 @@ export function UsageDashboard({ usage, runs, isRunListCut, runUsage, now }: {
   const sessionTotal = head ? totalTokens(head.tokens) : 0;
   const latestFirst = [...runs].reverse();
   const max = Math.max(0, ...runs.map((r) => (r.usage ? totalTokens(r.usage.tokens) : 0)));
+  const activity = sessionActivity(runs);
   return (
     <div className={styles.dashboard}>
       {head && (
@@ -289,6 +299,12 @@ export function UsageDashboard({ usage, runs, isRunListCut, runUsage, now }: {
           </section>
           <ModelRows usage={head} />
         </>
+      )}
+      {isListed && (activity.tools.length > 0 || activity.skills.length > 0) && (
+        <section>
+          <Heading>{t("sessions.usage.sessionActivity")}</Heading>
+          <ToolsAndSkills tools={activity.tools} skills={activity.skills} />
+        </section>
       )}
       {isListed ? (
         <section>

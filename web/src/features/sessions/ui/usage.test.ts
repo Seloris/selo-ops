@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cacheReuse, exactTokens, formatTokens, hasDroppedPrompts, kindShares, listsRuns, percentText, runRequestText, runTimeText, skillHowLabel, soleModel, topWithRest, totalTokens, widthPercent, type RunUsage } from "./usage.ts";
+import { cacheReuse, exactTokens, formatTokens, hasDroppedPrompts, kindShares, listsRuns, percentText, runRequestText, runTimeText, sessionActivity, skillHowLabel, soleModel, topWithRest, totalTokens, widthPercent, type RunUsage, type SessionRun } from "./usage.ts";
 
 const NARROW = " ";
 
@@ -186,5 +186,29 @@ describe("listsRuns", () => {
   });
   it("lists a single run when the export cut the list", () => {
     expect(listsRuns([run({ tokens })], true, session)).toBe(true);
+  });
+});
+
+describe("sessionActivity", () => {
+  const tokens = { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 };
+  const run = (tools: RunUsage["tools"], skills: RunUsage["skills"]) =>
+    ({ since: "2026-10-23T01:10:00Z", request: "", isRequestCut: false, usage: { calls: 1, tokens, byModel: [], tools, skills, prompts: [], settled: true, partial: false } }) as SessionRun;
+
+  it("sums each tool and each skill over the runs, the most used first", () => {
+    const runs = [
+      run([{ name: "Read", count: 2 }, { name: "Edit", count: 1 }], [{ name: "selo:build", count: 1, how: "command" }]),
+      run([{ name: "Edit", count: 4 }], [{ name: "selo:build", count: 2, how: "command" }, { name: "selo:build", count: 1, how: "tool" }]),
+    ];
+
+    expect(sessionActivity(runs)).toEqual({
+      tools: [{ name: "Edit", count: 5 }, { name: "Read", count: 2 }],
+      skills: [{ name: "selo:build", count: 3, how: "command" }, { name: "selo:build", count: 1, how: "tool" }],
+    });
+  });
+
+  it("skips the runs with no usage", () => {
+    const empty = { since: "2026-10-23T01:10:00Z", request: "", isRequestCut: false, usage: null } as SessionRun;
+
+    expect(sessionActivity([empty, run([{ name: "Bash", count: 1 }], [])])).toEqual({ tools: [{ name: "Bash", count: 1 }], skills: [] });
   });
 });

@@ -211,7 +211,7 @@ export interface components {
                 since: string;
                 request: string;
                 isRequestCut: boolean;
-                usage: components["schemas"]["Usage"];
+                usage: components["schemas"]["RunUsage"];
             }[];
             isRunListCut: boolean;
             touchedFiles: string[];
