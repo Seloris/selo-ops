@@ -65,6 +65,7 @@ const sheet = (overrides: Partial<SpecSheet> = {}): SpecSheet => ({
   file: ".planning/pages/home.md",
   title: "Home",
   route: "/",
+  isStub: false,
   frCount: 3,
   brCount: 0,
   nextFr: "FR-04",

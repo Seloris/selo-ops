@@ -89,6 +89,7 @@ export function ProjectView({
             <SpecChip kind={s.kind === "page" ? "page" : "domain"} />
             <span className={styles.ellipsis}>{s.title}</span>
             {s.route && <span className={styles.route}>{s.route}</span>}
+            {s.isStub && <Tag>{t("projects.specs.stub")}</Tag>}
           </span>
           <span className={styles.counts}>{t("projects.specs.counts", { fr: s.frCount, br: s.brCount })}</span>
           <span className={`${styles.commit} ${styles.ellipsis}`} title={commit ?? undefined}>

@@ -539,6 +539,7 @@
   "projects.specs.pages": "Pages",
   "projects.specs.domains": "Fiches de domaine",
   "projects.specs.counts": "{fr} FR · {br} BR",
+  "projects.specs.stub": "À bootstrapper",
   "projects.specs.lastCommit": "{subject} · il y a {age}",
   "projects.specs.ideas": "Idées",
   "projects.specs.debt": "Dette technique",

@@ -352,6 +352,7 @@ export interface components {
             file: string;
             title: string;
             route: string | null;
+            isStub: boolean;
             frCount: number;
             brCount: number;
             nextFr: string;

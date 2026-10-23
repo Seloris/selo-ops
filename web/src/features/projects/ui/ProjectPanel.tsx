@@ -182,9 +182,12 @@ export function ProjectPanel({
                 <StateTag state={subject.blueprint.state} />
               </>
             ) : subject.kind === "sheet" ? (
-              <Tag icon={<SpecIcon kind={sheetKind} />} color={specColor(sheetKind)}>
-                {kindLabel}
-              </Tag>
+              <>
+                <Tag icon={<SpecIcon kind={sheetKind} />} color={specColor(sheetKind)}>
+                  {kindLabel}
+                </Tag>
+                {subject.sheet.isStub && <Tag>{t("projects.specs.stub")}</Tag>}
+              </>
             ) : (
               <Tag>{kindLabel}</Tag>
             )}
