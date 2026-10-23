@@ -232,7 +232,6 @@
 
 .trackCell {
   grid-area: track;
-  justify-self: end;
 }
 
 .counts,

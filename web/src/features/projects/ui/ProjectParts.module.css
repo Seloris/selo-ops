@@ -76,6 +76,23 @@
   background: var(--bp);
 }
 
+/* The small track's pips carry their stage's number. */
+.numbered {
+  display: inline-grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-width: 1.5px;
+  font-size: 0.66em;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--bp);
+}
+
+.numbered.filled {
+  color: var(--bg);
+}
+
 .stage {
   display: inline-flex;
   align-items: center;

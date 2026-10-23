@@ -537,8 +537,6 @@
   "projects.progress.mergedShort": "› fusion",
   "projects.progress.doneSummary_one": "✓ {count} commit · revu · fusionné",
   "projects.progress.doneSummary_other": "✓ {count} commits · revu · fusionné",
-  "projects.progress.commits_one": "{count} commit",
-  "projects.progress.commits_other": "{count} commits",
   "projects.progress.reviewed": "revu",
   "projects.progress.mergedDone": "fusionné",
   "projects.columns.date": "Date",

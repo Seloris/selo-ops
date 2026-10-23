@@ -57,8 +57,8 @@ export function ProgressTrack({ blueprint, isLarge = false }: { blueprint: Bluep
         {steps.map((s, i) =>
           s.kind === "stage" ? (
             <span key={i} className={styles.stage}>
-              <span className={`${styles.pip} ${s.isDone ? styles.filled : ""}`} />
-              {s.number} {s.component}
+              <span className={`${styles.pip} ${styles.numbered} ${s.isDone ? styles.filled : ""}`}>{s.number}</span>
+              {s.component}
             </span>
           ) : (
             <span key={i} className={`${styles.milestone} ${s.isDone ? styles.reached : ""}`}>
@@ -124,16 +124,16 @@ export function DeltaBar({ delta }: { delta: DeltaLine[] }) {
   );
 }
 
-// projects FR-08: a « Terminé » blueprint's progress in short: one filled pip per commit, then the review and the merge checked.
+// projects FR-08: a « Terminé » blueprint's progress in short: one filled pip per commit holding its number, then the review and the merge checked.
 export function DoneSummary({ blueprint }: { blueprint: Blueprint }) {
-  const count = blueprint.stages.length;
-  const label = tn("projects.progress.doneSummary", count);
+  const label = tn("projects.progress.doneSummary", blueprint.stages.length);
   return (
     <span className={styles.track} style={colorStyle("done")} role="img" aria-label={label} title={label}>
-      {blueprint.stages.map((_, i) => (
-        <span key={i} className={`${styles.pip} ${styles.filled}`} />
+      {blueprint.stages.map((s) => (
+        <span key={s.number} className={`${styles.pip} ${styles.numbered} ${styles.filled}`}>
+          {s.number}
+        </span>
       ))}
-      <span className={styles.stage}>{tn("projects.progress.commits", count)}</span>
       <span className={styles.check}>✓ {t("projects.progress.reviewed")}</span>
       <span className={styles.check}>✓ {t("projects.progress.mergedDone")}</span>
     </span>

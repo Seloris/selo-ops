@@ -114,10 +114,10 @@ export function ProjectView({
   };
 
   // projects FR-08 and FR-09: the columns named once above the rows; hidden for assistive tech, each cell carrying its own label.
-  const headRow = (keys: MessageKey[], gridClass: string | undefined, endFrom = keys.length) => (
+  const headRow = (keys: MessageKey[], gridClass: string | undefined, endKeys: MessageKey[] = []) => (
     <div className={`${styles.headRow} ${gridClass ?? ""}`} aria-hidden="true">
-      {keys.map((k, i) => (
-        <span key={k} className={i >= endFrom ? styles.end : undefined}>
+      {keys.map((k) => (
+        <span key={k} className={endKeys.includes(k) ? styles.end : undefined}>
           {t(k)}
         </span>
       ))}
@@ -289,7 +289,7 @@ export function ProjectView({
             {headRow(
               ["projects.columns.date", "projects.columns.blueprint", "projects.columns.state", "projects.columns.sheets", "projects.columns.delta", "projects.columns.progress"],
               styles.bpRow,
-              4,
+              ["projects.columns.delta"],
             )}
             <ul className={styles.rows}>{listed.map(blueprintRow)}</ul>
             {legacy.length > 0 && (
