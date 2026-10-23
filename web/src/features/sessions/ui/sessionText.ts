@@ -53,7 +53,7 @@ export function blockerTone(b: Session["blockers"][number]): DotTone {
 export function toneOf(s: Session): DotTone {
   if (isTodo(s)) return s.state === "stopped" ? "danger" : "warn";
   if (s.state === "working" && !s.isClosed && !s.isArchived) return "pulse";
-  return s.state === "job-done" ? "hollow" : "idle";
+  return s.state === "job-done" ? "done" : "idle";
 }
 
 export type AwaitedKind = "question" | "permission" | "commit" | "error";

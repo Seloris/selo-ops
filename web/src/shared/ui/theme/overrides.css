@@ -3,6 +3,7 @@
 
    Added tokens:
    --warn, --warn-soft   amber, the second state colour the skin lacks (rose is its --danger)
+   --done                green, the dot of a finished job (sessions-live FR-10)
    --font-mono           commands, branches, commit subjects
    --lane-free, --lane-fastlane, --lane-autopilot   the type of work: sky, lime, violet (sessions-live FR-29)
    --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
@@ -14,6 +15,7 @@
 :root {
   --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
   --warn: #d97706;
+  --done: #16a34a;
   --warn-soft: rgba(217,119,6,.15);
   --lane-free: #0284c7;
   --lane-fastlane: #4d7c0f;
@@ -33,6 +35,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --warn: #fbbf24;
+    --done: #4ade80;
     --warn-soft: rgba(251,191,36,.16);
     --lane-free: #7dd3fc;
     --lane-fastlane: #a3e635;
@@ -71,6 +74,7 @@
   --scrim: rgba(15,17,22,.45);
   --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
   --warn: #d97706;
+  --done: #16a34a;
   --warn-soft: rgba(217,119,6,.15);
   --lane-free: #0284c7;
   --lane-fastlane: #4d7c0f;
@@ -109,6 +113,7 @@
   --scrim: rgba(3,6,12,.55);
   --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
   --warn: #fbbf24;
+  --done: #4ade80;
   --warn-soft: rgba(251,191,36,.16);
   --lane-free: #7dd3fc;
   --lane-fastlane: #a3e635;

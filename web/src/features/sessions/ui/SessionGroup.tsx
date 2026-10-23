@@ -35,7 +35,7 @@ export function ProjectHeader({ project, count, todoCount }: { project: Project;
   );
 }
 
-const BUCKET_TONE = { todo: "warn", run: "pulse", rest: "idle", done: "hollow" } as const;
+const BUCKET_TONE = { todo: "warn", run: "pulse", rest: "idle", done: "done" } as const;
 
 export function StatusHeader({ bucket, count }: { bucket: Bucket; count: number }) {
   return (

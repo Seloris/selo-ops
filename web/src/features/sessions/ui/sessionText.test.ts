@@ -195,7 +195,7 @@ describe("toneOf", () => {
     [{ state: "stopped", isClosed: true }, "idle"],
     [{ state: "working" }, "pulse"],
     [{ state: "turn-ended" }, "idle"],
-    [{ state: "job-done" }, "hollow"],
+    [{ state: "job-done" }, "done"],
   ] as const)("colours %o as %s", (overrides, tone) => {
     // Act, Assert
     expect(toneOf(buildSession(overrides))).toBe(tone);

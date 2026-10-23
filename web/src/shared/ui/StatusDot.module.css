@@ -22,8 +22,8 @@
   background: var(--text-muted);
 }
 
-.hollow {
-  box-shadow: inset 0 0 0 1.5px var(--text-muted);
+.done {
+  background: var(--done);
 }
 
 @keyframes pulse {
