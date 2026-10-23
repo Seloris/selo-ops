@@ -14,8 +14,12 @@
 }
 
 .pulse {
-  background: var(--text);
+  background: var(--lane-free);
   animation: pulse 1.6s ease-in-out infinite;
+}
+
+.turn {
+  background: var(--hue-next);
 }
 
 .idle {

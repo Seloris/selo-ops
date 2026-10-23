@@ -2,7 +2,7 @@ import { dayTime } from "../../../shared/lib/dayTime.ts";
 import { formatAge } from "../../../shared/lib/formatAge.ts";
 import { t, tn, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import type { DotTone } from "../../../shared/ui/StatusDot.tsx";
-import { ageMs, bucketOf, isStale, isTodo, type InstalledPlugin, type Project, type Session } from "../data/sessionView.ts";
+import { ageMs, bucketOf, isTodo, type InstalledPlugin, type Project, type Session } from "../data/sessionView.ts";
 import { formatTokens, totalTokens } from "./usage.ts";
 
 // The words and tones a session shows, shared by its row, its card and its detail.
@@ -53,6 +53,7 @@ export function blockerTone(b: Session["blockers"][number]): DotTone {
 export function toneOf(s: Session): DotTone {
   if (isTodo(s)) return s.state === "stopped" ? "danger" : "warn";
   if (s.state === "working" && !s.isClosed && !s.isArchived) return "pulse";
+  if (s.state === "turn-ended" && !s.isClosed && !s.isArchived) return "turn";
   return s.state === "job-done" ? "done" : "idle";
 }
 
@@ -112,18 +113,17 @@ export function calmText(s: Session): string {
 
 export interface AgeDisplay {
   text: string;
-  // A tag replaces the plain age; `isStale` adds the clock icon.
+  // A tag replaces the plain age (closed, archived).
   isTag: boolean;
-  isStale: boolean;
 }
 
 // sessions-live FR-14.
 export function ageDisplay(s: Session, now: number): AgeDisplay {
   const text = age(ageMs(s, now));
-  if (s.isArchived) return { text: t("sessions.age.archived", { age: text }), isTag: true, isStale: false };
-  if (s.isClosed) return { text: t("sessions.age.closed", { age: text }), isTag: true, isStale: false };
-  if (isStale(s, now)) return { text: t("sessions.age.stale", { age: text }), isTag: true, isStale: true };
-  return { text, isTag: false, isStale: false };
+  if (s.isArchived) return { text: t("sessions.age.archived", { age: text }), isTag: true };
+  if (s.isClosed) return { text: t("sessions.age.closed", { age: text }), isTag: true };
+  if (s.state === "job-done" || s.state === "turn-ended") return { text: t("sessions.age.finished", { age: text }), isTag: false };
+  return { text, isTag: false };
 }
 
 // `session` BR-10: « … » when the export cut the request.

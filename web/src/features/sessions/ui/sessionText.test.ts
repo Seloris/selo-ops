@@ -99,15 +99,15 @@ describe("ageDisplay", () => {
     const age = ageDisplay(buildSession({ updatedAt: ago(5) }), NOW);
 
     // Assert
-    expect(age).toEqual({ text: "5 min", isTag: false, isStale: false });
+    expect(age).toEqual({ text: "5 min", isTag: false });
   });
 
-  it("tags an open session without news for 30 min", () => {
+  it("prefixes the age of a finished session with « il y a »", () => {
     // Act
-    const age = ageDisplay(buildSession({ updatedAt: ago(45) }), NOW);
+    const age = ageDisplay(buildSession({ state: "job-done", updatedAt: ago(25) }), NOW);
 
     // Assert
-    expect(age).toEqual({ text: "Sans nouvelles depuis 45 min", isTag: true, isStale: true });
+    expect(age).toEqual({ text: "il y a 25 min", isTag: false });
   });
 
   it("prefers « Archivée » over « Fermée », counted from the archive", () => {
@@ -118,7 +118,7 @@ describe("ageDisplay", () => {
     const age = ageDisplay(session, NOW);
 
     // Assert
-    expect(age).toEqual({ text: "Archivée · 10 min", isTag: true, isStale: false });
+    expect(age).toEqual({ text: "Archivée · 10 min", isTag: true });
   });
 
   it("shows « Fermée » with the age of a closed session", () => {
@@ -195,7 +195,8 @@ describe("toneOf", () => {
     [{ state: "stopped" }, "danger"],
     [{ state: "stopped", isClosed: true }, "idle"],
     [{ state: "working" }, "pulse"],
-    [{ state: "turn-ended" }, "idle"],
+    [{ state: "turn-ended" }, "turn"],
+    [{ state: "turn-ended", isClosed: true }, "idle"],
     [{ state: "job-done" }, "done"],
   ] as const)("colours %o as %s", (overrides, tone) => {
     // Act, Assert
