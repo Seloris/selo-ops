@@ -255,15 +255,18 @@
   }
 }
 
-/* help FR-12: the tab bar stays at the top of its scroller (the page, or the popup's body), opaque over what scrolls under it. */
+/* help FR-12: the tab bar stays at the top of its scroller (the page, or the popup's body), opaque over what scrolls under it,
+   a full-width strip that bleeds over the container's side padding (--help-bleed, else the panel's)
+   and over its top padding once stuck (--help-top). */
 .tabs {
   position: sticky;
-  top: 0;
+  /* A sticky box stops at the scroller's padding: a negative top lifts it to the very edge. */
+  top: calc(-1 * var(--help-top, 0px));
   z-index: 2;
-  padding: 8px;
+  margin-inline: calc(-1 * var(--help-bleed, var(--panel-pad)));
+  padding: 10px var(--help-bleed, var(--panel-pad));
   background: var(--pop-bg);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-control);
+  border-bottom: var(--border-width) solid var(--border);
   -webkit-backdrop-filter: var(--blur);
   backdrop-filter: var(--blur);
 }
@@ -507,9 +510,11 @@
   gap: 10px;
 }
 
-/* Beside the tree, the cards stack; under it (narrow), they share a row. */
+/* Beside the tree, the cards stack in one column and share its height. */
 .split .rules {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 1fr;
+  align-self: stretch;
 }
 
 .dense {

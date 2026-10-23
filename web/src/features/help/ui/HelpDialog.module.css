@@ -1,4 +1,13 @@
 .content {
   display: grid;
   gap: 28px;
+  /* The modal body's paddings, which the sticky tab bar bleeds over. */
+  --help-bleed: 24px;
+  --help-top: 20px;
+}
+
+@media (max-width: 640px) {
+  .content {
+    --help-bleed: 16px;
+  }
 }
