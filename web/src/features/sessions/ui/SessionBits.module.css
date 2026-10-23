@@ -8,6 +8,13 @@
   white-space: nowrap;
 }
 
+.stateText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .calm {
   font-weight: 400;
   color: var(--text-muted);

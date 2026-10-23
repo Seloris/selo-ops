@@ -12,7 +12,7 @@ export function StateLabel({ session }: { session: Session }) {
   return (
     <span className={`${styles.state} ${isTodo(session) ? "" : styles.calm}`}>
       <StatusDot tone={toneOf(session)} />
-      {stateLabel(session)}
+      <span className={styles.stateText}>{stateLabel(session)}</span>
     </span>
   );
 }
