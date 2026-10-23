@@ -215,6 +215,7 @@
   "sessions.toast.commandLabel": "Commande à copier",
   "sessions.archiveConfirm.title": "Archiver cette session ?",
   "sessions.archiveConfirm.message": "Elle n’est pas terminée (« {state} »). Elle quittera la liste ; tu pourras la désarchiver.",
+  "sessions.archiveConfirm.messageNote": "Elle porte une note. Elle quittera la liste ; tu pourras la désarchiver.",
   "sessions.archiveConfirm.confirm": "Archiver quand même",
   "sessions.archiveConfirm.cancel": "Annuler",
   "sessions.toast.archived": "Session archivée",

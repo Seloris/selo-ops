@@ -35,6 +35,7 @@ import { SessionCards } from "../ui/SessionCards.tsx";
 import { parseFoldedSections, toggleSection, type FoldedSections } from "../ui/detailSections.ts";
 import { SessionDetail } from "../ui/SessionDetail.tsx";
 import { NoteDialog } from "../ui/NoteDialog.tsx";
+import { NoteText } from "../ui/SessionBits.tsx";
 import { ArchivedToggle, ClosedHeader, ProjectHeader, SessionGroup, StatusHeader } from "../ui/SessionGroup.tsx";
 import { SessionList, type SessionActions } from "../ui/SessionList.tsx";
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
@@ -233,7 +234,8 @@ export function SessionsLivePage() {
     onCopyNext: (s) =>
       void copy(s.nextAction ?? "", t("sessions.toast.nextCopied"), t("sessions.toast.nextHint", { project: projectName(s.projectId), lane: laneLabel(s.lane) })),
     onArchive: (s) => {
-      if (isFinished(s)) archiveNow(s.id);
+      // sessions-live FR-22: a finished session archives at once, unless it holds a note.
+      if (isFinished(s) && !s.note) archiveNow(s.id);
       else setArchiveAsked(s);
     },
     onUnarchive: (id) =>
@@ -375,7 +377,13 @@ export function SessionsLivePage() {
       <ConfirmDialog
         isOpen={archiveAsked !== null}
         title={t("sessions.archiveConfirm.title")}
-        message={archiveAsked ? t("sessions.archiveConfirm.message", { state: stateLabel(archiveAsked) }) : ""}
+        message={
+          !archiveAsked
+            ? ""
+            : isFinished(archiveAsked)
+              ? t("sessions.archiveConfirm.messageNote")
+              : t("sessions.archiveConfirm.message", { state: stateLabel(archiveAsked) })
+        }
         confirmLabel={t("sessions.archiveConfirm.confirm")}
         cancelLabel={t("sessions.archiveConfirm.cancel")}
         isPending={archive.isPending}
@@ -385,7 +393,9 @@ export function SessionsLivePage() {
           archive.reset();
           setArchiveAsked(null);
         }}
-      />
+      >
+        {archiveAsked?.note && <NoteText note={archiveAsked.note} />}
+      </ConfirmDialog>
       {noteFor && (
         <NoteDialog
           key={noteFor.id}

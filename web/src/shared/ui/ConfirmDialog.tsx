@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { Button } from "./Button.tsx";
 import styles from "./ConfirmDialog.module.css";
 import { ErrorMessage } from "./ErrorMessage.tsx";
@@ -13,6 +13,7 @@ export function ConfirmDialog({
   error,
   onConfirm,
   onCancel,
+  children,
 }: {
   isOpen: boolean;
   title: string;
@@ -23,6 +24,8 @@ export function ConfirmDialog({
   error: string | null;
   onConfirm(): void;
   onCancel(): void;
+  // Shown under the message, such as the text the action would put away.
+  children?: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
 
@@ -52,6 +55,7 @@ export function ConfirmDialog({
     >
       <h2 id="confirm-dialog-title">{title}</h2>
       <p>{message}</p>
+      {children}
       {error && <ErrorMessage>{error}</ErrorMessage>}
       <div className={styles.actions}>
         <Button variant="quiet" onClick={onCancel} disabled={isPending}>
