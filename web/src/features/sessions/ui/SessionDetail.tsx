@@ -8,7 +8,7 @@ import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
-import { formatTokens, totalTokens } from "./usage.ts";
+import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, LaneLabel, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
@@ -132,7 +132,7 @@ export function SessionDetail({
     </Section>
   );
   const usageSection = (
-    <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.usage")} summary={s.usage ? t("sessions.detail.usageSummary", { tokens: formatTokens(totalTokens(s.usage.tokens)) }) : unknown} {...fold("usage")}>
+    <Section icon={<GaugeIcon />} hue="usage" title={t("sessions.detail.usage")} summary={s.usage ? usageSummary(s.usage) : unknown} {...fold("usage")}>
       {s.usage || s.runs.length > 0 || s.runUsage ? (
         <UsageDashboard usage={s.usage} runs={s.runs} isRunListCut={s.isRunListCut} runUsage={s.runUsage} now={now} />
       ) : (

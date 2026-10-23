@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cacheReuse, exactTokens, formatTokens, hasDroppedPrompts, kindShares, listsRuns, percentText, runRequestText, runTimeText, sessionActivity, skillHowLabel, soleModel, topWithRest, totalTokens, widthPercent, type RunUsage, type SessionRun } from "./usage.ts";
+import { cacheReuse, exactTokens, formatTokens, hasDroppedPrompts, kindShares, listsRuns, percentText, runRequestText, runTimeText, sessionActivity, skillHowLabel, soleModel, topWithRest, totalTokens, usageSummary, widthPercent, type RunUsage, type SessionRun } from "./usage.ts";
 
 const NARROW = " ";
 
@@ -210,5 +210,17 @@ describe("sessionActivity", () => {
     const empty = { since: "2026-10-23T01:10:00Z", request: "", isRequestCut: false, usage: null } as SessionRun;
 
     expect(sessionActivity([empty, run([{ name: "Bash", count: 1 }], [])])).toEqual({ tools: [{ name: "Bash", count: 1 }], skills: [] });
+  });
+});
+
+describe("usageSummary", () => {
+  it("sums up the total, the sole model, the calls, the cache reuse and the output", () => {
+    const usage = { tokens: { input: 20, cacheRead: 785_000, cacheWrite: 32_000, output: 4000 }, calls: 10, byModel: [{ model: "claude-sonnet-5-5" }] } as Parameters<typeof usageSummary>[0];
+    expect(usageSummary(usage)).toBe(`821${NARROW}k tokens consommés · claude-sonnet-5-5 · 10 appels · 96${NARROW}% de cache réutilisé · 4,0${NARROW}k en sortie`);
+  });
+
+  it("leaves out the model when several share the session and the cache when nothing was read", () => {
+    const usage = { tokens: { input: 0, cacheRead: 0, cacheWrite: 0, output: 5 }, calls: 1, byModel: [] } as Parameters<typeof usageSummary>[0];
+    expect(usageSummary(usage)).toBe("5 tokens consommés · 1 appels · 5 en sortie");
   });
 });

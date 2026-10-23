@@ -168,6 +168,8 @@
   "sessions.pluginOutdated": "Écrite par selo-ops {version}, autre version que celle installée",
   "sessions.detail.usage": "Consommation",
   "sessions.detail.usageSummary": "{tokens} tokens consommés",
+  "sessions.detail.usageCache": "{percent} de cache réutilisé",
+  "sessions.detail.usageOutput": "{tokens} en sortie",
   "sessions.facts.modelTokens": "{model} · {tokens} tokens",
   "sessions.usage.calls": "Appels API",
   "sessions.usage.callsCount": "{count} appels",

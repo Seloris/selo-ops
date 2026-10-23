@@ -49,6 +49,21 @@ export function percentText(ratio: number): string {
   return `${Math.round(ratio * 100)}${NARROW}%`;
 }
 
+// sessions-live FR-31: what the folded « Consommation » heading keeps showing: the total, the sole model, the calls,
+// the cache reuse and the output (the figures of FR-32's summary card).
+export function usageSummary(usage: Pick<Usage, "tokens" | "calls" | "byModel">): string {
+  const reuse = cacheReuse(usage.tokens);
+  return [
+    t("sessions.detail.usageSummary", { tokens: formatTokens(totalTokens(usage.tokens)) }),
+    soleModel(usage as Usage),
+    t("sessions.usage.callsCount", { count: exactTokens(usage.calls) }),
+    reuse === null ? null : t("sessions.detail.usageCache", { percent: percentText(reuse) }),
+    t("sessions.detail.usageOutput", { tokens: formatTokens(usage.tokens.output) }),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 // A bar's width against the largest one of its list, in percent.
 export const widthPercent = (n: number, max: number) => (max > 0 ? Math.min(100, (n / max) * 100) : 0);
 
