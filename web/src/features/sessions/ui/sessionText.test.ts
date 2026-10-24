@@ -37,6 +37,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     skill: null,
     trail: [],
     isTrailCut: false,
+    mode: null,
     request: "Fix the build",
     isRequestCut: false,
     isRequestImage: false,
@@ -393,16 +394,19 @@ describe("workLabel", () => {
     expect(workLabel(buildSession({ flow, skill }))).toBe(label);
   });
 
+  const entry = (substep: string | null) => ({ at: "2026-10-24T09:00:00.000Z", skill: "fastlane", step: null, substep, phase: "working" as const });
+
   it.each([
-    [null, "fastlane › itération"],
-    ["code", "fastlane › itération"],
-    ["tests", "fastlane"],
-  ] as const)("reads a fastlane's iterate loop at step %s as « %s »", (step, label) => {
-    expect(workLabel(buildSession({ flow: "fastlane", skill: "fastlane", request: "Resserrer la liste — iterate", step }))).toBe(label);
+    [null, [], "fastlane › itération"],
+    ["code", [entry(null), entry("code")], "fastlane › itération"],
+    ["tests", [entry("code"), entry("tests")], "fastlane"],
+    ["code", [entry("code"), entry("tests"), entry("code")], "fastlane"],
+  ] as const)("reads an iterate fastlane at substep %s, trail %j, as « %s »", (substep, trail, label) => {
+    expect(workLabel(buildSession({ flow: "fastlane", skill: "fastlane", mode: "iterate", substep, trail: [...trail] }))).toBe(label);
   });
 
-  it("needs the option itself, not the word inside the request", () => {
-    expect(workLabel(buildSession({ flow: "fastlane", skill: "fastlane", request: "Itérer sur —iterate", step: null }))).toBe("fastlane");
+  it("reads a fastlane with no mode as itself", () => {
+    expect(workLabel(buildSession({ flow: "fastlane", skill: "fastlane", mode: null, substep: "code" }))).toBe("fastlane");
   });
 });
 
@@ -416,8 +420,8 @@ describe("laneColor", () => {
 
   it("takes the flow's token for a mockup and a fastlane's iterate loop", () => {
     expect(laneColor(buildSession({ flow: "free", skill: "mockup" }))).toBe("var(--lane-mockup)");
-    expect(laneColor(buildSession({ flow: "fastlane", request: "Resserrer la liste — iterate", step: "code" }))).toBe("var(--lane-iterate)");
-    expect(laneColor(buildSession({ flow: "fastlane", request: "Resserrer la liste — iterate", step: "review" }))).toBe("var(--lane-fastlane)");
+    expect(laneColor(buildSession({ flow: "fastlane", mode: "iterate", substep: "code" }))).toBe("var(--lane-iterate)");
+    expect(laneColor(buildSession({ flow: "fastlane", mode: "iterate", substep: "review" }))).toBe("var(--lane-fastlane)");
   });
 });
 

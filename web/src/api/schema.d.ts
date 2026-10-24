@@ -428,6 +428,7 @@ export interface components {
             folder: string;
             flow: string;
             skill: string | null;
+            mode: string | null;
             trail: components["schemas"]["TrailEntry"][];
             isTrailCut: boolean;
             request: string;

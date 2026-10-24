@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/sessionView.ts";
-import { hasTrail, MAX_WEIGHT, skillColor, trailLines, waitingText, type TrailEntry } from "./trail.ts";
+import { hasTrail, lineColor, MAX_WEIGHT, skillColor, trailLines, waitingText, type TrailEntry } from "./trail.ts";
 
 describe("skillColor", () => {
   it("colours the lane skills, build as a blueprint, mockup as its flow, and leaves the others neutral", () => {
@@ -24,6 +24,24 @@ const entry = (minutes: number, phase: TrailEntry["phase"], overrides: Partial<T
 });
 
 describe("trailLines", () => {
+  it("colours an iterate fastlane's loop orange, up to its end's first mark past code", () => {
+    // Arrange
+    const trail = [
+      entry(0, "working", { skill: "fastlane" }),
+      entry(2, "awaiting-answer", { skill: "fastlane", substep: "code" }),
+      entry(6, "working", { skill: "fastlane", substep: "tests" }),
+      entry(9, "working", { skill: "fastlane", substep: "code" }),
+    ];
+
+    // Act
+    const iterate = trailLines(trail, T0, "iterate");
+    const plain = trailLines(trail, T0);
+
+    // Assert
+    expect(iterate.map(lineColor)).toEqual(["var(--lane-iterate)", "var(--lane-iterate)", "var(--lane-fastlane)", "var(--lane-fastlane)"]);
+    expect(plain.map((l) => l.isLoop)).toEqual([false, false, false, false]);
+  });
+
   it("marks past working lines only, never a wait nor the last line", () => {
     // Arrange
     const trail = [entry(0, "working"), entry(3, "awaiting-answer"), entry(5, "working"), entry(9, "working")];

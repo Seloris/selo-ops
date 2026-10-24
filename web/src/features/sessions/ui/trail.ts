@@ -1,6 +1,6 @@
 import { t } from "../../../shared/lib/i18n/index.ts";
 import type { Session } from "../data/sessionView.ts";
-import { age, stepText } from "./sessionText.ts";
+import { age, LOOP_SUBSTEPS, stepText } from "./sessionText.ts";
 
 // sessions-live FR-41: the current run's history as the export keeps it, oldest first (displayed newest first).
 
@@ -15,6 +15,8 @@ export interface TrailLine {
   weight: number;
   // A working line followed by another is finished: no badge, no pulse.
   isPastWork: boolean;
+  // A line of a fastlane's iterate loop, before its end's first mark past `code` (`session` BR-22).
+  isLoop: boolean;
 }
 
 // Past about 1 h 47 a line, the last one most of all, weighs no more in the folded ribbon.
@@ -34,14 +36,18 @@ const SKILL_LANES: Readonly<Record<string, string>> = { fastlane: "fastlane", bl
 export const skillColor = (skill: string | null): string | undefined =>
   skill && SKILL_LANES[skill] ? `var(--lane-${SKILL_LANES[skill]})` : undefined;
 
+// The line's skill colour: orange through an iterate loop, else its skill's.
+export const lineColor = (l: TrailLine): string | undefined => (l.isLoop ? "var(--lane-iterate)" : skillColor(l.entry.skill));
+
 export const hasTrail =(s: Session) => !s.isOutsideSelo && s.trail.length > 0;
 
-export function trailLines(trail: TrailEntry[], now: number): TrailLine[] {
+export function trailLines(trail: TrailEntry[], now: number, mode: string | null = null): TrailLine[] {
   const durations = durationsOf(trail);
+  const loopEnd = mode === "iterate" ? trail.findIndex((e) => !LOOP_SUBSTEPS.has(e.substep)) : 0;
   return trail.map((entry, i) => {
     const ms = durations[i] ?? null;
     const lasted = Math.max(0, ms ?? now - Date.parse(entry.at));
-    return { entry, stepText: stepText(entry), durationText: ms === null ? null : age(ms), weight: Math.min(MAX_WEIGHT, Math.sqrt(lasted / 1000)), isPastWork: ms !== null && entry.phase === "working" };
+    return { entry, stepText: stepText(entry), durationText: ms === null ? null : age(ms), weight: Math.min(MAX_WEIGHT, Math.sqrt(lasted / 1000)), isPastWork: ms !== null && entry.phase === "working", isLoop: loopEnd === -1 || i < loopEnd };
   });
 }
 

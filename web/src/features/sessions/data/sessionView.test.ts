@@ -27,6 +27,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     skill: null,
     trail: [],
     isTrailCut: false,
+    mode: null,
     request: "Fix the build",
     isRequestCut: false,
     isRequestImage: false,

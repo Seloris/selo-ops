@@ -9,7 +9,7 @@ import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
-import { hasTrail, skillColor, trailLines, waitingText } from "./trail.ts";
+import { hasTrail, lineColor, trailLines, waitingText } from "./trail.ts";
 import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
@@ -110,7 +110,7 @@ export function SessionDetail({
   );
   // sessions-live FR-41: absent outside selo and for an export older than 2.5.0, which writes no trail.
   // A past wait reads as open; past work is muted; the last line keeps the session's closed or archived state, so it never pulses then.
-  const trail = trailLines(s.trail, now).map((l, i, all) => {
+  const trail = trailLines(s.trail, now, s.mode).map((l, i, all) => {
     const isLast = i === all.length - 1;
     const tone: DotTone = l.isPastWork ? "idle" : toneOf({ ...s, state: l.entry.phase, isClosed: isLast && s.isClosed, isArchived: isLast && s.isArchived });
     return { ...l, tone };
@@ -149,7 +149,7 @@ export function SessionDetail({
               )}
             </span>
             <span className={styles.line}>
-              <span style={{ color: skillColor(l.entry.skill) }}>{l.entry.skill}</span>
+              <span style={{ color: lineColor(l) }}>{l.entry.skill}</span>
               {l.entry.skill && l.stepText && " · "}
               {l.stepText}
               {/* Read with its own line, where the eye finds it beside the line below. */}

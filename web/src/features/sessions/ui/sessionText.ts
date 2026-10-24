@@ -21,15 +21,13 @@ export const stateLabel = (s: Session) => t(`sessions.state.${s.state}` as Messa
 
 const flowLabel = (flow: string) => (flow === "free" ? t("sessions.lane.free") : flow);
 
-// `session` BR-22: a fastlane run whose request carries ` — iterate`, while its loop runs: the loop marks `code` once,
-// its end marks `tests` first. shortcut: read from the request, cut at 200 characters by the export, so a longer one
-// loses its option; upgrade once the export writes the run's mode.
-const ITERATE = /(^|\s)— iterate(\s|$)/;
+// `session` BR-22: a fastlane in its iterate mode runs its loop until its end's first mark past `code` (`tests` first).
+export const LOOP_SUBSTEPS: ReadonlySet<string | null> = new Set([null, "code"]);
 
-export const isIterating = (s: Pick<Session, "flow" | "request" | "step">): boolean =>
-  s.flow === "fastlane" && ITERATE.test(s.request) && (s.step === null || s.step === "code");
+export const isIterating = (s: Pick<Session, "mode" | "substep" | "trail">): boolean =>
+  s.mode === "iterate" && LOOP_SUBSTEPS.has(s.substep) && s.trail.every((e) => LOOP_SUBSTEPS.has(e.substep));
 
-type WorkOf = Pick<Session, "isOutsideSelo" | "flow" | "skill" | "request" | "step">;
+type WorkOf = Pick<Session, "isOutsideSelo" | "flow" | "skill" | "mode" | "substep" | "trail">;
 
 // `session` BR-22: the run's flow, then the skill running when it is another, or « itération » in a fastlane's loop;
 // a session outside selo (`session` BR-12) reads « hors selo ».
