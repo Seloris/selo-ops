@@ -56,6 +56,19 @@
   backdrop-filter: var(--blur);
 }
 
+.end {
+  left: auto;
+  right: 0;
+}
+
+.note {
+  max-width: 280px;
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
 .check {
   display: flex;
   align-items: center;

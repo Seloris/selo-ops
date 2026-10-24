@@ -1,19 +1,23 @@
 import { t } from "../../../shared/lib/i18n/index.ts";
+import type { NotifySetting } from "../../../shared/lib/notifications.ts";
 import type { Theme } from "../../../shared/lib/theme.ts";
 import { MoonIcon, QuestionIcon, SunIcon } from "../../../shared/ui/icons.tsx";
 import { NavTabs } from "../../../shared/ui/NavTabs.tsx";
 import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import styles from "./AppHeader.module.css";
+import { NotifyMenu } from "./NotifyMenu.tsx";
 
-// app FR-02 and FR-03: the header every page shares.
+// app FR-02, FR-03 and FR-05: the header every page shares.
 export function AppHeader({
   theme,
   onTheme,
+  notify,
   isHelpPage,
   onHelp,
 }: {
   theme: Theme;
   onTheme: (theme: Theme) => void;
+  notify: NotifySetting;
   // On the help page itself, « Aide » is its current link, not a popup.
   isHelpPage: boolean;
   onHelp(): void;
@@ -34,6 +38,7 @@ export function AppHeader({
         label={t("app.nav.helpLabel")}
         tabs={[isHelpPage ? { label: t("app.nav.help"), to: "/help", icon: <QuestionIcon /> } : { label: t("app.nav.help"), onClick: onHelp, icon: <QuestionIcon /> }]}
       />
+      {notify.permission !== "unsupported" && <NotifyMenu notify={notify} />}
       <Segmented
         label={t("app.theme.label")}
         value={theme}

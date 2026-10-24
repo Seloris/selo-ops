@@ -4,8 +4,11 @@ import { ChevronDownIcon } from "./icons.tsx";
 import styles from "./Dropdown.module.css";
 
 // A button opening a floating panel below it; a click outside closes it. The caller owns `isOpen`.
+// `triggerLabel` names an icon-only trigger; `align="end"` opens the panel leftwards, for a trigger at the right edge.
 export function Dropdown({
   trigger,
+  triggerLabel,
+  align = "start",
   isOpen,
   onToggle,
   onClose,
@@ -14,6 +17,8 @@ export function Dropdown({
   children,
 }: {
   trigger: ReactNode;
+  triggerLabel?: string;
+  align?: "start" | "end";
   isOpen: boolean;
   onToggle: () => void;
   onClose: () => void;
@@ -23,14 +28,14 @@ export function Dropdown({
 }) {
   return (
     <div className={styles.dropdown}>
-      <button type="button" className={styles.trigger} aria-expanded={isOpen} onClick={onToggle}>
+      <button type="button" className={styles.trigger} aria-label={triggerLabel} title={triggerLabel} aria-expanded={isOpen} onClick={onToggle}>
         {trigger}
         <ChevronDownIcon />
       </button>
       {isOpen && (
         <>
           <button type="button" className={styles.away} aria-label={closeLabel} onClick={onClose} />
-          <div className={styles.panel} role="group" aria-label={panelLabel}>
+          <div className={`${styles.panel} ${align === "end" ? styles.end : ""}`} role="group" aria-label={panelLabel}>
             {children}
           </div>
         </>
@@ -52,4 +57,9 @@ export function DropdownCheck({ label, count, isChecked, onChange }: { label: st
 
 export function DropdownSeparator() {
   return <div className={styles.sep} />;
+}
+
+// A line of text in a dropdown's panel: a heading over its checklist, or a message in its place.
+export function DropdownNote({ children }: { children: ReactNode }) {
+  return <p className={styles.note}>{children}</p>;
 }

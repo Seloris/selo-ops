@@ -5,7 +5,8 @@ import { sessionsKeys } from "./sessionsKeys.ts";
 // sessions-live FR-02: the export is read again every 5 s.
 export const REFRESH_MS = 5000;
 
-export function useSessionsQuery() {
+// `inBackground`: keeps reading while the tab is hidden (app FR-05), when the notifications matter most.
+export function useSessionsQuery({ enabled = true, inBackground = false }: { enabled?: boolean; inBackground?: boolean } = {}) {
   return useQuery({
     queryKey: sessionsKeys.list(),
     queryFn: async () => {
@@ -14,5 +15,7 @@ export function useSessionsQuery() {
       return data;
     },
     refetchInterval: REFRESH_MS,
+    refetchIntervalInBackground: inBackground,
+    enabled,
   });
 }

@@ -36,9 +36,9 @@ src/
                             Panel, PageTitle, Field (label, error, the control as a render prop), TextInput, SearchInput, Select,
                             Button (variant: primary, danger, quiet, ghost), Switch, Checkbox, List (List, ListItem with isDone, ListItemText),
                             Badge, EmptyState, LoadingState, ErrorMessage (role="alert"), ConfirmDialog (a native <dialog>), icons.tsx,
-                            Segmented, NavTabs (links between pages, a page not built yet dimmed with its note), IconButton, Tag (color tints it), StatusDot, Dropdown (DropdownCheck), CommandBox, Drawer (a side panel), Modal (a large native dialog, open while mounted), Toast, Card (a static block on the row tokens); Button also takes size="sm"
+                            Segmented, NavTabs (links between pages, a page not built yet dimmed with its note), IconButton, Tag (color tints it), StatusDot, Dropdown (DropdownCheck, DropdownSeparator, DropdownNote; `triggerLabel` for an icon trigger, `align="end"`), CommandBox, Drawer (a side panel), Modal (a large native dialog, open while mounted), Toast, Card (a static block on the row tokens); Button also takes size="sm"
       theme/                fonts.ts (the skin's font imports) and skin.css (its tokens), both written by setup: never edited; base.css (the page), overrides.css (this application's values)
-    lib/                    utils (formatAge, clipboard, storage, useNow), theme (data-theme on the root), i18n/ (fr.json, t and tn)
+    lib/                    utils (formatAge, clipboard, storage, useNow), theme (data-theme on the root), notifications (the states that notify, app FR-05), i18n/ (fr.json, t and tn)
 ```
 
 ## Package scripts
@@ -52,7 +52,7 @@ src/
 
 - **TypeScript strict**, function components, hooks; no default exports except where React Router's lazy routes need them; no `any`.
 - **Data:** a page uses its feature's `data/` hooks; the hooks are the only place that calls the API client; the client is the only place that calls `fetch`. Server state lives in TanStack Query (one query-key factory per feature, every mutation invalidates or updates the queries it changes); local UI state in `useState`/`useReducer`; no global store unless several features share client state.
-- **Across features:** the projects page reads the sessions' query (`useSessionsQuery`, the same cache) and their pure helpers (`sessionText.ts`, `panelWidth.ts`) for its live sessions and its panel: the only imports from another feature.
+- **Across features:** the projects page reads the sessions' query (`useSessionsQuery`, the same cache) and their pure helpers (`sessionText.ts`, `panelWidth.ts`) for its live sessions and its panel; the app shell's notifier (`useStateNotifier`, app FR-05) reads the same query, `stateAlerts.ts` and `sessionText.ts` (a `data` hook reading a `ui` helper, for the notification's labels): the only imports from another feature.
 - **Types** of requests and responses come from `src/api/schema.d.ts` (`paths`, `components["schemas"][...]`), never redeclared by hand.
 - **Pages** are routed, thin, and compose UI components; **UI** components receive props and emit callbacks: no data hook, no client call inside them.
 - **Forms:** one `{Name}Form.tsx` per form, holding its fields, validation and the mapping of the API's problem details (`400` field errors) to field messages.

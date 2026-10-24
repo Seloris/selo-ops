@@ -196,6 +196,26 @@ export function QuestionIcon() {
   );
 }
 
+export function BellIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.9 1.9 0 0 0 3.4 0" />
+    </svg>
+  );
+}
+
+export function BellOffIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M8.7 3.7A6 6 0 0 1 18 8c0 2.9.5 4.9 1.1 6.3" />
+      <path d="M17 17H3s3-2 3-9c0-.6.1-1.1.2-1.6" />
+      <path d="M10.3 21a1.9 1.9 0 0 0 3.4 0" />
+      <path d="m2 2 20 20" />
+    </svg>
+  );
+}
+
 export function ShieldIcon() {
   return (
     <svg {...iconProps}>

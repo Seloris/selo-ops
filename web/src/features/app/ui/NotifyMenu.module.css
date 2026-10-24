@@ -1,0 +1,13 @@
+/* The count of states that notify, beside the bell: the active setting's mint. */
+.count {
+  min-width: 18px;
+  padding: 0 5px;
+  font-size: 0.8em;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-soft-text);
+  background: var(--accent-soft);
+  border-radius: 9px;
+}
