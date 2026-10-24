@@ -85,6 +85,22 @@ export function ChevronRightIcon() {
   );
 }
 
+export function PlusIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+export function BackIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="m15 6-6 6 6 6" />
+    </svg>
+  );
+}
+
 export function CloseIcon() {
   return (
     <svg {...iconProps}>

@@ -1,0 +1,412 @@
+.window {
+  display: grid;
+  gap: 18px;
+}
+
+.project {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px 14px;
+}
+
+.project > :first-child {
+  width: min(260px, 100%);
+}
+
+.path {
+  padding-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  overflow-wrap: anywhere;
+  color: var(--text-muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+/* ---- What to do (sessions-live FR-44) ---- */
+
+.choices {
+  display: grid;
+  gap: 10px;
+  padding-right: 20px;
+  border-right: var(--border-width) solid var(--border);
+}
+
+.group {
+  display: grid;
+  gap: 2px;
+}
+
+.groupName,
+.label {
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  text-transform: var(--label-transform);
+  letter-spacing: var(--label-tracking);
+  color: var(--text-muted);
+}
+
+.groupName {
+  padding: 0 10px 2px;
+}
+
+/* A choice wears its lane's colour (FR-29) on its skill's name and, chosen, on its edge. */
+.window [data-skill="autopilot"] { --lane: var(--lane-autopilot); }
+.window [data-skill="fastlane"] { --lane: var(--lane-fastlane); }
+.window [data-skill="mockup"] { --lane: var(--lane-mockup); }
+.window [data-skill="blueprint"],
+.window [data-skill="build"] { --lane: var(--lane-blueprint); }
+.window [data-skill="grill"],
+.window [data-skill="review"],
+.window [data-skill="try"] { --lane: var(--text-muted); }
+.window [data-skill="free"] { --lane: var(--lane-free); }
+
+.choice {
+  position: relative;
+  display: grid;
+  width: 100%;
+  padding: 6px 10px 6px 14px;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: background-color 0.12s;
+}
+
+.choice:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.choice[aria-pressed="true"] {
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 var(--border-width) var(--border);
+}
+
+.choice[aria-pressed="true"]::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--lane);
+}
+
+.choice:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.choiceName {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.93em;
+  font-weight: 600;
+}
+
+.skill {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  font-weight: 500;
+  color: var(--lane);
+}
+
+.count {
+  margin-left: auto;
+  font-size: 0.8em;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.when {
+  font-size: 0.8em;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.unsure {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 0;
+  font-size: 0.82em;
+  color: var(--text-muted);
+}
+
+.unsure svg {
+  width: 14px;
+  height: 14px;
+}
+
+.unsure a {
+  color: var(--text);
+  text-underline-offset: 3px;
+}
+
+/* ---- The chosen form (FR-45, FR-46) ---- */
+
+.form {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.back {
+  display: none;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.lead {
+  margin: 0;
+  font-size: 0.88em;
+  color: var(--text-muted);
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field > [role="group"] {
+  justify-self: start;
+}
+
+.options {
+  display: grid;
+  gap: 4px;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 16px;
+  padding: 2px 12px 8px;
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--radius-control);
+}
+
+.option label {
+  height: calc(var(--control-h) - 4px);
+}
+
+.optionName {
+  display: flex;
+  align-items: center;
+  height: calc(var(--control-h) - 4px);
+  font-size: 0.92em;
+}
+
+.flag {
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.8em;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.wide,
+.stage {
+  grid-column: 1 / -1;
+  padding-top: 8px;
+}
+
+.stage {
+  width: 90px;
+}
+
+.blueprints {
+  display: grid;
+  gap: 4px;
+}
+
+.blueprint {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.blueprint:hover {
+  background: var(--surface-2);
+}
+
+/* Chosen as a skill is (FR-44): a neutral fill and the blueprint lane's edge; mint stays for the settings. */
+.blueprint {
+  position: relative;
+}
+
+.blueprint[aria-pressed="true"] {
+  background: var(--surface-2);
+}
+
+.blueprint[aria-pressed="true"]::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--lane-blueprint);
+}
+
+.bpTitle {
+  font-size: 0.92em;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.bpState {
+  --bp: var(--bp-ready);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px;
+  font-size: 0.75em;
+  font-weight: 600;
+  color: var(--bp);
+  background: var(--surface-2);
+  border-radius: var(--badge-radius);
+}
+
+.bpState[data-state="building"] {
+  --bp: var(--bp-building);
+}
+
+.bpState::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bp);
+}
+
+.bpFile {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  overflow-wrap: anywhere;
+  color: var(--text-muted);
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 14px;
+  padding: 14px 0;
+  border-top: var(--border-width) solid var(--border);
+  /* Kept in sight at the bottom of the window while its body scrolls. */
+  position: sticky;
+  bottom: 0;
+  background: var(--pop-bg);
+}
+
+.footHint {
+  flex: 1;
+  min-width: 200px;
+  font-size: 0.82em;
+  color: var(--text-muted);
+}
+
+.kbd {
+  margin-left: 8px;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  white-space: nowrap;
+  color: var(--text);
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius-control) / 2);
+}
+
+/* ---- Phone width: two steps (FR-47) ---- */
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .choices {
+    padding-right: 0;
+    border-right: 0;
+  }
+
+  .window[data-step="choose"] .form,
+  .window[data-step="form"] .choices {
+    display: none;
+  }
+
+  .back {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 0;
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    color: var(--text);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .back svg {
+    align-self: center;
+    flex: none;
+  }
+
+  .foot .footHint {
+    min-width: 100%;
+  }
+
+  .foot button {
+    flex: 1;
+  }
+
+  .kbd {
+    display: none;
+  }
+}

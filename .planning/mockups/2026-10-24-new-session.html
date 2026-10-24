@@ -1,0 +1,1097 @@
+<title>Nouvelle session</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* selo skin "aurora", copied from the selo plugin (skins/aurora/tokens.css). Do not edit:
+   switch skins with /selo:setup skin {component} {skin}; override variables in overrides.css. */
+:root {
+  --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-size: 15px;
+  --title-size: 34px;
+  --title-weight: 500;
+  --title-tracking: -0.02em;
+  --title-transform: none;
+  --title-style: normal;
+  --label-size: 0.85em;
+  --label-weight: 500;
+  --label-transform: none;
+  --label-tracking: 0;
+  --radius: 20px;
+  --radius-control: 12px;
+  --radius-pill: 999px;
+  --check-radius: 7px;
+  --switch-radius: 999px;
+  --badge-radius: var(--radius-pill);
+  --border-width: 1px;
+  --control-h: 40px;
+  --panel-bg: var(--surface);
+  --panel-border: var(--border-width) solid var(--border);
+  --panel-pad: 32px;
+  --blur: blur(18px) saturate(140%);
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(20,184,166,.28), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.20), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.20), transparent 70%);
+  --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
+  --shadow-control: none;
+  --shadow-pop: 0 24px 60px -12px rgba(0,0,0,.35);
+  --list-gap: 8px;
+  --list-rule: none;
+  --item-pad: 12px 14px;
+  --item-bg: rgba(255,255,255,.55);
+  --item-border: var(--border-width) solid var(--border);
+  --item-rule: var(--item-border);
+  --item-radius: var(--radius-control);
+  --item-shadow: none;
+  --badge-border: 0;
+  --badge-transform: none;
+  --badge-tracking: 0;
+  --btn-border: transparent;
+  --btn-weight: 600;
+  --btn-transform: none;
+  --btn-tracking: 0;
+  --control-bg: rgba(255,255,255,.7);
+  --control-border: var(--border);
+  --control-border-on: var(--accent);
+  --accent-text: #ffffff;
+  --accent-soft: rgba(15,148,136,.12);
+  --accent-soft-text: #0b6b62;
+  --danger-text: #ffffff;
+  --focus: color-mix(in srgb, var(--accent) 35%, transparent);
+  --pop-bg: rgba(255,255,255,.95);
+  --scrim: rgba(15,17,22,.45);
+  --bg: #eef3f4;
+  --surface: rgba(255,255,255,.62);
+  --surface-2: rgba(255,255,255,.8);
+  --border: rgba(15,23,42,.09);
+  --text: #0f172a;
+  --text-muted: #55627a;
+  --accent: #0f9488;
+  --danger: #e11d48;
+  --danger-soft: rgba(225,29,72,.1);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #070b14;
+    --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(45,212,191,.32), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.18), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.28), transparent 70%);
+    --surface: rgba(255,255,255,.06);
+    --surface-2: rgba(255,255,255,.1);
+    --border: rgba(255,255,255,.14);
+    --text: #eef2ff;
+    --text-muted: #a5adc8;
+    --accent: #5eead4;
+    --accent-text: #04201b;
+    --accent-soft: rgba(94,234,212,.14);
+    --accent-soft-text: #a7f3e4;
+    --danger: #fb7185;
+    --danger-soft: rgba(251,113,133,.14);
+    --danger-text: #2a0710;
+    --control-bg: rgba(0,0,0,.25);
+    --item-bg: rgba(255,255,255,.04);
+    --pop-bg: rgba(17,22,36,.92);
+    --scrim: rgba(3,6,12,.55);
+    --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+    color-scheme: dark;
+  }
+}
+
+/*
+ * Element recipes: how every skin is meant to be applied. Stack-agnostic, framework-free CSS that
+ * reads the token contract only (see README.md): no literal color, radius, shadow or font.
+ * A stack ports each recipe into its own components (the react-express pack: one shared/ui
+ * component and its CSS Module per element); the class names here only label the recipes.
+ * The same rules render all seven skins: a skin changes the variables, never these rules.
+ */
+
+/* ---------- page ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: var(--bg-image);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 1.5;
+}
+:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* ---------- panel: the page's main surface ---------- */
+
+.panel {
+  display: grid;
+  gap: 28px;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--panel-pad);
+  background: var(--panel-bg);
+  border: var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+
+/* ---------- headings ---------- */
+
+.title {
+  margin: 0;
+  line-height: 1.02;
+  text-wrap: balance;
+  font-family: var(--font-display);
+  font-size: var(--title-size);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-tracking);
+  text-transform: var(--title-transform);
+  font-style: var(--title-style);
+}
+.subtitle { margin: 0; color: var(--text-muted); font-size: 0.9em; font-variant-numeric: tabular-nums; }
+
+/* ---------- field: label, control, error ---------- */
+
+.field { display: grid; gap: 6px; min-width: 0; }
+.label {
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  text-transform: var(--label-transform);
+  letter-spacing: var(--label-tracking);
+  color: var(--text-muted);
+}
+.input, .select {
+  width: 100%;
+  height: var(--control-h);
+  margin: 0;
+  padding: 0 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input::placeholder { color: var(--text-muted); opacity: 0.75; }
+.input:focus-visible, .select:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus); }
+.input[aria-invalid="true"] { border-color: var(--danger); }
+.error { margin: 8px 0 0; color: var(--danger); font-size: 0.85em; }
+
+/* search: an input with a leading icon (16px, currentColor) */
+.search { position: relative; }
+.search svg {
+  position: absolute; left: 12px; top: 50%;
+  width: 16px; height: 16px; transform: translateY(-50%);
+  color: var(--text-muted); pointer-events: none;
+}
+.search .input { padding-left: 36px; }
+
+/* select: the native control restyled, its chevron drawn by the wrapper */
+.select-wrap { position: relative; }
+.select { padding-right: 34px; cursor: pointer; }
+.select-wrap::after {
+  content: "";
+  position: absolute; right: 14px; top: 50%;
+  width: 7px; height: 7px; pointer-events: none;
+  border-right: 1.5px solid var(--text-muted);
+  border-bottom: 1.5px solid var(--text-muted);
+  transform: translateY(-70%) rotate(45deg);
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: var(--control-h);
+  padding: 0 18px;
+  white-space: nowrap;
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--btn-weight);
+  text-transform: var(--btn-transform);
+  letter-spacing: var(--btn-tracking);
+  border: var(--border-width) solid var(--btn-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  transition: transform 0.12s, filter 0.12s, background-color 0.12s, color 0.12s;
+}
+/* restores the page's ring: .btn's own shadow has the same specificity and loads later */
+.btn:focus-visible { box-shadow: 0 0 0 3px var(--focus); }
+.btn:active { transform: translate(1px, 1px); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--accent); color: var(--accent-text); }
+.btn-danger { background: var(--danger); color: var(--danger-text); }
+.btn-primary:hover:not(:disabled), .btn-danger:hover:not(:disabled) { filter: brightness(1.07); }
+.btn-quiet { background: var(--surface-2); color: var(--text); }
+/* toward the text color: darker on a light skin, lighter on a dark one */
+.btn-quiet:hover:not(:disabled) { background: color-mix(in srgb, var(--surface-2), var(--text) 8%); }
+/* ghost: a row action (delete), quiet until hovered */
+.btn-ghost {
+  height: auto; padding: 6px 10px;
+  font-size: 0.86em; font-weight: 500;
+  background: transparent; color: var(--text-muted);
+  border-color: transparent; box-shadow: none;
+}
+.btn-ghost:hover { color: var(--danger); background: var(--danger-soft); }
+.btn-ghost svg { width: 15px; height: 15px; }
+
+/* ---------- switch: a checkbox with role="switch" ---------- */
+
+.switch { display: inline-flex; align-items: center; gap: 10px; height: var(--control-h); cursor: pointer; user-select: none; font-size: 0.92em; }
+.switch input {
+  position: relative; flex: none;
+  width: 38px; height: 22px; margin: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--switch-radius);
+  transition: background-color 0.15s;
+}
+.switch input::before {
+  content: "";
+  position: absolute; top: 2px; left: 2px;
+  width: calc(18px - 2 * var(--border-width));
+  height: calc(18px - 2 * var(--border-width));
+  border-radius: var(--switch-radius);
+  background: var(--text-muted);
+  transition: transform 0.15s;
+}
+.switch input:checked { background: var(--accent); border-color: var(--control-border-on); }
+.switch input:checked::before { transform: translateX(16px); background: var(--accent-text); }
+.switch input:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- list and its rows ---------- */
+
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--list-gap); border-top: var(--list-rule); }
+/* wraps: at narrow widths the tag and the row action go to a second line instead of widening the page */
+.item {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  padding: var(--item-pad);
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-bottom: var(--item-rule);
+  border-radius: var(--item-radius);
+  box-shadow: var(--item-shadow);
+}
+/* the 120px basis keeps the text readable: the row's last items wrap before it narrows below it */
+.item-text { flex: 1 1 120px; min-width: 0; overflow-wrap: anywhere; }
+.item.is-done .item-text { color: var(--text-muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.empty {
+  padding: 28px 16px; text-align: center; color: var(--text-muted);
+  border: var(--border-width) dashed var(--border);
+  border-radius: var(--item-radius);
+}
+
+/* checkbox: the native control restyled, its tick drawn in CSS */
+.check {
+  flex: none; display: grid; place-items: center;
+  width: 20px; height: 20px; margin: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--check-radius);
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.check::after {
+  content: "";
+  width: 5px; height: 10px;
+  border: solid var(--accent-text); border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg) scale(0);
+  transition: transform 0.12s;
+}
+.check:checked { background: var(--accent); border-color: var(--control-border-on); }
+.check:checked::after { transform: translateY(-1px) rotate(45deg) scale(1); }
+.check:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- badge: a tag ---------- */
+
+.badge {
+  flex: none;
+  padding: 1px 10px;
+  line-height: 1.7;
+  font-size: 0.78em;
+  font-weight: 600;
+  text-transform: var(--badge-transform);
+  letter-spacing: var(--badge-tracking);
+  color: var(--accent-soft-text);
+  background: var(--accent-soft);
+  border: var(--badge-border);
+  border-radius: var(--badge-radius);
+}
+
+/* ---------- dialog: a native <dialog> opened with showModal() ---------- */
+
+.dialog {
+  width: min(400px, calc(100% - 32px));
+  padding: 24px;
+  color: var(--text);
+  background: var(--pop-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+.dialog::backdrop { background: var(--scrim); }
+.dialog[open] { display: grid; gap: 8px; animation: fade 0.15s ease-out; }
+.dialog h2 { margin: 0; font-family: var(--font-display); font-size: 1.3em; font-weight: var(--title-weight); text-transform: var(--title-transform); line-height: 1.2; }
+.dialog p { margin: 0; color: var(--text-muted); }
+.actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+@keyframes fade { from { opacity: 0; } }
+
+/* This application's own values for the skin's variables, loaded after skin.css (the selo plugin's
+   skins/README.md lists them). A dark-only value goes in a @media (prefers-color-scheme: dark) block.
+
+   Added tokens:
+   --warn, --warn-soft   amber, the second state colour the skin lacks (rose is its --danger)
+   --done                green, the dot of a finished job (sessions-live FR-10)
+   --font-mono           commands, branches, commit subjects
+   --working             sky blue, the pulsing dot of a running session; no lane's colour, not --mark's blue (sessions-live FR-10)
+   --lane-fastlane, --lane-autopilot   the lanes on the help page: lime, violet (help FR-11)
+   --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
+   --lane-free           a free request: slate; the four --lane-* also colour the type of work of a session (sessions-live FR-29)
+   --lane-mockup, --lane-iterate   the two flows beside the lanes, mockup first and the fastlane's iterate mode: fuchsia, orange (help FR-11, sessions-live FR-29); orange, not --warn's amber
+   --mark                a control that holds something of the person's (the session's note button): blue
+   --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage, --hue-next, --hue-trail   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia, violet, lime; --hue-next is also the next action's chip and button in the list (sessions-live FR-10)
+
+   --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
+   --bp-draft, --bp-ready, --bp-building, --bp-review, --bp-merging, --bp-done, --bp-legacy   a blueprint's state, the same in bars, legends, tags and tracks: lime, cyan, blue, violet, fuchsia, green, grey (projects FR-14); none is --mark, amber or rose
+   --delta-add, --delta-change, --delta-remove   a spec delta's lines added, changed, removed, in figures, bars and signs: green, yellow, red; no state colour
+   --hue-progress, --hue-blueprints, --hue-specs, --hue-ideas, --hue-debt   the icons of the projects page's sections: orange, teal, emerald, sky, stone
+   --spec-page, --spec-domain, --spec-blueprint   a page spec, a domain sheet, a blueprint, wherever one shows (app FR-04): indigo, pink, teal like the blueprint lane
+   The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
+   of that scheme, so the choice wins over the system's prefers-color-scheme. */
+:root {
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+  --warn: #d97706;
+  --done: #16a34a;
+  --warn-soft: rgba(217,119,6,.15);
+  --working: #0284c7;
+  --mark: #2563eb;
+  --lane-fastlane: #4d7c0f;
+  --lane-autopilot: #7c3aed;
+  --lane-blueprint: #0f766e;
+  --lane-free: #475569;
+  --lane-mockup: #c026d3;
+  --lane-iterate: #c2410c;
+  --hue-close: #047857;
+  --hue-recap: #be185d;
+  --hue-agents: #0e7490;
+  --hue-files: #4338ca;
+  --hue-usage: #a21caf;
+  --hue-next: #7c3aed;
+  --hue-trail: #4d7c0f;
+  --kind-input: #2563eb;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #7c3aed;
+  --kind-output: #16a34a;
+    --bp-draft: #65a30d;
+    --bp-ready: #0891b2;
+    --bp-building: #1d4ed8;
+    --bp-review: #7c3aed;
+    --bp-merging: #c026d3;
+    --bp-done: #16a34a;
+    --bp-legacy: #94a3b8;
+    --delta-add: #16a34a;
+    --delta-change: #ca8a04;
+    --delta-remove: #e11d48;
+    --hue-progress: #ea580c;
+    --hue-blueprints: #0d9488;
+    --hue-specs: #047857;
+    --hue-ideas: #0369a1;
+    --hue-debt: #78716c;
+    --spec-page: #4f46e5;
+    --spec-domain: #db2777;
+    --spec-blueprint: #0f766e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --warn: #fbbf24;
+    --done: #4ade80;
+    --warn-soft: rgba(251,191,36,.16);
+    --working: #38bdf8;
+    --mark: #93c5fd;
+    --lane-fastlane: #a3e635;
+    --lane-autopilot: #c4b5fd;
+    --lane-blueprint: #2dd4bf;
+    --lane-free: #94a3b8;
+    --lane-mockup: #f0abfc;
+    --lane-iterate: #fb923c;
+    --hue-close: #6ee7b7;
+    --hue-recap: #f9a8d4;
+    --hue-agents: #67e8f9;
+    --hue-files: #a5b4fc;
+    --hue-usage: #f0abfc;
+    --hue-next: #c4b5fd;
+    --hue-trail: #bef264;
+    --kind-input: #60a5fa;
+    --kind-cache-read: #a8a29e;
+    --kind-cache-write: #a78bfa;
+    --kind-output: #4ade80;
+    --bp-draft: #a3e635;
+    --bp-ready: #22d3ee;
+    --bp-building: #60a5fa;
+    --bp-review: #a78bfa;
+    --bp-merging: #e879f9;
+    --bp-done: #4ade80;
+    --bp-legacy: #64748b;
+    --delta-add: #4ade80;
+    --delta-change: #facc15;
+    --delta-remove: #fb7185;
+    --hue-progress: #fdba74;
+    --hue-blueprints: #5eead4;
+    --hue-specs: #6ee7b7;
+    --hue-ideas: #7dd3fc;
+    --hue-debt: #d6d3d1;
+    --spec-page: #a5b4fc;
+    --spec-domain: #f9a8d4;
+    --spec-blueprint: #2dd4bf;
+  }
+}
+
+:root[data-theme="light"] {
+  --bg: #eef3f4;
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(20,184,166,.28), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.20), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.20), transparent 70%);
+  --surface: rgba(255,255,255,.62);
+  --surface-2: rgba(255,255,255,.8);
+  --border: rgba(15,23,42,.09);
+  --text: #0f172a;
+  --text-muted: #55627a;
+  --accent: #0f9488;
+  --accent-text: #ffffff;
+  --accent-soft: rgba(15,148,136,.12);
+  --accent-soft-text: #0b6b62;
+  --danger: #e11d48;
+  --danger-soft: rgba(225,29,72,.1);
+  --danger-text: #ffffff;
+  --control-bg: rgba(255,255,255,.7);
+  --item-bg: rgba(255,255,255,.55);
+  --pop-bg: rgba(255,255,255,.95);
+  --scrim: rgba(15,17,22,.45);
+  --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
+  --warn: #d97706;
+  --done: #16a34a;
+  --warn-soft: rgba(217,119,6,.15);
+  --working: #0284c7;
+  --mark: #2563eb;
+  --lane-fastlane: #4d7c0f;
+  --lane-autopilot: #7c3aed;
+  --lane-blueprint: #0f766e;
+  --lane-free: #475569;
+  --lane-mockup: #c026d3;
+  --lane-iterate: #c2410c;
+  --hue-close: #047857;
+  --hue-recap: #be185d;
+  --hue-agents: #0e7490;
+  --hue-files: #4338ca;
+  --hue-usage: #a21caf;
+  --hue-next: #7c3aed;
+  --hue-trail: #4d7c0f;
+  --kind-input: #2563eb;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #7c3aed;
+  --kind-output: #16a34a;
+  --bp-draft: #65a30d;
+  --bp-ready: #0891b2;
+  --bp-building: #1d4ed8;
+  --bp-review: #7c3aed;
+  --bp-merging: #c026d3;
+  --bp-done: #16a34a;
+  --bp-legacy: #94a3b8;
+  --delta-add: #16a34a;
+  --delta-change: #ca8a04;
+  --delta-remove: #e11d48;
+  --hue-progress: #ea580c;
+  --hue-blueprints: #0d9488;
+  --hue-specs: #047857;
+  --hue-ideas: #0369a1;
+  --hue-debt: #78716c;
+  --spec-page: #4f46e5;
+  --spec-domain: #db2777;
+  --spec-blueprint: #0f766e;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #070b14;
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(45,212,191,.32), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.18), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.28), transparent 70%);
+  --surface: rgba(255,255,255,.06);
+  --surface-2: rgba(255,255,255,.1);
+  --border: rgba(255,255,255,.14);
+  --text: #eef2ff;
+  --text-muted: #a5adc8;
+  --accent: #5eead4;
+  --accent-text: #04201b;
+  --accent-soft: rgba(94,234,212,.14);
+  --accent-soft-text: #a7f3e4;
+  --danger: #fb7185;
+  --danger-soft: rgba(251,113,133,.14);
+  --danger-text: #2a0710;
+  --control-bg: rgba(0,0,0,.25);
+  --item-bg: rgba(255,255,255,.04);
+  --pop-bg: rgba(17,22,36,.92);
+  --scrim: rgba(3,6,12,.55);
+  --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+  --warn: #fbbf24;
+  --done: #4ade80;
+  --warn-soft: rgba(251,191,36,.16);
+  --working: #38bdf8;
+  --mark: #93c5fd;
+  --lane-fastlane: #a3e635;
+  --lane-autopilot: #c4b5fd;
+  --lane-blueprint: #2dd4bf;
+  --lane-free: #94a3b8;
+  --lane-mockup: #f0abfc;
+  --lane-iterate: #fb923c;
+  --hue-close: #6ee7b7;
+  --hue-recap: #f9a8d4;
+  --hue-agents: #67e8f9;
+  --hue-files: #a5b4fc;
+  --hue-usage: #f0abfc;
+  --hue-next: #c4b5fd;
+  --hue-trail: #bef264;
+  --kind-input: #60a5fa;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #a78bfa;
+  --kind-output: #4ade80;
+  --bp-draft: #a3e635;
+  --bp-ready: #22d3ee;
+  --bp-building: #60a5fa;
+  --bp-review: #a78bfa;
+  --bp-merging: #e879f9;
+  --bp-done: #4ade80;
+  --bp-legacy: #64748b;
+  --delta-add: #4ade80;
+  --delta-change: #facc15;
+  --delta-remove: #fb7185;
+  --hue-progress: #fdba74;
+  --hue-blueprints: #5eead4;
+  --hue-specs: #6ee7b7;
+  --hue-ideas: #7dd3fc;
+  --hue-debt: #d6d3d1;
+  --spec-page: #a5b4fc;
+  --spec-domain: #f9a8d4;
+  --spec-blueprint: #2dd4bf;
+  color-scheme: dark;
+}
+
+/* ---- Mockup frame ---- */
+body { padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.mk-intro { max-width: 1280px; margin: 0 auto 28px; }
+.mk-intro h1 { margin: 0 0 6px; font-size: 26px; font-weight: 500; letter-spacing: -0.02em; }
+.mk-intro p { margin: 0; color: var(--text-muted); max-width: 820px; }
+.plate { max-width: 1280px; margin: 0 auto 40px; }
+.plate > h2 { margin: 0 0 4px; font-size: 1.05em; font-weight: 600; }
+.plate > p { margin: 0 0 12px; font-size: 0.9em; color: var(--text-muted); max-width: 900px; }
+.scroller { overflow-x: auto; padding-bottom: 6px; }
+.frame { position: relative; overflow: hidden; border: var(--border-width) solid var(--border); border-radius: var(--radius-control); background-color: var(--bg); background-image: var(--bg-image); }
+.w1280 { width: 1280px; }
+.w360 { width: 360px; }
+.h720 { height: 800px; }
+.h760 { height: 840px; }
+.h780 { height: 780px; }
+.mobiles { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+.mobiles figure { margin: 0; }
+.mobiles figcaption { margin-top: 6px; font-size: 0.85em; color: var(--text-muted); max-width: 360px; }
+.mono { font-family: var(--font-mono); }
+svg.i { width: 15px; height: 15px; display: block; }
+
+/* ---- App shell, copied from the page ---- */
+.nav { display: flex; align-items: center; gap: 6px; padding: 12px 32px; }
+.nav .brand { font-weight: 600; font-size: 0.86em; letter-spacing: .04em; margin-right: 14px; }
+.nav .tab { padding: 5px 12px; font-size: 0.9em; border-radius: var(--radius-control); color: var(--text-muted); }
+.nav .tab.on { background: var(--surface-2); color: var(--text); font-weight: 600; }
+.nav .soon { font-size: 0.72em; padding: 1px 7px; border: var(--border-width) solid var(--border); border-radius: var(--radius-pill); color: var(--text-muted); margin-left: 4px; }
+.nav .grow { flex: 1; }
+.nav .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.86em; color: var(--text-muted); padding: 5px 10px; border: var(--border-width) solid var(--border); border-radius: var(--radius-control); }
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 10px 32px 10px; }
+.top .brandline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.top h1 { margin: 0; font-family: var(--font-display); font-size: var(--title-size); font-weight: var(--title-weight); letter-spacing: var(--title-tracking); line-height: 1.1; }
+.top .sub { margin: 0; font-size: 0.93em; color: var(--text-muted); display: flex; gap: 8px; align-items: center; }
+.top .sub b { color: var(--text); font-weight: 600; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
+.dot.done { background: var(--done); }
+.dot.run { background: var(--working); box-shadow: 0 0 0 3px color-mix(in srgb, var(--working) 25%, transparent); }
+.dot.turn { background: transparent; border: 2px solid var(--done); width: 9px; height: 9px; }
+.top .grow { flex: 1; }
+.top .meta { font-size: 0.8em; color: var(--text-muted); white-space: nowrap; }
+.top .plugins { font-family: var(--font-mono); }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; padding: 6px 32px 14px; font-size: 0.87em; color: var(--text-muted); }
+.seg { display: inline-flex; gap: 2px; height: calc(var(--control-h) - 4px); padding: 3px; background: var(--control-bg); border: var(--border-width) solid var(--control-border); border-radius: var(--radius-control); }
+.seg span { display: inline-flex; align-items: center; padding: 0 12px; border-radius: calc(var(--radius-control) - 3px); font-weight: 500; color: var(--text-muted); white-space: nowrap; }
+.seg span.on { color: var(--accent-soft-text); background: var(--accent-soft); font-weight: 600; }
+.bar .searchbox { margin-left: auto; width: 460px; height: var(--control-h); display: flex; align-items: center; gap: 8px; padding: 0 12px; background: var(--control-bg); border: var(--border-width) solid var(--control-border); border-radius: var(--radius-control); }
+.groups { display: grid; gap: 14px; padding: 0 32px 24px; }
+.group { padding: 4px 6px 6px; background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); box-shadow: var(--shadow-card); }
+.ghead { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 40px; padding: 4px 4px 4px 10px; }
+.ghead .name { font-weight: 600; }
+.ghead .gmeta { font-size: 0.83em; color: var(--text-muted); }
+.ghead .count { display: inline-flex; gap: 14px; margin-left: auto; font-size: 0.83em; color: var(--text-muted); align-items: center; }
+.ghead .count b { color: var(--text); font-weight: 600; }
+.row { display: grid; grid-template-columns: 128px 1fr auto auto; gap: 2px 14px; align-items: center; padding: 8px 10px; border-radius: var(--radius-control); background: var(--item-bg); border: var(--border-width) solid var(--border); margin-top: 6px; }
+.row.todo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+.badge2 { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; font-size: 0.75em; font-weight: 600; border-radius: var(--radius-pill); background: var(--surface-2); width: max-content; }
+.badge2.warn { background: var(--warn-soft); color: var(--warn); }
+.badge2.done { color: var(--done); }
+.badge2.run { color: var(--working); }
+.row .req { font-weight: 600; font-size: 0.92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .ctx { font-size: 0.83em; color: var(--text-muted); }
+.row .ctx.warn { color: var(--warn); }
+.row .lane { font-family: var(--font-mono); font-size: 0.8em; }
+.row .age { font-size: 0.8em; color: var(--text-muted); text-align: right; white-space: nowrap; }
+.row .acts { display: flex; gap: 2px; grid-row: span 2; }
+.icon { display: grid; place-items: center; width: calc(var(--control-h) - 8px); height: calc(var(--control-h) - 8px); padding: 0; background: transparent; border: 0; border-radius: calc(var(--radius-control) - 3px); color: var(--text-muted); cursor: pointer; }
+.icon:hover { color: var(--text); background: var(--surface-2); }
+.icon.accent { color: var(--accent); }
+.lane-free { color: var(--lane-free); } .lane-fastlane { color: var(--lane-fastlane); } .lane-blueprint { color: var(--lane-blueprint); } .lane-autopilot { color: var(--lane-autopilot); } .lane-mockup { color: var(--lane-mockup); } .lane-iterate { color: var(--lane-iterate); }
+
+/* ---- New: the two entry points ---- */
+.btn.sm { height: calc(var(--control-h) - 8px); padding: 0 12px 0 10px; gap: 7px; font-size: 0.87em; }
+.new-here { outline: 2px dashed color-mix(in srgb, var(--accent) 70%, transparent); outline-offset: 3px; }
+.plus-tip { position: absolute; z-index: 5; padding: 8px 12px; font-size: 0.85em; background: var(--pop-bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); box-shadow: var(--shadow-pop); white-space: nowrap; }
+
+/* ---- New: the « Nouvelle session » dialog ---- */
+.scrim { position: absolute; inset: 0; background: var(--scrim); display: grid; place-items: center; }
+.ns { width: 880px; max-height: calc(100% - 48px); display: flex; flex-direction: column; background: var(--pop-bg); border: var(--border-width) solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-pop); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); }
+.ns-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 16px 16px 16px 24px; border-bottom: var(--border-width) solid var(--border); }
+.ns-head h3 { margin: 0; font-family: var(--font-display); font-size: 1.3em; font-weight: var(--title-weight); line-height: 1.2; }
+.ns-head .in { color: var(--text-muted); }
+.ns-head .select-wrap { width: 190px; }
+.ns-head .select { height: calc(var(--control-h) - 6px); font-weight: 600; }
+.ns-head .path { font-family: var(--font-mono); font-size: 0.78em; color: var(--text-muted); }
+.ns-head .grow { flex: 1; }
+.ns-body { display: grid; grid-template-columns: 290px 1fr; min-height: 0; flex: 1; }
+.lanes { padding: 14px 12px 14px 14px; border-right: var(--border-width) solid var(--border); overflow: auto; display: flex; flex-direction: column; gap: 2px; }
+.lanes .gl { font-size: var(--label-size); font-weight: var(--label-weight); color: var(--text-muted); padding: 8px 10px 2px; }
+.lanes .gl:first-child { padding-top: 2px; }
+.ln { position: relative; display: grid; gap: 0; width: 100%; padding: 6px 10px 6px 14px; font: inherit; text-align: left; color: var(--text); background: transparent; border: 0; border-radius: var(--radius-control); cursor: pointer; }
+.ln:hover { background: var(--surface-2); }
+.ln[aria-checked="true"] { background: var(--surface-2); box-shadow: inset 0 0 0 var(--border-width) var(--border); }
+.ln[aria-checked="true"]::before { content: ""; position: absolute; left: 4px; top: 8px; bottom: 8px; width: 3px; border-radius: 3px; background: var(--c); }
+.ln .lt { display: flex; align-items: baseline; gap: 8px; font-weight: 600; font-size: 0.93em; }
+.ln .sk { font-family: var(--font-mono); font-size: 0.78em; font-weight: 500; color: var(--c); }
+.ln .lw { font-size: 0.8em; color: var(--text-muted); line-height: 1.35; }
+.ln .cnt { margin-left: auto; font-size: 0.75em; font-weight: 500; color: var(--text-muted); }
+.ln:disabled { opacity: .5; cursor: not-allowed; }
+.lanes .unsure { margin-top: auto; padding: 12px 10px 2px; font-size: 0.82em; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+.lanes .unsure a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.form { padding: 18px 24px 8px; overflow: auto; display: grid; gap: 18px; align-content: start; }
+.form .lead { margin: -4px 0 0; font-size: 0.88em; color: var(--text-muted); }
+.form .lead b { color: var(--text); font-weight: 600; }
+textarea.input { height: auto; min-height: 92px; padding: 10px 12px; line-height: 1.45; resize: vertical; }
+.opts { display: grid; gap: 2px; }
+.opt { display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; align-items: center; padding: 8px 12px; border-radius: var(--radius-control); background: var(--item-bg); border: var(--border-width) solid var(--border); }
+.opt .on-label { font-size: 0.92em; font-weight: 500; }
+.opt .desc { grid-column: 1; font-size: 0.8em; color: var(--text-muted); line-height: 1.35; }
+.opt .flag { font-family: var(--font-mono); font-size: 0.78em; color: var(--text-muted); margin-left: 6px; font-weight: 400; }
+.opt .ctl { grid-column: 2; grid-row: 1 / span 2; }
+.opt .switch { height: auto; }
+.opt .select-wrap { width: 250px; }
+.opt .select { height: calc(var(--control-h) - 6px); font-size: 0.9em; }
+.opt .num { width: 70px; height: calc(var(--control-h) - 6px); }
+.opt.off .on-label, .opt.off .desc { opacity: .55; }
+.cmd { display: flex; align-items: flex-start; gap: 10px; padding: 8px 6px 8px 12px; background: var(--control-bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); }
+.cmd code { flex: 1; min-width: 0; padding-top: 5px; font-family: var(--font-mono); font-size: 0.84em; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cmd .f { color: var(--text-muted); }
+.cmd .ph { color: var(--text-muted); font-style: italic; }
+.bps { display: grid; gap: 4px; }
+.bp { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 12px; align-items: center; padding: 8px 12px; border-radius: var(--radius-control); background: var(--item-bg); border: var(--border-width) solid var(--border); cursor: pointer; }
+.bp.sel { border-color: var(--control-border-on); background: var(--accent-soft); }
+.bp .radio { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--control-border); grid-row: span 2; }
+.bp.sel .radio { border: 5px solid var(--accent); }
+.bp .bt { font-weight: 600; font-size: 0.92em; }
+.bp .bf { font-family: var(--font-mono); font-size: 0.78em; color: var(--text-muted); grid-column: 2; }
+.bp .st { grid-row: span 2; font-size: 0.75em; font-weight: 600; padding: 2px 9px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--c); display: inline-flex; gap: 6px; align-items: center; }
+.bp .st::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+.ns-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 14px 16px 14px 24px; border-top: var(--border-width) solid var(--border); }
+.ns-foot .hint { flex: 1; min-width: 220px; font-size: 0.82em; color: var(--text-muted); }
+.ns-foot .hint b { color: var(--text); font-weight: 600; }
+kbd { font-family: var(--font-mono); font-size: 0.85em; padding: 1px 6px; border: var(--border-width) solid var(--border); border-bottom-width: 2px; border-radius: 6px; background: var(--surface-2); color: var(--text); }
+.toast { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; width: max-content; max-width: 600px; padding: 10px 8px 10px 10px; font-size: 0.9em; background: var(--pop-bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); box-shadow: var(--shadow-pop); overflow: hidden; }
+.toast .ti { flex: none; display: grid; place-items: center; width: 32px; height: 32px; color: var(--done); background: var(--surface-2); border: var(--border-width) solid var(--border); border-radius: var(--radius-pill); }
+.toast .tb { display: grid; gap: 2px; }
+.toast .tt { font-weight: 600; }
+.toast .tx { color: var(--text-muted); font-size: 0.95em; }
+.toast .timer { position: absolute; left: 0; bottom: 0; width: 62%; height: 2px; background: var(--text); opacity: .35; }
+
+/* ---- 360 px ---- */
+.w360 .nav { padding: 10px 16px; flex-wrap: wrap; }
+.w360 .top { padding: 6px 16px 8px; }
+.w360 .top h1 { font-size: 30px; }
+.w360 .groups { padding: 0 12px 16px; }
+.w360 .row { grid-template-columns: 1fr auto; }
+.w360 .ghead { padding-left: 8px; }
+.ns.phone { width: 100%; height: 100%; max-height: none; border-radius: 0; border: 0; }
+.ns.phone .ns-head { padding: 12px 8px 12px 16px; }
+.ns.phone .ns-head .select-wrap { width: 100%; }
+.ns.phone .ns-body { grid-template-columns: 1fr; overflow: auto; }
+.ns.phone .lanes { border-right: 0; padding: 10px 8px; }
+.ns.phone .form { padding: 14px 16px 8px; }
+.ns.phone .ns-foot { padding: 12px 16px; }
+.ns.phone .ns-foot .btn { flex: 1; }
+.ns.phone .ns-foot .hint { min-width: 100%; }
+.backline { display: flex; align-items: center; gap: 6px; font-size: 0.9em; }
+.backline .sk { font-family: var(--font-mono); font-size: 0.85em; }
+</style>
+<div class="mk-intro">
+  <h1>Nouvelle session — maquette</h1>
+  <p>Sessions live : un bouton « Nouvelle session » dans l’en-tête de la page et un « + » sur chaque bloc de projet ouvrent la même fenêtre. On choisit ce qu’on veut faire, la commande selo se compose sous nos yeux, « Copier et ouvrir » la copie et ouvre Claude Desktop dans le dossier du projet. Les ajouts sont entourés de pointillés sur la première planche.</p>
+</div>
+
+<!-- ============ Plate 1 ============ -->
+<section class="plate">
+  <h2>1 · Les deux entrées, 1280 px</h2>
+  <p>« Nouvelle session » en fin de ligne du titre, toujours là quel que soit le regroupement : elle ouvre la fenêtre sur le projet de la session la plus récente. Le « + » d’un bloc l’ouvre sur ce projet-là ; au survol il dit lequel.</p>
+  <div class="scroller"><div class="frame w1280" style="height:560px">
+    <div class="nav">
+      <span class="brand">SELO OPS</span><span class="tab on">Live</span><span class="tab">Projets</span><span class="tab">Debug<span class="soon">Bientôt</span></span>
+      <span class="grow"></span><span class="pill">Aide</span><span class="pill">Notifications</span><span class="pill">Clair · <b>Sombre</b></span>
+    </div>
+    <div class="top">
+      <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
+      <span class="grow"></span>
+      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta">Mis à jour il y a 2 s</span>
+      <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
+    </div>
+    <div class="bar">
+      Affichage <span class="seg"><span class="on">Liste</span><span>Cartes</span></span>
+      Regrouper <span class="seg"><span class="on">Par projet</span><span>Par statut</span><span>Aucun</span></span>
+      <span class="seg"><span>Projets : <b style="color:var(--text)">&nbsp;Tous</b></span></span>
+      <span>☐ Afficher les fermées (17)</span>
+      <span class="searchbox">Rechercher : demande, blueprint, branche, projet</span>
+    </div>
+    <div class="groups">
+      <div class="group">
+        <div class="ghead">
+          <span class="name">webapp-factory</span><span class="gmeta mono">main</span><span class="gmeta">· 6 fichiers non commités</span>
+          <span class="count"><b>1 à traiter</b><span>2 sessions</span>
+            <span style="position:relative">
+              <button class="icon new-here" aria-label="Nouvelle session dans webapp-factory" style="background:var(--surface-2);color:var(--text)"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+              <span class="plus-tip" style="right:-6px;top:40px">Nouvelle session dans webapp-factory</span>
+            </span>
+          </span>
+        </div>
+        <div class="row todo">
+          <span class="badge2 warn"><span class="dot"></span>Commit à valider</span>
+          <span class="req">Passer le mode itératif de la fastlane en champ du manifeste</span>
+          <span class="age">1 min</span>
+          <span class="acts"><button class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></button><button class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button><button class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button></span>
+          <span class="lane lane-fastlane">fastlane</span>
+          <span class="ctx warn mono">feat(selo-ops): 2.7.0 — a fastlane’s iterate mode, as a field</span>
+          <span class="age">15,2 M</span>
+        </div>
+        <div class="row">
+          <span class="badge2 done"><span class="dot turn"></span>Tour terminé</span>
+          <span class="req">Pourquoi le hook de commit ne voit pas la ligne Spec ?</span>
+          <span class="age">il y a 19 min</span>
+          <span class="acts"><button class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></button><button class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button><button class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button></span>
+          <span class="lane lane-free">libre</span><span class="ctx">Rien d’attendu</span><span class="age">4,1 M</span>
+        </div>
+      </div>
+      <div class="group">
+        <div class="ghead">
+          <span class="name">selo-ops</span><span class="gmeta mono">heads/main</span><span class="gmeta">· rien à commiter</span>
+          <span class="count"><span>3 sessions</span>
+            <button class="icon new-here" aria-label="Nouvelle session dans selo-ops"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+          </span>
+        </div>
+        <div class="row">
+          <span class="badge2 run"><span class="dot run"></span>En cours</span>
+          <span class="req">Signaler une session comme importante, avec ses propres notifications</span>
+          <span class="age">14 s</span>
+          <span class="acts"><button class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></button><button class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button><button class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button></span>
+          <span class="lane lane-fastlane">fastlane</span><span class="ctx">Étape 2 · tests du web</span><span class="age">746 k</span>
+        </div>
+        <div class="row">
+          <span class="badge2 done"><span class="dot done"></span>Job done</span>
+          <span class="req">Déroulé du tour : la durée à côté de la ligne qu’elle mesure</span>
+          <span class="age">il y a 6 min</span>
+          <span class="acts"><button class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></button><button class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button><button class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button></span>
+          <span class="lane lane-fastlane">fastlane</span><span class="ctx">Rien d’attendu</span><span class="age">6,7 M</span>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ Plate 2 : fastlane ============ -->
+<section class="plate">
+  <h2>2 · La fenêtre, choix « Changer quelque chose », 1280 px</h2>
+  <p>Une seule fenêtre, sans étapes : à gauche ce qu’on veut faire, dit avec des mots et le nom du skill dans la couleur de sa lane ; à droite le formulaire de ce choix. La commande se met à jour à chaque frappe. Ouverte, la fenêtre pointe sur « Confier à l’agent » (planche 4), le champ Demande a le focus ; <kbd>Ctrl</kbd> <kbd>↵</kbd> vaut « Copier et ouvrir ».</p>
+  <div class="scroller"><div class="frame w1280 h760"><div class="scrim">
+    <div class="ns">
+      <div class="ns-head">
+        <h3>Nouvelle session</h3><span class="in">dans</span>
+        <div class="select-wrap"><select class="select"><option>selo-ops</option></select></div>
+        <span class="path">C:\WS\ia-projects\selo-ops</span>
+        <span class="grow"></span>
+        <button class="icon" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="ns-body">
+        <nav class="lanes" role="radiogroup" aria-label="Que veux-tu faire ?">
+          <div class="gl">Faire</div>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-autopilot)"><span class="lt">Confier à l’agent <span class="sk">autopilot</span></span><span class="lw">Il choisit fastlane ou blueprint et va au bout, sans question.</span></button>
+          <button class="ln" role="radio" aria-checked="true" style="--c:var(--lane-fastlane)"><span class="lt">Changer quelque chose <span class="sk">fastlane</span></span><span class="lw">Une page ou un composant, sans nouvelle entité ni règle.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-mockup)"><span class="lt">Voir avant de coder <span class="sk">mockup</span></span><span class="lw">Une maquette, itérée jusqu’à validation.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-blueprint)"><span class="lt">Concevoir une évolution <span class="sk">blueprint</span></span><span class="lw">Nouvelle page, entité ou règle, ou plusieurs pages.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-blueprint)"><span class="lt">Construire un blueprint <span class="sk">build</span><span class="cnt">2</span></span><span class="lw">Un blueprint commité, étape par étape.</span></button>
+          <div class="gl">Questionner et vérifier</div>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Me faire questionner <span class="sk">grill</span></span><span class="lw">Deux tours de questions sur une demande.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Relire du travail <span class="sk">review</span></span><span class="lw">Le travail en cours, un blueprint ou une page.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Tester dans le navigateur <span class="sk">try</span></span><span class="lw">La démo lancée, cliquée, puis arrêtée.</span></button>
+          <div class="gl">Sans skill</div>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-free)"><span class="lt">Session libre <span class="sk">libre</span></span><span class="lw">Ta demande telle quelle, sans skill.</span></button>
+          <div class="unsure"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17h.01"/></svg>Pas sûr ? <a href="#">Le guide de choix</a></div>
+        </nav>
+        <div class="form">
+          <p class="lead"><b>Fastlane</b> : un changement sur une page ou un composant, testé, relu et commité. Elle s’arrête et propose un blueprint si elle croise une nouvelle entité ou règle.</p>
+          <label class="field"><span class="label">Demande</span>
+            <textarea class="input">Dans la barre de réglages, ajouter un filtre par type de travail (libre, fastlane, blueprint, autopilot), mémorisé dans le navigateur.</textarea>
+          </label>
+          <div class="field"><span class="label">Options</span>
+            <div class="opts">
+              <div class="opt"><span class="on-label">Mode itératif<span class="flag">— iterate</span></span><span class="ctl"><label class="switch"><input type="checkbox" role="switch" aria-label="Mode itératif"></label></span><span class="desc">Tu enchaînes les changements sur l’app lancée ; tests, revue et commit une fois que tu valides.</span></div>
+              <div class="opt"><span class="on-label">Sans test navigateur<span class="flag">— no browser</span></span><span class="ctl"><label class="switch"><input type="checkbox" role="switch" checked aria-label="Sans test navigateur"></label></span><span class="desc">Saute le test dans le navigateur à la fin.</span></div>
+              <div class="opt"><span class="on-label">D’après une maquette<span class="flag">— mockup</span></span><span class="ctl"><span class="select-wrap"><select class="select"><option>Aucune</option><option>2026-10-24-new-session.html</option></select></span></span><span class="desc">Construit et compare le résultat avec une maquette validée.</span></div>
+            </div>
+          </div>
+          <div class="field"><span class="label">Commande</span>
+            <div class="cmd"><code><span class="lane-fastlane">/selo:fastlane</span> Dans la barre de réglages, ajouter un filtre par type de travail (libre, fastlane, blueprint, autopilot), mémorisé dans le navigateur. <span class="f">— no browser</span></code>
+              <button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div>
+          </div>
+        </div>
+      </div>
+      <div class="ns-foot">
+        <span class="hint">Ouvre Claude Desktop dans <b>selo-ops</b>, la commande pré-remplie et copiée · <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
+        <button class="btn btn-quiet">Annuler</button>
+        <button class="btn btn-primary"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============ Plate 3 : build ============ -->
+<section class="plate">
+  <h2>3 · Choix « Construire un blueprint », 1280 px</h2>
+  <p>Pas de demande à écrire : on choisit un blueprint du projet, prêt ou en construction (une reprise). Le compteur à côté du choix dit combien il y en a ; à zéro, le choix est grisé avec « Aucun blueprint prêt ».</p>
+  <div class="scroller"><div class="frame w1280 h720"><div class="scrim">
+    <div class="ns">
+      <div class="ns-head">
+        <h3>Nouvelle session</h3><span class="in">dans</span>
+        <div class="select-wrap"><select class="select"><option>selo-ops</option></select></div>
+        <span class="path">C:\WS\ia-projects\selo-ops</span>
+        <span class="grow"></span>
+        <button class="icon" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="ns-body">
+        <nav class="lanes" role="radiogroup" aria-label="Que veux-tu faire ?">
+          <div class="gl">Faire</div>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-autopilot)"><span class="lt">Confier à l’agent <span class="sk">autopilot</span></span><span class="lw">Il choisit fastlane ou blueprint et va au bout, sans question.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-fastlane)"><span class="lt">Changer quelque chose <span class="sk">fastlane</span></span><span class="lw">Une page ou un composant, sans nouvelle entité ni règle.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-mockup)"><span class="lt">Voir avant de coder <span class="sk">mockup</span></span><span class="lw">Une maquette, itérée jusqu’à validation.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-blueprint)"><span class="lt">Concevoir une évolution <span class="sk">blueprint</span></span><span class="lw">Nouvelle page, entité ou règle, ou plusieurs pages.</span></button>
+          <button class="ln" role="radio" aria-checked="true" style="--c:var(--lane-blueprint)"><span class="lt">Construire un blueprint <span class="sk">build</span><span class="cnt">2</span></span><span class="lw">Un blueprint commité, étape par étape.</span></button>
+          <div class="gl">Questionner et vérifier</div>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Me faire questionner <span class="sk">grill</span></span><span class="lw">Deux tours de questions sur une demande.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Relire du travail <span class="sk">review</span></span><span class="lw">Le travail en cours, un blueprint ou une page.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Tester dans le navigateur <span class="sk">try</span></span><span class="lw">La démo lancée, cliquée, puis arrêtée.</span></button>
+          <div class="gl">Sans skill</div>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-free)"><span class="lt">Session libre <span class="sk">libre</span></span><span class="lw">Ta demande telle quelle, sans skill.</span></button>
+        </nav>
+        <div class="form">
+          <p class="lead"><b>Build</b> : construit un blueprint commité, une étape par composant, puis la revue, les suites, le test navigateur et le delta de spec fusionné.</p>
+          <div class="field"><span class="label">Blueprint</span>
+            <div class="bps" role="radiogroup">
+              <div class="bp sel" role="radio" aria-checked="true"><span class="radio"></span><span class="bt">Démarrer une session sur un skill</span><span class="st" style="--c:var(--bp-ready)">Prêt</span><span class="bf">2026-10-24-new-session.md</span></div>
+              <div class="bp" role="radio" aria-checked="false"><span class="radio"></span><span class="bt">Journal des livraisons par jour</span><span class="st" style="--c:var(--bp-building)">En construction · étape 2/3</span><span class="bf">2026-10-23-delivery-journal.md</span></div>
+            </div>
+          </div>
+          <div class="field"><span class="label">Options</span>
+            <div class="opts">
+              <div class="opt"><span class="on-label">Une seule étape<span class="flag">— stage N</span></span><span class="ctl" style="display:flex;gap:10px;align-items:center"><input class="input num" type="number" value="1" disabled><label class="switch"><input type="checkbox" role="switch" aria-label="Une seule étape"></label></span><span class="desc">Construit l’étape choisie et s’arrête.</span></div>
+              <div class="opt"><span class="on-label">Sans test navigateur<span class="flag">— no browser</span></span><span class="ctl"><label class="switch"><input type="checkbox" role="switch" aria-label="Sans test navigateur"></label></span><span class="desc">Saute le test dans le navigateur à la fin.</span></div>
+            </div>
+          </div>
+          <div class="field"><span class="label">Commande</span>
+            <div class="cmd"><code><span class="lane-blueprint">/selo:build</span> .planning/blueprints/2026-10-24-new-session.md</code>
+              <button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div>
+          </div>
+        </div>
+      </div>
+      <div class="ns-foot">
+        <span class="hint">Ouvre Claude Desktop dans <b>selo-ops</b>, la commande pré-remplie et copiée · <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
+        <button class="btn btn-quiet">Annuler</button>
+        <button class="btn btn-primary"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============ Plate 4 : autopilot ============ -->
+<section class="plate">
+  <h2>4 · Choix par défaut « Confier à l’agent », 1280 px</h2>
+  <p>L’autopilot part d’une demande ou d’un blueprint. « Lane » laisse l’agent choisir par défaut ; « S’arrêter au blueprint » n’a de sens que hors fastlane, il est grisé quand Fastlane est choisie.</p>
+  <div class="scroller"><div class="frame w1280 h760"><div class="scrim">
+    <div class="ns">
+      <div class="ns-head">
+        <h3>Nouvelle session</h3><span class="in">dans</span>
+        <div class="select-wrap"><select class="select"><option>webapp-factory</option></select></div>
+        <span class="path">C:\WS\webapp-factory</span>
+        <span class="grow"></span>
+        <button class="icon" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="ns-body">
+        <nav class="lanes" role="radiogroup" aria-label="Que veux-tu faire ?">
+          <div class="gl">Faire</div>
+          <button class="ln" role="radio" aria-checked="true" style="--c:var(--lane-autopilot)"><span class="lt">Confier à l’agent <span class="sk">autopilot</span></span><span class="lw">Il choisit fastlane ou blueprint et va au bout, sans question.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-fastlane)"><span class="lt">Changer quelque chose <span class="sk">fastlane</span></span><span class="lw">Une page ou un composant, sans nouvelle entité ni règle.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-mockup)"><span class="lt">Voir avant de coder <span class="sk">mockup</span></span><span class="lw">Une maquette, itérée jusqu’à validation.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-blueprint)"><span class="lt">Concevoir une évolution <span class="sk">blueprint</span></span><span class="lw">Nouvelle page, entité ou règle, ou plusieurs pages.</span></button>
+          <button class="ln" role="radio" aria-checked="false" disabled style="--c:var(--lane-blueprint)"><span class="lt">Construire un blueprint <span class="sk">build</span><span class="cnt">0</span></span><span class="lw">Aucun blueprint prêt dans ce projet.</span></button>
+          <div class="gl">Questionner et vérifier</div>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Me faire questionner <span class="sk">grill</span></span><span class="lw">Deux tours de questions sur une demande.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Relire du travail <span class="sk">review</span></span><span class="lw">Le travail en cours, un blueprint ou une page.</span></button>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Tester dans le navigateur <span class="sk">try</span></span><span class="lw">La démo lancée, cliquée, puis arrêtée.</span></button>
+          <div class="gl">Sans skill</div>
+          <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-free)"><span class="lt">Session libre <span class="sk">libre</span></span><span class="lw">Ta demande telle quelle, sans skill.</span></button>
+        </nav>
+        <div class="form">
+          <p class="lead"><b>Autopilot</b> : l’agent choisit la fastlane ou le blueprint et mène la demande jusqu’au travail fini, sans poser de question.</p>
+          <div class="field"><span class="label">Partir de</span>
+            <span class="seg" style="width:max-content"><span class="on">Une demande</span><span>Un blueprint</span></span>
+          </div>
+          <label class="field"><span class="label">Demande</span>
+            <textarea class="input">Archiver d’un coup toutes les sessions Job done d’un projet, depuis l’en-tête de son bloc.</textarea>
+          </label>
+          <div class="field"><span class="label">Options</span>
+            <div class="opts">
+              <div class="opt"><span class="on-label">Lane<span class="flag">— fastlane · — blueprint</span></span><span class="ctl"><span class="seg"><span class="on">Au choix de l’agent</span><span>Fastlane</span><span>Blueprint</span></span></span><span class="desc">Force la lane au lieu de laisser l’agent la choisir.</span></div>
+              <div class="opt"><span class="on-label">S’arrêter au blueprint<span class="flag">— until blueprint</span></span><span class="ctl"><label class="switch"><input type="checkbox" role="switch" aria-label="S’arrêter au blueprint"></label></span><span class="desc">Écrit et commite le blueprint, puis rend la main.</span></div>
+              <div class="opt"><span class="on-label">Sans test navigateur<span class="flag">— no browser</span></span><span class="ctl"><label class="switch"><input type="checkbox" role="switch" aria-label="Sans test navigateur"></label></span><span class="desc">Saute le test dans le navigateur à la fin.</span></div>
+            </div>
+          </div>
+          <div class="field"><span class="label">Commande</span>
+            <div class="cmd"><code><span class="lane-autopilot">/selo:autopilot</span> Archiver d’un coup toutes les sessions Job done d’un projet, depuis l’en-tête de son bloc.</code>
+              <button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div>
+          </div>
+        </div>
+      </div>
+      <div class="ns-foot">
+        <span class="hint">Ouvre Claude Desktop dans <b>webapp-factory</b>, la commande pré-remplie et copiée · <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
+        <button class="btn btn-quiet">Annuler</button>
+        <button class="btn btn-primary"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============ Plate 5 : after the click ============ -->
+<section class="plate">
+  <h2>5 · Après « Copier et ouvrir », 1280 px</h2>
+  <p>La fenêtre se ferme, Claude Desktop prend le premier plan. Revenu sur le dashboard, un toast rappelle les deux gestes qui restent. La commande est pré-remplie dans Claude Desktop ; le presse-papier sert de secours si le champ arrive vide. La nouvelle session apparaît dans son bloc au prochain rafraîchissement, une fois le prompt envoyé.</p>
+  <div class="scroller"><div class="frame w1280" style="height:300px">
+    <div class="top" style="padding-top:22px">
+      <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
+      <span class="grow"></span><span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span><span class="meta">Mis à jour il y a 1 s</span>
+      <button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
+    </div>
+    <div class="toast">
+      <span class="ti"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-10"/></svg></span>
+      <span class="tb"><span class="tt">Claude Desktop s’ouvre dans selo-ops</span><span class="tx">Confirme le dossier, puis <kbd>↵</kbd> : la commande est déjà dans le champ, et copiée au cas où.</span></span>
+      <button class="btn btn-quiet sm">Rouvrir</button>
+      <button class="icon" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <span class="timer"></span>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ Plate 6 : 360 ============ -->
+<section class="plate">
+  <h2>6 · À 360 px</h2>
+  <p>Le bouton d’en-tête devient une icône « + » à côté du titre. La fenêtre couvre l’écran et se fait en deux temps : la liste des choix, puis le formulaire, avec un retour. Les boutons restent en bas.</p>
+  <div class="mobiles">
+    <figure><div class="frame w360 h780">
+      <div class="nav"><span class="brand">SELO OPS</span><span class="tab on">Live</span><span class="tab">Projets</span></div>
+      <div class="top">
+        <div class="brandline"><h1>Sessions live</h1></div><span class="grow"></span>
+        <button class="icon new-here" aria-label="Nouvelle session" style="background:var(--surface-2);color:var(--text)"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <p class="sub" style="width:100%">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p>
+      </div>
+      <div class="groups">
+        <div class="group">
+          <div class="ghead"><span class="name">webapp-factory</span><span class="gmeta mono">main</span>
+            <span class="count"><b>1 à traiter</b><button class="icon new-here" aria-label="Nouvelle session dans webapp-factory"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></span></div>
+          <div class="row todo"><span class="badge2 warn"><span class="dot"></span>Commit à valider</span><span class="age">1 min</span><span class="req" style="grid-column:1/-1">Passer le mode itératif de la fastlane…</span></div>
+          <div class="row"><span class="badge2 done"><span class="dot turn"></span>Tour terminé</span><span class="age">19 min</span><span class="req" style="grid-column:1/-1">Pourquoi le hook de commit ne voit pas…</span></div>
+        </div>
+        <div class="group">
+          <div class="ghead"><span class="name">selo-ops</span><span class="gmeta mono">heads/main</span>
+            <span class="count"><span>3 sessions</span><button class="icon new-here" aria-label="Nouvelle session dans selo-ops"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></span></div>
+          <div class="row"><span class="badge2 run"><span class="dot run"></span>En cours</span><span class="age">14 s</span><span class="req" style="grid-column:1/-1">Signaler une session comme importante…</span></div>
+        </div>
+      </div>
+    </div><figcaption>La page, avec les deux entrées.</figcaption></figure>
+
+    <figure><div class="frame w360 h780">
+      <div class="ns phone">
+        <div class="ns-head">
+          <h3>Nouvelle session</h3><span class="grow"></span>
+          <button class="icon" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <div class="select-wrap"><select class="select"><option>selo-ops</option></select></div>
+        </div>
+        <div class="ns-body">
+          <nav class="lanes" role="radiogroup" aria-label="Que veux-tu faire ?">
+            <div class="gl">Faire</div>
+            <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-autopilot)"><span class="lt">Confier à l’agent <span class="sk">autopilot</span></span><span class="lw">Il choisit fastlane ou blueprint et va au bout, sans question.</span></button>
+            <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-fastlane)"><span class="lt">Changer quelque chose <span class="sk">fastlane</span></span><span class="lw">Une page ou un composant, sans nouvelle entité ni règle.</span></button>
+            <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-mockup)"><span class="lt">Voir avant de coder <span class="sk">mockup</span></span><span class="lw">Une maquette, itérée jusqu’à validation.</span></button>
+            <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-blueprint)"><span class="lt">Concevoir une évolution <span class="sk">blueprint</span></span><span class="lw">Nouvelle page, entité ou règle, ou plusieurs pages.</span></button>
+            <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-blueprint)"><span class="lt">Construire un blueprint <span class="sk">build</span><span class="cnt">2</span></span><span class="lw">Un blueprint commité, étape par étape.</span></button>
+            <div class="gl">Questionner et vérifier</div>
+            <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Me faire questionner <span class="sk">grill</span></span></button>
+            <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Relire du travail <span class="sk">review</span></span></button>
+            <button class="ln" role="radio" aria-checked="false" style="--c:var(--text-muted)"><span class="lt">Tester dans le navigateur <span class="sk">try</span></span></button>
+            <div class="gl">Sans skill</div>
+            <button class="ln" role="radio" aria-checked="false" style="--c:var(--lane-free)"><span class="lt">Session libre <span class="sk">libre</span></span></button>
+          </nav>
+        </div>
+      </div>
+    </div><figcaption>Premier temps : que veux-tu faire ? Un appui ouvre le formulaire.</figcaption></figure>
+
+    <figure><div class="frame w360 h780">
+      <div class="ns phone">
+        <div class="ns-head">
+          <button class="icon" aria-label="Retour aux choix"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <span class="backline"><b>Changer quelque chose</b><span class="sk lane-fastlane">fastlane</span></span><span class="grow"></span>
+          <button class="icon" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+        <div class="ns-body">
+          <div class="form">
+            <p class="lead">Dans <b>selo-ops</b>. Un changement sur une page ou un composant, testé, relu et commité.</p>
+            <label class="field"><span class="label">Demande</span><textarea class="input" placeholder="Ce que tu veux changer, en une phrase ou plus"></textarea></label>
+            <div class="field"><span class="label">Options</span>
+              <div class="opts">
+                <div class="opt"><span class="on-label">Mode itératif</span><span class="ctl"><label class="switch"><input type="checkbox" role="switch" aria-label="Mode itératif"></label></span><span class="desc">Commit une fois que tu valides.</span></div>
+                <div class="opt"><span class="on-label">Sans test navigateur</span><span class="ctl"><label class="switch"><input type="checkbox" role="switch" aria-label="Sans test navigateur"></label></span><span class="desc">Saute le test à la fin.</span></div>
+              </div>
+            </div>
+            <div class="field"><span class="label">Commande</span><div class="cmd"><code><span class="lane-fastlane">/selo:fastlane</span> <span class="ph">ta demande</span></code></div></div>
+          </div>
+        </div>
+        <div class="ns-foot">
+          <span class="hint">Écris la demande pour lancer.</span>
+          <button class="btn btn-quiet">Copier</button>
+          <button class="btn btn-primary" disabled>Copier et ouvrir</button>
+        </div>
+      </div>
+    </div><figcaption>Second temps, demande vide : « Copier et ouvrir » attend la demande.</figcaption></figure>
+  </div>
+</section>

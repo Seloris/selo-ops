@@ -1,0 +1,7 @@
+.area {
+  height: auto;
+  min-height: calc(var(--control-h) * 2.3);
+  padding: 10px 12px;
+  line-height: 1.45;
+  resize: vertical;
+}

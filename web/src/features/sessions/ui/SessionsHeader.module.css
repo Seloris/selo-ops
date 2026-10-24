@@ -76,3 +76,9 @@
     padding: 14px 16px 8px;
   }
 }
+
+@media (max-width: 640px) {
+  .newLabel {
+    display: none;
+  }
+}

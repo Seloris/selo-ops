@@ -19,6 +19,7 @@ import {
   countsOf,
   groupSessions,
   isFinished,
+  isOpen,
   openCountByProject,
   type Block,
   type Bucket,
@@ -31,7 +32,10 @@ import { useArchiveSessionMutation } from "../data/useArchiveSessionMutation.ts"
 import { useSessionsQuery } from "../data/useSessionsQuery.ts";
 import { useSaveNoteMutation } from "../data/useSaveNoteMutation.ts";
 import { useUnarchiveSessionMutation } from "../data/useUnarchiveSessionMutation.ts";
+import { useProjectsQuery } from "../../projects/data/useProjectsQuery.ts";
 import { BlockedCommand } from "../ui/BlockedCommand.tsx";
+import { NewSessionDialog } from "../ui/NewSessionDialog.tsx";
+import { newSessionLink, type ProjectOverview } from "../ui/newSession.ts";
 import { SessionCards } from "../ui/SessionCards.tsx";
 import { parseFoldedSections, toggleSection, type FoldedSections } from "../ui/detailSections.ts";
 import { SessionDetail } from "../ui/SessionDetail.tsx";
@@ -79,6 +83,16 @@ interface ToastState {
   hint?: string;
   // A command the browser refused to copy: shown selected, to copy by hand.
   blockedCommand?: string;
+  // sessions-live FR-46: the new session's link, opened again by « Rouvrir ».
+  reopenLink?: string;
+}
+
+// sessions-live FR-20 and FR-46: a link click, not a page navigation, so a browser with no handler for `claude://`
+// keeps the dashboard.
+function openLink(link: string) {
+  const anchor = document.createElement("a");
+  anchor.href = link;
+  anchor.click();
 }
 
 export function SessionsLivePage() {
@@ -102,7 +116,10 @@ export function SessionsLivePage() {
   const [archiveAsked, setArchiveAsked] = useState<Session | null>(null);
   // sessions-live FR-40: the session whose note is being written.
   const [noteFor, setNoteFor] = useState<Session | null>(null);
-  const isDialogOpen = noteFor !== null || archiveAsked !== null;
+  // sessions-live FR-43: the « Nouvelle session » window, open on the project holding this folder (null: the first).
+  const [newSession, setNewSession] = useState<{ folder: string | null } | null>(null);
+  const projectsQuery = useProjectsQuery({ enabled: newSession !== null });
+  const isDialogOpen = noteFor !== null || archiveAsked !== null || newSession !== null;
 
   const [isResizing, setResizing] = useState(false);
   // sessions-live FR-37: the detail alone on the screen, header and settings hidden, the browser in full screen
@@ -221,10 +238,7 @@ export function SessionsLivePage() {
         void copy(resumeCommand(s), t("sessions.toast.resumeCopied"), t("sessions.toast.resumeHint", { folder: s.folder }));
         return;
       }
-      // A link click, not a page navigation: a browser with no handler for `claude://` keeps the dashboard.
-      const anchor = document.createElement("a");
-      anchor.href = link;
-      anchor.click();
+      openLink(link);
       showToast({ title: t("sessions.toast.desktopOpening"), isOpened: true });
     },
     onToggleNext: (id) =>
@@ -280,8 +294,37 @@ export function SessionsLivePage() {
       <SessionCards sessions={list} showProject={showProject} projectName={projectName} now={now} selectedId={selectedId} nextShown={nextShown} outdatedIds={outdatedIds} actions={actions} />
     );
 
+  // sessions-live FR-46: the command copied as well, in case the desktop app opens with an empty field.
+  const openNewSession = async (command: string, project: ProjectOverview, folder: string) => {
+    const isCopied = await copyText(command);
+    const link = newSessionLink(command, folder);
+    setNewSession(null);
+    openLink(link);
+    showToast({
+      title: t("sessions.toast.newOpening", { project: project.name }),
+      hint: t(isCopied ? "sessions.toast.newOpeningHint" : "sessions.toast.newOpeningNoCopy"),
+      isOpened: true,
+      reopenLink: link,
+    });
+  };
+
+  // sessions-live FR-43: the header's button opens on the project of the most recently updated open session; one
+  // outside selo has no project the export holds.
+  const latestFolder = sessions.filter((s) => isOpen(s) && !s.isOutsideSelo).reduce<Session | null>((latest, s) => (latest === null || s.updatedAt > latest.updatedAt ? s : latest), null)?.folder ?? null;
+
   const blockHeader = (b: Block, project: Project | undefined) => {
-    if (b.kind === "project" && project) return <ProjectHeader project={project} count={b.sessions.length} todoCount={b.todoCount} />;
+    if (b.kind === "project" && project) {
+      // sessions-live FR-12: a block only sessions outside selo show has no project the export holds, so no « + ».
+      const selo = b.sessions.find((s) => !s.isOutsideSelo);
+      return (
+        <ProjectHeader
+          project={project}
+          count={b.sessions.length}
+          todoCount={b.todoCount}
+          onNewSession={selo ? () => setNewSession({ folder: selo.folder }) : undefined}
+        />
+      );
+    }
     if (b.kind === "status") return <StatusHeader bucket={b.key as Bucket} count={b.sessions.length} />;
     return null;
   };
@@ -308,6 +351,7 @@ export function SessionsLivePage() {
           updatedSeconds={updatedSeconds}
           isRefreshing={query.isFetching}
           plugins={pluginsText(query.data?.plugins ?? [])}
+          onNewSession={() => setNewSession({ folder: latestFolder })}
         />
       )}
       {!isOnlyDetail && <SettingsBar
@@ -411,6 +455,16 @@ export function SessionsLivePage() {
           onClose={() => setNoteFor(null)}
         />
       )}
+      {newSession && (
+        <NewSessionDialog
+          projects={projectsQuery.data?.projects ?? null}
+          error={projectsQuery.isError ? projectsQuery.error.message || t("sessions.toast.failedUnknown") : null}
+          folder={newSession.folder}
+          onCopy={copyText}
+          onOpen={(command, project, folder) => void openNewSession(command, project, folder)}
+          onClose={() => setNewSession(null)}
+        />
+      )}
       {toast && (
         <Toast
           key={toast.id}
@@ -423,6 +477,13 @@ export function SessionsLivePage() {
         >
           {toast.blockedCommand && <BlockedCommand command={toast.blockedCommand} />}
           {toast.hint && <span className={styles.hint}>{toast.hint}</span>}
+          {toast.reopenLink && (
+            <span>
+              <Button size="sm" onClick={() => toast.reopenLink && openLink(toast.reopenLink)}>
+                {t("sessions.toast.reopen")}
+              </Button>
+            </span>
+          )}
         </Toast>
       )}
     </div>

@@ -1,5 +1,6 @@
 import { t, tn } from "../../../shared/lib/i18n/index.ts";
-import { RefreshIcon } from "../../../shared/ui/icons.tsx";
+import { Button } from "../../../shared/ui/Button.tsx";
+import { PlusIcon, RefreshIcon } from "../../../shared/ui/icons.tsx";
 import { PageTitle } from "../../../shared/ui/PageTitle.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import type { Counts } from "../data/sessionView.ts";
@@ -11,12 +12,14 @@ export function SessionsHeader({
   updatedSeconds,
   isRefreshing,
   plugins,
+  onNewSession,
 }: {
   counts: Counts | null;
   updatedSeconds: number | null;
   isRefreshing: boolean;
   // The installed selo plugins' versions, already worded; null when unknown.
   plugins: string | null;
+  onNewSession(): void;
 }) {
   return (
     <div className={styles.top}>
@@ -48,6 +51,11 @@ export function SessionsHeader({
           {t("sessions.updated.text", { seconds: updatedSeconds })}
         </span>
       )}
+      {/* sessions-live FR-43: below 640 px, its icon alone. */}
+      <Button size="sm" aria-label={t("sessions.new.open")} title={t("sessions.new.open")} onClick={onNewSession}>
+        <PlusIcon />
+        <span className={styles.newLabel}>{t("sessions.new.open")}</span>
+      </Button>
     </div>
   );
 }
