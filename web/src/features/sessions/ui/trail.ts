@@ -28,9 +28,9 @@ const durationsOf = (trail: TrailEntry[]) =>
     return next ? Date.parse(next.at) - Date.parse(e.at) : null;
   });
 
-const SKILL_LANES: Readonly<Record<string, string>> = { fastlane: "fastlane", blueprint: "blueprint", build: "blueprint", autopilot: "autopilot" };
+const SKILL_LANES: Readonly<Record<string, string>> = { fastlane: "fastlane", blueprint: "blueprint", build: "blueprint", autopilot: "autopilot", mockup: "mockup" };
 
-// A line's skill in its lane's colour (sessions-live FR-29's tokens); neutral for the others.
+// A line's skill in its lane's colour, mockup in its flow's (sessions-live FR-29's tokens); neutral for the others.
 export const skillColor = (skill: string | null): string | undefined =>
   skill && SKILL_LANES[skill] ? `var(--lane-${SKILL_LANES[skill]})` : undefined;
 

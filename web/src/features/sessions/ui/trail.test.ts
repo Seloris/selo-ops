@@ -3,12 +3,12 @@ import type { Session } from "../data/sessionView.ts";
 import { hasTrail, MAX_WEIGHT, skillColor, trailLines, waitingText, type TrailEntry } from "./trail.ts";
 
 describe("skillColor", () => {
-  it("colours the lane skills, build as a blueprint, and leaves the others neutral", () => {
+  it("colours the lane skills, build as a blueprint, mockup as its flow, and leaves the others neutral", () => {
     // Act
-    const colors = ["fastlane", "blueprint", "build", "autopilot", "review", null].map(skillColor);
+    const colors = ["fastlane", "blueprint", "build", "autopilot", "mockup", "review", null].map(skillColor);
 
     // Assert
-    expect(colors).toEqual(["var(--lane-fastlane)", "var(--lane-blueprint)", "var(--lane-blueprint)", "var(--lane-autopilot)", undefined, undefined]);
+    expect(colors).toEqual(["var(--lane-fastlane)", "var(--lane-blueprint)", "var(--lane-blueprint)", "var(--lane-autopilot)", "var(--lane-mockup)", undefined, undefined]);
   });
 });
 

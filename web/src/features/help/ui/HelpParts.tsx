@@ -6,11 +6,11 @@ import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { SpecChip, SpecIcon, specColor, type SpecKind } from "../../../shared/ui/SpecKind.tsx";
-import type { DecisionGuide, FlowStep, HelpTab, Lane, LaneId, LifecycleStep, Role, Rule, Section, Skill, SpecUnit, StripStep, Term, TreeNode } from "../content.ts";
+import type { ColourId, DecisionGuide, FlowStep, HelpTab, Lane, LaneId, LifecycleStep, Role, Rule, Section, Skill, SpecUnit, StripStep, Term, TreeNode } from "../content.ts";
 import styles from "./HelpParts.module.css";
 
 // help FR-11: a lane's class sets --lane, which its card, name and dot read.
-const laneClass = (lane: LaneId) => styles[`lane-${lane}`];
+const laneClass = (lane: ColourId) => styles[`lane-${lane}`];
 
 function LaneName({ lane }: { lane: Lane }) {
   return <strong className={`${styles.laneName} ${laneClass(lane.id)}`}>{t(lane.name)}</strong>;
@@ -79,7 +79,7 @@ export function SubTitle({ text }: { text: MessageKey }) {
   return <h3 className={styles.subTitle}>{t(text)}</h3>;
 }
 
-export function LaneList({ lanes }: { lanes: Lane[] }) {
+export function LaneList({ lanes }: { lanes: Lane<ColourId>[] }) {
   return (
     <ul className={styles.cards}>
       {lanes.map((lane) => (
@@ -90,6 +90,7 @@ export function LaneList({ lanes }: { lanes: Lane[] }) {
               {t(lane.name)}
             </h3>
             <Labelled label="help.lanes.when">{t(lane.when)}</Labelled>
+            {lane.loop && <Labelled label="help.flows.loop">{t(lane.loop)}</Labelled>}
             <div className={styles.codes} aria-label={t("help.lanes.prompt")}>
               {lane.prompts.map((prompt) => (
                 <Code key={prompt} text={prompt} />

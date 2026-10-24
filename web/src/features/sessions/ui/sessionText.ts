@@ -21,23 +21,38 @@ export const stateLabel = (s: Session) => t(`sessions.state.${s.state}` as Messa
 
 const flowLabel = (flow: string) => (flow === "free" ? t("sessions.lane.free") : flow);
 
-// `session` BR-22: the run's flow, then the skill running when it is another; a session outside selo (`session` BR-12)
-// reads « hors selo ».
-export function workLabel(s: Pick<Session, "isOutsideSelo" | "flow" | "skill">): string {
+// `session` BR-22: a fastlane run whose request carries ` — iterate`, while its loop runs: the loop marks `code` once,
+// its end marks `tests` first. shortcut: read from the request, cut at 200 characters by the export, so a longer one
+// loses its option; upgrade once the export writes the run's mode.
+const ITERATE = /(^|\s)— iterate(\s|$)/;
+
+export const isIterating = (s: Pick<Session, "flow" | "request" | "step">): boolean =>
+  s.flow === "fastlane" && ITERATE.test(s.request) && (s.step === null || s.step === "code");
+
+type WorkOf = Pick<Session, "isOutsideSelo" | "flow" | "skill" | "request" | "step">;
+
+// `session` BR-22: the run's flow, then the skill running when it is another, or « itération » in a fastlane's loop;
+// a session outside selo (`session` BR-12) reads « hors selo ».
+export function workLabel(s: WorkOf): string {
   if (s.isOutsideSelo) return t("sessions.lane.outside");
   const flow = flowLabel(s.flow);
+  if (isIterating(s)) return `${flow} › ${t("sessions.lane.iterate")}`;
   return s.skill && s.skill !== s.flow ? `${flow} › ${s.skill}` : flow;
 }
 
 // sessions-live FR-11: the row's second line under the badge — the type of work, then the project when shown.
-export const metaText = (s: Pick<Session, "isOutsideSelo" | "flow" | "skill">, project: string | null): string =>
+export const metaText = (s: WorkOf, project: string | null): string =>
   project === null ? workLabel(s) : `${workLabel(s)} · ${project}`;
 
 const LANES: ReadonlySet<string> = new Set(["free", "fastlane", "blueprint", "autopilot"]);
 
-// sessions-live FR-29: the type of work in its lane's colour, the help's; neutral outside selo or for an unknown flow.
-export function laneColor(s: Pick<Session, "isOutsideSelo" | "flow">): string | undefined {
-  return !s.isOutsideSelo && LANES.has(s.flow) ? `var(--lane-${s.flow})` : undefined;
+// sessions-live FR-29: the type of work in its lane's colour, the help's, a mockup or a fastlane's loop in its flow's;
+// neutral outside selo or for an unknown flow.
+export function laneColor(s: WorkOf): string | undefined {
+  if (s.isOutsideSelo) return undefined;
+  if (isIterating(s)) return "var(--lane-iterate)";
+  if (s.skill === "mockup") return "var(--lane-mockup)";
+  return LANES.has(s.flow) ? `var(--lane-${s.flow})` : undefined;
 }
 
 export const blockerLabel = (b: Session["blockers"][number]) => t(`sessions.blocker.${b}` as MessageKey);

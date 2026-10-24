@@ -7,6 +7,7 @@ import {
   decisionGuide,
   idKinds,
   idRules,
+  flows,
   lanes,
   lanesById,
   lifecycleSteps,
@@ -69,7 +70,7 @@ export function HelpContent() {
   );
 }
 
-// help FR-01 to FR-05, FR-08, FR-15.
+// help FR-01 to FR-05, FR-08, FR-15, FR-17.
 function GuideTab() {
   return (
     <>
@@ -77,6 +78,9 @@ function GuideTab() {
 
       <HelpSection section={sections.lanes} intro="help.lanes.intro">
         <LaneList lanes={lanes} />
+        <SubTitle text="help.flows.title" />
+        <Note text="help.flows.intro" />
+        <LaneList lanes={flows} />
         <SubTitle text="help.guide.title" />
         <Note text="help.guide.intro" />
         <DecisionGuideList guide={decisionGuide} lanesById={lanesById} />

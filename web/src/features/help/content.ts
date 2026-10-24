@@ -20,12 +20,19 @@ export const sectionOrder: Section[] = [sections.lanes, sections.lifecycle, sect
 
 export type LaneId = "fastlane" | "blueprint" | "autopilot";
 
-export interface Lane {
-  id: LaneId;
+// help FR-17: the two flows beside the lanes, each in a colour of its own (help FR-11).
+export type FlowId = "mockup" | "iterate";
+
+export type ColourId = LaneId | FlowId;
+
+export interface Lane<Id extends ColourId = LaneId> {
+  id: Id;
   name: MessageKey;
   short: MessageKey;
   when: MessageKey;
   prompts: MessageKey[];
+  // A flow's loop, turn by turn, and how it ends.
+  loop?: MessageKey;
 }
 
 export const lanesById: Record<LaneId, Lane> = {
@@ -53,6 +60,15 @@ export const lanesById: Record<LaneId, Lane> = {
 };
 
 export const lanes: Lane[] = [lanesById.fastlane, lanesById.blueprint, lanesById.autopilot];
+
+export const flows: Lane<FlowId>[] = (["mockup", "iterate"] as const).map((id) => ({
+  id,
+  name: `help.flows.${id}.name`,
+  short: `help.flows.${id}.name`,
+  when: `help.flows.${id}.when`,
+  prompts: id === "mockup" ? ["help.flows.mockup.prompt", "help.flows.mockup.promptNext"] : ["help.flows.iterate.prompt"],
+  loop: `help.flows.${id}.loop`,
+}));
 
 // help FR-03: each question answered yes ends on its lane; no goes to the next one, the last no ends on `otherwise`.
 export interface DecisionGuide {
@@ -97,8 +113,8 @@ export interface Skill {
   when: MessageKey;
   prompt: MessageKey;
   options: MessageKey[];
-  // help FR-11: the skill that runs a lane wears its colour (build runs the blueprint lane).
-  lane?: LaneId;
+  // help FR-11: the skill that runs a lane or a flow wears its colour (build runs the blueprint lane).
+  lane?: ColourId;
 }
 
 // help FR-06: one card per skill.
@@ -109,7 +125,7 @@ export const skills: Skill[] = [
     when: "help.skills.fastlane.when",
     prompt: "help.skills.fastlane.prompt",
     lane: "fastlane",
-    options: ["help.options.noBrowser", "help.options.autonomous"],
+    options: ["help.options.iterate", "help.options.mockup", "help.options.noBrowser", "help.options.autonomous"],
   },
   {
     name: "help.skills.blueprint.name",
@@ -117,7 +133,7 @@ export const skills: Skill[] = [
     when: "help.skills.blueprint.when",
     prompt: "help.skills.blueprint.prompt",
     lane: "blueprint",
-    options: ["help.options.blueprintRevise", "help.options.autonomous"],
+    options: ["help.options.blueprintRevise", "help.options.mockup", "help.options.autonomous"],
   },
   {
     name: "help.skills.build.name",
@@ -134,6 +150,14 @@ export const skills: Skill[] = [
     prompt: "help.skills.autopilot.prompt",
     lane: "autopilot",
     options: ["help.options.fastlane", "help.options.blueprint", "help.options.untilBlueprint", "help.options.noBrowser"],
+  },
+  {
+    name: "help.skills.mockup.name",
+    what: "help.skills.mockup.what",
+    when: "help.skills.mockup.when",
+    prompt: "help.skills.mockup.prompt",
+    lane: "mockup",
+    options: [],
   },
   {
     name: "help.skills.grill.name",

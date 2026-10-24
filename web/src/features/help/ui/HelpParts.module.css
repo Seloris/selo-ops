@@ -177,6 +177,14 @@
   --lane: var(--lane-autopilot);
 }
 
+.lane-mockup {
+  --lane: var(--lane-mockup);
+}
+
+.lane-iterate {
+  --lane: var(--lane-iterate);
+}
+
 .laneCell {
   position: relative;
   border-radius: var(--item-radius);

@@ -392,6 +392,18 @@ describe("workLabel", () => {
   ] as const)("reads flow %s and skill %s as « %s »", (flow, skill, label) => {
     expect(workLabel(buildSession({ flow, skill }))).toBe(label);
   });
+
+  it.each([
+    [null, "fastlane › itération"],
+    ["code", "fastlane › itération"],
+    ["tests", "fastlane"],
+  ] as const)("reads a fastlane's iterate loop at step %s as « %s »", (step, label) => {
+    expect(workLabel(buildSession({ flow: "fastlane", skill: "fastlane", request: "Resserrer la liste — iterate", step }))).toBe(label);
+  });
+
+  it("needs the option itself, not the word inside the request", () => {
+    expect(workLabel(buildSession({ flow: "fastlane", skill: "fastlane", request: "Itérer sur —iterate", step: null }))).toBe("fastlane");
+  });
 });
 
 describe("laneColor", () => {
@@ -400,6 +412,12 @@ describe("laneColor", () => {
     expect(laneColor(buildSession({ flow: "blueprint" }))).toBe("var(--lane-blueprint)");
     expect(laneColor(buildSession({ flow: "other" }))).toBeUndefined();
     expect(laneColor(buildSession({ isOutsideSelo: true }))).toBeUndefined();
+  });
+
+  it("takes the flow's token for a mockup and a fastlane's iterate loop", () => {
+    expect(laneColor(buildSession({ flow: "free", skill: "mockup" }))).toBe("var(--lane-mockup)");
+    expect(laneColor(buildSession({ flow: "fastlane", request: "Resserrer la liste — iterate", step: "code" }))).toBe("var(--lane-iterate)");
+    expect(laneColor(buildSession({ flow: "fastlane", request: "Resserrer la liste — iterate", step: "review" }))).toBe("var(--lane-fastlane)");
   });
 });
 
