@@ -250,8 +250,8 @@ export function SessionsLivePage() {
     onCopyNext: (s) =>
       void copy(s.nextAction ?? "", t("sessions.toast.nextCopied"), t("sessions.toast.nextHint", { project: projectName(s.projectId), lane: workLabel(s) })),
     onArchive: (s) => {
-      // sessions-live FR-22: a finished session archives at once, unless it holds a note.
-      if (isFinished(s) && !s.note) archiveNow(s.id);
+      // sessions-live FR-22: a finished session archives at once, unless it holds a note or is flagged.
+      if (isFinished(s) && !s.note && !flags.isFlagged(s.id)) archiveNow(s.id);
       else setArchiveAsked(s);
     },
     onUnarchive: (id) =>
@@ -429,9 +429,14 @@ export function SessionsLivePage() {
         message={
           !archiveAsked
             ? ""
-            : isFinished(archiveAsked)
-              ? t("sessions.archiveConfirm.messageNote")
-              : t("sessions.archiveConfirm.message", { state: stateLabel(archiveAsked) })
+            : [
+                flags.isFlagged(archiveAsked.id) && t("sessions.archiveConfirm.flagged"),
+                !isFinished(archiveAsked) && t("sessions.archiveConfirm.notDone", { state: stateLabel(archiveAsked) }),
+                archiveAsked.note && t("sessions.archiveConfirm.hasNote"),
+                t("sessions.archiveConfirm.after"),
+              ]
+                .filter(Boolean)
+                .join(" ")
         }
         confirmLabel={t("sessions.archiveConfirm.confirm")}
         cancelLabel={t("sessions.archiveConfirm.cancel")}
