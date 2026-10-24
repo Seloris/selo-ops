@@ -56,6 +56,8 @@ const runSchema = z.object({
   lane: z.string().nullish(),
   flow: z.string().nullish(),
   skill: z.string().nullish(),
+  // Since the plugin's 2.7.0 (`session` BR-22): `iterate` for a fastlane's iterate mode, else null.
+  mode: z.string().nullish(),
   trail: lenientArray(trailEntrySchema),
   trailCut: z.boolean().nullish().catch(null),
   request: z.string().nullish(),

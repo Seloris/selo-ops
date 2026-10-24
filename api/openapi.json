@@ -538,6 +538,12 @@
               "null"
             ]
           },
+          "mode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "trail": {
             "type": "array",
             "items": {
@@ -802,6 +808,7 @@
           "folder",
           "flow",
           "skill",
+          "mode",
           "trail",
           "isTrailCut",
           "request",

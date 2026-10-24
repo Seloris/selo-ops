@@ -87,6 +87,14 @@ function workOf(run: ExportRun): { flow: string; skill: string | null } {
   return { flow: LANE_FLOWS[lane] ?? "free", skill: run.skill ?? (SKILL_LANES.has(lane) ? lane : null) };
 }
 
+// `session` BR-22: an export older than 2.7.0 writes no mode; its run's request tells it, unless cut before the option.
+const ITERATE = /(^|\s)— iterate(\s|$)/;
+
+function modeOf(run: ExportRun, flow: string): string | null {
+  if (run.mode !== undefined) return run.mode;
+  return flow === "fastlane" && ITERATE.test(run.request ?? "") ? "iterate" : null;
+}
+
 function toSession(
   file: SessionFile,
   current: ExportRun,
@@ -102,6 +110,7 @@ function toSession(
   const isArchived = archive !== undefined && archive.runId === current.id;
   const ownProject = projectFiles.find((p) => norm(p.root) === norm(file.root));
   const { text, isCut } = cleanRequest(current.request ?? "");
+  const work = workOf(current);
   const since = Date.parse(current.since);
   const subagents = file.runs.filter((r) => r.agentId && Date.parse(r.since) >= since);
   const isClosed = file.status === "ended";
@@ -119,7 +128,8 @@ function toSession(
     projectId: projectIdOf(file, projectFiles),
     branch: ownProject?.branch ?? null,
     folder: file.root,
-    ...workOf(current),
+    ...work,
+    mode: modeOf(current, work.flow),
     trail: current.trail,
     isTrailCut: current.trailCut ?? false,
     request: text,
@@ -198,6 +208,7 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     folder: outside.folder,
     flow: "free",
     skill: null,
+    mode: null,
     trail: [],
     isTrailCut: false,
     request: prompt || (status.name ?? "").trim(),

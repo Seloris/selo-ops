@@ -67,6 +67,8 @@ export const sessionSchema = z
     // running now, null when none; an export older than 2.5.0 has them read from its lane.
     flow: z.string(),
     skill: z.string().nullable(),
+    // `session` BR-22: `iterate` for a fastlane run in its iterate mode, else null.
+    mode: z.string().nullable(),
     // sessions-live FR-41: the current run's history, oldest first; empty outside selo and before 2.5.0.
     trail: z.array(trailEntrySchema),
     // True once the export dropped the trail's oldest entries.

@@ -22,6 +22,8 @@ interface DemoSession {
   lane?: string;
   flow?: string;
   skill?: string;
+  // Since 2.7.0, a fastlane's iterate mode (`session` BR-22).
+  mode?: string;
   // The current run's trail: seconds ago, skill, step, substep, phase (sessions-live FR-41).
   trail?: [number, string | null, string | null, string | null, Phase][];
   trailCut?: boolean;
@@ -130,8 +132,9 @@ const SESSIONS: DemoSession[] = [
     model: OPUS, effort: "medium", perms: "default", blockers: ["not-done", "question", "dirty-files"],
     files: [".planning/mockups/2026-10-24-product-sheet.html"] },
   { id: "5a9d3e17-c240-4b8f-a6d1-7e0b2f94c58a", project: "selo-ops", flow: "fastlane", skill: "fastlane", phase: "awaiting-answer", age: 35,
-    trail: [[900, "fastlane", null, null, "working"], [780, "fastlane", "code", null, "awaiting-answer"], [600, "fastlane", "code", null, "working"], [35, "fastlane", "code", null, "awaiting-answer"]],
-    request: "Resserrer les lignes de la liste des sessions — iterate", step: "code",
+    mode: "iterate",
+    trail: [[900, "fastlane", null, null, "working"], [780, "fastlane", null, "code", "awaiting-answer"], [600, "fastlane", null, "code", "working"], [35, "fastlane", null, "code", "awaiting-answer"]],
+    request: "Resserrer les lignes de la liste des sessions", substep: "code",
     question: "Autre chose, ou on valide ?",
     model: OPUS, effort: "medium", perms: "acceptEdits", blockers: ["not-done", "question", "dirty-files"],
     files: ["web/src/features/sessions/ui/SessionList.module.css"] },
@@ -403,7 +406,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
     const since = at(s.age + 600);
     const current: ExportRun = {
       id: `${s.id}:1`, agentId: null, ...(s.lane === undefined ? {} : { lane: s.lane }), request: s.request, task: null, blueprint: s.blueprint ?? null,
-      ...(s.flow === undefined ? {} : { flow: s.flow, skill: s.skill ?? null }),
+      ...(s.flow === undefined ? {} : { flow: s.flow, skill: s.skill ?? null, mode: s.mode ?? null }),
       trail: (s.trail ?? []).map(([ago, skill, step, substep, phase]) => ({ at: at(ago), skill, step, substep, phase })),
       ...(s.trailCut === undefined ? {} : { trailCut: s.trailCut }),
       step: s.step ?? (s.flow === undefined ? s.lane : null), substep: s.substep ?? null, error: s.error ?? null, phase: s.phase,

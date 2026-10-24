@@ -121,4 +121,31 @@ describe("sessions routes — run trail", () => {
     // Assert
     expect(session.trail).toEqual([trail[0], trail[1]]);
   });
+
+  it.each([
+    ["the run's mode, written by 2.7.0", { mode: "iterate", request: "Resserrer la liste" }, "iterate"],
+    ["no mode, written by 2.7.0", { mode: null, request: "Resserrer la liste — iterate" }, null],
+    ["the request of a run written before 2.7.0", { request: "Resserrer la liste — iterate" }, "iterate"],
+    ["a request with no option, before 2.7.0", { request: "Itérer sur —iterate" }, null],
+  ] as const)("reads a fastlane's mode from %s", async (_, run, mode) => {
+    // Arrange
+    ctx.seed.session(buildSessionFile({ current: { ...buildRun({ flow: "fastlane", skill: "fastlane" }), ...run } }));
+
+    // Act
+    const session = await only();
+
+    // Assert
+    expect(session.mode).toBe(mode);
+  });
+
+  it("reads no mode for another flow's request carrying the option", async () => {
+    // Arrange
+    ctx.seed.session(buildSessionFile({ current: buildRun({ flow: "free", request: "Expliquer — iterate" }) }));
+
+    // Act
+    const session = await only();
+
+    // Assert
+    expect(session.mode).toBeNull();
+  });
 });
