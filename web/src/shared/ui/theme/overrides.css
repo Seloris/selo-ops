@@ -11,6 +11,7 @@
    --lane-free           a free request: slate; the four --lane-* also colour the type of work of a session (sessions-live FR-29)
    --lane-mockup, --lane-iterate   the two flows beside the lanes, mockup first and the fastlane's iterate mode: fuchsia, orange (help FR-11, sessions-live FR-29); orange, not --warn's amber
    --mark                a control that holds something of the person's (the session's note button): blue
+   --flag, --flag-soft   bright yellow, the flag of a flagged session (sessions-live FR-42); not --warn's amber
    --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage, --hue-next, --hue-trail   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia, violet, lime; --hue-next is also the next action's chip and button in the list (sessions-live FR-10)
 
    --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
@@ -25,6 +26,8 @@
   --warn: #d97706;
   --done: #16a34a;
   --warn-soft: rgba(217,119,6,.15);
+  --flag: #ca8a04;
+  --flag-soft: rgba(202,138,4,.16);
   --working: #0284c7;
   --mark: #2563eb;
   --lane-fastlane: #4d7c0f;
@@ -69,6 +72,8 @@
     --warn: #fbbf24;
     --done: #4ade80;
     --warn-soft: rgba(251,191,36,.16);
+    --flag: #facc15;
+    --flag-soft: rgba(250,204,21,.16);
     --working: #38bdf8;
     --mark: #93c5fd;
     --lane-fastlane: #a3e635;
@@ -132,6 +137,8 @@
   --warn: #d97706;
   --done: #16a34a;
   --warn-soft: rgba(217,119,6,.15);
+  --flag: #ca8a04;
+  --flag-soft: rgba(202,138,4,.16);
   --working: #0284c7;
   --mark: #2563eb;
   --lane-fastlane: #4d7c0f;
@@ -195,6 +202,8 @@
   --warn: #fbbf24;
   --done: #4ade80;
   --warn-soft: rgba(251,191,36,.16);
+  --flag: #facc15;
+  --flag-soft: rgba(250,204,21,.16);
   --working: #38bdf8;
   --mark: #93c5fd;
   --lane-fastlane: #a3e635;

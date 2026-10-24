@@ -5,13 +5,13 @@ import { FlagIcon } from "../../../shared/ui/icons.tsx";
 import { Switch } from "../../../shared/ui/Switch.tsx";
 import styles from "./FlagControls.module.css";
 
-// sessions-live FR-42: the flag, in the mark colour once set, so that it shows without hovering.
+// sessions-live FR-42: the flag, yellow on a yellow pill once set, so that it shows without hovering.
 export function FlagButton({ id, flags }: { id: string; flags: SessionFlags }) {
   const isFlagged = flags.isFlagged(id);
   return (
     <IconButton
       label={isFlagged ? t("sessions.actions.unflag") : t("sessions.actions.flag")}
-      tone={isFlagged ? "mark" : "muted"}
+      tone={isFlagged ? "flag" : "muted"}
       aria-pressed={isFlagged}
       onClick={() => flags.toggleFlag(id)}
     >

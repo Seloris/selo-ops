@@ -9,7 +9,7 @@ export function IconButton({
   tooltip,
   children,
   ...props
-}: { label: string; tone?: "muted" | "accent" | "mark"; tooltip?: ReactNode; children: ReactNode } & Omit<
+}: { label: string; tone?: "muted" | "accent" | "mark" | "flag"; tooltip?: ReactNode; children: ReactNode } & Omit<
   ComponentProps<"button">,
   "className" | "aria-label" | "title"
 >) {
