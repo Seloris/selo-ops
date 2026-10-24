@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useSearchParams } from "react-router";
+import { useSessionFlags } from "../../../shared/lib/flags.ts";
 import { copyText } from "../../../shared/lib/clipboard.ts";
 import { t } from "../../../shared/lib/i18n/index.ts";
 import { readStored, writeStored } from "../../../shared/lib/storage.ts";
@@ -82,6 +83,7 @@ interface ToastState {
 
 export function SessionsLivePage() {
   const query = useSessionsQuery();
+  const flags = useSessionFlags();
   const archive = useArchiveSessionMutation();
   const unarchive = useUnarchiveSessionMutation();
   const saveNote = useSaveNoteMutation();
@@ -244,6 +246,7 @@ export function SessionsLivePage() {
       saveNote.reset();
       setNoteFor(s);
     },
+    flags,
   };
 
   // The checked projects; null while none is unchecked (every project, the ones to come included).

@@ -437,6 +437,16 @@ export function SlidersIcon() {
   );
 }
 
+// Filled once the session is flagged (sessions-live FR-42).
+export function FlagIcon({ isFilled = false }: { isFilled?: boolean }) {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 22V15" />
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" fill={isFilled ? "currentColor" : "none"} />
+    </svg>
+  );
+}
+
 export function NoteIcon() {
   return (
     <svg {...iconProps}>

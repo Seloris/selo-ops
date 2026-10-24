@@ -1,10 +1,12 @@
 import type { CSSProperties } from "react";
+import type { SessionFlags } from "../../../shared/lib/flags.ts";
 import { t } from "../../../shared/lib/i18n/index.ts";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { NoteIcon, OpenIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
 import { AgeLabel, AwaitedIcon, FilesCount, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import { laneColor, requestText, rowContext, workLabel } from "./sessionText.ts";
+import { FlagButton } from "./FlagControls.tsx";
 import { NextButton } from "./NextAction.tsx";
 import { totalTokens } from "./usage.ts";
 import { TokenCount } from "./UsageParts.tsx";
@@ -18,6 +20,8 @@ export interface SessionActions {
   onArchive: (session: Session) => void;
   onUnarchive: (id: string) => void;
   onEditNote: (session: Session) => void;
+  // sessions-live FR-42: the flags, kept in the browser.
+  flags: SessionFlags;
 }
 
 // sessions-live FR-11: two lines per session — state, request and age, then type and project, the context and the counts.
@@ -71,6 +75,7 @@ export function SessionList({
             </button>
             <span className={styles.actions}>
               <NextButton session={s} onCopy={actions.onCopyNext} />
+              <FlagButton id={s.id} flags={actions.flags} />
               <IconButton
                 label={s.note ? t("sessions.actions.editNote") : t("sessions.actions.note")}
                 tone={s.note ? "mark" : "muted"}

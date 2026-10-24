@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { Outlet, ScrollRestoration, useLocation } from "react-router";
+import { useSessionFlags } from "../../../shared/lib/flags.ts";
 import { useNotifySetting } from "../../../shared/lib/notifications.ts";
 import { useTheme } from "../../../shared/lib/theme.ts";
 import { useStateNotifier } from "../data/useStateNotifier.ts";
@@ -11,7 +12,8 @@ import { AppHeader } from "../ui/AppHeader.tsx";
 export function AppLayout() {
   const [theme, setTheme] = useTheme();
   const notify = useNotifySetting();
-  useStateNotifier(notify.states);
+  const { notifyIds } = useSessionFlags();
+  useStateNotifier(notify.states, notifyIds);
   const { pathname } = useLocation();
   // The page the popup was opened on: on another page (back, forward), it is closed, never left over the new page.
   const [helpOpenOn, setHelpOpenOn] = useState<string | null>(null);

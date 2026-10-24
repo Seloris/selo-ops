@@ -14,6 +14,7 @@ import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
+import { FlagButton, NotifySwitch } from "./FlagControls.tsx";
 import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, laneColor, requestText, toneOf, workLabel, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 import extras from "./NextAction.module.css";
@@ -264,6 +265,7 @@ export function SessionDetail({
             <NoteIcon />
             {t("sessions.actions.note")}
           </Button>
+          <FlagButton id={s.id} flags={actions.flags} />
           {(s.canArchive || s.isArchived) && (
             <span className={extras.archive}>
               {s.canArchive && (
@@ -281,6 +283,7 @@ export function SessionDetail({
             </span>
           )}
         </div>
+        <NotifySwitch id={s.id} flags={actions.flags} />
       </div>
 
       {isFullscreen ? (

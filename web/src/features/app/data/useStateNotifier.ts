@@ -2,24 +2,30 @@ import { useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router";
 import { t } from "../../../shared/lib/i18n/index.ts";
 import type { SessionState } from "../../sessions/data/sessionView.ts";
-import { newlyWatched, watchedStates } from "../../sessions/data/stateAlerts.ts";
+import { newlyWatched, watchedBy, watchedStates } from "../../sessions/data/stateAlerts.ts";
 import { useSessionsQuery } from "../../sessions/data/useSessionsQuery.ts";
 import { requestText, stateLabel } from "../../sessions/ui/sessionText.ts";
 
-// app FR-05: a browser notification for each open session that enters a chosen state, on every page, tab hidden or not.
-export function useStateNotifier(states: string[]) {
+// app FR-05, FR-07: a browser notification for each open session that enters a chosen state, or for a flagged session
+// with its switch on that ends a turn or its job, on every page, tab hidden or not.
+export function useStateNotifier(states: string[], notifyIds: string[]) {
   const navigate = useNavigate();
-  const isOn = states.length > 0;
+  const isOn = states.length > 0 || notifyIds.length > 0;
   const statesKey = [...states].sort().join(",");
-  const watched = useMemo(() => new Set(statesKey.split(",") as SessionState[]), [statesKey]);
+  const idsKey = [...notifyIds].sort().join(",");
+  const choiceKey = `${statesKey}|${idsKey}`;
+  const watched = useMemo(
+    () => watchedBy(new Set(statesKey.split(",") as SessionState[]), new Set(idsKey.split(","))),
+    [statesKey, idsKey],
+  );
   const { data } = useSessionsQuery({ enabled: isOn, inBackground: true });
   const before = useRef<{ key: string; states: Map<string, SessionState> } | null>(null);
 
   useEffect(() => {
     if (!isOn || data === undefined) return;
     // A new choice starts from a fresh baseline: the sessions already in a chosen state raise nothing.
-    const raised = before.current?.key === statesKey ? newlyWatched(before.current.states, data.sessions, watched) : [];
-    before.current = { key: statesKey, states: watchedStates(data.sessions, watched) };
+    const raised = before.current?.key === choiceKey ? newlyWatched(before.current.states, data.sessions, watched) : [];
+    before.current = { key: choiceKey, states: watchedStates(data.sessions, watched) };
     if (document.hasFocus()) return;
     const projects = new Map(data.projects.map((p) => [p.id, p.name]));
     for (const s of raised) {
@@ -42,7 +48,7 @@ export function useStateNotifier(states: string[]) {
         notification.close();
       };
     }
-  }, [isOn, data, statesKey, watched, navigate]);
+  }, [isOn, data, choiceKey, watched, navigate]);
 
   // Turned off, the next turn on starts from a fresh baseline too.
   useEffect(() => {

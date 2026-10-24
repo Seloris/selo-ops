@@ -14,7 +14,7 @@ function readChosen(): string[] {
 // Storage may be blocked: the choice then lasts until the page reloads.
 let chosen = readChosen();
 
-const permissionNow = (): NotifyPermission => ("Notification" in window ? Notification.permission : "unsupported");
+export const permissionNow = (): NotifyPermission => ("Notification" in window ? Notification.permission : "unsupported");
 
 export interface NotifySetting {
   permission: NotifyPermission;

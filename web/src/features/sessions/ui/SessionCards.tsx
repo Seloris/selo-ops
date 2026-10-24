@@ -3,6 +3,7 @@ import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { ArchiveIcon, NoteIcon, OpenIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
 import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
+import { FlagButton, NotifySwitch } from "./FlagControls.tsx";
 import { AgeLabel, AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { awaitedOf, calmText, closeText, modelText, laneColor, requestText, workLabel } from "./sessionText.ts";
@@ -71,6 +72,11 @@ export function SessionCards({
                 <span className={styles.value}>{closeText(s)}</span>
               </span>
             </button>
+            {actions.flags.isFlagged(s.id) && actions.flags.permission !== "unsupported" && (
+              <div className={styles.command}>
+                <NotifySwitch id={s.id} flags={actions.flags} />
+              </div>
+            )}
             {isNextOpen && s.nextAction && (
               <div className={styles.command}>
                 <CommandBox command={s.nextAction} copyLabel={t("sessions.actions.copy")} onCopy={() => actions.onCopyNext(s)} />
@@ -91,6 +97,7 @@ export function SessionCards({
                 <NoteIcon />
                 {t("sessions.actions.note")}
               </Button>
+              <FlagButton id={s.id} flags={actions.flags} />
               {s.canArchive && (
                 <span className={styles.push}>
                   <Button size="sm" onClick={() => actions.onArchive(s)}>
