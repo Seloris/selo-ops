@@ -82,7 +82,7 @@ describe("sessions usage", () => {
       ]);
     });
 
-    it("still lists a session written before 2.2.0, with no usage", async () => {
+    it("still lists a session whose file has no usage", async () => {
       // Arrange
       const file = buildSessionFile();
       expect(Object.keys(file)).not.toContain("usage");

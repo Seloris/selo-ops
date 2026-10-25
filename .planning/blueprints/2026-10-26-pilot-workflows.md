@@ -38,6 +38,11 @@ Pages: `sessions-live`, `help` · Domain: `session` · Components: `api`, `web`
 - Token `--lane-autopilot` renamed `--lane-pilot`; help content and catalog keys follow the rename.
 - Demo seed: every session in the 2.8.0 shape (no lane-only run, no autopilot), an interactive pilot, an autonomous pilot on build, a job done with `Next:` lines; `api/openapi.json` regenerated.
 
+### Decided during build
+- Names of the next steps in the API → `nextSteps: [{ summary, command }]` on the session, read from the export's `next: [{ text, prompt }]` (the blueprint's words in the contract, the export's in the reader).
+- Demo's two pilots → the session waiting on a permission becomes the interactive « pilot › fastlane »; the autonomous one stopped on a question reads « pilot autonome › blueprint », beside the autonomous pilot on build.
+- Demo's versions → every exported session written by selo-ops 2.8.0, selo installed at 2.6.0 and 2.5.0 (the 2.8.0 shape; no session without a writer version left).
+
 ## Stages
 1. api — `feat(pilot-workflows): api — pilot flow, autonomous mode and the footer's next steps`
 2. web — `feat(pilot-workflows): web — pilot in sessions live, the new-session window and the help`
@@ -48,7 +53,7 @@ Pages: `sessions-live`, `help` · Domain: `session` · Components: `api`, `web`
 - browser: demo at 1280 and 375 px — pilot rows violet, the window's two pilot choices and their commands, a job done's next steps in the detail, the help's pilot lane and « Réglages » section.
 
 ## Progress
-- [ ] Stage 1 — api
+- [x] Stage 1 — api
 - [ ] Stage 2 — web
 - [ ] Review
 - [ ] Browser test

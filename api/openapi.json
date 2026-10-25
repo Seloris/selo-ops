@@ -671,6 +671,24 @@
               "null"
             ]
           },
+          "nextSteps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "summary": {
+                  "type": "string"
+                },
+                "command": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "summary",
+                "command"
+              ]
+            }
+          },
           "model": {
             "type": [
               "string",
@@ -830,6 +848,7 @@
           "recap",
           "commits",
           "nextAction",
+          "nextSteps",
           "model",
           "effort",
           "permissionMode",

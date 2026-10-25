@@ -39,7 +39,7 @@ describe("demo", () => {
     expect(res.status).toBe(200);
     const waiting = sessionsResponseSchema.parse(res.body).sessions.filter((s) => s.state === "awaiting-permission");
     expect(waiting).toHaveLength(1);
-    expect(waiting[0]).toMatchObject({ isOutsideSelo: false, flow: "fastlane", permissionTool: expect.stringMatching(/\S/) });
+    expect(waiting[0]).toMatchObject({ isOutsideSelo: false, flow: "pilot", skill: "fastlane", permissionTool: expect.stringMatching(/\S/) });
   });
 
   it("shows every case of usage the browser test needs", async () => {
@@ -62,7 +62,7 @@ describe("demo", () => {
     expect(sessions.find((s) => s.id === "d3b16f74-e0a9-4c25-87d1-4f9e2b6c0a58")?.model).toBe("claude-sonnet-5-5");
   });
 
-  it("lists sessions with and without a writer version, and selo installed at two versions", async () => {
+  it("lists every exported session with its writer version, and selo installed at two versions", async () => {
     // Arrange
     const app = await demoApp();
 
@@ -72,12 +72,27 @@ describe("demo", () => {
     // Assert
     const { sessions, plugins } = sessionsResponseSchema.parse(res.body);
     const exported = sessions.filter((s) => !s.isOutsideSelo);
-    expect(exported.some((s) => s.writtenBy !== null)).toBe(true);
-    expect(exported.some((s) => s.writtenBy === null)).toBe(true);
+    expect(exported.every((s) => s.writtenBy === "2.8.0")).toBe(true);
     expect(plugins).toEqual([
-      { name: "selo", versions: ["2.2.0", "2.1.0"] },
-      { name: "selo-ops", versions: ["2.2.1"] },
+      { name: "selo", versions: ["2.6.0", "2.5.0"] },
+      { name: "selo-ops", versions: ["2.8.0"] },
     ]);
+  });
+
+  it("shows an interactive pilot, an autonomous pilot on build and a job done with its next steps", async () => {
+    // Arrange
+    const app = await demoApp();
+
+    // Act
+    const res = await request(app).get("/v1/sessions");
+
+    // Assert
+    const { sessions } = sessionsResponseSchema.parse(res.body);
+    expect(sessions.some((s) => s.flow === "pilot" && s.mode === null)).toBe(true);
+    expect(sessions.some((s) => s.flow === "pilot" && s.mode === "autonomous" && s.skill === "build")).toBe(true);
+    expect(sessions.some((s) => s.flow === "autopilot")).toBe(false);
+    const done = sessions.find((s) => s.state === "job-done" && s.nextSteps.length >= 2);
+    expect(done?.nextSteps.map((n) => n.command)).toContain(done?.nextAction);
   });
 
   it("shows every blueprint state, a worktree's own blueprint, a project without planning and readable files", async () => {

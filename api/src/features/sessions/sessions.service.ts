@@ -76,25 +76,6 @@ function modelOf(file: SessionFile): string | null {
     .sort((a, b) => Date.parse(b.since) - Date.parse(a.since))[0];
   return latest ? topModelOf(latest) : null;
 }
-// `session` BR-22: an export older than 2.5.0 writes only a lane, which mixed the flow with the skill running.
-const LANE_FLOWS: Record<string, string> = { fastlane: "fastlane", blueprint: "blueprint", build: "blueprint", autopilot: "autopilot" };
-const SKILL_LANES = new Set(["fastlane", "blueprint", "build", "autopilot", "review", "try", "grill", "setup", "run"]);
-
-function workOf(run: ExportRun): { flow: string; skill: string | null } {
-  if (run.flow) return { flow: run.flow, skill: run.skill ?? null };
-  const lane = run.lane ?? "free";
-  // A run opened before 2.5.0 may get its skill from a 2.5.0 hook, its flow never.
-  return { flow: LANE_FLOWS[lane] ?? "free", skill: run.skill ?? (SKILL_LANES.has(lane) ? lane : null) };
-}
-
-// `session` BR-22: an export older than 2.7.0 writes no mode; its run's request tells it, unless cut before the option.
-const ITERATE = /(^|\s)— iterate(\s|$)/;
-
-function modeOf(run: ExportRun, flow: string): string | null {
-  if (run.mode !== undefined) return run.mode;
-  return flow === "fastlane" && ITERATE.test(run.request ?? "") ? "iterate" : null;
-}
-
 function toSession(
   file: SessionFile,
   current: ExportRun,
@@ -110,7 +91,6 @@ function toSession(
   const isArchived = archive !== undefined && archive.runId === current.id;
   const ownProject = projectFiles.find((p) => norm(p.root) === norm(file.root));
   const { text, isCut } = cleanRequest(current.request ?? "");
-  const work = workOf(current);
   const since = Date.parse(current.since);
   const subagents = file.runs.filter((r) => r.agentId && Date.parse(r.since) >= since);
   const isClosed = file.status === "ended";
@@ -128,8 +108,10 @@ function toSession(
     projectId: projectIdOf(file, projectFiles),
     branch: ownProject?.branch ?? null,
     folder: file.root,
-    ...work,
-    mode: modeOf(current, work.flow),
+    // `session` BR-22: a run with no flow is a free one.
+    flow: current.flow ?? "free",
+    skill: current.skill ?? null,
+    mode: current.mode ?? null,
     trail: current.trail,
     isTrailCut: current.trailCut ?? false,
     request: text,
@@ -150,7 +132,8 @@ function toSession(
     error: current.error ?? null,
     recap: current.recap?.text ?? null,
     commits: (current.commits ?? []).map(({ sha, subject }) => ({ sha, subject })),
-    nextAction: current.resumePrompt ?? null,
+    nextAction: current.resumePrompt ?? current.next[0]?.prompt ?? null,
+    nextSteps: current.next.map(({ text, prompt }) => ({ summary: text, command: prompt })),
     model: modelOf(file),
     effort: file.effort ?? null,
     permissionMode: file.permissionMode ?? null,
@@ -229,6 +212,7 @@ function toOutsideSession(outside: OutsideSession, archive: SessionArchive | und
     recap: null,
     commits: [],
     nextAction: null,
+    nextSteps: [],
     model: transcript?.model ?? null,
     effort: null,
     permissionMode: null,

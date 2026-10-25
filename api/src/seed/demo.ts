@@ -18,11 +18,9 @@ interface DemoSession {
   id: string;
   project: string;
   worktree?: string;
-  // An export older than 2.5.0 writes the lane alone; 2.5.0 adds flow, skill and the trail (`session` BR-22).
-  lane?: string;
-  flow?: string;
+  // The run's flow, skill and mode: `iterate` for a fastlane's iterate mode, `autonomous` for an autonomous pilot (`session` BR-22).
+  flow: string;
   skill?: string;
-  // Since 2.7.0, a fastlane's iterate mode (`session` BR-22).
   mode?: string;
   // The current run's trail: seconds ago, skill, step, substep, phase (sessions-live FR-41).
   trail?: [number, string | null, string | null, string | null, Phase][];
@@ -36,7 +34,9 @@ interface DemoSession {
   question?: string;
   commit?: { subject: string; body: string };
   error?: string;
+  // The resume prompt, and the `Next:` lines of the done footer: summary, prompt (sessions-live FR-48).
   next?: string;
+  nextSteps?: [string, string][];
   model: string | null;
   effort: string;
   perms: string;
@@ -66,40 +66,40 @@ const OPUS = "claude-opus-5-5";
 const SONNET = "claude-sonnet-5-5";
 
 const SESSIONS: DemoSession[] = [
-  { id: "3f9c2a71-5b0e-4d8a-9c1f-a2e7b6d40c13", project: "ledger-api", lane: "build", phase: "awaiting-answer", age: 95,
+  { id: "3f9c2a71-5b0e-4d8a-9c1f-a2e7b6d40c13", project: "ledger-api", flow: "blueprint", skill: "build", phase: "awaiting-answer", age: 95,
     request: "Solde mensuel par client : afficher le solde de chaque mois sur la fiche client, avec le détail des factures et des avoirs",
     blueprint: "2026-10-20-monthly-balance", step: "stage:1", substep: "code",
     question: "Le statut « remboursé » compte-t-il dans le solde du mois ? (A) oui, en négatif — recommandé · (B) non · (C) seulement si le remboursement est partiel",
     model: OPUS, effort: "high", perms: "auto", blockers: ["not-done", "question", "dirty-files"],
     subagents: [{ type: "selo:runner", task: "npm test -- balance", phase: "job-done" }],
     files: ["api/src/billing/balance.ts", "api/src/billing/balance.test.ts", "api/migrations/0012_monthly_balance.sql"] },
-  { id: "91d0b7e3-2c4a-4f68-b5e9-7a13c8f20d54", project: "atelier-web", lane: "fastlane", phase: "awaiting-commit", age: 360,
+  { id: "91d0b7e3-2c4a-4f68-b5e9-7a13c8f20d54", project: "atelier-web", flow: "fastlane", skill: "fastlane", phase: "awaiting-commit", age: 360,
     request: "Garder le code promo quand on revient au panier",
     commit: { subject: "feat(cart): keep promo code across sessions", body: "Spec: cart ~FR-07" },
     model: SONNET, effort: "medium", perms: "acceptEdits", blockers: ["not-done", "pending-commit", "dirty-files"],
     files: ["web/src/features/cart/data/useCartQuery.ts", "web/src/features/cart/ui/PromoField.tsx", ".planning/pages/cart.md"] },
-  { id: "5a6e3d92-81bf-4c07-9e2a-d4f1b0c87e36", project: "selo-ops", lane: "free", phase: "stopped", age: 660,
+  { id: "5a6e3d92-81bf-4c07-9e2a-d4f1b0c87e36", project: "selo-ops", flow: "free", phase: "stopped", age: 660,
     request: "Pourquoi le build du front casse depuis ce matin ?",
     error: "npm run build : TS2322 — Type « string | undefined » non assignable à « string » (web/src/features/sessions/ui/SessionRow.tsx:42)",
     model: OPUS, effort: "high", perms: "default", blockers: ["not-done", "dirty-files"],
     subagents: [{ type: "selo:runner", task: "npm run build", phase: "stopped" }],
     files: ["web/src/features/sessions/ui/SessionRow.tsx"] },
-  { id: "e47c1a08-9d35-4b62-8f0e-1c5a7b93d2f4", project: "harbor-mobile", lane: "autopilot", phase: "awaiting-answer", age: 2880,
+  { id: "e47c1a08-9d35-4b62-8f0e-1c5a7b93d2f4", project: "harbor-mobile", flow: "pilot", skill: "blueprint", mode: "autonomous", phase: "awaiting-answer", age: 2880,
     request: "Mode hors-ligne pour la liste des tournées : consulter et cocher les arrêts sans réseau, puis synchroniser au retour du réseau",
     blueprint: "2026-10-22-offline-rounds", step: "blueprint",
     question: "Aucune réponse recommandée : cache local en lecture seule, ou file d’attente des modifications rejouée au retour du réseau ?",
     model: OPUS, effort: "xhigh", perms: "auto", blockers: ["not-done", "question"] },
-  { id: "2b8f6c15-4e7d-4a91-b3c0-8d2e5f6a1b97", project: "ledger-api", lane: "fastlane", phase: "awaiting-commit", age: 4800,
+  { id: "2b8f6c15-4e7d-4a91-b3c0-8d2e5f6a1b97", project: "ledger-api", flow: "fastlane", skill: "fastlane", phase: "awaiting-commit", age: 4800,
     request: "Arrondi de la TVA : arrondir ligne par ligne, pas sur le total",
     commit: { subject: "fix(invoices): round VAT per line, not per total", body: "Spec: invoice ~BR-04" },
     model: SONNET, effort: "medium", perms: "acceptEdits", blockers: ["not-done", "pending-commit", "dirty-files"],
     files: ["api/src/invoices/vat.ts", "api/src/invoices/vat.test.ts", ".planning/domain/invoice.md"] },
-  { id: "6d1f8b3a-4c27-4e95-a0b6-3e9c5d2f7a18", project: "harbor-mobile", lane: "fastlane", phase: "working", age: 240,
+  { id: "6d1f8b3a-4c27-4e95-a0b6-3e9c5d2f7a18", project: "harbor-mobile", flow: "pilot", skill: "fastlane", phase: "working", age: 240,
     request: "Purger le cache des photos de tournée au démarrage quand il dépasse 200 Mo", substep: "code",
     permission: "rm -rf android/app/build/intermediates/photo-cache && npx react-native run-android --variant=debug",
     model: OPUS, effort: "medium", perms: "default", blockers: ["not-done", "dirty-files"],
     files: ["src/features/rounds/data/photoCache.ts", "src/features/rounds/data/photoCache.test.ts"] },
-  { id: "7c3a9e51-0f2b-4d84-a6e7-b19d4c2f8a03", project: "selo-ops", lane: "build", flow: "blueprint", skill: "build", phase: "working", age: 4, trailCut: true,
+  { id: "7c3a9e51-0f2b-4d84-a6e7-b19d4c2f8a03", project: "selo-ops", flow: "blueprint", skill: "build", phase: "working", age: 4, trailCut: true,
     trail: [[590, "build", "stage:1", "commit", "awaiting-commit"], [500, "build", "stage:2", "tests", "working"], [300, "build", "stage:2", "code", "working"]],
     request: ".planning/blueprints/2026-10-22-sessions-live.md", blueprint: "2026-10-22-sessions-live", step: "stage:2", substep: "code",
     model: OPUS, effort: "high", perms: "auto", blockers: ["not-done", "dirty-files", "background-tasks", "subagents"],
@@ -108,9 +108,9 @@ const SESSIONS: DemoSession[] = [
       { type: "selo:reviewer", task: "relecture de l’étape 1 (api)", phase: "job-done" },
     ],
     files: ["web/src/features/sessions/pages/SessionsLivePage.tsx", "web/src/features/sessions/ui/SessionRow.tsx", "web/src/shared/lib/i18n/fr.json"] },
-  { id: "b81e0c44-6a2f-4c19-8d3e-5f07a9c2e611", project: "atelier-web", worktree: "one-step-checkout", lane: "autopilot", flow: "autopilot", skill: "build", phase: "working", age: 2,
+  { id: "b81e0c44-6a2f-4c19-8d3e-5f07a9c2e611", project: "atelier-web", worktree: "one-step-checkout", flow: "pilot", skill: "build", mode: "autonomous", phase: "working", age: 2,
     trail: [
-      [600, "autopilot", null, null, "working"], [570, "blueprint", null, null, "working"], [420, "blueprint", null, "commit", "awaiting-commit"],
+      [600, "pilot", null, null, "working"], [570, "blueprint", null, null, "working"], [420, "blueprint", null, "commit", "awaiting-commit"],
       [300, "blueprint", null, null, "working"], [240, "build", "stage:1", "tests", "working"],
     ],
     request: "Refaire la page de paiement en une seule étape : adresse, livraison et carte sur le même écran, validation en direct de chaque champ, et un récapitulatif fixe à droite sur grand écran",
@@ -138,28 +138,33 @@ const SESSIONS: DemoSession[] = [
     question: "Autre chose, ou on valide ?",
     model: OPUS, effort: "medium", perms: "acceptEdits", blockers: ["not-done", "question", "dirty-files"],
     files: ["web/src/features/sessions/ui/SessionList.module.css"] },
-  { id: "0d5e8b27-6a1c-4f93-8e42-c7b0a3d9f1e6", project: "selo-ops", lane: "blueprint", phase: "turn-ended", age: 240,
+  { id: "0d5e8b27-6a1c-4f93-8e42-c7b0a3d9f1e6", project: "selo-ops", flow: "blueprint", skill: "blueprint", phase: "job-done", age: 240,
     request: "Archiver une session à la main quand son travail est fini", blueprint: "2026-10-22-session-archive",
     next: "/selo:build .planning/blueprints/2026-10-22-session-archive.md",
-    model: OPUS, effort: "high", perms: "default", blockers: ["not-done"],
+    nextSteps: [
+      ["Construire les 2 étapes, de préférence dans une nouvelle session", "/selo:build .planning/blueprints/2026-10-22-session-archive.md"],
+      ["Relire le blueprint avant de le construire", "/selo:review blueprint .planning/blueprints/2026-10-22-session-archive.md"],
+    ],
+    recap: "Blueprint de l’archivage manuel prêt : 2 étapes, api puis web.",
+    model: OPUS, effort: "high", perms: "default", blockers: [],
     commits: [{ sha: "a41c9e2", subject: "docs(session-archive): blueprint — manual archive" }],
     files: [".planning/blueprints/2026-10-22-session-archive.md"] },
-  { id: "6f2a4c80-b3d1-4e57-9a08-e5c2d7f13b49", project: "ledger-api", lane: "grill", phase: "turn-ended", age: 1020,
+  { id: "6f2a4c80-b3d1-4e57-9a08-e5c2d7f13b49", project: "ledger-api", flow: "free", skill: "grill", phase: "turn-ended", age: 1020,
     request: "Export CSV des factures", model: SONNET, effort: "medium", perms: "default", blockers: ["not-done"] },
-  { id: "a9c7e215-3f8b-4d06-b2e4-61d0f5a8c793", project: "atelier-web", lane: "fastlane", phase: "job-done", age: 540,
+  { id: "a9c7e215-3f8b-4d06-b2e4-61d0f5a8c793", project: "atelier-web", flow: "fastlane", skill: "fastlane", phase: "job-done", age: 540,
     request: "Le filtre par taille se vide quand on revient en arrière", model: SONNET, effort: "medium", perms: "acceptEdits", blockers: [],
     recap: "Le filtre par taille garde la sélection après un retour arrière.",
     commits: [{ sha: "c7d21f0", subject: "fix(catalog): keep size filter on back navigation" }],
     files: ["web/src/features/catalog/ui/SizeFilter.tsx", ".planning/pages/catalog.md"] },
-  { id: "d3b16f74-e0a9-4c25-87d1-4f9e2b6c0a58", project: "selo-ops", lane: "free", phase: "job-done", age: 7500,
+  { id: "d3b16f74-e0a9-4c25-87d1-4f9e2b6c0a58", project: "selo-ops", flow: "free", phase: "job-done", age: 7500,
     earlier: ["Pourquoi cette session n’a qu’une demande ?", null, "fait un .bat stp"],
     request: "Ajouter un script npm run app:demo à la racine", model: null, effort: "low", perms: "acceptEdits", blockers: ["dirty-files"],
     recap: "Script app:demo ajouté : il lance l’API et le web en démo, sur le créneau du worktree.",
     commits: [{ sha: "9b0e4d3", subject: "tools(tooling): add app:demo script" }], files: ["package.json", "selo-run.mjs"] },
-  { id: "48e0a6d1-7b2c-4f39-a5e8-0c9d3f7b2e16", project: "harbor-mobile", lane: "try", phase: "turn-ended", age: 2040,
+  { id: "48e0a6d1-7b2c-4f39-a5e8-0c9d3f7b2e16", project: "harbor-mobile", flow: "free", skill: "try", phase: "turn-ended", age: 2040,
     request: "Tester la connexion avec le compte livreur", model: SONNET, effort: "low", perms: "default", blockers: ["not-done", "background-tasks"],
     recap: "Connexion du compte livreur vérifiée ; la démo tourne encore sur le port 5191." },
-  { id: "f5a2c938-1d6e-4b70-9c3f-8e4b0a7d6c21", project: "ledger-api", lane: "build", phase: "job-done", age: 1500,
+  { id: "f5a2c938-1d6e-4b70-9c3f-8e4b0a7d6c21", project: "ledger-api", flow: "blueprint", skill: "build", phase: "job-done", age: 1500,
     request: ".planning/blueprints/2026-10-19-payment-reminders.md", blueprint: "2026-10-19-payment-reminders",
     model: OPUS, effort: "high", perms: "auto", blockers: ["background-tasks"],
     recap: "Relances à J+15 et J+30 envoyées par la tâche du matin ; spec facture mise à jour.",
@@ -168,28 +173,28 @@ const SESSIONS: DemoSession[] = [
       { sha: "b52c0d9", subject: "feat(payment-reminders): web — reminders on the invoice page" },
       { sha: "7f41e2a", subject: "docs(payment-reminders): spec merged" },
     ] },
-  { id: "1e7b3c90-5a4d-4e82-b0f6-d2c8a9e41f37", project: "selo-ops", lane: "fastlane", phase: "job-done", age: 10800, isClosed: true,
+  { id: "1e7b3c90-5a4d-4e82-b0f6-d2c8a9e41f37", project: "selo-ops", flow: "fastlane", skill: "fastlane", phase: "job-done", age: 10800, isClosed: true,
     request: "Bouton thème clair / sombre dans l’en-tête", model: SONNET, effort: "medium", perms: "acceptEdits", blockers: [],
     recap: "Le thème se choisit dans l’en-tête et reste mémorisé.", commits: [{ sha: "4c9d2e1", subject: "feat(app): theme switch in the header" }] },
-  { id: "8a4d0f62-c9e1-4b37-a2d5-6f3b8e0c7a94", project: "atelier-web", lane: "free", phase: "stopped", age: 14400, isClosed: true,
+  { id: "8a4d0f62-c9e1-4b37-a2d5-6f3b8e0c7a94", project: "atelier-web", flow: "free", phase: "stopped", age: 14400, isClosed: true,
     request: "Essayer Vite 6 sur le front", error: "npm ci : ERESOLVE, impossible de résoudre la dépendance @vitejs/plugin-react",
     model: SONNET, effort: "low", perms: "default", blockers: ["not-done", "dirty-files"], files: ["web/package.json"] },
-  { id: "c06f9b3e-2d7a-4e18-95c4-a8e1d3b70f52", project: "ledger-api", lane: "blueprint", phase: "stopped", age: 20000, isClosed: true,
+  { id: "c06f9b3e-2d7a-4e18-95c4-a8e1d3b70f52", project: "ledger-api", flow: "blueprint", skill: "blueprint", phase: "stopped", age: 20000, isClosed: true,
     request: "Multi-devises sur les factures", model: OPUS, effort: "high", perms: "default", blockers: ["not-done"] },
-  { id: "93b5e7a2-0c4f-4d16-8b9e-2a7d1f6c5e08", project: "selo-ops", lane: "build", phase: "job-done", age: 93000, archivedAge: 90000,
+  { id: "93b5e7a2-0c4f-4d16-8b9e-2a7d1f6c5e08", project: "selo-ops", flow: "blueprint", skill: "build", phase: "job-done", age: 93000, archivedAge: 90000,
     request: ".planning/blueprints/2026-10-20-ops-export.md", blueprint: "2026-10-20-ops-export",
     model: OPUS, effort: "high", perms: "auto", blockers: [], recap: "L’API lit l’export ops et sert la liste des projets.",
     commits: [{ sha: "e1f7a30", subject: "feat(ops-export): api — read the ops export" }] },
-  { id: "27d8c4f1-6b3e-4a05-9f2d-c1e0b8a5d374", project: "ledger-api", lane: "fastlane", phase: "job-done", age: 101000, archivedAge: 100000,
+  { id: "27d8c4f1-6b3e-4a05-9f2d-c1e0b8a5d374", project: "ledger-api", flow: "fastlane", skill: "fastlane", phase: "job-done", age: 101000, archivedAge: 100000,
     request: "Corriger le tri des factures par date", model: SONNET, effort: "medium", perms: "acceptEdits", blockers: [],
     recap: "Les factures se trient par date d’émission, la plus récente d’abord.", commits: [{ sha: "5d2b8c7", subject: "fix(invoices): sort by issue date" }] },
-  { id: "b4e1a8d6-9f0c-4372-a5b8-3d6e2c9f1a70", project: "harbor-mobile", lane: "fastlane", phase: "job-done", age: 182000, archivedAge: 180000,
+  { id: "b4e1a8d6-9f0c-4372-a5b8-3d6e2c9f1a70", project: "harbor-mobile", flow: "fastlane", skill: "fastlane", phase: "job-done", age: 182000, archivedAge: 180000,
     request: "Icône de l’app en mode sombre", model: SONNET, effort: "low", perms: "acceptEdits", blockers: [],
     recap: "Icône sombre ajoutée pour iOS et Android.", commits: [{ sha: "0a9f3e4", subject: "feat(app): dark app icon" }] },
 ];
 
-// What the sessions written by the plugin's 2.2.0 consumed (`session` BR-18 to BR-20); every other session is a 1.0.0
-// file, with no `usage` key. `scale`: the current run's total tokens; `model`: the one its usage names (the session's
+// What some sessions consumed (`session` BR-18 to BR-20); the others' files have no `usage` key, as a run before its
+// first stop. `scale`: the current run's total tokens; `model`: the one its usage names (the session's
 // export model may be null); `prompts`: how many the run lists, 50 being the most the export keeps; `agents`: the real
 // model of each subagent, null for one stopped by Esc (no usage).
 interface DemoUsage {
@@ -405,11 +410,11 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
   for (const s of SESSIONS) {
     const since = at(s.age + 600);
     const current: ExportRun = {
-      id: `${s.id}:1`, agentId: null, ...(s.lane === undefined ? {} : { lane: s.lane }), request: s.request, task: null, blueprint: s.blueprint ?? null,
-      ...(s.flow === undefined ? {} : { flow: s.flow, skill: s.skill ?? null, mode: s.mode ?? null }),
+      id: `${s.id}:1`, agentId: null, flow: s.flow, skill: s.skill ?? null, mode: s.mode ?? null, request: s.request, task: null, blueprint: s.blueprint ?? null,
+      next: (s.nextSteps ?? []).map(([text, prompt]) => ({ text, prompt })),
       trail: (s.trail ?? []).map(([ago, skill, step, substep, phase]) => ({ at: at(ago), skill, step, substep, phase })),
       ...(s.trailCut === undefined ? {} : { trailCut: s.trailCut }),
-      step: s.step ?? (s.flow === undefined ? s.lane : null), substep: s.substep ?? null, error: s.error ?? null, phase: s.phase,
+      step: s.step ?? null, substep: s.substep ?? null, error: s.error ?? null, phase: s.phase,
       pendingCommit: s.commit ?? null, question: s.question ?? null,
       recap: s.recap ? { text: s.recap, commits: s.commits ?? [] } : null, commits: s.commits ?? [],
       resumePrompt: s.next ?? null, since, updatedAt: at(s.age),
@@ -419,13 +424,13 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
     const subagents: ExportRun[] = (s.subagents ?? []).map((a, i) => {
       const agentModel = usage?.agents?.[i];
       return {
-        ...current, id: `${s.id}:agent-${i}`, agentId: `agent-${i}`, lane: "free", request: a.type, task: a.task, phase: a.phase,
+        ...current, id: `${s.id}:agent-${i}`, agentId: `agent-${i}`, flow: "free", skill: null, mode: null, next: [], request: a.type, task: a.task, phase: a.phase,
         blueprint: null, pendingCommit: null, question: null, error: null, recap: null, commits: [], resumePrompt: null, since: at(s.age + 300 - i),
         ...(usage ? { usage: agentModel ? agentUsageOf(agentModel, 180_000 - i * 70_000) : null } : {}),
       };
     });
     const earlier: ExportRun[] = (s.earlier ?? []).map((request, i, all) => ({
-      ...current, id: `${s.id}:0-${i}`, request, phase: "job-done", blueprint: null, pendingCommit: null, question: null, error: null,
+      ...current, id: `${s.id}:0-${i}`, request, phase: "job-done", next: [], blueprint: null, pendingCommit: null, question: null, error: null,
       recap: null, commits: [], resumePrompt: null,
       since: at(s.age + 600 + (all.length - i) * 900), updatedAt: at(s.age + 540 + (all.length - i) * 900),
       ...(usage ? { usage: earlierUsageOf(usage.model, 60_000 + i * 25_000, at(s.age + 590 + (all.length - i) * 900)) } : {}),
@@ -437,8 +442,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
       touchedFiles: s.files ?? [], close: { ok: s.blockers.length === 0, blockers: s.blockers },
       runs: [...subagents, current, ...[...earlier].reverse()], current,
     };
-    // A session with usage was written by a recent export, one without by an export older than the field.
-    if (usage) file.writtenBy = DEMO_SELO_OPS_VERSION;
+    file.writtenBy = DEMO_SELO_OPS_VERSION;
     if (usage) file.usage = sumUsage([current, ...subagents, ...earlier].flatMap((r) => (r.usage ? [r.usage] : [])));
     writeJson(join(opsDir, "sessions"), `${s.id}.json`, file);
     if (s.permission !== undefined) seedPermissionWait(folders, file, s.permission, now - s.age * 1000);
@@ -449,7 +453,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
   seedInstalledPlugins(folders.claudePluginsFile, ROOT);
 }
 
-const DEMO_SELO_OPS_VERSION = "2.2.1";
+const DEMO_SELO_OPS_VERSION = "2.8.0";
 
 function seedInstalledPlugins(file: string, root: string) {
   const entry = (version: string, projectPath?: string) => ({
@@ -462,7 +466,7 @@ function seedInstalledPlugins(file: string, root: string) {
   writeJson(dirname(file), basename(file), {
     version: 2,
     plugins: {
-      "selo@selo": [entry("2.2.0", `${root}/${first}`), entry("2.1.0", `${root}/${second}`)],
+      "selo@selo": [entry("2.6.0", `${root}/${first}`), entry("2.5.0", `${root}/${second}`)],
       "selo-ops@selo": [entry(DEMO_SELO_OPS_VERSION)],
     },
   });

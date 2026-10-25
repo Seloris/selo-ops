@@ -63,13 +63,13 @@ export const sessionSchema = z
     projectId: z.string(),
     branch: z.string().nullable(),
     folder: z.string(),
-    // `session` BR-22: how the current run is driven (`free`, `fastlane`, `blueprint`, `autopilot`) and the selo skill
-    // running now, null when none; an export older than 2.5.0 has them read from its lane.
+    // `session` BR-22: how the current run is driven (`free`, `fastlane`, `blueprint`, `pilot`) and the selo skill
+    // running now, null when none.
     flow: z.string(),
     skill: z.string().nullable(),
-    // `session` BR-22: `iterate` for a fastlane run in its iterate mode, else null.
+    // `session` BR-22: `iterate` for a fastlane run in its iterate mode, `autonomous` for an autonomous pilot, else null.
     mode: z.string().nullable(),
-    // sessions-live FR-41: the current run's history, oldest first; empty outside selo and before 2.5.0.
+    // sessions-live FR-41: the current run's history, oldest first; empty outside selo and before the run's first change.
     trail: z.array(trailEntrySchema),
     // True once the export dropped the trail's oldest entries.
     isTrailCut: z.boolean(),
@@ -94,7 +94,10 @@ export const sessionSchema = z
     error: z.string().nullable(),
     recap: z.string().nullable(),
     commits: z.array(commitSchema),
+    // sessions-live FR-21: the resume prompt, else the first next step's command.
     nextAction: z.string().nullable(),
+    // sessions-live FR-48: the `Next:` lines of the current run's done footer, in order; empty outside selo.
+    nextSteps: z.array(z.object({ summary: z.string(), command: z.string() })),
     // `session` BR-20: the export's, else the top model of its latest main run with usage.
     model: z.string().nullable(),
     effort: z.string().nullable(),
@@ -104,12 +107,12 @@ export const sessionSchema = z
     subagents: z.array(
       z.object({ type: z.string(), task: z.string().nullable(), state: sessionStateSchema, model: z.string().nullable(), usage: usageSchema.nullable() }),
     ),
-    // `session` BR-18: the session's totals, and its current main run's; null for a session outside selo or one the
-    // export wrote before 2.2.0.
+    // `session` BR-18: the session's totals, and its current main run's; null for a session outside selo or a run before
+    // its first stop.
     usage: usageSchema.nullable(),
     runUsage: runUsageSchema.nullable(),
     // Every main run the export keeps, oldest first: its request, cleaned (`session` BR-10), "" when unreadable, and its
-    // usage with what it did (tools, skills, prompts), null before its first stop or in an export older than 2.2.0.
+    // usage with what it did (tools, skills, prompts), null before its first stop.
     // Empty for a session outside selo.
     runs: z.array(
       z.object({ since: z.iso.datetime(), request: z.string(), isRequestCut: z.boolean(), isRequestImage: z.boolean(), usage: runUsageSchema.nullable() }),

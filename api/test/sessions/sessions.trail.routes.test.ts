@@ -26,66 +26,42 @@ describe("sessions routes — run trail", () => {
   };
 
   const trail: ExportTrailEntry[] = [
-    { at: "2026-01-01T09:00:00.000Z", skill: "autopilot", step: null, substep: null, phase: "working" },
+    { at: "2026-01-01T09:00:00.000Z", skill: "pilot", step: null, substep: null, phase: "working" },
     { at: "2026-01-01T09:05:00.000Z", skill: "build", step: "stage:1", substep: "tests", phase: "working" },
     { at: "2026-01-01T09:20:00.000Z", skill: "build", step: "stage:1", substep: "commit", phase: "awaiting-commit" },
   ];
 
-  it("gives the flow, the skill and the trail of a run written by 2.5.0", async () => {
+  it("gives the flow, the skill and the trail of the current run", async () => {
     // Arrange
-    ctx.seed.session(buildSessionFile({ writtenBy: "2.5.0", current: buildRun({ lane: "build", flow: "autopilot", skill: "build", trail, trailCut: true }) }));
+    ctx.seed.session(buildSessionFile({ current: buildRun({ flow: "pilot", skill: "build", mode: "autonomous", trail, trailCut: true }) }));
 
     // Act
     const session = await only();
 
     // Assert
-    expect(session).toMatchObject({ flow: "autopilot", skill: "build", trail, isTrailCut: true });
+    expect(session).toMatchObject({ flow: "pilot", skill: "build", mode: "autonomous", trail, isTrailCut: true });
     expect(session).not.toHaveProperty("lane");
   });
 
-  it("reads the lane of a run written before 2.5.0 as its flow and skill, with no trail", async () => {
-    // Arrange
-    ctx.seed.session(buildSessionFile({ writtenBy: "2.4.0", current: buildRun({ lane: "build", step: "stage:2" }) }));
-
-    // Act
-    const session = await only();
-
-    // Assert
-    expect(session).toMatchObject({ flow: "blueprint", skill: "build", trail: [], isTrailCut: false, step: "stage:2" });
-  });
-
   it.each([
-    ["fastlane", "fastlane", "fastlane"],
-    ["autopilot", "autopilot", "autopilot"],
-    ["blueprint", "blueprint", "blueprint"],
-    ["review", "free", "review"],
-    ["free", "free", null],
-  ] as const)("reads the lane %s of an older run as flow %s and skill %s", async (lane, flow, skill) => {
+    ["an interactive pilot", { flow: "pilot", skill: "fastlane", mode: null }, { flow: "pilot", skill: "fastlane", mode: null }],
+    ["an autonomous pilot", { flow: "pilot", skill: "build", mode: "autonomous" }, { flow: "pilot", skill: "build", mode: "autonomous" }],
+    ["a free run with a tool skill", { flow: "free", skill: "review", mode: null }, { flow: "free", skill: "review", mode: null }],
+  ] as const)("gives %s its flow, skill and mode as the export writes them", async (_, run, expected) => {
     // Arrange
-    ctx.seed.session(buildSessionFile({ current: buildRun({ lane }) }));
+    ctx.seed.session(buildSessionFile({ current: buildRun(run) }));
 
     // Act
     const session = await only();
 
     // Assert
-    expect(session).toMatchObject({ flow, skill });
+    expect(session).toMatchObject(expected);
   });
 
-  it("takes the skill a 2.5.0 hook gave a run opened before 2.5.0, its flow read from the lane", async () => {
+  it("reads a run with no flow as a free one, whatever lane it still carries", async () => {
     // Arrange
-    ctx.seed.session(buildSessionFile({ current: buildRun({ lane: "build", skill: "review" }) }));
-
-    // Act
-    const session = await only();
-
-    // Assert
-    expect(session).toMatchObject({ flow: "blueprint", skill: "review" });
-  });
-
-  it("keeps a run that has no lane at all", async () => {
-    // Arrange
-    const run: Record<string, unknown> = { ...buildRun(), flow: "fastlane", skill: "fastlane" };
-    delete run.lane;
+    const run: Record<string, unknown> = { ...buildRun(), lane: "build", skill: null };
+    delete run.flow;
     const file = { ...buildSessionFile(), runs: [run], current: run };
     ctx.seed.raw("sessions", `${file.sessionId}.json`, JSON.stringify(file));
 
@@ -93,7 +69,7 @@ describe("sessions routes — run trail", () => {
     const session = await only();
 
     // Assert
-    expect(session).toMatchObject({ id: file.sessionId, flow: "fastlane", skill: "fastlane" });
+    expect(session).toMatchObject({ id: file.sessionId, flow: "free", skill: null });
   });
 
   it("keeps the session when its trail is malformed, with an empty trail", async () => {
@@ -122,25 +98,23 @@ describe("sessions routes — run trail", () => {
     expect(session.trail).toEqual([trail[0], trail[1]]);
   });
 
-  it.each([
-    ["the run's mode, written by 2.7.0", { mode: "iterate", request: "Resserrer la liste" }, "iterate"],
-    ["no mode, written by 2.7.0", { mode: null, request: "Resserrer la liste — iterate" }, null],
-    ["the request of a run written before 2.7.0", { request: "Resserrer la liste — iterate" }, "iterate"],
-    ["a request with no option, before 2.7.0", { request: "Itérer sur —iterate" }, null],
-  ] as const)("reads a fastlane's mode from %s", async (_, run, mode) => {
+  it("reads a fastlane's iterate mode from the run's mode", async () => {
     // Arrange
-    ctx.seed.session(buildSessionFile({ current: { ...buildRun({ flow: "fastlane", skill: "fastlane" }), ...run } }));
+    ctx.seed.session(buildSessionFile({ current: buildRun({ flow: "fastlane", skill: "fastlane", mode: "iterate", request: "Resserrer la liste" }) }));
 
     // Act
     const session = await only();
 
     // Assert
-    expect(session.mode).toBe(mode);
+    expect(session.mode).toBe("iterate");
   });
 
-  it("reads no mode for another flow's request carrying the option", async () => {
+  it("reads no mode from a request carrying the option when the run has none", async () => {
     // Arrange
-    ctx.seed.session(buildSessionFile({ current: buildRun({ flow: "free", request: "Expliquer — iterate" }) }));
+    const run: Record<string, unknown> = { ...buildRun({ flow: "fastlane", skill: "fastlane" }), request: "Resserrer la liste — iterate" };
+    delete run.mode;
+    const file = { ...buildSessionFile(), runs: [run], current: run };
+    ctx.seed.raw("sessions", `${file.sessionId}.json`, JSON.stringify(file));
 
     // Act
     const session = await only();

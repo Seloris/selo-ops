@@ -80,7 +80,8 @@ describe("sessions routes", () => {
         writtenAt: "2026-01-01T10:00:00.000Z",
         close: { ok: false, blockers: ["not-done", "pending-commit", "dirty-files", "unknown-blocker"] },
         current: buildRun({
-          lane: "build",
+          flow: "blueprint",
+          skill: "build",
           request: ".planning/blueprints/2026-10-22-cart.md",
           blueprint: "2026-10-22-cart",
           step: "stage:2",
@@ -115,6 +116,75 @@ describe("sessions routes", () => {
         blockers: ["not-done", "pending-commit", "dirty-files"],
         updatedAt: "2026-01-01T10:00:00.000Z",
       });
+    });
+
+    it("gives the next steps of the run's done footer, in order", async () => {
+      // Arrange
+      const next = [
+        { text: "Construire les 2 étapes", prompt: "/selo:build .planning/blueprints/b.md" },
+        { text: "Relire le blueprint", prompt: "/selo:review blueprint .planning/blueprints/b.md" },
+      ];
+      ctx.seed.session(buildSessionFile({ current: buildRun({ phase: "job-done", next }) }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.nextSteps).toEqual([
+        { summary: "Construire les 2 étapes", command: "/selo:build .planning/blueprints/b.md" },
+        { summary: "Relire le blueprint", command: "/selo:review blueprint .planning/blueprints/b.md" },
+      ]);
+    });
+
+    it("gives no next step when the run has none", async () => {
+      // Arrange
+      const run: Record<string, unknown> = { ...buildRun() };
+      delete run.next;
+      const file = { ...buildSessionFile(), runs: [run], current: run };
+      ctx.seed.raw("sessions", `${file.sessionId}.json`, JSON.stringify(file));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session).toMatchObject({ id: file.sessionId, nextSteps: [], nextAction: null });
+    });
+
+    it("drops a next step that does not read and keeps its siblings", async () => {
+      // Arrange
+      const run = { ...buildRun(), next: [{ text: "Relire", prompt: "/selo:review" }, { text: 42 }, "broken"] };
+      const file = { ...buildSessionFile(), runs: [run], current: run };
+      ctx.seed.raw("sessions", `${file.sessionId}.json`, JSON.stringify(file));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.nextSteps).toEqual([{ summary: "Relire", command: "/selo:review" }]);
+    });
+
+    it("falls back on the first next step for the next action when the export gives no resume prompt", async () => {
+      // Arrange
+      const next = [{ text: "Relire", prompt: "/selo:review" }, { text: "Tester", prompt: "/selo:try" }];
+      ctx.seed.session(buildSessionFile({ current: buildRun({ phase: "job-done", next, resumePrompt: null }) }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.nextAction).toBe("/selo:review");
+    });
+
+    it("keeps the resume prompt as the next action over the next steps", async () => {
+      // Arrange
+      const next = [{ text: "Relire", prompt: "/selo:review" }];
+      ctx.seed.session(buildSessionFile({ current: buildRun({ phase: "job-done", next, resumePrompt: "/selo:build b.md" }) }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.nextAction).toBe("/selo:build b.md");
     });
 
     it("dates the session's creation by the first dated line of its transcript", async () => {

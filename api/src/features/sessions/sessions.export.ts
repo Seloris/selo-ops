@@ -10,8 +10,8 @@ export const PHASES = ["awaiting-answer", "awaiting-commit", "stopped", "working
 
 const commitSchema = z.object({ sha: z.string(), subject: z.string() });
 
-// Since the plugin's 2.2.0 (`session` BR-18): what a run, or the whole session, consumed. Read leniently: a usage that
-// does not match becomes null, never a reason to skip the file; a file written by 1.0.0 has no `usage` key at all.
+// `session` BR-18: what a run, or the whole session, consumed. Read leniently: a usage that does not match becomes null,
+// never a reason to skip the file; a run before its first stop has no `usage` key at all.
 const tokensSchema = z.object({ input: z.number(), cacheRead: z.number(), cacheWrite: z.number(), output: z.number() });
 const usageFields = {
   calls: z.number(),
@@ -40,7 +40,7 @@ const lenientArray = <T>(item: z.ZodType<T>) =>
       return parsed.success ? [parsed.data] : [];
     }));
 
-// Since the plugin's 2.5.0 (`session` BR-22): one entry at each change of the run's skill, step, substep or phase.
+// `session` BR-22: one entry at each change of the run's skill, step, substep or phase.
 const trailEntrySchema = z.object({
   at: z.iso.datetime(),
   skill: z.string().nullable(),
@@ -49,15 +49,17 @@ const trailEntrySchema = z.object({
   phase: z.enum(PHASES),
 });
 
+const nextStepSchema = z.object({ text: z.string(), prompt: z.string() });
+
 const runSchema = z.object({
   id: z.string(),
   agentId: z.string().nullish(),
-  // Deprecated by 2.5.0, which still writes it; `flow` and `skill` replace it.
-  lane: z.string().nullish(),
   flow: z.string().nullish(),
   skill: z.string().nullish(),
-  // Since the plugin's 2.7.0 (`session` BR-22): `iterate` for a fastlane's iterate mode, else null.
+  // `session` BR-22: the prompt's option, `iterate` (a fastlane's iterate mode) or `autonomous` (a pilot's), else null.
   mode: z.string().nullish(),
+  // sessions-live FR-48: the `Next:` lines of the run's done footer, in order.
+  next: lenientArray(nextStepSchema),
   trail: lenientArray(trailEntrySchema),
   trailCut: z.boolean().nullish().catch(null),
   request: z.string().nullish(),
