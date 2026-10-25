@@ -63,4 +63,4 @@ Pages: `sessions-live`, `help` · Domain: `session` · Components: `api`, `web`
 - [x] Stage 2 — web
 - [x] Review
 - [x] Browser test
-- [ ] Spec merged
+- [x] Spec merged
