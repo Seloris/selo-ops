@@ -57,7 +57,8 @@
 }
 
 /* A choice wears its lane's colour (FR-29) on its skill's name and, chosen, on its edge. */
-.window [data-skill="autopilot"] { --lane: var(--lane-autopilot); }
+.window [data-skill="autonomous"],
+.window [data-skill="pilot"] { --lane: var(--lane-pilot); }
 .window [data-skill="fastlane"] { --lane: var(--lane-fastlane); }
 .window [data-skill="mockup"] { --lane: var(--lane-mockup); }
 .window [data-skill="blueprint"],

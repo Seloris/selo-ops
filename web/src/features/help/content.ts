@@ -18,7 +18,7 @@ export const sections = {
 
 export const sectionOrder: Section[] = [sections.lanes, sections.lifecycle, sections.skills, sections.vocabulary];
 
-export type LaneId = "fastlane" | "blueprint" | "autopilot";
+export type LaneId = "fastlane" | "blueprint" | "pilot";
 
 // help FR-17: the two flows beside the lanes, each in a colour of its own (help FR-11).
 export type FlowId = "mockup" | "iterate";
@@ -50,16 +50,16 @@ export const lanesById: Record<LaneId, Lane> = {
     when: "help.lanes.blueprint.when",
     prompts: ["help.lanes.blueprint.prompt", "help.lanes.blueprint.promptNext"],
   },
-  autopilot: {
-    id: "autopilot",
-    name: "help.lanes.autopilot.name",
-    short: "help.lanes.autopilot.short",
-    when: "help.lanes.autopilot.when",
-    prompts: ["help.lanes.autopilot.prompt"],
+  pilot: {
+    id: "pilot",
+    name: "help.lanes.pilot.name",
+    short: "help.lanes.pilot.short",
+    when: "help.lanes.pilot.when",
+    prompts: ["help.lanes.pilot.prompt", "help.lanes.pilot.promptAutonomous"],
   },
 };
 
-export const lanes: Lane[] = [lanesById.fastlane, lanesById.blueprint, lanesById.autopilot];
+export const lanes: Lane[] = [lanesById.fastlane, lanesById.blueprint, lanesById.pilot];
 
 export const flows: Lane<FlowId>[] = (["mockup", "iterate"] as const).map((id) => ({
   id,
@@ -78,7 +78,7 @@ export interface DecisionGuide {
 
 export const decisionGuide: DecisionGuide = {
   questions: [
-    { question: "help.guide.leave.question", yes: "autopilot" },
+    { question: "help.guide.leave.question", yes: "pilot" },
     { question: "help.guide.newRule.question", yes: "blueprint" },
     { question: "help.guide.severalPages.question", yes: "blueprint" },
   ],
@@ -93,15 +93,15 @@ export interface LifecycleStep {
 
 // help FR-04: the steps of a piece of work, in order, with the lanes that run each one.
 export const lifecycleSteps: LifecycleStep[] = [
-  { name: "help.lifecycle.grill.name", text: "help.lifecycle.grill.text", lanes: ["blueprint", "autopilot"] },
-  { name: "help.lifecycle.blueprint.name", text: "help.lifecycle.blueprint.text", lanes: ["blueprint", "autopilot"] },
+  { name: "help.lifecycle.grill.name", text: "help.lifecycle.grill.text", lanes: ["blueprint", "pilot"] },
+  { name: "help.lifecycle.blueprint.name", text: "help.lifecycle.blueprint.text", lanes: ["blueprint", "pilot"] },
   { name: "help.lifecycle.approval.name", text: "help.lifecycle.approval.text", lanes: ["blueprint"] },
-  { name: "help.lifecycle.stages.name", text: "help.lifecycle.stages.text", lanes: ["fastlane", "blueprint", "autopilot"] },
-  { name: "help.lifecycle.review.name", text: "help.lifecycle.review.text", lanes: ["fastlane", "blueprint", "autopilot"] },
-  { name: "help.lifecycle.suites.name", text: "help.lifecycle.suites.text", lanes: ["fastlane", "blueprint", "autopilot"] },
-  { name: "help.lifecycle.browser.name", text: "help.lifecycle.browser.text", lanes: ["fastlane", "blueprint", "autopilot"] },
-  { name: "help.lifecycle.specMerged.name", text: "help.lifecycle.specMerged.text", lanes: ["blueprint", "autopilot"] },
-  { name: "help.lifecycle.footer.name", text: "help.lifecycle.footer.text", lanes: ["fastlane", "blueprint", "autopilot"] },
+  { name: "help.lifecycle.stages.name", text: "help.lifecycle.stages.text", lanes: ["fastlane", "blueprint", "pilot"] },
+  { name: "help.lifecycle.review.name", text: "help.lifecycle.review.text", lanes: ["fastlane", "blueprint", "pilot"] },
+  { name: "help.lifecycle.suites.name", text: "help.lifecycle.suites.text", lanes: ["fastlane", "blueprint", "pilot"] },
+  { name: "help.lifecycle.browser.name", text: "help.lifecycle.browser.text", lanes: ["fastlane", "blueprint", "pilot"] },
+  { name: "help.lifecycle.specMerged.name", text: "help.lifecycle.specMerged.text", lanes: ["blueprint", "pilot"] },
+  { name: "help.lifecycle.footer.name", text: "help.lifecycle.footer.text", lanes: ["fastlane", "blueprint", "pilot"] },
 ];
 
 // help FR-05.
@@ -144,12 +144,12 @@ export const skills: Skill[] = [
     options: ["help.options.stage", "help.options.noBrowser", "help.options.autonomous"],
   },
   {
-    name: "help.skills.autopilot.name",
-    what: "help.skills.autopilot.what",
-    when: "help.skills.autopilot.when",
-    prompt: "help.skills.autopilot.prompt",
-    lane: "autopilot",
-    options: ["help.options.fastlane", "help.options.blueprint", "help.options.untilBlueprint", "help.options.noBrowser"],
+    name: "help.skills.pilot.name",
+    what: "help.skills.pilot.what",
+    when: "help.skills.pilot.when",
+    prompt: "help.skills.pilot.prompt",
+    lane: "pilot",
+    options: ["help.options.fastlane", "help.options.blueprint", "help.options.untilBlueprint", "help.options.noBrowser", "help.options.autonomous"],
   },
   {
     name: "help.skills.mockup.name",
@@ -237,10 +237,11 @@ export const helpTabs: { value: HelpTab; label: MessageKey }[] = [
   { value: "technical", label: "help.tabs.technical" },
 ];
 
-// help FR-06, FR-07: the « Technique » tab's two sections.
+// help FR-06, FR-07, FR-18: the « Technique » tab's three sections.
 export const technicalSections = {
   skills: { id: "technical-skills", title: "help.skills.skillsTitle" },
   roles: { id: "technical-roles", title: "help.roles.title" },
+  settings: { id: "technical-settings", title: "help.settings.title" },
 } as const satisfies Record<string, Section>;
 
 // A short card: an optional code or kind chip on top, then one sentence.
@@ -307,6 +308,12 @@ export const specLines: Rule[] = [
 export const specChecks: Rule[] = [
   { head: "help.specs.specCheck.example1", text: "help.specs.specCheck.cite" },
   { head: "help.specs.specCheck.example2", text: "help.specs.specCheck.merge" },
+];
+
+// help FR-18: the person's two selo settings.
+export const settingRules: Rule[] = [
+  { head: "help.settings.routing.head", text: "help.settings.routing.text" },
+  { head: "help.settings.commit.head", text: "help.settings.commit.text" },
 ];
 
 export interface TreeNode {

@@ -23,7 +23,7 @@ import {
   isRequestOptional,
   projectOfFolder,
   usesBlueprint,
-  type AutopilotLane,
+  type PilotLane,
   type NewSessionForm,
   type ProjectOverview,
   type SkillId,
@@ -31,8 +31,10 @@ import {
 import styles from "./NewSessionDialog.module.css";
 
 const skillKey = (skill: SkillId, part: "label" | "when" | "lead") => `sessions.new.skill.${skill}.${part}` as MessageKey;
-const skillName = (skill: SkillId) => (skill === "free" ? t("sessions.lane.free") : skill);
-const LANES: AutopilotLane[] = ["agent", "fastlane", "blueprint"];
+// sessions-live FR-44: the selo skill beside each choice, as a session's type of work reads it (FR-29).
+const skillName = (skill: SkillId) =>
+  skill === "free" ? t("sessions.lane.free") : skill === "autonomous" ? t("sessions.lane.pilotAutonomous") : skill;
+const LANES: PilotLane[] = ["agent", "fastlane", "blueprint"];
 
 // sessions-live FR-44 to FR-47: what to do, in which project, as the selo command a new session of the Claude
 // app opens with. `folder` points at the project to open on (FR-43): a session's folder.
@@ -116,7 +118,7 @@ export function NewSessionDialog({
   );
 
   const options = [
-    form.skill === "autopilot" && !form.fromBlueprint && (
+    form.skill === "autonomous" && !form.fromBlueprint && (
       <div key="lane" className={styles.option}>
         <span className={styles.optionName}>{t("sessions.new.lane")}</span>
         <code className={styles.flag}>— fastlane · — blueprint</code>
@@ -131,7 +133,7 @@ export function NewSessionDialog({
         </span>
       </div>
     ),
-    form.skill === "autopilot" &&
+    form.skill === "autonomous" &&
       !form.fromBlueprint &&
       option(t("sessions.new.untilBlueprint"), "— until blueprint", t("sessions.new.untilBlueprintHint"), form.untilBlueprint && form.lane !== "fastlane", (on) => update({ untilBlueprint: on }), form.lane === "fastlane"),
     form.skill === "fastlane" && option(t("sessions.new.iterate"), "— iterate", t("sessions.new.iterateHint"), form.iterate, (on) => update({ iterate: on })),
@@ -233,7 +235,7 @@ export function NewSessionDialog({
                 <span className={styles.srOnly}>{t("sessions.new.back")}</span>
               </button>
               <p className={styles.lead}>{t(skillKey(form.skill, "lead"))}</p>
-              {form.skill === "autopilot" && (
+              {form.skill === "autonomous" && (
                 <div className={styles.field}>
                   <span className={styles.label}>{t("sessions.new.startFrom")}</span>
                   <Segmented

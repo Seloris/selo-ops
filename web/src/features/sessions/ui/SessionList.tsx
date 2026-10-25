@@ -16,7 +16,8 @@ export interface SessionActions {
   onOpen: (id: string) => void;
   onResume: (session: Session) => void;
   onToggleNext: (id: string) => void;
-  onCopyNext: (session: Session) => void;
+  // `command`: one of the detail's next steps (sessions-live FR-48), else the next action.
+  onCopyNext: (session: Session, command?: string) => void;
   onArchive: (session: Session) => void;
   onUnarchive: (id: string) => void;
   onEditNote: (session: Session) => void;

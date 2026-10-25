@@ -18,6 +18,7 @@ import {
   rowContext,
   laneColor,
   metaText,
+  nextCommands,
   workLabel,
   shownBlockers,
   toneOf,
@@ -57,6 +58,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     recap: null,
     commits: [],
     nextAction: null,
+    nextSteps: [],
     model: null,
     effort: null,
     permissionMode: null,
@@ -385,7 +387,7 @@ describe("isPluginOutdated", () => {
 
 describe("workLabel", () => {
   it.each([
-    ["autopilot", "build", "autopilot › build"],
+    ["pilot", "fastlane", "pilot › fastlane"],
     ["fastlane", "fastlane", "fastlane"],
     ["fastlane", null, "fastlane"],
     ["free", "review", "libre › review"],
@@ -405,6 +407,11 @@ describe("workLabel", () => {
     expect(workLabel(buildSession({ flow: "fastlane", skill: "fastlane", mode: "iterate", substep, trail: [...trail] }))).toBe(label);
   });
 
+  it("reads an autonomous pilot as « pilot autonome », its skill after it", () => {
+    expect(workLabel(buildSession({ flow: "pilot", skill: "build", mode: "autonomous" }))).toBe("pilot autonome › build");
+    expect(workLabel(buildSession({ flow: "pilot", skill: "pilot", mode: "autonomous" }))).toBe("pilot autonome");
+  });
+
   it("reads a fastlane with no mode as itself", () => {
     expect(workLabel(buildSession({ flow: "fastlane", skill: "fastlane", mode: null, substep: "code" }))).toBe("fastlane");
   });
@@ -414,6 +421,9 @@ describe("laneColor", () => {
   it("takes the lane's token, none outside selo or for an unknown flow", () => {
     expect(laneColor(buildSession({ flow: "free" }))).toBe("var(--lane-free)");
     expect(laneColor(buildSession({ flow: "blueprint" }))).toBe("var(--lane-blueprint)");
+    expect(laneColor(buildSession({ flow: "pilot" }))).toBe("var(--lane-pilot)");
+    expect(laneColor(buildSession({ flow: "pilot", skill: "build", mode: "autonomous" }))).toBe("var(--lane-pilot)");
+    expect(laneColor(buildSession({ flow: "autopilot" }))).toBeUndefined();
     expect(laneColor(buildSession({ flow: "other" }))).toBeUndefined();
     expect(laneColor(buildSession({ isOutsideSelo: true }))).toBeUndefined();
   });
@@ -422,6 +432,32 @@ describe("laneColor", () => {
     expect(laneColor(buildSession({ flow: "free", skill: "mockup" }))).toBe("var(--lane-mockup)");
     expect(laneColor(buildSession({ flow: "fastlane", mode: "iterate", substep: "code" }))).toBe("var(--lane-iterate)");
     expect(laneColor(buildSession({ flow: "fastlane", mode: "iterate", substep: "review" }))).toBe("var(--lane-fastlane)");
+  });
+});
+
+describe("nextCommands (sessions-live FR-48)", () => {
+  const step = (summary: string, command: string) => ({ summary, command });
+
+  it("lists the resume prompt first, then each next step with its summary", () => {
+    const s = buildSession({ nextAction: "/selo:build b.md", nextSteps: [step("Relire", "/selo:review b.md"), step("Tester", "/selo:try")] });
+    expect(nextCommands(s)).toEqual([
+      { summary: null, command: "/selo:build b.md" },
+      { summary: "Relire", command: "/selo:review b.md" },
+      { summary: "Tester", command: "/selo:try" },
+    ]);
+  });
+
+  it("shows a command once, with the summary a next step gives it", () => {
+    const s = buildSession({ nextAction: "/selo:build b.md", nextSteps: [step("Construire", "/selo:build b.md"), step("Relire", "/selo:review"), step("Encore", "/selo:review")] });
+    expect(nextCommands(s)).toEqual([
+      { summary: "Construire", command: "/selo:build b.md" },
+      { summary: "Relire", command: "/selo:review" },
+    ]);
+  });
+
+  it("gives nothing without a next action, nor for an archived session", () => {
+    expect(nextCommands(buildSession())).toEqual([]);
+    expect(nextCommands(buildSession({ isArchived: true, nextAction: "/selo:review", nextSteps: [step("Relire", "/selo:review")] }))).toEqual([]);
   });
 });
 

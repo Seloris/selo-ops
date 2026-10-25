@@ -19,7 +19,11 @@ export function createdText(iso: string, now: number): string {
 
 export const stateLabel = (s: Session) => t(`sessions.state.${s.state}` as MessageKey);
 
-const flowLabel = (flow: string) => (flow === "free" ? t("sessions.lane.free") : flow);
+// `session` BR-22: an autonomous pilot reads « pilot autonome ».
+function flowLabel(s: Pick<Session, "flow" | "mode">): string {
+  if (s.flow === "free") return t("sessions.lane.free");
+  return s.flow === "pilot" && s.mode === "autonomous" ? t("sessions.lane.pilotAutonomous") : s.flow;
+}
 
 // `session` BR-22: a fastlane in its iterate mode runs its loop until its end's first mark past `code` (`tests` first).
 export const LOOP_SUBSTEPS: ReadonlySet<string | null> = new Set([null, "code"]);
@@ -33,7 +37,7 @@ type WorkOf = Pick<Session, "isOutsideSelo" | "flow" | "skill" | "mode" | "subst
 // a session outside selo (`session` BR-12) reads « hors selo ».
 export function workLabel(s: WorkOf): string {
   if (s.isOutsideSelo) return t("sessions.lane.outside");
-  const flow = flowLabel(s.flow);
+  const flow = flowLabel(s);
   if (isIterating(s)) return `${flow} › ${t("sessions.lane.iterate")}`;
   return s.skill && s.skill !== s.flow ? `${flow} › ${s.skill}` : flow;
 }
@@ -42,7 +46,7 @@ export function workLabel(s: WorkOf): string {
 export const metaText = (s: WorkOf, project: string | null): string =>
   project === null ? workLabel(s) : `${workLabel(s)} · ${project}`;
 
-const LANES: ReadonlySet<string> = new Set(["free", "fastlane", "blueprint", "autopilot"]);
+const LANES: ReadonlySet<string> = new Set(["free", "fastlane", "blueprint", "pilot"]);
 
 // sessions-live FR-29: the type of work in its lane's colour, the help's, a mockup or a fastlane's loop in its flow's;
 // neutral outside selo or for an unknown flow.
@@ -51,6 +55,24 @@ export function laneColor(s: WorkOf): string | undefined {
   if (isIterating(s)) return "var(--lane-iterate)";
   if (s.skill === "mockup") return "var(--lane-mockup)";
   return LANES.has(s.flow) ? `var(--lane-${s.flow})` : undefined;
+}
+
+export interface NextCommand {
+  summary: string | null;
+  command: string;
+}
+
+// sessions-live FR-48: the resume prompt, then each next step of the done footer; a command once, with the summary a
+// next step gives it; nothing for an archived session (FR-21).
+export function nextCommands(s: Pick<Session, "isArchived" | "nextAction" | "nextSteps">): NextCommand[] {
+  if (s.isArchived || !s.nextAction) return [];
+  const byCommand = new Map<string, NextCommand>([[s.nextAction, { summary: null, command: s.nextAction }]]);
+  for (const { summary, command } of s.nextSteps) {
+    const known = byCommand.get(command);
+    if (!known) byCommand.set(command, { summary, command });
+    else known.summary ??= summary;
+  }
+  return [...byCommand.values()];
 }
 
 export const blockerLabel = (b: Session["blockers"][number]) => t(`sessions.blocker.${b}` as MessageKey);

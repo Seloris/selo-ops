@@ -247,8 +247,8 @@ export function SessionsLivePage() {
         if (!next.delete(id)) next.add(id);
         return next;
       }),
-    onCopyNext: (s) =>
-      void copy(s.nextAction ?? "", t("sessions.toast.nextCopied"), t("sessions.toast.nextHint", { project: projectName(s.projectId), lane: workLabel(s) })),
+    onCopyNext: (s, command) =>
+      void copy(command ?? s.nextAction ?? "", t("sessions.toast.nextCopied"), t("sessions.toast.nextHint", { project: projectName(s.projectId), lane: workLabel(s) })),
     onArchive: (s) => {
       // sessions-live FR-22: a finished session archives at once, unless it holds a note or is flagged.
       if (isFinished(s) && !s.note && !flags.isFlagged(s.id)) archiveNow(s.id);

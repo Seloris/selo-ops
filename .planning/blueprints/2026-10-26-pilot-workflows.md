@@ -11,7 +11,7 @@ Pages: `sessions-live`, `help` · Domain: `session` · Components: `api`, `web`
 - sessions-live ~ FR-29 — « « blueprint » teal, « autopilot » violet; » → « « blueprint » teal, « pilot » and « pilot autonome » violet; »
 - sessions-live ~ FR-41 — « (fastlane, blueprint and build, autopilot in their lane's colour, » → « (fastlane, blueprint and build, pilot in their lane's colour, »
 - sessions-live ~ FR-21 — « « Action suivante » is shown only when the export proposes a selo command, and nothing is run: » → « « Action suivante » is shown only when the export proposes a selo command, its resume prompt, else the first `Next:` line of the run's done footer (FR-48), and nothing is run: »
-- sessions-live + FR-48 — In the detail, « Action suivante » lists, under the resume prompt when the export gives one, every `Next:` line of the current run's done footer as the export keeps them, in order, each with its summary, its command and « Copier »; a command already listed shows once.
+- sessions-live + FR-48 — In the detail, « Action suivante » lists, under the resume prompt when the export gives one, every `Next:` line of the current run's done footer as the export keeps them, in order, each with its summary, its command and « Copier »; a command already listed shows once, in its first place, with the summary a `Next:` line gives it.
 - sessions-live ~ FR-44 — « « Faire » — « Confier à l'agent » (autopilot, chosen when the window opens), » → « « Faire » — « Confier à l'agent » (pilot autonome, chosen when the window opens), « Laisser selo choisir la voie » (pilot), »
 - sessions-live ~ FR-45 — « autopilot starts from a request or from such a blueprint. Its options are switches named in words with their selo flag beside them: for autopilot from a request, … for autopilot, fastlane and build, « Sans test navigateur »; » → « « Confier à l'agent » starts from a request or from such a blueprint, « Laisser selo choisir la voie » from a request. Its options are switches named in words with their selo flag beside them: for « Confier à l'agent » from a request, « Lane » (« Au choix de l'agent », « Fastlane », « Blueprint ») and « S'arrêter au blueprint », disabled with « Fastlane »; for fastlane, « Mode itératif »; for build, « Une seule étape » with its number; for both pilot choices, fastlane and build, « Sans test navigateur »; »
 - sessions-live ~ FR-46 — « then each option's flag (`— no browser`); » → « then each option's flag (`— no browser`), « Confier à l'agent » ending with `— autonomous`; »
@@ -32,6 +32,9 @@ Pages: `sessions-live`, `help` · Domain: `session` · Components: `api`, `web`
 - The done footer's `Next:` lines → « Action suivante » falls back on the first, the detail lists them all.
 - Pilot keeps autopilot's violet everywhere (help, sessions live, trail).
 
+### Decided during build
+- A resume prompt that is also a `Next:` line → shown once, first, with that line's summary (FR-48's "shows once", the summary kept rather than lost; written into the `+ FR-48` line).
+
 ## Technical defaults
 - API drops every reading of older exports: the deprecated `lane`, its flow and skill mapping, the ` — iterate` read from the request, the `autopilot` flow; `flow`, `skill`, `mode`, `trail` and `next` read as given.
 - API session gains its next steps (summary, command) from the run's `next`, read leniently; `nextAction` = resume prompt, else the first one.
@@ -42,6 +45,9 @@ Pages: `sessions-live`, `help` · Domain: `session` · Components: `api`, `web`
 - Names of the next steps in the API → `nextSteps: [{ summary, command }]` on the session, read from the export's `next: [{ text, prompt }]` (the blueprint's words in the contract, the export's in the reader).
 - Demo's two pilots → the session waiting on a permission becomes the interactive « pilot › fastlane »; the autonomous one stopped on a question reads « pilot autonome › blueprint », beside the autonomous pilot on build.
 - Demo's versions → every exported session written by selo-ops 2.8.0, selo installed at 2.6.0 and 2.5.0 (the 2.8.0 shape; no session without a writer version left).
+- The window's two pilot choices in the code → `autonomous` (« Confier à l'agent », `pilot autonome` beside it) and `pilot` (« Laisser selo choisir la voie »), both running `/selo:pilot`.
+- The help's pilot lane and skill → the lane card gives both prompts (`/selo:pilot {demande | blueprint}` and its `— autonomous` form); the skill card lists `— autonomous` among its options; « Réglages » shows one card per setting, the setting in code on top.
+- `web/CLAUDE.md`'s lane token list → follows the rename to `--lane-pilot`.
 
 ## Stages
 1. api — `feat(pilot-workflows): api — pilot flow, autonomous mode and the footer's next steps`
@@ -54,7 +60,7 @@ Pages: `sessions-live`, `help` · Domain: `session` · Components: `api`, `web`
 
 ## Progress
 - [x] Stage 1 — api
-- [ ] Stage 2 — web
-- [ ] Review
-- [ ] Browser test
+- [x] Stage 2 — web
+- [x] Review
+- [x] Browser test
 - [ ] Spec merged

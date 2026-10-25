@@ -15,7 +15,7 @@ import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { FlagButton, NotifySwitch } from "./FlagControls.tsx";
-import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, laneColor, requestText, toneOf, workLabel, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, laneColor, nextCommands, requestText, toneOf, workLabel, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 import extras from "./NextAction.module.css";
 
@@ -63,10 +63,19 @@ export function SessionDetail({
       )}
     </Section>
   );
-  const next = s.isArchived ? null : s.nextAction;
-  const nextSection = next && (
-    <Section icon={<PromptIcon />} hue="next" title={t("sessions.actions.next")} summary={next} {...fold("next")}>
-      <CommandBox command={next} copyLabel={t("sessions.actions.copy")} onCopy={() => actions.onCopyNext(s)} />
+  // sessions-live FR-21, FR-48: the resume prompt, then the next steps of the done footer.
+  const next = nextCommands(s);
+  const firstNext = next[0];
+  const nextSection = firstNext && (
+    <Section icon={<PromptIcon />} hue="next" title={t("sessions.actions.next")} summary={firstNext.command} {...fold("next")}>
+      <ul className={styles.nextSteps}>
+        {next.map(({ summary, command }) => (
+          <li key={command}>
+            {summary && <p className={styles.muted}>{summary}</p>}
+            <CommandBox command={command} copyLabel={t("sessions.actions.copy")} onCopy={() => actions.onCopyNext(s, command)} />
+          </li>
+        ))}
+      </ul>
     </Section>
   );
   const closeSection = (
@@ -108,7 +117,7 @@ export function SessionDetail({
       )}
     </Section>
   );
-  // sessions-live FR-41: absent outside selo and for an export older than 2.5.0, which writes no trail.
+  // sessions-live FR-41: absent outside selo and for a run with no history.
   // A past wait reads as open; past work is muted; the last line keeps the session's closed or archived state, so it never pulses then.
   const trail = trailLines(s.trail, now, s.mode).map((l, i, all) => {
     const isLast = i === all.length - 1;

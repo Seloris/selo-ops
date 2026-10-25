@@ -457,6 +457,10 @@ export interface components {
                 subject: string;
             }[];
             nextAction: string | null;
+            nextSteps: {
+                summary: string;
+                command: string;
+            }[];
             model: string | null;
             effort: string | null;
             permissionMode: string | null;

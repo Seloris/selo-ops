@@ -14,6 +14,7 @@ import {
   roles,
   sectionOrder,
   sections,
+  settingRules,
   skills,
   planningTree,
   specChecks,
@@ -146,7 +147,7 @@ function SpecsTab() {
   );
 }
 
-// help FR-06, FR-07.
+// help FR-06, FR-07, FR-18.
 function TechnicalTab() {
   return (
     <>
@@ -156,6 +157,9 @@ function TechnicalTab() {
       </HelpSection>
       <HelpSection section={technicalSections.roles} intro="help.roles.intro">
         <RoleCards roles={roles} />
+      </HelpSection>
+      <HelpSection section={technicalSections.settings} intro="help.settings.intro">
+        <RuleCards rules={settingRules} layout="rows" />
       </HelpSection>
     </>
   );

@@ -47,6 +47,7 @@ function buildSession(overrides: Partial<Session> = {}): Session {
     recap: null,
     commits: [],
     nextAction: null,
+    nextSteps: [],
     model: null,
     effort: null,
     permissionMode: null,

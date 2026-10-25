@@ -6,7 +6,7 @@
    --done                green, the dot of a finished job (sessions-live FR-10)
    --font-mono           commands, branches, commit subjects
    --working             sky blue, the pulsing dot of a running session; no lane's colour, not --mark's blue (sessions-live FR-10)
-   --lane-fastlane, --lane-autopilot   the lanes on the help page: lime, violet (help FR-11)
+   --lane-fastlane, --lane-pilot   the lanes on the help page: lime, violet (help FR-11)
    --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
    --lane-free           a free request: slate; the four --lane-* also colour the type of work of a session (sessions-live FR-29)
    --lane-mockup, --lane-iterate   the two flows beside the lanes, mockup first and the fastlane's iterate mode: fuchsia, orange (help FR-11, sessions-live FR-29); orange, not --warn's amber
@@ -31,7 +31,7 @@
   --working: #0284c7;
   --mark: #2563eb;
   --lane-fastlane: #4d7c0f;
-  --lane-autopilot: #7c3aed;
+  --lane-pilot: #7c3aed;
   --lane-blueprint: #0f766e;
   --lane-free: #475569;
   --lane-mockup: #c026d3;
@@ -77,7 +77,7 @@
     --working: #38bdf8;
     --mark: #93c5fd;
     --lane-fastlane: #a3e635;
-    --lane-autopilot: #c4b5fd;
+    --lane-pilot: #c4b5fd;
     --lane-blueprint: #2dd4bf;
     --lane-free: #94a3b8;
     --lane-mockup: #f0abfc;
@@ -142,7 +142,7 @@
   --working: #0284c7;
   --mark: #2563eb;
   --lane-fastlane: #4d7c0f;
-  --lane-autopilot: #7c3aed;
+  --lane-pilot: #7c3aed;
   --lane-blueprint: #0f766e;
   --lane-free: #475569;
   --lane-mockup: #c026d3;
@@ -207,7 +207,7 @@
   --working: #38bdf8;
   --mark: #93c5fd;
   --lane-fastlane: #a3e635;
-  --lane-autopilot: #c4b5fd;
+  --lane-pilot: #c4b5fd;
   --lane-blueprint: #2dd4bf;
   --lane-free: #94a3b8;
   --lane-mockup: #f0abfc;

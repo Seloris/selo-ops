@@ -53,24 +53,29 @@ const project = (id: string, root: string, worktrees: string[] = [], blueprints:
 });
 
 describe("commandOf (sessions-live FR-45, FR-46)", () => {
-  it("opens on autopilot with the request after the skill", () => {
-    expect(commandOf(form({ request: "  Archiver en lot  " }))).toBe("/selo:autopilot Archiver en lot");
+  it("opens on the autonomous pilot, the request after the skill and `— autonomous` last", () => {
+    expect(commandOf(form({ request: "  Archiver en lot  " }))).toBe("/selo:pilot Archiver en lot — autonomous");
   });
 
-  it("adds autopilot's forced lane, its stop at the blueprint and no browser, in that order", () => {
+  it("adds the autonomous pilot's forced lane, its stop at the blueprint and no browser, then `— autonomous`", () => {
     expect(commandOf(form({ request: "x", lane: "blueprint", untilBlueprint: true, noBrowser: true }))).toBe(
-      "/selo:autopilot x — blueprint — until blueprint — no browser",
+      "/selo:pilot x — blueprint — until blueprint — no browser — autonomous",
     );
   });
 
   it("drops the stop at the blueprint when the lane is fastlane", () => {
-    expect(commandOf(form({ request: "x", lane: "fastlane", untilBlueprint: true }))).toBe("/selo:autopilot x — fastlane");
+    expect(commandOf(form({ request: "x", lane: "fastlane", untilBlueprint: true }))).toBe("/selo:pilot x — fastlane — autonomous");
   });
 
-  it("starts autopilot from a blueprint's file, without lane options", () => {
+  it("starts the autonomous pilot from a blueprint's file, without lane options", () => {
     expect(commandOf(form({ fromBlueprint: true, blueprintFile: ".planning/blueprints/b.md", lane: "fastlane", noBrowser: true }))).toBe(
-      "/selo:autopilot .planning/blueprints/b.md — no browser",
+      "/selo:pilot .planning/blueprints/b.md — no browser — autonomous",
     );
+  });
+
+  it("lets selo pick the lane from a request, with no browser only", () => {
+    expect(commandOf(form({ skill: "pilot", request: "x", lane: "blueprint", untilBlueprint: true, noBrowser: true }))).toBe("/selo:pilot x — no browser");
+    expect(commandOf(form({ skill: "pilot", request: "x", fromBlueprint: true, blueprintFile: "b.md" }))).toBe("/selo:pilot x");
   });
 
   it("gives fastlane its iterate mode", () => {
@@ -105,7 +110,7 @@ describe("canOpen (sessions-live FR-46)", () => {
     expect(canOpen(form({ skill: "try" }))).toBe(true);
   });
 
-  it("waits for the blueprint for build and an autopilot started from one", () => {
+  it("waits for the blueprint for build and an autonomous pilot started from one", () => {
     expect(canOpen(form({ skill: "build", request: "x" }))).toBe(false);
     expect(canOpen(form({ skill: "build", blueprintFile: "b.md" }))).toBe(true);
     expect(canOpen(form({ fromBlueprint: true, request: "x" }))).toBe(false);

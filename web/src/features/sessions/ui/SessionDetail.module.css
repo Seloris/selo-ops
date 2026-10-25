@@ -289,6 +289,20 @@
   line-height: 1.45;
 }
 
+/* sessions-live FR-48: each next step, its summary above its command. */
+.nextSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nextSteps p {
+  margin: 0 0 4px;
+}
+
 .lines:first-child {
   margin-top: 0;
 }

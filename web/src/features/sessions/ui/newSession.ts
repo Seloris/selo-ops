@@ -4,23 +4,24 @@ export type ProjectOverview = components["schemas"]["ProjectOverview"];
 export type Blueprint = components["schemas"]["Blueprint"];
 
 // sessions-live FR-44: what the « Nouvelle session » window offers, in its groups and order.
-export type SkillId = "autopilot" | "fastlane" | "mockup" | "blueprint" | "build" | "grill" | "review" | "try" | "free";
+// `autonomous`: « Confier à l'agent », the pilot with `— autonomous`; `pilot`: « Laisser selo choisir la voie ».
+export type SkillId = "autonomous" | "pilot" | "fastlane" | "mockup" | "blueprint" | "build" | "grill" | "review" | "try" | "free";
 export type SkillGroup = "do" | "check" | "free";
 export const SKILL_GROUPS: { group: SkillGroup; skills: SkillId[] }[] = [
-  { group: "do", skills: ["autopilot", "fastlane", "mockup", "blueprint", "build"] },
+  { group: "do", skills: ["autonomous", "pilot", "fastlane", "mockup", "blueprint", "build"] },
   { group: "check", skills: ["grill", "review", "try"] },
   { group: "free", skills: ["free"] },
 ];
 
-export type AutopilotLane = "agent" | "fastlane" | "blueprint";
+export type PilotLane = "agent" | "fastlane" | "blueprint";
 
 export interface NewSessionForm {
   skill: SkillId;
   request: string;
-  // build, and an autopilot started from a blueprint: the blueprint's file.
+  // build, and an autonomous pilot started from a blueprint: the blueprint's file.
   blueprintFile: string | null;
   fromBlueprint: boolean;
-  lane: AutopilotLane;
+  lane: PilotLane;
   untilBlueprint: boolean;
   iterate: boolean;
   noBrowser: boolean;
@@ -29,7 +30,7 @@ export interface NewSessionForm {
 }
 
 export const EMPTY_FORM: NewSessionForm = {
-  skill: "autopilot",
+  skill: "autonomous",
   request: "",
   blueprintFile: null,
   fromBlueprint: false,
@@ -40,27 +41,31 @@ export const EMPTY_FORM: NewSessionForm = {
   stage: null,
 };
 
-export const usesBlueprint = (f: NewSessionForm) => f.skill === "build" || (f.skill === "autopilot" && f.fromBlueprint);
+export const usesBlueprint = (f: NewSessionForm) => f.skill === "build" || (f.skill === "autonomous" && f.fromBlueprint);
 export const isRequestOptional = (skill: SkillId) => skill === "review" || skill === "try";
-export const hasNoBrowser = (skill: SkillId) => skill === "autopilot" || skill === "fastlane" || skill === "build";
+export const hasNoBrowser = (skill: SkillId) => skill === "autonomous" || skill === "pilot" || skill === "fastlane" || skill === "build";
 
-// sessions-live FR-45: each option a skill takes, as its selo flag.
+// The selo skill a choice runs: both pilot choices run `/selo:pilot`.
+export const seloSkillOf = (skill: SkillId) => (skill === "autonomous" ? "pilot" : skill);
+
+// sessions-live FR-45, FR-46: each option a skill takes, as its selo flag; the autonomous pilot's `— autonomous` last.
 function flagsOf(f: NewSessionForm): string[] {
   const flags: string[] = [];
-  if (f.skill === "autopilot" && !f.fromBlueprint) {
+  if (f.skill === "autonomous" && !f.fromBlueprint) {
     if (f.lane !== "agent") flags.push(f.lane);
     if (f.untilBlueprint && f.lane !== "fastlane") flags.push("until blueprint");
   }
   if (f.skill === "fastlane" && f.iterate) flags.push("iterate");
   if (f.skill === "build" && f.stage !== null) flags.push(`stage ${f.stage}`);
   if (hasNoBrowser(f.skill) && f.noBrowser) flags.push("no browser");
+  if (f.skill === "autonomous") flags.push("autonomous");
   return flags;
 }
 
 export function commandOf(f: NewSessionForm): string {
   const subject = usesBlueprint(f) ? (f.blueprintFile ?? "") : f.request.trim();
   if (f.skill === "free") return subject;
-  return [`/selo:${f.skill}`, subject, ...flagsOf(f).map((flag) => `— ${flag}`)].filter((part) => part !== "").join(" ");
+  return [`/selo:${seloSkillOf(f.skill)}`, subject, ...flagsOf(f).map((flag) => `— ${flag}`)].filter((part) => part !== "").join(" ");
 }
 
 export function canOpen(f: NewSessionForm): boolean {

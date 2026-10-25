@@ -5,10 +5,10 @@ import { hasTrail, lineColor, MAX_WEIGHT, skillColor, trailLines, waitingText, t
 describe("skillColor", () => {
   it("colours the lane skills, build as a blueprint, mockup as its flow, and leaves the others neutral", () => {
     // Act
-    const colors = ["fastlane", "blueprint", "build", "autopilot", "mockup", "review", null].map(skillColor);
+    const colors = ["fastlane", "blueprint", "build", "pilot", "mockup", "review", null].map(skillColor);
 
     // Assert
-    expect(colors).toEqual(["var(--lane-fastlane)", "var(--lane-blueprint)", "var(--lane-blueprint)", "var(--lane-autopilot)", "var(--lane-mockup)", undefined, undefined]);
+    expect(colors).toEqual(["var(--lane-fastlane)", "var(--lane-blueprint)", "var(--lane-blueprint)", "var(--lane-pilot)", "var(--lane-mockup)", undefined, undefined]);
   });
 });
 

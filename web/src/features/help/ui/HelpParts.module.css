@@ -28,7 +28,7 @@
   width: 48px;
   height: 3px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, var(--lane-fastlane), var(--lane-blueprint), var(--lane-autopilot));
+  background: linear-gradient(90deg, var(--lane-fastlane), var(--lane-blueprint), var(--lane-pilot));
 }
 
 .tocList {
@@ -173,8 +173,8 @@
   --lane: var(--lane-blueprint);
 }
 
-.lane-autopilot {
-  --lane: var(--lane-autopilot);
+.lane-pilot {
+  --lane: var(--lane-pilot);
 }
 
 .lane-mockup {
