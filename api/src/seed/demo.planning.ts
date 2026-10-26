@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import type { ExportBlueprint, ExportSheet } from "../features/sessions/sessions.export.js";
+import type { ExportBlueprint, ExportMockup, ExportSheet } from "../features/sessions/sessions.export.js";
 
 // The demo's `.planning` folders and the export's view of them (the projects page, `project` BR-01 to BR-04): every
 // blueprint state, a blueprint only a worktree holds, ideas and technical debt. Each file is written once, from the same
@@ -41,6 +41,8 @@ interface DemoPlanning {
   blueprints: DemoBlueprint[];
   ideas: [string, string][];
   debts: string[];
+  // sessions-live FR-50: each mockup's name, title, whether it is validated, whether it is committed.
+  mockups?: [string, string, boolean, boolean][];
 }
 
 const MINUTE = 60;
@@ -119,6 +121,7 @@ export const DEMO_PLANNING: Record<string, DemoPlanning> = {
         stages: [["web", "catalog grid", "2c9e7a4"]], delta: [["catalog", "+", "FR-01", "Products show in a grid with their price."]], decisions: [] },
     ],
     ideas: [["catalog", "**Wishlist:** keep products for later."]],
+    mockups: [["2026-10-24-product-sheet", "Fiche produit", true, false], ["2026-10-25-wishlist", "Liste d’envies", false, false], ["2026-10-15-catalog", "Grille du catalogue", true, true]],
     debts: ["**No image sizes (web):** product images load at full size in the grid. See [ProductCard.tsx](../web/src/features/catalog/ui/ProductCard.tsx)."],
   },
   "selo-ops": {
@@ -142,6 +145,7 @@ export const DEMO_PLANNING: Record<string, DemoPlanning> = {
       { name: "2026-10-20-ops-export", title: "Read the ops export", state: "done", pages: [], domain: ["session"], components: ["api"],
         stages: [["api", "read the ops export", "e1f7a30"]], delta: [["session", "+", "BR-01", "Selo Ops reads the ops export and never writes to it."]], decisions: [] },
     ],
+    mockups: [["2026-10-26-new-session-modes", "Nouvelle session, deux modes", true, false]],
     ideas: [["sessions-live", "**Session token count:** see the number of tokens a session used."], ["sessions-live", "**Session duration:** see when a session was created and how long it ran."], ["app", "**Terminal mode:** drive sessions from a terminal in the app."]],
     debts: ["**Export read on each poll (api):** the whole export is read again every 5 s. See [sessions.export.ts](../api/src/features/sessions/sessions.export.ts).", "**Panel width in local storage (web):** the detail's width is kept per browser only. See [panelWidth.ts](../web/src/features/sessions/ui/panelWidth.ts)."],
   },
@@ -263,5 +267,6 @@ export function seedPlanning(project: string, root: string, worktreeRoot: (name:
   write(root, ".planning/ideas.md", ["# Ideas", "", "The person's ideas, not yet specified.", "",
     ...[...new Set(planning.ideas.map(([scope]) => scope))].flatMap((scope) => [`## ${scope}`, "", ...planning.ideas.filter(([s]) => s === scope).map(([, text]) => `- 2026-10-20 — ${text}`), ""])].join("\n"));
   write(root, ".planning/technical-debt.md", ["# Technical debt", "", "A flat list, new items at the bottom.", "", ...planning.debts.map((d) => `- ${d}`), ""].join("\n"));
-  return { sheets, blueprints: base.map((b) => toExportBlueprint(b, at)), worktrees };
+  const mockups: ExportMockup[] = (planning.mockups ?? []).map(([name, title, validated, committed]) => ({ file: `.planning/mockups/${name}.html`, title, validated, committed }));
+  return { sheets, blueprints: base.map((b) => toExportBlueprint(b, at)), mockups, worktrees };
 }

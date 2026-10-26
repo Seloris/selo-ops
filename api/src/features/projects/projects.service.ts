@@ -2,7 +2,7 @@ import { NotFoundError } from "../../shared/errors.js";
 import type { ExportBlueprint, ExportSheet, OpsExportReader, ProjectFile, SessionFile } from "../sessions/sessions.export.js";
 import type { PlanningReader } from "./projects.planning.js";
 import type { SlotReader } from "./projects.slots.js";
-import type { Blueprint, Project, ProjectSlot, ProjectFileResponse, ProjectsResponse, SpecSheet } from "./projects.schema.js";
+import type { Blueprint, Mockup, Project, ProjectSlot, ProjectFileResponse, ProjectsResponse, SpecSheet } from "./projects.schema.js";
 
 export const IDEAS_FILE = ".planning/ideas.md";
 export const DEBT_FILE = ".planning/technical-debt.md";
@@ -89,6 +89,15 @@ function toBlueprint(b: ExportBlueprint, worktreeBranch: string | null, sessionI
   };
 }
 
+// sessions-live FR-50: the validated mockups no commit holds yet, the base checkout's first, then a worktree's own
+// (`project` BR-01), the first worktree holding one winning.
+function mockupsOf({ base, worktrees }: Checkouts): Mockup[] {
+  const toBuild = (f: ProjectFile, worktreeBranch: string | null) =>
+    f.mockups.filter((m) => m.validated && !m.committed).map((m) => ({ file: m.file, title: m.title, worktreeBranch }));
+  const all = [...toBuild(base, null), ...worktrees.flatMap((w) => toBuild(w, w.branch ?? null))];
+  return all.filter((m, i) => all.findIndex((x) => x.file === m.file) === i).sort((a, b) => b.file.localeCompare(a.file));
+}
+
 // Where each readable file of a project lives: the export's files, a worktree-only blueprint in its worktree.
 function filesOf({ base, worktrees }: Checkouts): Map<string, string> {
   const files = new Map<string, string>();
@@ -144,6 +153,7 @@ function toProject(checkouts: Checkouts, liveSessions: SessionFile[], planning: 
     worktrees: worktrees.map((w) => ({ root: w.root, branch: w.branch ?? null, aheadCount: w.aheadCount ?? null, changedCount: w.changedCount ?? null })),
     sheets: hasPlanning ? base.sheets.map((s) => toSheet(s, blueprints, planning.read(base.root, s.file))) : [],
     blueprints,
+    mockups: hasPlanning ? mockupsOf(checkouts) : [],
     ideaCount: hasPlanning ? countItems(planning.read(base.root, IDEAS_FILE)) : 0,
     debtCount: hasPlanning ? countItems(planning.read(base.root, DEBT_FILE)) : 0,
     sessionIds: sessions.map((s) => s.sessionId),

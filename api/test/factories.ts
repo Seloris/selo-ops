@@ -1,5 +1,5 @@
 import type { ClaudeStatusFile } from "../src/features/sessions/sessions.desktop.js";
-import type { ExportBlueprint, ExportRun, ExportRunUsage, ExportSheet, ExportUsage, ProjectFileInput, SessionFile } from "../src/features/sessions/sessions.export.js";
+import type { ExportBlueprint, ExportMockup, ExportRun, ExportRunUsage, ExportSheet, ExportUsage, ProjectFileInput, SessionFile } from "../src/features/sessions/sessions.export.js";
 import type { RunningStatusFile } from "../src/features/sessions/sessions.outside.js";
 
 // One `build{Entity}(overrides)` per entity: the only way a test builds a row.
@@ -171,6 +171,17 @@ export function buildExportBlueprint(overrides: Partial<ExportBlueprint> = {}): 
     next: { prompt: `/selo:build ${file}` },
     sessions: [],
     modifiedAt: EPOCH,
+    ...overrides,
+  };
+}
+
+// A mockup as the export lists it in a project file: validated, not committed yet.
+export function buildExportMockup(overrides: Partial<ExportMockup> = {}): ExportMockup {
+  return {
+    file: ".planning/mockups/2026-01-03-due-date.html",
+    title: "Due date",
+    validated: true,
+    committed: false,
     ...overrides,
   };
 }

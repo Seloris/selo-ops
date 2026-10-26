@@ -5,7 +5,7 @@ import request from "supertest";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { projectFileResponseSchema, projectsResponseSchema } from "../../src/features/projects/projects.schema.js";
 import { sessionsResponseSchema } from "../../src/features/sessions/sessions.schema.js";
-import { buildExportBlueprint, buildExportSheet, buildProjectFile, buildRun, buildSessionFile, rootKeyOf } from "../factories.js";
+import { buildExportBlueprint, buildExportMockup, buildExportSheet, buildProjectFile, buildRun, buildSessionFile, rootKeyOf } from "../factories.js";
 import { createTestContext } from "../setup.js";
 
 // `project` BR-01 to BR-04: the projects of the export, merged per repository, their specs read from the base checkout.
@@ -139,6 +139,51 @@ describe("projects", () => {
       ]);
     });
 
+    it("lists the mockups to build, validated and not committed, a worktree's own with its branch", async () => {
+      // Arrange
+      const root = slash(ctx.code.repo("ledger-api"));
+      const worktree = slash(ctx.code.folder("ledger-api-wt"));
+      ctx.seed.project(
+        buildProjectFile({
+          root,
+          sheets: [buildExportSheet()],
+          mockups: [
+            buildExportMockup(),
+            buildExportMockup({ file: ".planning/mockups/2026-01-04-tags.html", title: "Tags", validated: false }),
+            buildExportMockup({ file: ".planning/mockups/2026-01-02-home.html", title: "Home", committed: true }),
+          ],
+        }),
+      );
+      ctx.seed.project(
+        buildProjectFile({
+          root: worktree,
+          repo: `${root}/.git`,
+          branch: "claude/export",
+          mockups: [buildExportMockup({ title: "Worktree copy" }), buildExportMockup({ file: ".planning/mockups/2026-01-05-export.html", title: "Export" })],
+        }),
+      );
+
+      // Act
+      const [project] = await list();
+
+      // Assert
+      expect(project?.mockups).toEqual([
+        { file: ".planning/mockups/2026-01-05-export.html", title: "Export", worktreeBranch: "claude/export" },
+        { file: ".planning/mockups/2026-01-03-due-date.html", title: "Due date", worktreeBranch: null },
+      ]);
+    });
+
+    it("lists no mockup when the export gives none", async () => {
+      // Arrange
+      seedRepoWithWorktree();
+
+      // Act
+      const [project] = await list();
+
+      // Assert
+      expect(project?.mockups).toEqual([]);
+    });
+
     it("lists a folder of a bigger repository on the base checkout's branch as a project of its own", async () => {
       // Arrange
       const root = slash(ctx.code.repo("factory"));
@@ -203,6 +248,7 @@ describe("projects", () => {
         buildProjectFile({
           sheets: [buildExportSheet(), { slug: "broken" }] as never,
           blueprints: [buildExportBlueprint(), buildExportBlueprint({ name: "x", state: "unknown" as never })],
+          mockups: [buildExportMockup(), { file: ".planning/mockups/x.html" }] as never,
           selo: 42 as never,
         }),
       );
@@ -215,6 +261,7 @@ describe("projects", () => {
       // Assert
       expect(project?.sheets).toHaveLength(1);
       expect(project?.blueprints.map((b) => b.name)).toEqual(["2026-01-01-due-date"]);
+      expect(project?.mockups.map((m) => m.title)).toEqual(["Due date"]);
       expect(project?.seloVersion).toBeNull();
       expect(sessions.projects[0]?.name).toBe("ledger-api");
     });

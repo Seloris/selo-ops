@@ -133,6 +133,14 @@ const blueprintSchema = z.object({
   modifiedAt: z.string().nullish().catch(null),
 });
 
+// A file of `.planning/mockups/` (sessions-live FR-50): whether it carries selo's validated meta, whether git tracks it unchanged.
+const mockupSchema = z.object({
+  file: z.string(),
+  title: z.string(),
+  validated: z.boolean(),
+  committed: z.boolean(),
+});
+
 // The fields the projects page reads (`project` BR-01) are read leniently: a mismatch never drops the file sessions read.
 export const projectFileSchema = z.object({
   schemaVersion: z.literal(1),
@@ -148,6 +156,7 @@ export const projectFileSchema = z.object({
   error: z.string().nullish().catch(null),
   sheets: lenientArray(sheetSchema),
   blueprints: lenientArray(blueprintSchema),
+  mockups: lenientArray(mockupSchema),
 });
 
 export type ExportRun = z.infer<typeof runSchema>;
@@ -160,6 +169,7 @@ export type ProjectFile = z.infer<typeof projectFileSchema>;
 export type ProjectFileInput = z.input<typeof projectFileSchema>;
 export type ExportSheet = z.infer<typeof sheetSchema>;
 export type ExportBlueprint = z.infer<typeof blueprintSchema>;
+export type ExportMockup = z.infer<typeof mockupSchema>;
 
 export interface OpsExport {
   sessions: SessionFile[];

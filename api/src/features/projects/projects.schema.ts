@@ -56,6 +56,16 @@ export const blueprintSchema = z
   })
   .meta({ id: "Blueprint" });
 
+// sessions-live FR-50: a mockup to build.
+export const mockupSchema = z
+  .object({
+    file: z.string(),
+    title: z.string(),
+    // `project` BR-01: the worktree's branch when only a worktree holds it; null when the base checkout does.
+    worktreeBranch: z.string().nullable(),
+  })
+  .meta({ id: "Mockup" });
+
 // `project` BR-05: a run of the app on a slot of one of the project's checkouts.
 export const projectSlotSchema = z
   .object({
@@ -87,6 +97,8 @@ export const projectSchema = z
     sheets: z.array(sheetSchema),
     // Newest first.
     blueprints: z.array(blueprintSchema),
+    // Newest first.
+    mockups: z.array(mockupSchema),
     ideaCount: z.number().int(),
     debtCount: z.number().int(),
     // The live sessions in its base checkout or one of its worktrees.
@@ -104,6 +116,7 @@ export const projectFileResponseSchema = z.object({ path: z.string(), text: z.st
 
 export type Project = z.infer<typeof projectSchema>;
 export type Blueprint = z.infer<typeof blueprintSchema>;
+export type Mockup = z.infer<typeof mockupSchema>;
 export type SpecSheet = z.infer<typeof sheetSchema>;
 export type ProjectSlot = z.infer<typeof projectSlotSchema>;
 export type ProjectsResponse = z.infer<typeof projectsResponseSchema>;

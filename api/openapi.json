@@ -118,6 +118,12 @@
               "$ref": "#/components/schemas/Blueprint"
             }
           },
+          "mockups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Mockup"
+            }
+          },
           "ideaCount": {
             "type": "integer"
           },
@@ -151,6 +157,7 @@
           "worktrees",
           "sheets",
           "blueprints",
+          "mockups",
           "ideaCount",
           "debtCount",
           "sessionIds",
@@ -404,6 +411,28 @@
           "merging",
           "done",
           "legacy"
+        ]
+      },
+      "Mockup": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "worktreeBranch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "file",
+          "title",
+          "worktreeBranch"
         ]
       },
       "ProjectSlot": {

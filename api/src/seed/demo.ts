@@ -376,7 +376,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
     ...Object.entries(PROJECTS).map(([name, p], i) => ({
       schemaVersion: 1 as const, root: `${ROOT}/${name}`, repo: repoOf(name), branch: p.branch, changedCount: p.changed, manifest: { name },
       selo: i === 1 ? "2.3.0" : "2.4.0", baseBranch: p.branch, aheadCount: null, unpushedCount: i, error: null,
-      sheets: planning.get(name)?.sheets ?? [], blueprints: planning.get(name)?.blueprints ?? [],
+      sheets: planning.get(name)?.sheets ?? [], blueprints: planning.get(name)?.blueprints ?? [], mockups: planning.get(name)?.mockups ?? [],
     })),
     ...SESSIONS.filter((s) => s.worktree).map((s) => ({
       schemaVersion: 1 as const, root: rootOf(s), repo: repoOf(s.project), branch: `claude/${s.worktree}`, changedCount: 2, manifest: { name: s.project },
