@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { sql } from "drizzle-orm";
@@ -115,6 +115,17 @@ function createPluginsFile() {
   return { file, write: (content: string) => writeFileSync(file, content), clear: () => rmSync(file, { force: true }) };
 }
 
+// Claude Code's user settings file: a file in another temporary folder, never the person's, removed by reset().
+function createSettingsFile() {
+  const file = join(mkdtempSync(join(tmpdir(), "selo-ops-settings-")), "settings.json");
+  return {
+    file,
+    write: (content: string) => writeFileSync(file, content),
+    read: () => (existsSync(file) ? readFileSync(file, "utf8") : null),
+    clear: () => rmSync(file, { force: true }),
+  };
+}
+
 export async function createTestContext() {
   const db: Database = openDatabase();
   await migrateDatabase(db);
@@ -124,6 +135,7 @@ export async function createTestContext() {
   const transcripts = createClaudeProjectsDir();
   const code = createCodeDir();
   const plugins = createPluginsFile();
+  const settings = createSettingsFile();
   const app = createApp({
     db,
     clock,
@@ -131,6 +143,7 @@ export async function createTestContext() {
     claudeSessionsDir: statuses.dir,
     claudeProjectsDir: transcripts.dir,
     claudePluginsFile: plugins.file,
+    claudeSettingsFile: settings.file,
   });
   const seed = {
     ...ops.seed,
@@ -153,7 +166,8 @@ export async function createTestContext() {
     transcripts.clear();
     code.clear();
     plugins.clear();
+    settings.clear();
     clock.set(EPOCH);
   };
-  return { app, db, clock, seed, code, reset, clearStatus: statuses.clear };
+  return { app, db, clock, seed, code, settings, reset, clearStatus: statuses.clear };
 }

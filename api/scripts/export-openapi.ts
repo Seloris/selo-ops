@@ -2,6 +2,7 @@ import { writeFileSync } from "node:fs";
 import "../src/features/health/health.schema.js";
 import "../src/features/projects/projects.schema.js";
 import "../src/features/sessions/sessions.schema.js";
+import "../src/features/settings/settings.schema.js";
 import { buildOpenApiDocument } from "../src/shared/openapi.js";
 
 const target = process.argv[2];

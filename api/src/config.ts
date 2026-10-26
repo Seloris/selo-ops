@@ -9,7 +9,7 @@ const envSchema = z.object({
   CLAUDE_CONFIG_DIR: z.string().optional(),
 });
 
-export type Config = z.infer<typeof envSchema> & { opsDir: string; claudeSessionsDir: string; claudeProjectsDir: string; claudePluginsFile: string };
+export type Config = z.infer<typeof envSchema> & { opsDir: string; claudeSessionsDir: string; claudeProjectsDir: string; claudePluginsFile: string; claudeSettingsFile: string };
 
 // As the selo plugin's ops.mjs resolves it: SELO_OPS_DIR, else CLAUDE_CONFIG_DIR/selo, else ~/.claude/selo.
 export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -24,5 +24,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
     claudeProjectsDir: join(configDir, "projects"),
     // Claude Code's list of installed plugins (`session` BR-01).
     claudePluginsFile: join(configDir, "plugins", "installed_plugins.json"),
+    // Claude Code's user settings file, whose `env` block holds the person's selo settings (`settings` BR-01).
+    claudeSettingsFile: join(configDir, "settings.json"),
   };
 }

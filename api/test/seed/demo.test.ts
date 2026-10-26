@@ -1,5 +1,5 @@
 import { mkdtempSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
@@ -7,6 +7,7 @@ import { createApp } from "../../src/app.js";
 import { migrateDatabase, openDatabase } from "../../src/db/client.js";
 import { projectFileResponseSchema, projectsResponseSchema } from "../../src/features/projects/projects.schema.js";
 import { sessionsResponseSchema } from "../../src/features/sessions/sessions.schema.js";
+import { settingsSchema } from "../../src/features/settings/settings.schema.js";
 import { seedDemo } from "../../src/seed/demo.js";
 import { createTestClock } from "../setup.js";
 
@@ -17,6 +18,7 @@ async function demoApp() {
     claudeSessionsDir: join(dir, "claude", "sessions"),
     claudeProjectsDir: join(dir, "claude", "projects"),
     claudePluginsFile: join(dir, "claude", "plugins", "installed_plugins.json"),
+    claudeSettingsFile: join(dir, "claude", "settings.json"),
     codeDir: join(dir, "code"),
     scratchDir: join(dir, "scratch"),
   };
@@ -117,5 +119,19 @@ describe("demo", () => {
         expect(projectFileResponseSchema.parse(read.body).text).toMatch(/^# /);
       }
     }
+  });
+
+  it("seeds a settings file of its own, its selo settings at their defaults", async () => {
+    // Arrange
+    const app = await demoApp();
+
+    // Act
+    const res = await request(app).get("/v1/settings");
+
+    // Assert
+    const settings = settingsSchema.parse(res.body);
+    expect(settings.state).toBe("ok");
+    expect(settings.path).not.toBe(join(homedir(), ".claude", "settings.json"));
+    expect(Object.values(settings.values).every((v) => v === null)).toBe(true);
   });
 });

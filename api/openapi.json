@@ -1187,6 +1187,331 @@
           "name",
           "versions"
         ]
+      },
+      "SeloSettings": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "missing",
+              "unreadable"
+            ]
+          },
+          "error": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "json",
+                  "root",
+                  "env"
+                ]
+              },
+              "line": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "column": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "reason",
+              "line",
+              "column"
+            ]
+          },
+          "values": {
+            "$ref": "#/components/schemas/SeloSettingValues"
+          },
+          "catalog": {
+            "type": "object",
+            "properties": {
+              "defaultPreset": {
+                "type": "string"
+              },
+              "presets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "models": {
+                      "type": "object",
+                      "properties": {
+                        "planner": {
+                          "type": "string",
+                          "enum": [
+                            "opus",
+                            "sonnet",
+                            "haiku",
+                            "fable"
+                          ]
+                        },
+                        "implementer": {
+                          "type": "string",
+                          "enum": [
+                            "opus",
+                            "sonnet",
+                            "haiku",
+                            "fable"
+                          ]
+                        },
+                        "reviewer": {
+                          "type": "string",
+                          "enum": [
+                            "opus",
+                            "sonnet",
+                            "haiku",
+                            "fable"
+                          ]
+                        },
+                        "runner": {
+                          "type": "string",
+                          "enum": [
+                            "opus",
+                            "sonnet",
+                            "haiku",
+                            "fable"
+                          ]
+                        },
+                        "explorer": {
+                          "type": "string",
+                          "enum": [
+                            "opus",
+                            "sonnet",
+                            "haiku",
+                            "fable"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "models"
+                  ]
+                }
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "planner",
+                    "implementer",
+                    "reviewer",
+                    "runner",
+                    "explorer"
+                  ]
+                }
+              },
+              "models": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "opus",
+                    "sonnet",
+                    "haiku",
+                    "fable"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "defaultPreset",
+              "presets",
+              "roles",
+              "models"
+            ]
+          }
+        },
+        "required": [
+          "path",
+          "state",
+          "error",
+          "values",
+          "catalog"
+        ]
+      },
+      "SeloSettingValues": {
+        "type": "object",
+        "properties": {
+          "SELO_MODELS": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "SELO_MODEL_PLANNER": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "SELO_MODEL_IMPLEMENTER": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "SELO_MODEL_REVIEWER": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "SELO_MODEL_RUNNER": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "SELO_MODEL_EXPLORER": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "SELO_ROUTING": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "SELO_COMMIT": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "SELO_MODELS",
+          "SELO_MODEL_PLANNER",
+          "SELO_MODEL_IMPLEMENTER",
+          "SELO_MODEL_REVIEWER",
+          "SELO_MODEL_RUNNER",
+          "SELO_MODEL_EXPLORER",
+          "SELO_ROUTING",
+          "SELO_COMMIT"
+        ]
+      },
+      "SeloSettingChanges": {
+        "type": "object",
+        "properties": {
+          "SELO_MODELS": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "lean",
+              null
+            ]
+          },
+          "SELO_MODEL_PLANNER": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "opus",
+              "sonnet",
+              "haiku",
+              "fable",
+              null
+            ]
+          },
+          "SELO_MODEL_IMPLEMENTER": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "opus",
+              "sonnet",
+              "haiku",
+              "fable",
+              null
+            ]
+          },
+          "SELO_MODEL_REVIEWER": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "opus",
+              "sonnet",
+              "haiku",
+              "fable",
+              null
+            ]
+          },
+          "SELO_MODEL_RUNNER": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "opus",
+              "sonnet",
+              "haiku",
+              "fable",
+              null
+            ]
+          },
+          "SELO_MODEL_EXPLORER": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "opus",
+              "sonnet",
+              "haiku",
+              "fable",
+              null
+            ]
+          },
+          "SELO_ROUTING": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "on"
+            ]
+          },
+          "SELO_COMMIT": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "auto"
+            ]
+          }
+        },
+        "additionalProperties": false
       }
     },
     "parameters": {}
@@ -1449,6 +1774,77 @@
           },
           "404": {
             "description": "The session is neither in the export nor running outside selo",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/settings": {
+      "get": {
+        "summary": "The person's selo settings: the SELO_ keys of the env block of Claude Code's user settings file",
+        "responses": {
+          "200": {
+            "description": "The settings, as the file holds them",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeloSettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Save the changed settings: the file read again, only these keys of its env block written",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeloSettingChanges"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The settings, as the file holds them",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeloSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An unknown key, or a value not allowed",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The file is unreadable: nothing written",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The file could not be written",
             "content": {
               "application/problem+json": {
                 "schema": {

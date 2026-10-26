@@ -12,6 +12,9 @@ import { createOutsideSessionReader } from "./features/sessions/sessions.outside
 import { createDesktopSessionLinkRepository, createSessionArchiveRepository, createSessionNoteRepository } from "./features/sessions/sessions.repository.js";
 import { sessionsRoutes } from "./features/sessions/sessions.routes.js";
 import { createSessionService } from "./features/sessions/sessions.service.js";
+import { createSettingsFile } from "./features/settings/settings.file.js";
+import { settingsRoutes } from "./features/settings/settings.routes.js";
+import { createSettingsService } from "./features/settings/settings.service.js";
 import type { Clock } from "./shared/clock.js";
 import { errorHandler } from "./shared/errors.js";
 
@@ -26,10 +29,12 @@ export interface AppContext {
   claudeProjectsDir: string;
   // Claude Code's list of installed plugins, read on each list for the selo plugins' versions, never written.
   claudePluginsFile: string;
+  // Claude Code's user settings file: read when the settings window opens, its `env` block's SELO_ keys written on a save.
+  claudeSettingsFile: string;
 }
 
 // No sign-in: a local dashboard of the developer's own sessions, every route is public.
-export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile }: AppContext) {
+export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile }: AppContext) {
   const app = express();
   app.use(express.json());
   app.use(healthRoutes({ clock }));
@@ -46,6 +51,7 @@ export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjects
   });
   app.use(sessionsRoutes({ sessions }));
   app.use(projectsRoutes({ projects: createProjectService({ opsExport, planning: createPlanningReader(), slots: createSlotReader() }) }));
+  app.use(settingsRoutes({ settings: createSettingsService({ file: createSettingsFile(claudeSettingsFile) }) }));
   app.use(errorHandler);
   return app;
 }

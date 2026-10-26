@@ -354,6 +354,8 @@ export interface DemoFolders {
   claudeProjectsDir: string;
   // Claude Code's list of installed plugins the demo writes: selo at two versions across projects.
   claudePluginsFile: string;
+  // Claude Code's user settings file, never the person's: other keys beside the defaults, for the settings window to save into.
+  claudeSettingsFile: string;
   // The projects' folders, real ones: a session outside selo finds its repository from its folder.
   codeDir: string;
   // A folder in no repository.
@@ -451,6 +453,11 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
   }
   seedOutside(folders, ROOT, now);
   seedInstalledPlugins(folders.claudePluginsFile, ROOT);
+  writeJson(dirname(folders.claudeSettingsFile), basename(folders.claudeSettingsFile), {
+    model: "opus",
+    permissions: { allow: ["Bash(npm test:*)"] },
+    env: { CLAUDE_CODE_MAX_OUTPUT_TOKENS: "32000" },
+  });
 }
 
 const DEMO_SELO_OPS_VERSION = "2.8.0";

@@ -33,6 +33,14 @@ Pages: none · Domain: `settings` (new), `app` · Components: `api`, `web`
 - Web → a `settings` feature: the window on the shared `Modal`, `Segmented`, `Select`, `Switch`, `Toast`; the preview and the change count in a pure `.ts` module with its test.
 - `settings` sheet's glossary, written at the merge → « réglages » `SeloSettings`, « preset » `preset`, « rôle » `role`, « personnalisé » `isCustom`.
 
+### Decided during build
+- Save contract and the defaults → a default value (`standard`, `off`, `ask`) is refused with `400`, only `null` removes a key (BR-03 held at the API, not only in the window).
+- Unreadable file's position → from V8's message (line and column, or a position, or the end of the text); none for an unexpected token, the window then gives no line and column.
+- A UTF-8 BOM before the JSON → read as no BOM; the file is written back without it.
+- A non-string `SELO_` value → shown as its JSON text, left in the file unless changed.
+- A failed write → `500` problem details naming the OS error; a save with no change writes nothing.
+- Demo settings file → `model`, `permissions` and one `env` key beside the defaults, so that a save shows the other keys kept.
+
 ## Stages
 1. api — `feat(selo-settings): api — read and save the person's selo settings`
 2. web — `feat(selo-settings): web — the « Réglages » window in the header`
@@ -43,7 +51,7 @@ Pages: none · Domain: `settings` (new), `app` · Components: `api`, `web`
 - browser: demo at 1280 and 360 px — « Réglages » in the header, the window unchanged, a preset, two roles and routing changed with the preview and count, the arrow back to the preset, save and toast, reopened with the saved values; the unreadable state with the demo's file broken by hand.
 
 ## Progress
-- [ ] Stage 1 — api
+- [x] Stage 1 — api
 - [ ] Stage 2 — web
 - [ ] Review
 - [ ] Browser test
