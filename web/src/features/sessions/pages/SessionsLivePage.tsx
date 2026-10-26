@@ -35,7 +35,7 @@ import { useUnarchiveSessionMutation } from "../data/useUnarchiveSessionMutation
 import { useProjectsQuery } from "../../projects/data/useProjectsQuery.ts";
 import { BlockedCommand } from "../ui/BlockedCommand.tsx";
 import { NewSessionDialog } from "../ui/NewSessionDialog.tsx";
-import { newSessionLink, type ProjectOverview } from "../ui/newSession.ts";
+import { PREFS_KEY, newSessionLink, parsePrefs, type ProjectOverview } from "../ui/newSession.ts";
 import { SessionCards } from "../ui/SessionCards.tsx";
 import { parseFoldedSections, toggleSection, type FoldedSections } from "../ui/detailSections.ts";
 import { SessionDetail } from "../ui/SessionDetail.tsx";
@@ -83,11 +83,11 @@ interface ToastState {
   hint?: string;
   // A command the browser refused to copy: shown selected, to copy by hand.
   blockedCommand?: string;
-  // sessions-live FR-46: the new session's link, opened again by « Rouvrir ».
+  // sessions-live FR-47: the new session's link, opened again by « Rouvrir ».
   reopenLink?: string;
 }
 
-// sessions-live FR-20 and FR-46: a link click, not a page navigation, so a browser with no handler for `claude://`
+// sessions-live FR-20 and FR-47: a link click, not a page navigation, so a browser with no handler for `claude://`
 // keeps the dashboard.
 function openLink(link: string) {
   const anchor = document.createElement("a");
@@ -294,7 +294,7 @@ export function SessionsLivePage() {
       <SessionCards sessions={list} showProject={showProject} projectName={projectName} now={now} selectedId={selectedId} nextShown={nextShown} outdatedIds={outdatedIds} actions={actions} />
     );
 
-  // sessions-live FR-46: the command copied as well, in case the desktop app opens with an empty field.
+  // sessions-live FR-47: the command copied as well, in case the desktop app opens with an empty field.
   const openNewSession = async (command: string, project: ProjectOverview, folder: string) => {
     const isCopied = await copyText(command);
     const link = newSessionLink(command, folder);
@@ -465,6 +465,8 @@ export function SessionsLivePage() {
           projects={projectsQuery.data?.projects ?? null}
           error={projectsQuery.isError ? projectsQuery.error.message || t("sessions.toast.failedUnknown") : null}
           folder={newSession.folder}
+          prefs={parsePrefs(readStored(PREFS_KEY))}
+          onPrefs={(prefs) => writeStored(PREFS_KEY, prefs)}
           onCopy={copyText}
           onOpen={(command, project, folder) => void openNewSession(command, project, folder)}
           onClose={() => setNewSession(null)}

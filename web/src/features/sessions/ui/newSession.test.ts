@@ -6,13 +6,16 @@ import {
   commandOf,
   folderOf,
   newSessionLink,
+  parsePrefs,
   projectOfFolder,
   type Blueprint,
+  type Mockup,
   type NewSessionForm,
   type ProjectOverview,
 } from "./newSession.ts";
 
-const form = (overrides: Partial<NewSessionForm> = {}): NewSessionForm => ({ ...EMPTY_FORM, ...overrides });
+const simple = (overrides: Partial<NewSessionForm> = {}): NewSessionForm => ({ ...EMPTY_FORM, ...overrides });
+const form = (overrides: Partial<NewSessionForm> = {}): NewSessionForm => simple({ mode: "advanced", ...overrides });
 
 const blueprint = (file: string, state: Blueprint["state"]): Blueprint => ({
   name: file,
@@ -32,7 +35,9 @@ const blueprint = (file: string, state: Blueprint["state"]): Blueprint => ({
   modifiedAt: null,
 });
 
-const project = (id: string, root: string, worktrees: string[] = [], blueprints: Blueprint[] = []): ProjectOverview => ({
+const mockup = (name: string, worktreeBranch: string | null = null): Mockup => ({ file: `.planning/mockups/${name}.html`, title: name, worktreeBranch });
+
+const project = (id: string, root: string, worktrees: string[] = [], blueprints: Blueprint[] = [], mockups: Mockup[] = []): ProjectOverview => ({
   id,
   name: id,
   root,
@@ -46,13 +51,40 @@ const project = (id: string, root: string, worktrees: string[] = [], blueprints:
   worktrees: worktrees.map((w) => ({ root: w, branch: "wt", aheadCount: 0, changedCount: 0 })),
   sheets: [],
   blueprints,
+  mockups,
   ideaCount: 0,
   debtCount: 0,
   sessionIds: [],
   slots: [],
 });
 
-describe("commandOf (sessions-live FR-45, FR-46)", () => {
+describe("commandOf in « Simple » (sessions-live FR-45, FR-47)", () => {
+  it("opens on « Je reste là »: the pilot on the request", () => {
+    expect(commandOf(simple({ request: "  Archiver en lot  " }))).toBe("/selo:pilot Archiver en lot");
+  });
+
+  it("ends with `— autonomous` on « Je m'absente »", () => {
+    expect(commandOf(simple({ request: "x", presence: "leave" }))).toBe("/selo:pilot x — autonomous");
+  });
+
+  it("builds a chosen blueprint, or hands it to the autonomous pilot", () => {
+    const resume = { kind: "blueprint", file: ".planning/blueprints/b.md" } as const;
+    expect(commandOf(simple({ resume, request: "ignored" }))).toBe("/selo:build .planning/blueprints/b.md");
+    expect(commandOf(simple({ resume, presence: "leave" }))).toBe("/selo:pilot .planning/blueprints/b.md — autonomous");
+  });
+
+  it("gives the pilot a chosen mockup after the request, before `— autonomous`", () => {
+    const resume = { kind: "mockup", file: ".planning/mockups/m.html" } as const;
+    expect(commandOf(simple({ resume, request: "x" }))).toBe("/selo:pilot x — mockup .planning/mockups/m.html");
+    expect(commandOf(simple({ resume, request: "x", presence: "leave" }))).toBe("/selo:pilot x — mockup .planning/mockups/m.html — autonomous");
+  });
+
+  it("ignores what only « Avancé » sets", () => {
+    expect(commandOf(simple({ skill: "fastlane", request: "x", iterate: true, noBrowser: true, touches: ["a.md"], mockupFile: "m.html" }))).toBe("/selo:pilot x");
+  });
+});
+
+describe("commandOf in « Avancé » (sessions-live FR-46, FR-47)", () => {
   it("opens on the autonomous pilot, the request after the skill and `— autonomous` last", () => {
     expect(commandOf(form({ request: "  Archiver en lot  " }))).toBe("/selo:pilot Archiver en lot — autonomous");
   });
@@ -97,9 +129,33 @@ describe("commandOf (sessions-live FR-45, FR-46)", () => {
   it("gives a free session the request alone", () => {
     expect(commandOf(form({ skill: "free", request: "Pourquoi le hook échoue ?" }))).toBe("Pourquoi le hook échoue ?");
   });
+
+  it("mentions each file the request touches after it, before the flags", () => {
+    const touches = [".planning/pages/projects.md", ".planning/domain/project.md"];
+    expect(commandOf(form({ skill: "fastlane", request: "x", touches, iterate: true }))).toBe("/selo:fastlane x @.planning/pages/projects.md @.planning/domain/project.md — iterate");
+    expect(commandOf(form({ skill: "free", request: "x", touches }))).toBe("x @.planning/pages/projects.md @.planning/domain/project.md");
+    expect(commandOf(form({ skill: "review", touches }))).toBe("/selo:review @.planning/pages/projects.md @.planning/domain/project.md");
+  });
+
+  it("mentions no file for a blueprint's file", () => {
+    expect(commandOf(form({ skill: "build", blueprintFile: "b.md", touches: ["a.md"] }))).toBe("/selo:build b.md");
+  });
+
+  it("gives fastlane and blueprint the chosen mockup as their first flag", () => {
+    expect(commandOf(form({ skill: "fastlane", request: "x", mockupFile: "m.html", iterate: true }))).toBe("/selo:fastlane x — mockup m.html — iterate");
+    expect(commandOf(form({ skill: "blueprint", request: "x", mockupFile: "m.html" }))).toBe("/selo:blueprint x — mockup m.html");
+    expect(commandOf(form({ skill: "pilot", request: "x", mockupFile: "m.html" }))).toBe("/selo:pilot x");
+  });
 });
 
-describe("canOpen (sessions-live FR-46)", () => {
+describe("canOpen (sessions-live FR-47)", () => {
+  it("waits in « Simple » for the request, a chosen blueprint going without one", () => {
+    expect(canOpen(simple({ request: " " }))).toBe(false);
+    expect(canOpen(simple({ request: "x" }))).toBe(true);
+    expect(canOpen(simple({ resume: { kind: "blueprint", file: "b.md" } }))).toBe(true);
+    expect(canOpen(simple({ resume: { kind: "mockup", file: "m.html" } }))).toBe(false);
+  });
+
   it("waits for the request", () => {
     expect(canOpen(form({ request: "  " }))).toBe(false);
     expect(canOpen(form({ request: "x" }))).toBe(true);
@@ -117,7 +173,7 @@ describe("canOpen (sessions-live FR-46)", () => {
   });
 });
 
-describe("newSessionLink (sessions-live FR-46)", () => {
+describe("newSessionLink (sessions-live FR-47)", () => {
   it("opens the desktop app's new session with the command and the folder, encoded", () => {
     expect(newSessionLink("/selo:fastlane a & b — no browser", "C:/WS/my app")).toBe(
       "claude://code/new?q=%2Fselo%3Afastlane%20a%20%26%20b%20%E2%80%94%20no%20browser&folder=C%3A%2FWS%2Fmy%20app",
@@ -144,7 +200,7 @@ describe("projectOfFolder (sessions-live FR-43)", () => {
   });
 });
 
-describe("folderOf (sessions-live FR-46)", () => {
+describe("folderOf (sessions-live FR-47)", () => {
   const inWorktree = { ...blueprint("w", "ready"), worktreeBranch: "wt" };
   const p = project("p", "C:/p", ["C:/p/.claude/worktrees/x"], [blueprint("b", "ready"), inWorktree]);
 
@@ -158,14 +214,40 @@ describe("folderOf (sessions-live FR-46)", () => {
     expect(folderOf(p, form({ fromBlueprint: true, blueprintFile: inWorktree.file }))).toBe("C:/p/.claude/worktrees/x");
   });
 
+  it("opens in the worktree holding a mockup only it holds", () => {
+    const q = project("q", "C:/q", ["C:/q/.claude/worktrees/x"], [], [mockup("m"), mockup("w", "wt")]);
+    expect(folderOf(q, simple({ resume: { kind: "mockup", file: mockup("w").file }, request: "x" }))).toBe("C:/q/.claude/worktrees/x");
+    expect(folderOf(q, form({ skill: "fastlane", request: "x", mockupFile: mockup("w").file }))).toBe("C:/q/.claude/worktrees/x");
+    expect(folderOf(q, form({ skill: "fastlane", request: "x", mockupFile: mockup("m").file }))).toBe("C:/q");
+  });
+
+  it("opens « Simple » on a chosen blueprint in the worktree that alone holds it", () => {
+    expect(folderOf(p, simple({ resume: { kind: "blueprint", file: inWorktree.file } }))).toBe("C:/p/.claude/worktrees/x");
+  });
+
   it("ignores the blueprint once the form takes a request", () => {
     expect(folderOf(p, form({ skill: "fastlane", blueprintFile: inWorktree.file, request: "x" }))).toBe("C:/p");
   });
 });
 
-describe("buildableBlueprints (sessions-live FR-44)", () => {
+describe("buildableBlueprints (sessions-live FR-45, FR-46)", () => {
   it("keeps the blueprints « Prêt » and « En construction », in the export's order", () => {
     const p = project("p", "C:/p", [], [blueprint("a", "draft"), blueprint("b", "building"), blueprint("c", "done"), blueprint("d", "ready")]);
     expect(buildableBlueprints(p).map((b) => b.name)).toEqual(["b", "d"]);
+  });
+});
+
+describe("parsePrefs (sessions-live FR-49)", () => {
+  it("opens « Simple » and « Je reste là » the first time", () => {
+    expect(parsePrefs(null)).toEqual({ mode: "simple", presence: "stay" });
+  });
+
+  it("keeps the mode and the choice made last", () => {
+    expect(parsePrefs({ mode: "advanced", presence: "leave" })).toEqual({ mode: "advanced", presence: "leave" });
+  });
+
+  it("falls back on each value it does not know", () => {
+    expect(parsePrefs({ mode: "expert", presence: 3 })).toEqual({ mode: "simple", presence: "stay" });
+    expect(parsePrefs("advanced")).toEqual({ mode: "simple", presence: "stay" });
   });
 });

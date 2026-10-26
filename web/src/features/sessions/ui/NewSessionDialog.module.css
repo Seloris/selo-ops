@@ -1,50 +1,53 @@
 .window {
   display: grid;
-  gap: 18px;
+  gap: 20px;
+}
+
+/* ---- The project and the mode (FR-44) ---- */
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.in {
+  font-size: 0.9em;
+  color: var(--text-muted);
 }
 
 .project {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 6px 14px;
-}
-
-.project > :first-child {
-  width: min(260px, 100%);
+  width: min(220px, 100%);
 }
 
 .path {
-  padding-bottom: 10px;
+  flex: 1;
+  min-width: 0;
   font-family: var(--font-mono);
-  font-size: 0.8em;
+  font-size: 0.78em;
   overflow-wrap: anywhere;
   color: var(--text-muted);
 }
 
-.grid {
+.body {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 24px;
-  align-items: start;
+  gap: 22px;
+  min-width: 0;
 }
 
-/* ---- What to do (sessions-live FR-44) ---- */
-
-.choices {
+.field {
   display: grid;
-  gap: 10px;
-  padding-right: 20px;
-  border-right: var(--border-width) solid var(--border);
+  gap: 8px;
+  min-width: 0;
 }
 
-.group {
-  display: grid;
-  gap: 2px;
+.field > [role="group"] {
+  justify-self: start;
 }
 
-.groupName,
-.label {
+.label,
+.groupName {
   font-size: var(--label-size);
   font-weight: var(--label-weight);
   text-transform: var(--label-transform);
@@ -52,8 +55,300 @@
   color: var(--text-muted);
 }
 
+.labelNote {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.file {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.76em;
+  overflow-wrap: anywhere;
+  color: var(--text-muted);
+}
+
+.hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.8em;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+/* ---- « Simple »: stay or leave (FR-45) ---- */
+
+.presence {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.presenceCard {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 2px 12px;
+  padding: 14px 16px;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.presenceCard:hover {
+  background: var(--surface-2);
+}
+
+/* The active setting: mint, as the design rules keep it. */
+.presenceCard[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--control-border-on);
+  box-shadow: inset 0 0 0 var(--border-width) var(--control-border-on);
+}
+
+.presenceIcon {
+  grid-row: span 3;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--lane-pilot);
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-pill);
+}
+
+.presenceCard[aria-pressed="true"] .presenceIcon {
+  color: var(--accent);
+}
+
+.presenceName {
+  font-weight: 600;
+}
+
+.presenceHint {
+  font-size: 0.84em;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.presenceSkill {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.76em;
+  color: var(--lane-pilot);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -6px 0;
+  font-size: 0.8em;
+  color: var(--text-muted);
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: var(--border-width);
+  background: var(--border);
+}
+
+/* ---- Blueprints and mockups to resume, and the build's picker ---- */
+
+.rows {
+  display: grid;
+  gap: 4px;
+}
+
+.row,
+.pick {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 2px 12px;
+  padding: 8px 8px 8px 12px;
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--radius-control);
+}
+
+.rowTitle,
+.row .file,
+.pick .file {
+  grid-column: 1;
+}
+
+.row .state {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.row button {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+}
+
+.pick {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr) auto;
+  width: 100%;
+  padding: 8px 12px;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.12s;
+}
+
+.pick:hover,
+.pick[aria-pressed="true"] {
+  background: var(--surface-2);
+}
+
+/* Chosen as a skill is: a neutral fill and the blueprint lane's edge; mint stays for the settings. */
+.pick[aria-pressed="true"]::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--lane-blueprint);
+}
+
+.pick .state {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+}
+
+.rowTitle {
+  min-width: 0;
+  font-size: 0.92em;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.state {
+  --state: var(--bp-ready);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  padding: 2px 9px;
+  font-size: 0.75em;
+  font-weight: 600;
+  color: var(--state);
+  background: var(--surface-2);
+  border-radius: var(--badge-radius);
+}
+
+.state[data-state="building"] {
+  --state: var(--bp-building);
+}
+
+.state[data-state="mockup"] {
+  --state: var(--lane-mockup);
+}
+
+.state::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--state);
+}
+
+.chosen {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 12px;
+  padding: 12px 8px 12px 14px;
+  background: var(--surface-2);
+  border: var(--item-border);
+  border-radius: var(--radius-control);
+}
+
+.chosenIcon {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--lane-blueprint);
+  background: var(--item-bg);
+  border-radius: var(--radius-pill);
+}
+
+.chosen[data-kind="mockup"] .chosenIcon {
+  color: var(--lane-mockup);
+}
+
+.chosenTitle {
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.chosen .file {
+  grid-column: 2;
+}
+
+.chosen button {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+}
+
+.more {
+  margin: -6px 0 0;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.link,
+.when a {
+  padding: 0;
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ---- « Avancé »: the skill chips (FR-46) ---- */
+
+.groups {
+  display: grid;
+  gap: 10px;
+}
+
+.group {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: start;
+  gap: 4px 12px;
+}
+
 .groupName {
-  padding: 0 10px 2px;
+  padding-top: 8px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 /* A choice wears its lane's colour (FR-29) on its skill's name and, chosen, on its edge. */
@@ -68,130 +363,123 @@
 .window [data-skill="try"] { --lane: var(--text-muted); }
 .window [data-skill="free"] { --lane: var(--lane-free); }
 
-.choice {
-  position: relative;
-  display: grid;
-  width: 100%;
-  padding: 6px 10px 6px 14px;
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: calc(var(--control-h) - 6px);
+  padding: 0 12px;
   font: inherit;
-  text-align: left;
+  font-size: 0.87em;
+  font-weight: 500;
+  white-space: nowrap;
   color: var(--text);
-  background: transparent;
-  border: 0;
+  background: var(--item-bg);
+  border: var(--border-width) solid var(--border);
   border-radius: var(--radius-control);
   cursor: pointer;
   transition: background-color 0.12s;
 }
 
-.choice:hover:not(:disabled) {
+.chip:hover:not(:disabled) {
   background: var(--surface-2);
 }
 
-.choice[aria-pressed="true"] {
-  background: var(--surface-2);
-  box-shadow: inset 0 0 0 var(--border-width) var(--border);
-}
-
-.choice[aria-pressed="true"]::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  border-radius: var(--radius-pill);
-  background: var(--lane);
-}
-
-.choice:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.choiceName {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 0.93em;
+.chip[aria-pressed="true"] {
   font-weight: 600;
+  background: var(--surface-2);
+  border-color: var(--lane);
+  box-shadow: inset 0 0 0 var(--border-width) var(--lane);
+}
+
+.chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .skill {
   font-family: var(--font-mono);
-  font-size: 0.8em;
+  font-size: 0.82em;
   font-weight: 500;
   color: var(--lane);
 }
 
 .count {
-  margin-left: auto;
+  padding: 0 6px;
   font-size: 0.8em;
-  font-weight: 500;
   font-variant-numeric: tabular-nums;
   color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
 }
 
 .when {
-  font-size: 0.8em;
-  line-height: 1.35;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.86em;
   color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: var(--radius-control);
 }
 
-.unsure {
+.when b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ---- « Ce que ça touche » ---- */
+
+.touches {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px 0;
-  font-size: 0.82em;
+}
+
+.touch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px 0 0;
+  font: inherit;
   color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
 }
 
-.unsure svg {
-  width: 14px;
-  height: 14px;
-}
-
-.unsure a {
+.touch:hover {
   color: var(--text);
-  text-underline-offset: 3px;
 }
 
-/* ---- The chosen form (FR-45, FR-46) ---- */
+.touch > svg {
+  width: 13px;
+  height: 13px;
+}
 
-.form {
+.touchPanel {
   display: grid;
-  gap: 18px;
-  min-width: 0;
+  gap: 2px;
+  max-width: 480px;
+  max-height: 320px;
+  overflow: auto;
+  padding: 8px;
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--radius-control);
 }
 
-.back {
-  display: none;
+.touchPanel > :first-child {
+  margin-bottom: 4px;
 }
 
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.lead {
-  margin: 0;
-  font-size: 0.88em;
-  color: var(--text-muted);
-}
-
-.field {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-}
-
-.field > [role="group"] {
-  justify-self: start;
-}
+/* ---- Options ---- */
 
 .options {
   display: grid;
@@ -227,14 +515,6 @@
   white-space: nowrap;
 }
 
-.hint {
-  grid-column: 1 / -1;
-  margin: 0;
-  font-size: 0.8em;
-  line-height: 1.35;
-  color: var(--text-muted);
-}
-
 .wide,
 .stage {
   grid-column: 1 / -1;
@@ -245,103 +525,29 @@
   width: 90px;
 }
 
-.blueprints {
-  display: grid;
-  gap: 4px;
-}
-
-.blueprint {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 2px 12px;
-  align-items: center;
-  width: 100%;
-  padding: 8px 12px;
-  font: inherit;
-  text-align: left;
-  color: var(--text);
-  background: var(--item-bg);
-  border: var(--item-border);
-  border-radius: var(--radius-control);
-  cursor: pointer;
-  transition: background-color 0.12s, border-color 0.12s;
-}
-
-.blueprint:hover {
-  background: var(--surface-2);
-}
-
-/* Chosen as a skill is (FR-44): a neutral fill and the blueprint lane's edge; mint stays for the settings. */
-.blueprint {
-  position: relative;
-}
-
-.blueprint[aria-pressed="true"] {
-  background: var(--surface-2);
-}
-
-.blueprint[aria-pressed="true"]::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  border-radius: var(--radius-pill);
-  background: var(--lane-blueprint);
-}
-
-.bpTitle {
-  font-size: 0.92em;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-.bpState {
-  --bp: var(--bp-ready);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 9px;
-  font-size: 0.75em;
-  font-weight: 600;
-  color: var(--bp);
-  background: var(--surface-2);
-  border-radius: var(--badge-radius);
-}
-
-.bpState[data-state="building"] {
-  --bp: var(--bp-building);
-}
-
-.bpState::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--bp);
-}
-
-.bpFile {
-  grid-column: 1 / -1;
-  font-family: var(--font-mono);
-  font-size: 0.78em;
-  overflow-wrap: anywhere;
-  color: var(--text-muted);
-}
+/* ---- The command and the action (FR-47) ---- */
 
 .foot {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0;
+  border-top: var(--border-width) solid var(--border);
+  /* Kept in sight at the bottom of the window while its body scrolls. */
+  position: sticky;
+  /* Down over the modal body's 28px bottom padding, so nothing scrolls past under it. */
+  bottom: -28px;
+  margin-bottom: -28px;
+  padding-bottom: 42px;
+  /* The window's tint on the opaque ground: --pop-bg alone lets the rows show through. */
+  background: linear-gradient(var(--pop-bg), var(--pop-bg)), var(--bg);
+}
+
+.footRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 10px 14px;
-  padding: 14px 0;
-  border-top: var(--border-width) solid var(--border);
-  /* Kept in sight at the bottom of the window while its body scrolls. */
-  position: sticky;
-  bottom: 0;
-  background: var(--pop-bg);
 }
 
 .footHint {
@@ -363,51 +569,73 @@
   border-radius: calc(var(--radius-control) / 2);
 }
 
-/* ---- Phone width: two steps (FR-47) ---- */
+/* ---- Phone width: one column (FR-47) ---- */
 
 @media (max-width: 640px) {
-  .grid {
+  .mode {
+    order: -1;
+    width: 100%;
+  }
+
+  .mode [role="group"] {
+    display: flex;
+  }
+
+  .mode [role="group"] > button {
+    flex: 1;
+  }
+
+  .project {
+    flex: 1;
+    width: auto;
+  }
+
+  .path {
+    flex-basis: 100%;
+  }
+
+  .presence {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .choices {
-    padding-right: 0;
-    border-right: 0;
+  .group {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .window[data-step="choose"] .form,
-  .window[data-step="form"] .choices {
-    display: none;
+  .groupName {
+    padding-top: 0;
   }
 
-  .back {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    padding: 4px 0;
-    font: inherit;
-    font-weight: 600;
-    text-align: left;
-    color: var(--text);
-    background: transparent;
-    border: 0;
-    cursor: pointer;
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .back svg {
-    align-self: center;
-    flex: none;
+  .row .state {
+    grid-column: 1;
+    grid-row: auto;
   }
 
-  .foot .footHint {
+  .row button {
+    grid-row: 1 / span 3;
+    grid-column: 2;
+  }
+
+  .footHint {
     min-width: 100%;
   }
 
-  .foot button {
+  .footRow button {
     flex: 1;
   }
 
   .kbd {
     display: none;
   }
+}
+
+/* Their own box-shadow hides the global focus ring: an outline instead. */
+.presenceCard:focus-visible,
+.chip:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }

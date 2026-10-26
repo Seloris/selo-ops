@@ -51,6 +51,7 @@ const project = (name: string, blueprints: Blueprint[] = []): ProjectOverview =>
   worktrees: [],
   sheets: [],
   blueprints,
+  mockups: [],
   ideaCount: 0,
   debtCount: 0,
   sessionIds: [],

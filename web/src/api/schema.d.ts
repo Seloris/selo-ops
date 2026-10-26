@@ -339,6 +339,7 @@ export interface components {
             }[];
             sheets: components["schemas"]["SpecSheet"][];
             blueprints: components["schemas"]["Blueprint"][];
+            mockups: components["schemas"]["Mockup"][];
             ideaCount: number;
             debtCount: number;
             sessionIds: string[];
@@ -395,6 +396,11 @@ export interface components {
         };
         /** @enum {string} */
         BlueprintState: "draft" | "ready" | "building" | "review" | "merging" | "done" | "legacy";
+        Mockup: {
+            file: string;
+            title: string;
+            worktreeBranch: string | null;
+        };
         ProjectSlot: {
             number: number;
             root: string;
