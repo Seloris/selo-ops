@@ -5,17 +5,19 @@ import { CloseIcon, CollapseIcon, ExpandIcon } from "./icons.tsx";
 import styles from "./Modal.module.css";
 
 // A large native dialog over the page, open while mounted: Échap, « Fermer » or a click on the backdrop closes it.
-// With `fullscreen` labels, an icon button beside « Fermer » fills the screen with it (the browser's too); Échap then leaves the full screen first.
+// `footer` stays at the bottom of the box while the body scrolls. With `fullscreen` labels, an icon button beside « Fermer » fills the screen with it (the browser's too); Échap then leaves the full screen first.
 export function Modal({
   title,
   closeLabel,
   fullscreen,
+  footer,
   onClose,
   children,
 }: {
   title: string;
   closeLabel: string;
   fullscreen?: { enter: string; exit: string };
+  footer?: ReactNode;
   onClose(): void;
   children: ReactNode;
 }) {
@@ -90,6 +92,7 @@ export function Modal({
           </Button>
         </div>
         <div className={styles.body}>{children}</div>
+        {footer && <div className={styles.foot}>{footer}</div>}
       </div>
     </dialog>
   );

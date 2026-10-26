@@ -313,6 +313,93 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The person's selo settings: the SELO_ keys of the env block of Claude Code's user settings file */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The settings, as the file holds them */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SeloSettings"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Save the changed settings: the file read again, only these keys of its env block written */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SeloSettingChanges"];
+                };
+            };
+            responses: {
+                /** @description The settings, as the file holds them */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SeloSettings"];
+                    };
+                };
+                /** @description An unknown key, or a value not allowed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description The file is unreadable: nothing written */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description The file could not be written */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -560,6 +647,66 @@ export interface components {
             /** @enum {string} */
             name: "selo" | "selo-ops";
             versions: string[];
+        };
+        SeloSettings: {
+            path: string;
+            /** @enum {string} */
+            state: "ok" | "missing" | "unreadable";
+            error: {
+                /** @enum {string} */
+                reason: "json" | "root" | "env";
+                line: number | null;
+                column: number | null;
+            } | null;
+            values: components["schemas"]["SeloSettingValues"];
+            catalog: {
+                defaultPreset: string;
+                presets: {
+                    id: string;
+                    models: {
+                        /** @enum {string} */
+                        planner?: "opus" | "sonnet" | "haiku" | "fable";
+                        /** @enum {string} */
+                        implementer?: "opus" | "sonnet" | "haiku" | "fable";
+                        /** @enum {string} */
+                        reviewer?: "opus" | "sonnet" | "haiku" | "fable";
+                        /** @enum {string} */
+                        runner?: "opus" | "sonnet" | "haiku" | "fable";
+                        /** @enum {string} */
+                        explorer?: "opus" | "sonnet" | "haiku" | "fable";
+                    };
+                }[];
+                roles: ("planner" | "implementer" | "reviewer" | "runner" | "explorer")[];
+                models: ("opus" | "sonnet" | "haiku" | "fable")[];
+            };
+        };
+        SeloSettingValues: {
+            SELO_MODELS: string | null;
+            SELO_MODEL_PLANNER: string | null;
+            SELO_MODEL_IMPLEMENTER: string | null;
+            SELO_MODEL_REVIEWER: string | null;
+            SELO_MODEL_RUNNER: string | null;
+            SELO_MODEL_EXPLORER: string | null;
+            SELO_ROUTING: string | null;
+            SELO_COMMIT: string | null;
+        };
+        SeloSettingChanges: {
+            /** @enum {string|null} */
+            SELO_MODELS?: "lean" | null;
+            /** @enum {string|null} */
+            SELO_MODEL_PLANNER?: "opus" | "sonnet" | "haiku" | "fable" | null;
+            /** @enum {string|null} */
+            SELO_MODEL_IMPLEMENTER?: "opus" | "sonnet" | "haiku" | "fable" | null;
+            /** @enum {string|null} */
+            SELO_MODEL_REVIEWER?: "opus" | "sonnet" | "haiku" | "fable" | null;
+            /** @enum {string|null} */
+            SELO_MODEL_RUNNER?: "opus" | "sonnet" | "haiku" | "fable" | null;
+            /** @enum {string|null} */
+            SELO_MODEL_EXPLORER?: "opus" | "sonnet" | "haiku" | "fable" | null;
+            /** @enum {string|null} */
+            SELO_ROUTING?: "on" | null;
+            /** @enum {string|null} */
+            SELO_COMMIT?: "auto" | null;
         };
     };
     responses: never;

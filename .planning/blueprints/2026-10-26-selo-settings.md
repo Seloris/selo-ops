@@ -40,6 +40,11 @@ Pages: none · Domain: `settings` (new), `app` · Components: `api`, `web`
 - A non-string `SELO_` value → shown as its JSON text, left in the file unless changed.
 - A failed read or write → `500` problem details naming the OS error; a save whose changes the file already holds writes nothing.
 - A symlinked settings file → written through its link, its file mode kept (review).
+- Each opening of the window → its own query key, never refetched under the person's edits; a save closes it, the next opening reads the file again.
+- What each preset sets → written from the catalog the API serves (« opus pour planifier et relire ; sonnet pour implémenter ; … »), not a fixed text.
+- The preview → the keys `env` will hold, a new value green and a changed one yellow (the delta tokens), a kept one muted; a removed key is simply absent.
+- The buttons at the bottom → an optional `footer` of the shared `Modal`, which also fills the phone's height with its body.
+- Closed while a save runs → « Annuler » disabled during it; Échap or « Fermer » close the window and the save still ends with its toast.
 - Demo settings file → `model`, `permissions` and one `env` key beside the defaults, so that a save shows the other keys kept.
 
 ## Stages
@@ -53,7 +58,7 @@ Pages: none · Domain: `settings` (new), `app` · Components: `api`, `web`
 
 ## Progress
 - [x] Stage 1 — api
-- [ ] Stage 2 — web
-- [ ] Review
-- [ ] Browser test
+- [x] Stage 2 — web
+- [x] Review
+- [x] Browser test
 - [ ] Spec merged

@@ -78,6 +78,11 @@
   padding: 20px 24px 28px;
 }
 
+.foot {
+  padding: 14px 24px;
+  border-top: var(--border-width) solid var(--border);
+}
+
 /* At phone width the box already covers the screen. */
 @media (max-width: 640px) {
   .fullscreen {
@@ -92,8 +97,14 @@
     border: 0;
   }
 
-  .head,
+  /* The footer at the bottom of the screen, however short the body. */
   .body {
+    flex: 1;
+  }
+
+  .head,
+  .body,
+  .foot {
     padding-left: 16px;
     padding-right: 16px;
   }
