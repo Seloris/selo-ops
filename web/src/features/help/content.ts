@@ -30,6 +30,7 @@ export const sections = {
   where: { id: "help-where", title: "help.specs.where.title" },
   ids: { id: "help-ids", title: "help.specs.ids.title" },
   follows: { id: "help-follows", title: "help.specs.follows.title" },
+  example: { id: "help-example", title: "help.specs.example.title" },
   stubs: { id: "help-stubs", title: "help.specs.stubs.title" },
   specLine: { id: "help-spec-line", title: "help.specs.specLine.title" },
   skills: { id: "help-skills", title: "help.skills.title" },
@@ -182,6 +183,117 @@ export const specFlows: Flow[] = [
     ],
   },
 ];
+
+// help FR-19: one line of a sample Markdown file, marked when a delta adds, changes or removes it.
+export type DeltaMark = "add" | "change" | "remove";
+
+export interface MdLine {
+  text: string;
+  mark?: DeltaMark;
+}
+
+export interface MdFile {
+  path: string;
+  lines: MdLine[];
+}
+
+// A spec file before and after the merge: the removed and changed lines marked before, the added and changed ones after.
+export interface MdDiff {
+  path: string;
+  before: MdLine[];
+  after: MdLine[];
+}
+
+// help FR-19: a worked example, as a project writes it (in the repository's language, English), shortened: the glossary and Technical defaults left out.
+export const exampleBlueprint: MdFile = {
+  path: ".planning/blueprints/2026-10-21-due-date.md",
+  lines: [
+    { text: "# Due date" },
+    { text: "Pages: `home` · Domain: `todo` · Components: `api`, `web`" },
+    { text: "" },
+    { text: "## Spec delta" },
+    { text: "- home ~ FR-01 — « The form takes a title. » → « The form takes a title and an optional due date (`todo` BR-03). »", mark: "change" },
+    { text: "- home + FR-04 — Each todo shows its due date, in red once past.", mark: "add" },
+    { text: "- home - FR-03 — « A todo older than 30 days is greyed out. »", mark: "remove" },
+    { text: "- todo + BR-03 — A due date is today or later.", mark: "add" },
+    { text: "" },
+    { text: "## Business decisions" },
+    { text: "- A past due date? → refused (a late todo is shown, never created)" },
+    { text: "" },
+    { text: "## Stages" },
+    { text: "1. api — `feat(due-date): api — optional due date on a todo`" },
+    { text: "2. web — `feat(due-date): web — due date in the form and the list`" },
+    { text: "" },
+    { text: "## Tests" },
+    { text: "- api: a past due date refused" },
+    { text: "- browser: a todo with a due date, then past it" },
+    { text: "" },
+    { text: "## Progress" },
+    { text: "- [x] Stage 1 — api" },
+    { text: "- [x] Stage 2 — web" },
+    { text: "- [x] Review" },
+    { text: "- [x] Browser test" },
+    { text: "- [ ] Spec merged" },
+  ],
+};
+
+export const exampleDiffs: MdDiff[] = [
+  {
+    path: ".planning/pages/home.md",
+    before: [
+      { text: "# Home" },
+      { text: "Route: `/` · Domain: `todo`" },
+      { text: "" },
+      { text: "The person adds and follows their todos." },
+      { text: "" },
+      { text: "## Form" },
+      { text: "- **FR-01** — The form takes a title.", mark: "change" },
+      { text: "" },
+      { text: "## List" },
+      { text: "- **FR-02** — Todos are listed newest first." },
+      { text: "- **FR-03** — A todo older than 30 days is greyed out.", mark: "remove" },
+    ],
+    after: [
+      { text: "# Home" },
+      { text: "Route: `/` · Domain: `todo`" },
+      { text: "" },
+      { text: "The person adds and follows their todos." },
+      { text: "" },
+      { text: "## Form" },
+      { text: "- **FR-01** — The form takes a title and an optional due date (`todo` BR-03).", mark: "change" },
+      { text: "" },
+      { text: "## List" },
+      { text: "- **FR-02** — Todos are listed newest first." },
+      { text: "- **FR-04** — Each todo shows its due date, in red once past.", mark: "add" },
+      { text: "" },
+      { text: "Retired: FR-03", mark: "add" },
+    ],
+  },
+  {
+    path: ".planning/domain/todo.md",
+    before: [
+      { text: "# Todo" },
+      { text: "" },
+      { text: "What holds for a todo on every page." },
+      { text: "" },
+      { text: "## Business rules" },
+      { text: "- **BR-01** — A title is 1 to 120 characters." },
+      { text: "- **BR-02** — A done todo stays editable." },
+    ],
+    after: [
+      { text: "# Todo" },
+      { text: "" },
+      { text: "What holds for a todo on every page." },
+      { text: "" },
+      { text: "## Business rules" },
+      { text: "- **BR-01** — A title is 1 to 120 characters." },
+      { text: "- **BR-02** — A done todo stays editable." },
+      { text: "- **BR-03** — A due date is today or later.", mark: "add" },
+    ],
+  },
+];
+
+export const exampleMergeCommit = ["docs(due-date): spec merged", "Spec: home ~FR-01 +FR-04 -FR-03 · todo +BR-03"];
 
 export const stubSteps: Step[] = [
   { name: "help.specs.stubs.stub.name", hint: "help.specs.stubs.stub.hint", code: "help.specs.stubs.stub.code" },

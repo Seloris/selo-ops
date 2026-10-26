@@ -3,7 +3,7 @@ import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { Card } from "../../../shared/ui/Card.tsx";
 import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import { SpecChip, SpecIcon, specColor } from "../../../shared/ui/SpecKind.tsx";
-import type { Branch, ColourId, Flow, HelpTab, LaneId, Row, Rule, Section, Step, TreeNode } from "../content.ts";
+import type { Branch, ColourId, DeltaMark, Flow, HelpTab, LaneId, MdDiff, MdFile, MdLine, Row, Rule, Section, Step, TreeNode } from "../content.ts";
 import styles from "./HelpParts.module.css";
 
 // help FR-11: a lane's class sets --lane, which its boxes, names, prompts and dots read.
@@ -201,6 +201,73 @@ export function PlanningTree({ caption, root }: { caption: MessageKey; root: Tre
         <TreeItems nodes={root.children ?? []} />
       </div>
     </figure>
+  );
+}
+
+const signs: Record<DeltaMark, string> = { add: "+", change: "~", remove: "-" };
+const markLabels: Record<DeltaMark, MessageKey> = { add: "help.specs.example.add", change: "help.specs.example.change", remove: "help.specs.example.remove" };
+
+// help FR-19: a Markdown file as text, each marked line tinted and signed in the gutter, so the mark is not colour alone.
+function Markdown({ lines }: { lines: MdLine[] }) {
+  return (
+    <pre className={styles.md}>
+      {lines.map((line, index) => (
+        <span key={index} className={line.mark ? `${styles.mdLine} ${styles[`md-${line.mark}`]}` : styles.mdLine}>
+          <span className={styles.mdSign} aria-hidden="true">
+            {line.mark ? signs[line.mark] : " "}
+          </span>
+          <span>
+            {line.mark && <span className={styles.srOnly}>{`${t(markLabels[line.mark])} : `}</span>}
+            {line.text || " "}
+          </span>
+        </span>
+      ))}
+    </pre>
+  );
+}
+
+export function MarkdownFile({ file }: { file: MdFile }) {
+  return (
+    <figure className={styles.figure}>
+      <figcaption className={styles.mdPath}>{file.path}</figcaption>
+      <Markdown lines={file.lines} />
+    </figure>
+  );
+}
+
+// help FR-19: a spec file before and after the merge, side by side, one under the other when narrow.
+export function FileDiff({ diff }: { diff: MdDiff }) {
+  return (
+    <figure className={styles.figure}>
+      <figcaption className={styles.mdPath}>{diff.path}</figcaption>
+      <div className={styles.diff}>
+        <div className={styles.figure}>
+          <span className={styles.caption}>{t("help.specs.example.before")}</span>
+          <Markdown lines={diff.before} />
+        </div>
+        <div className={styles.figure}>
+          <span className={styles.caption}>{t("help.specs.example.after")}</span>
+          <Markdown lines={diff.after} />
+        </div>
+      </div>
+    </figure>
+  );
+}
+
+// help FR-19: the step between the blueprint and the specs it rewrites.
+export function MergeArrow({ label, codes }: { label: MessageKey; codes: string[] }) {
+  return (
+    <div className={styles.merge}>
+      <span className={styles.mergeArrow} aria-hidden="true">
+        ↓
+      </span>
+      <span>{t(label)}</span>
+      {codes.map((code) => (
+        <code key={code} className={styles.code}>
+          {code}
+        </code>
+      ))}
+    </div>
   );
 }
 

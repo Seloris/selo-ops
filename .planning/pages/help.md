@@ -6,7 +6,7 @@ A static page that explains how selo works, so that a person picks a lane and fo
 
 ## Tabs
 
-- **FR-12** — The page opens on three tabs, « Guide », « Specs » and « Technique », « Guide » selected each time the page or the popup opens: « Guide » holds FR-02 to FR-05 and FR-17, « Specs » FR-13 and FR-14, « Technique » FR-06, FR-07 and FR-18. The tab bar stays at the top while the page or the popup scrolls; a tab chosen while the bar is stuck opens at its top.
+- **FR-12** — The page opens on three tabs, « Guide », « Specs » and « Technique », « Guide » selected each time the page or the popup opens: « Guide » holds FR-02 to FR-05 and FR-17, « Specs » FR-13, FR-14 and FR-19, « Technique » FR-06, FR-07 and FR-18. The tab bar stays at the top while the page or the popup scrolls; a tab chosen while the bar is stuck opens at its top.
 
 ## Choosing a lane
 
@@ -21,8 +21,9 @@ A static page that explains how selo works, so that a person picks a lane and fo
 
 ## Specs tab
 
-- **FR-13** — The « Specs » tab explains how selo manages specs in five short sections, in this order: where each fact lives, the ids, the spec following the code, page stubs, the `Spec:` line of commit bodies.
+- **FR-13** — The « Specs » tab explains how selo manages specs in six short sections, in this order: where each fact lives, the ids, the spec following the code, a blueprint applied, page stubs, the `Spec:` line of commit bodies.
 - **FR-14** — The « Specs » tab's figures: the tree of `.planning/` with a note of a few words per entry, beside three cards saying which file a fact goes to (a page spec, a domain sheet, a page citing a BR), beneath them when narrow; the four kinds of id (FR, BR, US, Q) as small cards above one line on their numbering (per file, never renumbered nor reused, the `Retired:` line); the path from a request to the updated spec, one row of boxes per lane in its colour (fastlane, blueprint); the three steps of a stub (stub, bootstrap, the change) as numbered tiles; one row per form of the `Spec:` line.
+- **FR-19** — « Un blueprint appliqué » shows a worked example, its files in the repository's language: a blueprint's Markdown with its spec delta, then the merge commit (`docs({name}): spec merged` and its `Spec:` line), then the page spec and the domain sheet it rewrites, each before and after side by side (one under the other when narrow); every line the delta adds, changes or removes is tinted green, yellow or red and signed `+`, `~` or `-`, so that a person sees what a merge writes.
 
 ## Technique tab
 

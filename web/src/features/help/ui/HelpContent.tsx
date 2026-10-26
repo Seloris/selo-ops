@@ -2,6 +2,9 @@ import { useRef, useState } from "react";
 import {
   commitPlaces,
   decisionTree,
+  exampleBlueprint,
+  exampleDiffs,
+  exampleMergeCommit,
   helpTabs,
   type HelpTab,
   idKinds,
@@ -18,7 +21,7 @@ import {
   stubSteps,
   whereRules,
 } from "../content.ts";
-import { DecisionTree, Flows, HelpSection, HelpTabs, LaneLegend, Note, PlanningTree, Rows, RuleCards, Split, Steps } from "./HelpParts.tsx";
+import { DecisionTree, FileDiff, Flows, HelpSection, HelpTabs, LaneLegend, MarkdownFile, MergeArrow, Note, PlanningTree, Rows, RuleCards, Split, Steps } from "./HelpParts.tsx";
 
 // help FR-12: the same tabs on the page and in the popup (help FR-10), the guide first.
 export function HelpContent() {
@@ -62,7 +65,7 @@ function GuideTab() {
   );
 }
 
-// help FR-13, its figures FR-14.
+// help FR-13, its figures FR-14, its example FR-19.
 function SpecsTab() {
   return (
     <>
@@ -79,6 +82,13 @@ function SpecsTab() {
       <HelpSection section={sections.follows}>
         <Flows flows={specFlows} />
         <Note text="help.specs.follows.note" />
+      </HelpSection>
+      <HelpSection section={sections.example} intro="help.specs.example.intro">
+        <MarkdownFile file={exampleBlueprint} />
+        <MergeArrow label="help.specs.example.merge" codes={exampleMergeCommit} />
+        {exampleDiffs.map((diff) => (
+          <FileDiff key={diff.path} diff={diff} />
+        ))}
       </HelpSection>
       <HelpSection section={sections.stubs}>
         <Steps steps={stubSteps} />
