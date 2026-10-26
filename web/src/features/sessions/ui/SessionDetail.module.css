@@ -362,6 +362,11 @@
   display: contents;
 }
 
+/* A start-aligned item grows to its nowrap text: held to its column, a long task ends in an ellipsis. */
+.trail .line {
+  max-width: 100%;
+}
+
 /* The timeline's node already carries the dot: the badge shows its label only. */
 .trail .status > span:first-child > [aria-hidden="true"] {
   display: none;
@@ -425,11 +430,6 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-
-/* Only the dot of the line still running pulses. */
-.trail li:not(:first-child) .node > span {
-  animation: none;
 }
 
 /* Folded: the same run as a ribbon, one segment per line. */

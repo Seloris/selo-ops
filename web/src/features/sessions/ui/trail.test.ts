@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/sessionView.ts";
-import { hasTrail, lineColor, MAX_WEIGHT, skillColor, trailLines, waitingText, type TrailEntry } from "./trail.ts";
+import { hasTrail, lineColor, MAX_WEIGHT, skillColor, timelineItems, trailLines, waitingText, type Subagent, type TrailEntry } from "./trail.ts";
 
 describe("skillColor", () => {
   it("colours the lane skills, build as a blueprint, mockup as its flow, and leaves the others neutral", () => {
@@ -89,6 +89,57 @@ describe("trailLines", () => {
 
     // Assert
     expect(line?.stepText).toBe("Étape 2 · tests");
+  });
+});
+
+const agent = (minutes: number, lasted: number, overrides: Partial<Subagent> = {}): Subagent => ({
+  type: "general-purpose",
+  task: "planner · blueprint due-date",
+  state: "job-done",
+  since: at(minutes),
+  updatedAt: at(minutes + lasted),
+  model: null,
+  usage: null,
+  ...overrides,
+});
+
+describe("timelineItems", () => {
+  it("places each subagent at its start among the run's lines, a run line first on a tie", () => {
+    // Arrange
+    const lines = trailLines([entry(0, "working", { skill: "pilot" }), entry(1, "turn-ended", { skill: "pilot" }), entry(10, "working", { skill: "pilot" })], T0);
+    const agents = [agent(10, 2, { task: "implementer · build due-date" }), agent(1, 8)];
+
+    // Act
+    const items = timelineItems(lines, agents, T0);
+
+    // Assert
+    expect(items.map((i) => i.line?.entry.phase ?? i.agent?.label)).toEqual(["working", "turn-ended", "planner · blueprint due-date", "working", "implementer · build due-date"]);
+  });
+
+  it("gives each item the time until the next, in the colour of the run's line in force", () => {
+    // Arrange
+    const lines = trailLines([entry(0, "working"), entry(4, "turn-ended")], T0);
+
+    // Act
+    const items = timelineItems(lines, [agent(1, 9)], T0 + 9 * 60_000);
+
+    // Assert
+    expect(items.map((i) => i.gapText)).toEqual(["1 min", "3 min", null]);
+    expect(items.map((i) => i.runLine?.entry.phase)).toEqual(["working", "working", "turn-ended"]);
+    expect(Math.round((items[2]?.weight ?? 0) ** 2)).toBe(300);
+  });
+
+  it("gives a subagent its duration until its last update, until now while it works, and its step's lane", () => {
+    // Arrange
+    const agents = [agent(0, 9), agent(2, 1, { state: "working", task: "runner · web tests" }), agent(3, 0, { task: null, type: "Explore" })];
+
+    // Act
+    const items = timelineItems([], agents, T0 + 7 * 60_000);
+
+    // Assert
+    expect(items.map((i) => i.agent?.durationText)).toEqual(["9 min", "5 min", "0 s"]);
+    expect(items.map((i) => i.agent?.label)).toEqual(["planner · blueprint due-date", "runner · web tests", "Explore"]);
+    expect(items.map((i) => i.agent?.parts)).toEqual([{ lead: "planner · ", skill: "blueprint", rest: " due-date" }, { lead: "runner · ", skill: "web", rest: " tests" }, null]);
   });
 });
 

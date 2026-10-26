@@ -142,6 +142,8 @@ function toSession(
       type: r.request ?? "",
       task: r.task ?? null,
       state: r.phase,
+      since: r.since,
+      updatedAt: r.updatedAt,
       model: topModelOf(r),
       usage: usageOf(r.usage),
     })),

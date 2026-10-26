@@ -41,13 +41,63 @@ export const lineColor = (l: TrailLine): string | undefined => (l.isLoop ? "var(
 
 export const hasTrail =(s: Session) => !s.isOutsideSelo && s.trail.length > 0;
 
+const weightOf = (ms: number) => Math.min(MAX_WEIGHT, Math.sqrt(Math.max(0, ms) / 1000));
+
 export function trailLines(trail: TrailEntry[], now: number, mode: string | null = null): TrailLine[] {
   const durations = durationsOf(trail);
   const loopEnd = mode === "iterate" ? trail.findIndex((e) => !LOOP_SUBSTEPS.has(e.substep)) : 0;
   return trail.map((entry, i) => {
     const ms = durations[i] ?? null;
-    const lasted = Math.max(0, ms ?? now - Date.parse(entry.at));
-    return { entry, stepText: stepText(entry), durationText: ms === null ? null : age(ms), weight: Math.min(MAX_WEIGHT, Math.sqrt(lasted / 1000)), isPastWork: ms !== null && entry.phase === "working", isLoop: loopEnd === -1 || i < loopEnd };
+    return { entry, stepText: stepText(entry), durationText: ms === null ? null : age(ms), weight: weightOf(ms ?? now - Date.parse(entry.at)), isPastWork: ms !== null && entry.phase === "working", isLoop: loopEnd === -1 || i < loopEnd };
+  });
+}
+
+export type Subagent = Session["subagents"][number];
+
+export interface AgentLine {
+  agent: Subagent;
+  label: string;
+  // Its task cut around the word after « · » (« planner · », « blueprint », « due-date »): the step a pilot gave it.
+  parts: { lead: string; skill: string; rest: string } | null;
+  // Until the export last saw it, until now while it works.
+  durationText: string;
+}
+
+export interface TimelineItem<L extends TrailLine = TrailLine> {
+  at: string;
+  line: L | null;
+  agent: AgentLine | null;
+  state: TrailEntry["phase"];
+  // The run's line in force until the next item: the rail between them takes its colour.
+  runLine: L | null;
+  // Until the next item; null on the last.
+  gapText: string | null;
+  weight: number;
+}
+
+const agentLine = (agent: Subagent, now: number): AgentLine => {
+  const [, lead = "", skill = "", rest = ""] = /^(.*?·\s*)(\S+)(.*)$/.exec(agent.task ?? "") ?? [];
+  return {
+    agent,
+    label: agent.task ?? agent.type,
+    parts: skill ? { lead, skill, rest } : null,
+    durationText: age(Math.max(0, (agent.state === "working" ? now : Date.parse(agent.updatedAt)) - Date.parse(agent.since))),
+  };
+};
+
+// sessions-live FR-41: the run's lines and its subagents, oldest first, each subagent at its start.
+export function timelineItems<L extends TrailLine>(lines: L[], agents: Subagent[], now: number): TimelineItem<L>[] {
+  // A stable sort keeps a run line before a subagent started at the same time.
+  const items = [
+    ...lines.map((line) => ({ at: line.entry.at, line, agent: null, state: line.entry.phase })),
+    ...agents.map((a) => ({ at: a.since, line: null, agent: agentLine(a, now), state: a.state })),
+  ].sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+  let runLine: L | null = null;
+  return items.map((item, i) => {
+    runLine = item.line ?? runLine;
+    const next = items[i + 1];
+    const ms = next ? Date.parse(next.at) - Date.parse(item.at) : null;
+    return { ...item, runLine, gapText: ms === null ? null : age(ms), weight: weightOf(ms ?? now - Date.parse(item.at)) };
   });
 }
 

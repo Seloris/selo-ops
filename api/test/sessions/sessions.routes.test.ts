@@ -243,18 +243,20 @@ describe("sessions routes", () => {
       expect(session.recap).toBe("Filter kept.");
     });
 
-    it("lists the subagents of the current run only, with their task", async () => {
+    it("lists the subagents of the current run only, with their task, start and last update", async () => {
       // Arrange
       const main = buildRun({ since: "2026-01-01T10:00:00.000Z" });
       const old = buildRun({ agentId: "a-old", request: "Explore", since: "2026-01-01T09:00:00.000Z", phase: "turn-ended" });
-      const runner = buildRun({ agentId: "a-1", request: "selo:runner", task: "api tests", since: "2026-01-01T10:05:00.000Z", phase: "working" });
+      const runner = buildRun({ agentId: "a-1", request: "selo:runner", task: "api tests", since: "2026-01-01T10:05:00.000Z", updatedAt: "2026-01-01T10:07:00.000Z", phase: "working" });
       ctx.seed.session(buildSessionFile({ current: main, runs: [runner, main, old] }));
 
       // Act
       const session = await only();
 
       // Assert
-      expect(session.subagents).toEqual([{ type: "selo:runner", task: "api tests", state: "working", model: null, usage: null }]);
+      expect(session.subagents).toEqual([
+        { type: "selo:runner", task: "api tests", state: "working", since: "2026-01-01T10:05:00.000Z", updatedAt: "2026-01-01T10:07:00.000Z", model: null, usage: null },
+      ]);
     });
 
     it.each(["turn-ended", "job-done"] as const)("shows a session as working while a subagent of its current run works after %s", async (phase) => {

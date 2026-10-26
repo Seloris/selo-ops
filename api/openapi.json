@@ -759,6 +759,14 @@
                 "state": {
                   "$ref": "#/components/schemas/SessionState"
                 },
+                "since": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
                 "model": {
                   "type": [
                     "string",
@@ -773,6 +781,8 @@
                 "type",
                 "task",
                 "state",
+                "since",
+                "updatedAt",
                 "model",
                 "usage"
               ]

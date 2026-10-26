@@ -68,8 +68,8 @@ describe("sessions usage", () => {
       const current = buildRun({ since: "2026-01-01T09:00:00.000Z" });
       const tokens = buildTokens({ output: 400 });
       const agentUsage = buildRunUsage({ calls: 4, tokens, byModel: [{ model: HAIKU, calls: 4, tokens }], prompts: [] });
-      const runner = buildRun({ agentId: "a-1", request: "selo:runner", since: "2026-01-01T09:05:00.000Z", usage: agentUsage });
-      const stopped = buildRun({ agentId: "a-2", request: "selo:reviewer", since: "2026-01-01T09:06:00.000Z", usage: null });
+      const runner = buildRun({ agentId: "a-1", request: "selo:runner", since: "2026-01-01T09:05:00.000Z", updatedAt: "2026-01-01T09:08:00.000Z", usage: agentUsage });
+      const stopped = buildRun({ agentId: "a-2", request: "selo:reviewer", since: "2026-01-01T09:06:00.000Z", updatedAt: "2026-01-01T09:07:00.000Z", usage: null });
       ctx.seed.session(buildSessionFile({ current, runs: [stopped, runner, current] }));
 
       // Act
@@ -77,8 +77,8 @@ describe("sessions usage", () => {
 
       // Assert
       expect(session.subagents).toEqual([
-        { type: "selo:reviewer", task: null, state: "working", model: null, usage: null },
-        { type: "selo:runner", task: null, state: "working", model: HAIKU, usage: { calls: 4, tokens, byModel: [{ model: HAIKU, calls: 4, tokens }] } },
+        { type: "selo:reviewer", task: null, state: "working", since: "2026-01-01T09:06:00.000Z", updatedAt: "2026-01-01T09:07:00.000Z", model: null, usage: null },
+        { type: "selo:runner", task: null, state: "working", since: "2026-01-01T09:05:00.000Z", updatedAt: "2026-01-01T09:08:00.000Z", model: HAIKU, usage: { calls: 4, tokens, byModel: [{ model: HAIKU, calls: 4, tokens }] } },
       ]);
     });
 

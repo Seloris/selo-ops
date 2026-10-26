@@ -562,6 +562,10 @@ export interface components {
                 type: string;
                 task: string | null;
                 state: components["schemas"]["SessionState"];
+                /** Format: date-time */
+                since: string;
+                /** Format: date-time */
+                updatedAt: string;
                 model: string | null;
                 usage: components["schemas"]["Usage"];
             }[];

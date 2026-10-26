@@ -105,7 +105,16 @@ export const sessionSchema = z
     blockers: z.array(closeBlockerSchema),
     // `model`: the subagent's real model, the top one of its own usage (`session` BR-20); null with no usage (stopped by Esc).
     subagents: z.array(
-      z.object({ type: z.string(), task: z.string().nullable(), state: sessionStateSchema, model: z.string().nullable(), usage: usageSchema.nullable() }),
+      z.object({
+        type: z.string(),
+        task: z.string().nullable(),
+        state: sessionStateSchema,
+        // When it started and when the export last saw it: the turn's timeline places it and gives its duration (sessions-live FR-41).
+        since: z.iso.datetime(),
+        updatedAt: z.iso.datetime(),
+        model: z.string().nullable(),
+        usage: usageSchema.nullable(),
+      }),
     ),
     // `session` BR-18: the session's totals, and its current main run's; null for a session outside selo or a run before
     // its first stop.

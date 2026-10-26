@@ -9,7 +9,7 @@ import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
 import { FileTree } from "./FileTree.tsx";
-import { hasTrail, lineColor, trailLines, waitingText } from "./trail.ts";
+import { hasTrail, lineColor, skillColor, timelineItems, trailLines, waitingText } from "./trail.ts";
 import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
@@ -124,11 +124,12 @@ export function SessionDetail({
     const tone: DotTone = l.isPastWork ? "idle" : toneOf({ ...s, state: l.entry.phase, isClosed: isLast && s.isClosed, isArchived: isLast && s.isArchived });
     return { ...l, tone };
   });
+  const timeline = timelineItems(trail, s.subagents, now);
   const trailSection = hasTrail(s) && (
     <Section
       icon={<TrailIcon />}
       hue="trail"
-      count={s.trail.length}
+      count={timeline.length}
       title={t("sessions.detail.trail")}
       aside={waitingText(s.trail)}
       summary={
@@ -142,31 +143,50 @@ export function SessionDetail({
     >
       <ul className={`${styles.lines} ${styles.trail}`}>
         {/* Newest first: the line under a dot is the earlier step's, which lasted until this one. */}
-        {trail.map((l, i) => ({ l, i, earlier: trail[i - 1] })).reverse().map(({ l, i, earlier }) => (
-          <li key={i}>
-            <span className={styles.hash}>{new Date(l.entry.at).toLocaleTimeString("fr-FR")}</span>
+        {timeline.map((item, i) => ({ item, earlier: timeline[i - 1] })).reverse().map(({ item: { at, line: l, agent: a, state, gapText }, earlier }) => (
+          <li key={`${at}|${a?.label ?? ""}`}>
+            <span className={styles.hash}>{new Date(at).toLocaleTimeString("fr-FR")}</span>
             <span
-              className={`${styles.node} ${earlier ? styles[`rail-${earlier.tone}`] : styles.end}`}
+              className={`${styles.node} ${earlier ? styles[`rail-${earlier.runLine?.tone ?? "idle"}`] : styles.end}`}
               style={{ "--weight": earlier?.weight ?? 0 } as CSSProperties}
             >
-              <StatusDot tone={l.tone} />
-              {/* How long the earlier step lasted, beside the line that stands for it. */}
-              {earlier?.durationText && (
+              <StatusDot tone={l ? l.tone : toneOf({ ...s, state, isClosed: state === "working" && s.isClosed, isArchived: state === "working" && s.isArchived })} />
+              {/* The time between the earlier item and this one, beside the line that stands for it. */}
+              {earlier?.gapText && (
                 <span className={styles.gap} aria-hidden="true">
-                  {earlier.durationText}
+                  {earlier.gapText}
                 </span>
               )}
             </span>
             <span className={styles.line}>
-              <span style={{ color: lineColor(l) }}>{l.entry.skill}</span>
-              {l.entry.skill && l.stepText && " · "}
-              {l.stepText}
+              {l ? (
+                <>
+                  <span style={{ color: lineColor(l) }}>{l.entry.skill}</span>
+                  {l.entry.skill && l.stepText && " · "}
+                  {l.stepText}
+                </>
+              ) : (
+                a && (
+                  <>
+                    {a.parts ? (
+                      <>
+                        {a.parts.lead}
+                        <span style={{ color: skillColor(a.parts.skill) }}>{a.parts.skill}</span>
+                        {a.parts.rest}
+                      </>
+                    ) : (
+                      a.label
+                    )}
+                    {` · ${a.durationText}`}
+                  </>
+                )
+              )}
               {/* Read with its own line, where the eye finds it beside the line below. */}
-              {l.durationText && <span className={styles.srOnly}>{`, ${l.durationText}`}</span>}
+              {l && gapText && <span className={styles.srOnly}>{`, ${gapText}`}</span>}
             </span>
             <span className={styles.status}>
               {/* Always there, empty for past work, so every line fills the grid's four columns. */}
-              {l.isPastWork ? <span /> : <StateLabel session={{ ...s, state: l.entry.phase, isClosed: false, isArchived: false }} />}
+              {l?.isPastWork ? <span /> : <StateLabel session={{ ...s, state, isClosed: false, isArchived: false }} />}
             </span>
           </li>
         ))}
