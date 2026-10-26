@@ -1,73 +1,23 @@
 import type { ReactNode } from "react";
 import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { Card } from "../../../shared/ui/Card.tsx";
-import { CloseIcon } from "../../../shared/ui/icons.tsx";
-import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { Segmented } from "../../../shared/ui/Segmented.tsx";
-import { Tag } from "../../../shared/ui/Tag.tsx";
-import { SpecChip, SpecIcon, specColor, type SpecKind } from "../../../shared/ui/SpecKind.tsx";
-import type { ColourId, DecisionGuide, FlowStep, HelpTab, Lane, LaneId, LifecycleStep, Role, Rule, Section, Skill, SpecUnit, StripStep, Term, TreeNode } from "../content.ts";
+import { SpecChip, SpecIcon, specColor } from "../../../shared/ui/SpecKind.tsx";
+import type { Branch, ColourId, Flow, HelpTab, LaneId, Row, Rule, Section, Step, TreeNode } from "../content.ts";
 import styles from "./HelpParts.module.css";
 
-// help FR-11: a lane's class sets --lane, which its card, name and dot read.
+// help FR-11: a lane's class sets --lane, which its boxes, names, prompts and dots read.
 const laneClass = (lane: ColourId) => styles[`lane-${lane}`];
-
-function LaneName({ lane }: { lane: Lane }) {
-  return <strong className={`${styles.laneName} ${laneClass(lane.id)}`}>{t(lane.name)}</strong>;
-}
 
 function Code({ text }: { text: MessageKey }) {
   return <code className={styles.code}>{t(text)}</code>;
 }
 
-// A label key carries its own colon (and the narrow no-break space before it).
-function Labelled({ label, children }: { label: MessageKey; children: ReactNode }) {
+export function HelpSection({ section, intro, children }: { section: Section; intro?: MessageKey; children: ReactNode }) {
   return (
-    <p className={styles.text}>
-      <span className={styles.label}>{t(label)}</span> {children}
-    </p>
-  );
-}
-
-export function TableOfContents({ title, sections }: { title: MessageKey; sections: Section[] }) {
-  return (
-    <nav className={styles.toc} aria-labelledby="help-toc">
-      <h2 id="help-toc" className={styles.tocTitle}>
-        {t(title)}
-      </h2>
-      <ol className={styles.tocList}>
-        {sections.map((section) => (
-          <li key={section.id}>
-            <a
-              className={styles.tocLink}
-              href={`#${section.id}`}
-              onClick={(event) => {
-                // Scrolls to the section without touching the address: inside the popup, the page under it keeps its own.
-                event.preventDefault();
-                document.getElementById(section.id)?.scrollIntoView({ block: "start" });
-              }}
-            >
-              {t(section.title)}
-            </a>
-          </li>
-        ))}
-      </ol>
-    </nav>
-  );
-}
-
-export function HelpSection({ section, intro, kind, children }: { section: Section; intro?: MessageKey; kind?: SpecKind; children: ReactNode }) {
-  return (
-    <section id={section.id} className={styles.section} aria-labelledby={`${section.id}-title`}>
-      <h2 id={`${section.id}-title`} className={styles.sectionTitle}>
-        {kind ? (
-          <span className={styles.kindTitle}>
-            <SpecChip kind={kind} />
-            {t(section.title)}
-          </span>
-        ) : (
-          t(section.title)
-        )}
+    <section className={styles.section} aria-labelledby={section.id}>
+      <h2 id={section.id} className={styles.sectionTitle}>
+        {t(section.title)}
       </h2>
       {intro && <p className={styles.muted}>{t(intro)}</p>}
       {children}
@@ -75,159 +25,12 @@ export function HelpSection({ section, intro, kind, children }: { section: Secti
   );
 }
 
-export function SubTitle({ text }: { text: MessageKey }) {
-  return <h3 className={styles.subTitle}>{t(text)}</h3>;
-}
-
-export function LaneList({ lanes }: { lanes: Lane<ColourId>[] }) {
+export function Note({ text, code }: { text: MessageKey; code?: MessageKey }) {
   return (
-    <ul className={styles.cards}>
-      {lanes.map((lane) => (
-        <li key={lane.id} className={`${styles.cell} ${styles.laneCell} ${laneClass(lane.id)}`}>
-          <Card>
-            <h3 className={`${styles.cardTitle} ${styles.laneTitle}`}>
-              <span className={styles.dot} aria-hidden="true" />
-              {t(lane.name)}
-            </h3>
-            <Labelled label="help.lanes.when">{t(lane.when)}</Labelled>
-            {lane.loop && <Labelled label="help.flows.loop">{t(lane.loop)}</Labelled>}
-            <div className={styles.codes} aria-label={t("help.lanes.prompt")}>
-              {lane.prompts.map((prompt) => (
-                <Code key={prompt} text={prompt} />
-              ))}
-            </div>
-          </Card>
-        </li>
-      ))}
-    </ul>
+    <p className={styles.muted}>
+      {t(text)} {code && <Code text={code} />}
+    </p>
   );
-}
-
-export function DecisionGuideList({ guide, lanesById }: { guide: DecisionGuide; lanesById: Record<LaneId, Lane> }) {
-  const last = guide.questions.length - 1;
-  return (
-    <ol className={styles.steps}>
-      {guide.questions.map((step, index) => (
-        <li key={step.question} className={styles.cell}>
-          <Card>
-            <p className={styles.numbered}>{t(step.question)}</p>
-            <ul className={styles.textList}>
-              <li>
-                <span className={styles.label}>{t("help.guide.yes")}</span> <LaneName lane={lanesById[step.yes]} />
-              </li>
-              <li>
-                <span className={styles.label}>{t("help.guide.no")}</span>{" "}
-                {index === last ? <LaneName lane={lanesById[guide.otherwise]} /> : t("help.guide.next")}
-              </li>
-            </ul>
-          </Card>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-export function LifecycleList({ steps, lanes }: { steps: LifecycleStep[]; lanes: Lane[] }) {
-  return (
-    <ol className={styles.steps}>
-      {steps.map((step) => (
-        <li key={step.name} className={styles.cell}>
-          <Card>
-            <div className={styles.stepHead}>
-              <h3 className={`${styles.cardTitle} ${styles.numbered}`}>{t(step.name)}</h3>
-              <span className={styles.tags} aria-label={t("help.lifecycle.lanes")}>
-                {lanes
-                  .filter((lane) => step.lanes.includes(lane.id))
-                  .map((lane) => (
-                    <Tag key={lane.id} color={`var(--lane-${lane.id})`}>
-                      {t(lane.short)}
-                    </Tag>
-                  ))}
-              </span>
-            </div>
-            <p className={styles.text}>{t(step.text)}</p>
-          </Card>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-export function TextList({ items }: { items: MessageKey[] }) {
-  return (
-    <ul className={styles.textList}>
-      {items.map((item) => (
-        <li key={item}>{t(item)}</li>
-      ))}
-    </ul>
-  );
-}
-
-export function SkillCards({ skills }: { skills: Skill[] }) {
-  return (
-    <ul className={styles.cards}>
-      {skills.map((skill) => (
-        <li
-          key={skill.name}
-          className={skill.lane ? `${styles.cell} ${styles.laneCell} ${laneClass(skill.lane)}` : styles.cell}
-        >
-          <Card>
-            <h3 className={skill.lane ? `${styles.cardTitle} ${styles.laneTitle}` : styles.cardTitle}>
-              {skill.lane && <span className={styles.dot} aria-hidden="true" />}
-              {t(skill.name)}
-            </h3>
-            <p className={styles.text}>{t(skill.what)}</p>
-            <Labelled label="help.skills.when">{t(skill.when)}</Labelled>
-            <div className={styles.codes} aria-label={t("help.skills.prompt")}>
-              <Code text={skill.prompt} />
-            </div>
-            <div className={styles.options}>
-              <span className={styles.label}>{t("help.skills.options")}</span>
-              {skill.options.length === 0
-                ? t("help.skills.noOption")
-                : skill.options.map((option) => <Code key={option} text={option} />)}
-            </div>
-          </Card>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-export function RoleCards({ roles }: { roles: Role[] }) {
-  return (
-    <ul className={styles.cards}>
-      {roles.map((role) => (
-        <li key={role.name} className={styles.cell}>
-          <Card>
-            <h3 className={styles.cardTitle}>{t(role.name)}</h3>
-            <p className={styles.text}>{t(role.what)}</p>
-            <Labelled label="help.roles.never">{t(role.never)}</Labelled>
-            <Labelled label="help.roles.model">
-              <Code text={role.model} />
-            </Labelled>
-          </Card>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-export function Glossary({ terms }: { terms: Term[] }) {
-  return (
-    <dl className={styles.glossary}>
-      {terms.map((term) => (
-        <Card key={term.term}>
-          <dt className={styles.cardTitle}>{t(term.term)}</dt>
-          <dd className={styles.text}>{t(term.definition)}</dd>
-        </Card>
-      ))}
-    </dl>
-  );
-}
-
-export function Note({ text }: { text: MessageKey }) {
-  return <p className={styles.muted}>{t(text)}</p>;
 }
 
 // help FR-12: pressed buttons rather than ARIA tabs, which would also need arrow-key navigation; the bar sticks to the top of the scroller.
@@ -239,139 +42,102 @@ export function HelpTabs({ tabs, value, onChange }: { tabs: { value: HelpTab; la
   );
 }
 
-export interface FileExample {
-  path: string;
-  text: string;
-}
-
-interface TreeChoice {
-  selected?: string;
-  onSelect(example: FileExample | null): void;
-}
-
-function TreeItems({ nodes, parent, selected, onSelect }: { nodes: TreeNode[]; parent: string } & TreeChoice) {
+// help FR-02, FR-03: a question on the left, its « oui » arrow to a lane on the right, its « non » down to the next question.
+export function DecisionTree({ branches }: { branches: Branch[] }) {
   return (
-    <ul className={styles.treeList}>
-      {nodes.map((node) => {
-        const path = parent + node.name;
-        const nameClass = `${node.children ? styles.treeFolder : styles.treeFile} ${node.kind ? styles.treeKind : ""}`;
-        const name = (
-          <>
-            {node.kind && <SpecIcon kind={node.kind} />}
-            {node.name}
-          </>
-        );
-        const color = node.kind ? { color: specColor(node.kind) } : undefined;
-        return (
-          <li key={node.name} className={styles.treeItem}>
-            {node.sample !== undefined ? (
-              // help FR-14: a click shows the file's example beside the tree; a second click gives the cards back.
-              <button
-                type="button"
-                className={`${nameClass} ${styles.treeButton}`}
-                style={color}
-                aria-pressed={selected === path}
-                onClick={() => onSelect(selected === path ? null : { path, text: node.sample ?? "" })}
-              >
-                {name}
-              </button>
-            ) : (
-              <span className={nameClass} style={color}>
-                {name}
-              </span>
-            )}
-            {node.note && <span className={styles.treeNote}>{t(node.note)}</span>}
-            {node.children && <TreeItems nodes={node.children} parent={path} selected={selected} onSelect={onSelect} />}
-          </li>
-        );
-      })}
-    </ul>
+    <ol className={styles.decision}>
+      {branches.map((branch, index) => (
+        <li key={branch.lane} className={`${styles.branch} ${laneClass(branch.lane)}`}>
+          <p className={branch.question ? styles.question : `${styles.question} ${styles.otherwise}`}>{t(branch.question ?? "help.lanes.otherwise")}</p>
+          <span className={styles.yes}>{branch.question ? t("help.lanes.yes") : ""}</span>
+          <div className={styles.laneBox}>
+            <h3 className={styles.laneTitle}>
+              <span className={styles.dot} aria-hidden="true" />
+              {t(branch.name)}
+            </h3>
+            <p className={styles.text}>{t(branch.hint)}</p>
+            <div className={styles.codes}>
+              {branch.prompts.map((prompt) => (
+                <Code key={prompt} text={prompt} />
+              ))}
+            </div>
+          </div>
+          {/* After the lane in reading order; the grid puts it under the question. */}
+          {index < branches.length - 1 && <span className={styles.no}>{t("help.lanes.no")}</span>}
+        </li>
+      ))}
+    </ol>
   );
 }
 
-// help FR-14.
-export function PlanningTree({ caption, root, selected, onSelect }: { caption: MessageKey; root: TreeNode } & TreeChoice) {
+// help FR-14, FR-17: one row of boxes joined by arrows per lane or flow, in its colour.
+export function Flows({ flows }: { flows: Flow[] }) {
   return (
-    <figure className={styles.figure}>
-      <figcaption className={styles.figureCaption}>{t(caption)}</figcaption>
-      <div className={styles.tree}>
-        <span className={styles.treeFolder}>{root.name}</span>
-        <TreeItems nodes={root.children ?? []} parent={root.name} selected={selected} onSelect={onSelect} />
-      </div>
-    </figure>
-  );
-}
-
-// help FR-14: the ids of a sample spec stand out, as a reader looks for them first.
-export function SpecSample({ caption, text, onClose }: { caption: string; text: string; onClose(): void }) {
-  return (
-    <figure className={styles.figure}>
-      <figcaption className={`${styles.figureCaption} ${styles.sampleCaption}`}>
-        {caption}
-        <IconButton label={t("help.specs.tree.close")} onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </figcaption>
-      <pre className={styles.sample}>
-        {text.split(/\b((?:FR|BR|US|Q)-\d+)\b/).map((part, index) =>
-          index % 2 === 1 ? (
-            <mark key={index} className={styles.sampleId}>
-              {part}
-            </mark>
-          ) : (
-            part
-          ),
-        )}
-      </pre>
-    </figure>
-  );
-}
-
-// help FR-14: one row of steps per lane, in its colour.
-export function SpecFlows({ caption, flows, lanesById }: { caption: MessageKey; flows: { lane: LaneId; steps: FlowStep[] }[]; lanesById: Record<LaneId, Lane> }) {
-  return (
-    <figure className={styles.figure}>
-      <figcaption className={styles.figureCaption}>{t(caption)}</figcaption>
+    <div className={styles.flows}>
       {flows.map((flow) => (
         <div key={flow.lane} className={`${styles.flow} ${laneClass(flow.lane)}`}>
-          <LaneName lane={lanesById[flow.lane]} />
+          <h3 className={styles.laneTitle}>
+            <span className={styles.dot} aria-hidden="true" />
+            {t(flow.name)}
+          </h3>
           <ol className={styles.flowSteps}>
-            {flow.steps.map((step) => (
-              <li key={step.label} className={styles.flowStep}>
-                <span>{t(step.label)}</span>
+            {flow.steps.map((step, index) => (
+              <li key={index} className={styles.flowStep}>
+                {step.label && <span>{t(step.label)}</span>}
                 {step.code && <Code text={step.code} />}
               </li>
             ))}
           </ol>
         </div>
       ))}
-    </figure>
+    </div>
   );
 }
 
-// help FR-15: one line per skill, its prompt in its lane's colour.
-export function SkillList({ skills }: { skills: Skill[] }) {
+// help FR-04: the lanes' dots, named once above the steps.
+export function LaneLegend({ lanes }: { lanes: { id: LaneId; name: MessageKey }[] }) {
   return (
-    <dl className={styles.skillList}>
-      {skills.map((skill) => (
-        <div key={skill.name} className={`${styles.skillRow} ${skill.lane ? laneClass(skill.lane) : ""}`}>
-          <dt className={styles.skillPrompt}>{t(skill.prompt)}</dt>
-          <dd className={styles.text}>{t(skill.what)}</dd>
-        </div>
+    <ul className={styles.legend}>
+      {lanes.map((lane) => (
+        <li key={lane.id} className={laneClass(lane.id)}>
+          <span className={styles.dot} aria-hidden="true" />
+          {t(lane.name)}
+        </li>
       ))}
-    </dl>
+    </ul>
   );
 }
 
-// Two figures side by side, one under the other when narrow.
-export function Split({ children }: { children: ReactNode }) {
-  return <div className={styles.split}>{children}</div>;
+// help FR-04, FR-14: numbered tiles in reading order, several per row, one per row when narrow.
+export function Steps({ steps, lanes }: { steps: Step[]; lanes?: { id: LaneId; name: MessageKey }[] }) {
+  return (
+    <ol className={styles.steps}>
+      {steps.map((step, index) => {
+        const passing = lanes?.filter((lane) => step.lanes?.includes(lane.id)) ?? [];
+        return (
+          <li key={step.name} className={styles.step}>
+            <span className={styles.stepNumber}>{index + 1}</span>
+            <strong>{t(step.name)}</strong>
+            <span className={styles.hint}>{t(step.hint)}</span>
+            {step.code && <Code text={step.code} />}
+            {passing.length > 0 && (
+              <span className={styles.dots} role="img" aria-label={t("help.lifecycle.lanes", { lanes: passing.map((lane) => t(lane.name)).join(", ") })}>
+                {passing.map((lane) => (
+                  <span key={lane.id} className={`${styles.dot} ${laneClass(lane.id)}`} />
+                ))}
+              </span>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
 }
 
-// help FR-14: short cards, a code or a kind chip on top of one sentence.
-export function RuleCards({ rules, layout = "grid" }: { rules: Rule[]; layout?: "grid" | "dense" | "rows" }) {
+// Short cards, a code or a kind chip on top of one sentence; "dense" for one-word cards.
+export function RuleCards({ rules, dense = false }: { rules: Rule[]; dense?: boolean }) {
   return (
-    <ul className={layout === "grid" ? styles.rules : `${styles.rules} ${styles[layout]}`}>
+    <ul className={dense ? `${styles.rules} ${styles.dense}` : styles.rules}>
       {rules.map((rule) => (
         <li key={rule.text} className={styles.cell}>
           <Card>
@@ -385,42 +151,60 @@ export function RuleCards({ rules, layout = "grid" }: { rules: Rule[]; layout?: 
   );
 }
 
-// help FR-14: the page spec and the domain sheet, side by side, each in its kind's colour.
-export function SpecUnits({ units }: { units: SpecUnit[] }) {
+// help FR-06, FR-07, FR-18: one line per item, its code in its lane's colour, then one sentence and its options.
+export function Rows({ rows }: { rows: Row[] }) {
   return (
-    <ul className={styles.units}>
-      {units.map((unit) => (
-        <li key={unit.kind} className={styles.unit} style={{ borderTopColor: specColor(unit.kind) }}>
-          <h3 className={`${styles.cardTitle} ${styles.kindTitle}`}>
-            <SpecChip kind={unit.kind} />
-            {t(unit.name)}
-          </h3>
-          <dl className={styles.facts}>
-            {unit.facts.map((fact) => (
-              <div key={fact.label}>
-                <dt className={styles.factLabel}>{t(fact.label)}</dt>
-                <dd className={styles.text}>{t(fact.text)}</dd>
-              </div>
-            ))}
-          </dl>
+    <dl className={styles.rows}>
+      {rows.map((row) => (
+        <div key={row.head} className={`${styles.row} ${row.lane ? laneClass(row.lane) : ""}`}>
+          <dt className={styles.rowHead}>{t(row.head)}</dt>
+          <dd className={styles.rowBody}>
+            <span className={styles.text}>{t(row.text)}</span>
+            {row.codes && (
+              <span className={styles.codes} role="group" aria-label={t("help.skills.options")}>
+                {row.codes.map((code) => (
+                  <Code key={code} text={code} />
+                ))}
+              </span>
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function TreeItems({ nodes }: { nodes: TreeNode[] }) {
+  return (
+    <ul className={styles.treeList}>
+      {nodes.map((node) => (
+        <li key={node.name} className={styles.treeItem}>
+          <span className={node.children || node.name.endsWith("/") ? styles.treeFolder : styles.treeFile} style={node.kind ? { color: specColor(node.kind) } : undefined}>
+            {node.kind && <SpecIcon kind={node.kind} />}
+            {node.name}
+          </span>
+          {node.note && <span className={styles.treeNote}>{t(node.note)}</span>}
+          {node.children && <TreeItems nodes={node.children} />}
         </li>
       ))}
     </ul>
   );
 }
 
-// help FR-14: numbered steps in one band, one under the other when narrow.
-export function Strip({ steps }: { steps: StripStep[] }) {
+// help FR-14: the tree of `.planning/`, one short note per entry.
+export function PlanningTree({ caption, root }: { caption: MessageKey; root: TreeNode }) {
   return (
-    <ol className={styles.strip}>
-      {steps.map((step, index) => (
-        <li key={step.name} className={styles.stripStep}>
-          <span className={styles.stripNumber}>{index + 1}</span>
-          <strong>{t(step.name)}</strong>
-          <span className={styles.muted}>{t(step.text)}</span>
-          {step.code && <Code text={step.code} />}
-        </li>
-      ))}
-    </ol>
+    <figure className={styles.figure}>
+      <figcaption className={styles.caption}>{t(caption)}</figcaption>
+      <div className={styles.tree}>
+        <span className={styles.treeFolder}>{root.name}</span>
+        <TreeItems nodes={root.children ?? []} />
+      </div>
+    </figure>
   );
+}
+
+// Two figures side by side, one under the other when narrow.
+export function Split({ children }: { children: ReactNode }) {
+  return <div className={styles.split}>{children}</div>;
 }

@@ -1,16 +1,9 @@
-.toc,
 .section {
   display: grid;
   gap: 14px;
   min-width: 0;
 }
 
-.section {
-  /* The anchor lands below the sticky tab bar, with some air above the title. */
-  scroll-margin-top: 80px;
-}
-
-.tocTitle,
 .sectionTitle {
   display: grid;
   gap: 10px;
@@ -22,37 +15,12 @@
 }
 
 /* Under each title, a short rule in the three lane colours. */
-.tocTitle::after,
 .sectionTitle::after {
   content: "";
   width: 48px;
   height: 3px;
   border-radius: var(--radius-pill);
   background: linear-gradient(90deg, var(--lane-fastlane), var(--lane-blueprint), var(--lane-pilot));
-}
-
-.tocList {
-  margin: 0;
-  padding-left: 1.4em;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px 24px;
-}
-
-.tocLink {
-  color: var(--text);
-  text-underline-offset: 3px;
-  text-decoration-color: var(--text-muted);
-}
-
-.tocLink:hover {
-  text-decoration-color: var(--text);
-}
-
-.subTitle {
-  margin: 12px 0 0;
-  font-size: 1.1em;
-  font-weight: 600;
 }
 
 .muted {
@@ -63,11 +31,6 @@
 .text {
   margin: 0;
   overflow-wrap: anywhere;
-}
-
-.label {
-  color: var(--text-muted);
-  font-weight: 500;
 }
 
 .code {
@@ -81,8 +44,7 @@
   overflow-wrap: anywhere;
 }
 
-.codes,
-.options {
+.codes {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -90,81 +52,7 @@
   min-width: 0;
 }
 
-/* Cards: two columns, one under 640px. */
-.cards {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-/* The list item lets its card fill the row's height. */
-.cell {
-  display: grid;
-  min-width: 0;
-}
-
-.cardTitle {
-  margin: 0;
-  font-size: 1em;
-  font-weight: 600;
-}
-
-.steps {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 8px;
-  counter-reset: step;
-}
-
-.steps > .cell {
-  counter-increment: step;
-}
-
-.numbered {
-  margin: 0;
-  font-weight: 500;
-}
-
-/* Numbered steps: a round counter on the left, joined to the next one by a thin line. */
-.steps > .cell {
-  position: relative;
-  padding-left: 40px;
-}
-
-.steps > .cell::before {
-  content: counter(step);
-  position: absolute;
-  top: 12px;
-  left: 0;
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  font-size: 0.85em;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-  background: var(--surface-2);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-pill);
-}
-
-.steps > .cell:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  top: 44px;
-  bottom: -8px;
-  left: 14px;
-  width: var(--border-width);
-  background: var(--border);
-}
-
-/* help FR-11: each lane sets --lane; its card gets a coloured top edge and a soft glow of that colour. */
+/* help FR-11: each lane or flow sets --lane. */
 .lane-fastlane {
   --lane: var(--lane-fastlane);
 }
@@ -185,102 +73,297 @@
   --lane: var(--lane-iterate);
 }
 
-.laneCell {
-  position: relative;
-  border-radius: var(--item-radius);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--lane) 16%, transparent), transparent 65%);
-}
-
-.laneCell::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 18px;
-  right: 18px;
-  height: 3px;
-  border-radius: 0 0 var(--radius-pill) var(--radius-pill);
+.dot {
+  flex: none;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
   background: var(--lane);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lane) 22%, transparent);
 }
 
 .laneTitle {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin: 0;
+  font-size: 1em;
+  font-weight: 600;
   color: var(--lane);
 }
 
-.dot {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-pill);
-  background: var(--lane);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lane) 22%, transparent);
+/* help FR-03: the decision tree, a question, its « oui » arrow, its lane; « non » goes down. */
+.decision {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
 }
 
-.laneName {
-  color: var(--lane);
-}
-
-.stepHead {
-  display: flex;
-  flex-wrap: wrap;
+.branch {
+  display: grid;
+  grid-template-columns: minmax(0, 15em) 3.5em minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 4px 0;
 }
 
-.stepHead .numbered {
+.question {
+  margin: 0;
+  padding: 10px 14px;
+  font-weight: 500;
+  text-align: center;
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.otherwise {
+  color: var(--text-muted);
+  border-style: dashed;
+}
+
+.no,
+.yes {
+  color: var(--text-muted);
+  font-size: 0.85em;
   font-weight: 600;
 }
 
-.tags {
+.no {
+  grid-column: 1;
+  justify-self: center;
+}
+
+.no::after {
+  content: " ↓";
+}
+
+.yes {
+  text-align: center;
+  color: var(--lane);
+}
+
+.yes::after {
+  content: " →";
+}
+
+.laneBox {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: var(--item-radius);
+  border: var(--border-width) solid color-mix(in srgb, var(--lane) 45%, transparent);
+  border-left: 3px solid var(--lane);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--lane) 14%, transparent), transparent 85%);
+}
+
+/* help FR-14, FR-17: rows of boxes joined by arrows. */
+/* The rows follow their own width, not the window's: the page's panel is narrower than the popup. */
+.flows {
+  display: grid;
+  gap: 10px;
+  container-type: inline-size;
+}
+
+.flow {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--item-radius);
+  border-left: 3px solid var(--lane);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--lane) 12%, transparent), transparent 80%);
+}
+
+.flowSteps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* One row of equal boxes, never wrapped: a wrapped row would leave an arrow pointing at nothing. */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 28px;
+}
+
+.flowStep {
+  position: relative;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.flowStep:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  top: 50%;
+  right: -22px;
+  transform: translateY(-50%);
+  color: var(--lane);
+  font-weight: 600;
+}
+
+/* Too narrow for a prompt per box: the boxes stack, each as wide as its text. */
+@container (max-width: 720px) {
+  .flowSteps {
+    grid-auto-flow: row;
+    gap: 22px;
+  }
+
+  .flowStep {
+    justify-self: start;
+  }
+
+  .flowStep:not(:last-child)::after {
+    content: "↓";
+    top: auto;
+    right: auto;
+    bottom: -20px;
+    left: 16px;
+    transform: none;
+  }
+}
+
+/* help FR-04: the legend and the numbered tiles. */
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 6px 18px;
+  color: var(--text-muted);
+  font-size: 0.9em;
 }
 
-.textList {
-  margin: 0;
-  padding-left: 1.2em;
-  display: grid;
-  gap: 4px;
-}
-
-.glossary {
-  margin: 0;
-  display: grid;
+.legend li {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
 }
 
-@media (max-width: 640px) {
-  .tocList {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .cards {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: 8px;
 }
 
-/* help FR-12: the tab bar stays at the top of its scroller (the page, or the popup's body), opaque over what scrolls under it,
-   a full-width strip that bleeds over the container's side padding (--help-bleed, else the panel's)
-   and over its top padding once stuck (--help-top). */
-.tabs {
-  position: sticky;
-  /* A sticky box stops at the scroller's padding: a negative top lifts it to the very edge. */
-  top: calc(-1 * var(--help-top, 0px));
-  z-index: 2;
-  /* Up over the top padding and the 28px row gap after the empty scroll marker before it. */
-  margin: calc(-28px - var(--help-top, 0px)) calc(-1 * var(--help-bleed, var(--panel-pad))) 0;
-  padding: 10px var(--help-bleed, var(--panel-pad));
-  background: var(--pop-bg);
-  border-bottom: var(--border-width) solid var(--border);
-  -webkit-backdrop-filter: var(--blur);
-  backdrop-filter: var(--blur);
+.step {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px;
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--item-radius);
 }
 
-/* help FR-14: the figures of the « Specs » tab. */
+.stepNumber {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
+.dots {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  padding-left: 3px;
+}
+
+/* Short cards. */
+.cell {
+  display: grid;
+  min-width: 0;
+}
+
+.rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 10px;
+}
+
+.dense {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+}
+
+.rules .code {
+  justify-self: start;
+}
+
+/* Beside the tree, the cards stack in one column. */
+.split .rules {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* help FR-06, FR-07, FR-18: one line per item. */
+.rows {
+  margin: 0;
+  display: grid;
+  padding: 4px 16px;
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--item-radius);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 17em) minmax(0, 1fr);
+  gap: 4px 16px;
+  padding: 9px 0;
+}
+
+.row + .row {
+  border-top: var(--border-width) solid var(--border);
+}
+
+.rowHead {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  font-weight: 500;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  color: var(--lane, var(--text));
+}
+
+.rowBody {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+}
+
+/* help FR-14: the tree of .planning/. */
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
 .figure {
   margin: 0;
   display: grid;
@@ -288,19 +371,17 @@
   min-width: 0;
 }
 
-.figureCaption {
+.caption {
   color: var(--text-muted);
   font-size: 0.9em;
   font-weight: 500;
 }
 
-.tree,
-.sample {
-  margin: 0;
+.tree {
   padding: 14px 16px;
   font-family: var(--font-mono);
   font-size: 0.86em;
-  line-height: 1.6;
+  line-height: 1.7;
   background: var(--control-bg);
   border: var(--border-width) solid var(--border);
   border-radius: var(--item-radius);
@@ -325,7 +406,7 @@
   top: 0;
   left: 0;
   width: 10px;
-  height: 0.8em;
+  height: 0.85em;
   border-left: var(--border-width) solid var(--text-muted);
   border-bottom: var(--border-width) solid var(--text-muted);
 }
@@ -333,7 +414,7 @@
 .treeItem:not(:last-child)::after {
   content: "";
   position: absolute;
-  top: 0.8em;
+  top: 0.85em;
   bottom: 0;
   left: 0;
   border-left: var(--border-width) solid var(--text-muted);
@@ -344,35 +425,16 @@
   color: var(--hue-files);
 }
 
-/* help FR-14: a file with an example is a button, pressed while its example shows. */
-.treeButton {
-  padding: 0 4px;
-  margin-left: -4px;
-  font: inherit;
-  background: none;
-  border: var(--border-width) solid transparent;
-  border-radius: var(--radius-control);
-  cursor: pointer;
-}
-
-.treeButton:hover {
-  text-decoration: underline;
-}
-
-.treeButton[aria-pressed="true"] {
-  background: var(--surface-2);
-  border-color: var(--border);
-}
-
-.sampleCaption {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+.treeFolder svg,
+.treeFile svg {
+  width: 13px;
+  height: 13px;
+  margin-right: 6px;
+  vertical-align: -2px;
 }
 
 .treeNote {
-  margin-left: 12px;
+  margin-left: 10px;
   font-family: var(--font-sans);
   color: var(--text-muted);
 }
@@ -381,248 +443,44 @@
   content: "— ";
 }
 
-.sample {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.sampleId {
-  padding: 0 4px;
-  font-weight: 600;
-  color: var(--text);
-  background: var(--surface-2);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-control);
-}
-
-.flow {
-  display: grid;
-  gap: 8px;
-  padding: 12px 14px;
-  border-radius: var(--item-radius);
-  border-left: 3px solid var(--lane);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--lane) 12%, transparent), transparent 80%);
-}
-
-.flowSteps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  /* One row of equal boxes, never wrapped: a wrapped row would leave an arrow pointing at nothing. */
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: 28px;
-}
-
-/* Boxes joined by an arrow in the lane's colour. */
-.flowStep {
-  position: relative;
-  display: grid;
-  align-content: start;
-  gap: 6px;
-  min-width: 0;
-  padding: 8px 12px;
-  background: var(--surface-2);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-control);
-}
-
-.flowStep:not(:last-child)::after {
-  content: "→";
-  position: absolute;
-  top: 50%;
-  right: -22px;
-  transform: translateY(-50%);
-  color: var(--lane);
-  font-weight: 600;
+/* help FR-12: the tab bar stays at the top of its scroller (the page, or the popup's body), opaque over what scrolls under it,
+   a full-width strip that bleeds over the container's side padding (--help-bleed, else the panel's)
+   and over its top padding once stuck (--help-top). */
+.tabs {
+  position: sticky;
+  /* A sticky box stops at the scroller's padding: a negative top lifts it to the very edge. */
+  top: calc(-1 * var(--help-top, 0px));
+  z-index: 2;
+  /* Up over the top padding and the 28px row gap after the empty scroll marker before it. */
+  margin: calc(-28px - var(--help-top, 0px)) calc(-1 * var(--help-bleed, var(--panel-pad))) 0;
+  padding: 10px var(--help-bleed, var(--panel-pad));
+  background: var(--pop-bg);
+  border-bottom: var(--border-width) solid var(--border);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
 }
 
 @media (max-width: 640px) {
-  .flowSteps {
-    grid-auto-flow: row;
-    gap: 22px;
+  .branch {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
   }
 
-  .flowStep:not(:last-child)::after {
-    content: "↓";
-    top: auto;
-    right: auto;
-    bottom: -20px;
-    left: 16px;
-    transform: none;
-  }
-}
-
-.kindTitle {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.treeKind svg {
-  width: 13px;
-  height: 13px;
-  margin-right: 6px;
-  vertical-align: -2px;
-}
-
-/* help FR-15: the guide's one line per skill. */
-.skillList {
-  margin: 0;
-  display: grid;
-  gap: 0;
-  padding: 6px 16px;
-  background: var(--item-bg);
-  border: var(--item-border);
-  border-radius: var(--item-radius);
-}
-
-.skillRow {
-  display: grid;
-  grid-template-columns: minmax(0, 15em) minmax(0, 1fr);
-  gap: 4px 16px;
-  padding: 8px 0;
-}
-
-.skillRow + .skillRow {
-  border-top: var(--border-width) solid var(--border);
-}
-
-.skillRow dd {
-  margin: 0;
-}
-
-.skillPrompt {
-  font-family: var(--font-mono);
-  font-size: 0.86em;
-  font-weight: 500;
-  line-height: 1.7;
-  overflow-wrap: anywhere;
-  color: var(--lane, var(--text));
-}
-
-/* help FR-14: the tree beside its rule cards, then the other figures. */
-.split {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
-  gap: 12px;
-  align-items: start;
-}
-
-.rules {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-  gap: 10px;
-}
-
-/* Beside the tree, the cards stack in one column and share its height. */
-.split .rules {
-  grid-template-columns: minmax(0, 1fr);
-  grid-auto-rows: 1fr;
-  align-self: stretch;
-}
-
-.dense {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
-}
-
-.rows {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.rules .code {
-  justify-self: start;
-}
-
-.units {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  gap: 12px;
-}
-
-.unit {
-  display: grid;
-  align-content: start;
-  gap: 12px;
-  min-width: 0;
-  padding: var(--item-pad);
-  background: var(--item-bg);
-  border: var(--item-border);
-  border-top: 3px solid;
-  border-radius: var(--item-radius);
-}
-
-.facts {
-  margin: 0;
-  display: grid;
-  gap: 10px;
-}
-
-.facts dd {
-  margin: 0;
-}
-
-.factLabel {
-  color: var(--text-muted);
-  font-size: 0.78em;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.strip {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
-  background: var(--item-bg);
-  border: var(--item-border);
-  border-radius: var(--item-radius);
-  overflow: hidden;
-}
-
-.stripStep {
-  display: grid;
-  align-content: start;
-  justify-items: start;
-  gap: 6px;
-  min-width: 0;
-  padding: 14px;
-  border-right: var(--border-width) solid var(--border);
-}
-
-.stripStep:last-child {
-  border-right: 0;
-}
-
-/* Stacked when narrow: a line between the steps instead. */
-@media (max-width: 560px) {
-  .stripStep {
-    border-right: 0;
+  .yes {
+    text-align: left;
+    padding-left: 14px;
   }
 
-  .stripStep + .stripStep {
-    border-top: var(--border-width) solid var(--border);
+  .yes::after {
+    content: " ↓";
   }
-}
 
-.stripNumber {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.8em;
-  font-weight: 600;
-}
+  .yes:empty {
+    display: none;
+  }
 
-@media (max-width: 640px) {
-  .skillRow {
+
+  .row {
     grid-template-columns: minmax(0, 1fr);
   }
 }

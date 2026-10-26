@@ -1,55 +1,24 @@
 import { useRef, useState } from "react";
-import { t } from "../../../shared/lib/i18n/index.ts";
 import {
   commitPlaces,
+  decisionTree,
   helpTabs,
   type HelpTab,
-  decisionGuide,
   idKinds,
-  idRules,
-  flows,
-  lanes,
-  lanesById,
-  lifecycleSteps,
-  roles,
-  sectionOrder,
-  sections,
-  settingRules,
-  skills,
+  laneLegend,
+  lifecycle,
   planningTree,
-  specChecks,
+  roles,
+  sections,
+  seeFirst,
+  settings,
+  skills,
   specFlows,
   specLines,
-  specSections,
-  specUnits,
   stubSteps,
-  technicalSections,
-  vocabulary,
   whereRules,
 } from "../content.ts";
-import {
-  DecisionGuideList,
-  type FileExample,
-  Glossary,
-  HelpSection,
-  HelpTabs,
-  LaneList,
-  LifecycleList,
-  Note,
-  PlanningTree,
-  RoleCards,
-  RuleCards,
-  SkillCards,
-  SkillList,
-  SpecFlows,
-  SpecSample,
-  SpecUnits,
-  Split,
-  Strip,
-  SubTitle,
-  TableOfContents,
-  TextList,
-} from "./HelpParts.tsx";
+import { DecisionTree, Flows, HelpSection, HelpTabs, LaneLegend, Note, PlanningTree, Rows, RuleCards, Split, Steps } from "./HelpParts.tsx";
 
 // help FR-12: the same tabs on the page and in the popup (help FR-10), the guide first.
 export function HelpContent() {
@@ -71,34 +40,23 @@ export function HelpContent() {
   );
 }
 
-// help FR-01 to FR-05, FR-08, FR-15, FR-17.
+// help FR-02 to FR-05, FR-17.
 function GuideTab() {
   return (
     <>
-      <TableOfContents title="help.toc.title" sections={sectionOrder} />
-
-      <HelpSection section={sections.lanes} intro="help.lanes.intro">
-        <LaneList lanes={lanes} />
-        <SubTitle text="help.flows.title" />
-        <Note text="help.flows.intro" />
-        <LaneList lanes={flows} />
-        <SubTitle text="help.guide.title" />
-        <Note text="help.guide.intro" />
-        <DecisionGuideList guide={decisionGuide} lanesById={lanesById} />
+      <HelpSection section={sections.lanes}>
+        <DecisionTree branches={decisionTree} />
+        <Note text="help.lanes.unsure" code="help.lanes.unsurePrompt" />
       </HelpSection>
-
-      <HelpSection section={sections.lifecycle} intro="help.lifecycle.intro">
-        <LifecycleList steps={lifecycleSteps} lanes={lanes} />
-        <SubTitle text="help.commits.title" />
-        <TextList items={commitPlaces} />
+      <HelpSection section={sections.flows} intro="help.flows.intro">
+        <Flows flows={seeFirst} />
       </HelpSection>
-
-      <HelpSection section={sections.skills} intro="help.skills.listIntro">
-        <SkillList skills={skills} />
+      <HelpSection section={sections.lifecycle}>
+        <LaneLegend lanes={laneLegend} />
+        <Steps steps={lifecycle} lanes={laneLegend} />
       </HelpSection>
-
-      <HelpSection section={sections.vocabulary}>
-        <Glossary terms={vocabulary} />
+      <HelpSection section={sections.commits}>
+        <RuleCards rules={commitPlaces} />
       </HelpSection>
     </>
   );
@@ -106,42 +64,27 @@ function GuideTab() {
 
 // help FR-13, its figures FR-14.
 function SpecsTab() {
-  const [example, setExample] = useState<FileExample | null>(null);
   return (
     <>
-      <Note text="help.specs.intro" />
-      <Split>
-        <PlanningTree caption="help.specs.tree.caption" root={planningTree} selected={example?.path} onSelect={setExample} />
-        {example ? (
-          <SpecSample caption={t("help.specs.tree.example", { path: example.path })} text={example.text} onClose={() => setExample(null)} />
-        ) : (
+      <HelpSection section={sections.where}>
+        <Split>
+          <PlanningTree caption="help.specs.tree.caption" root={planningTree} />
           <RuleCards rules={whereRules} />
-        )}
-      </Split>
-
-      <HelpSection section={specSections.units}>
-        <SpecUnits units={specUnits} />
+        </Split>
       </HelpSection>
-
-      <HelpSection section={specSections.ids}>
-        <RuleCards rules={idKinds} layout="dense" />
-        <TextList items={idRules} />
+      <HelpSection section={sections.ids}>
+        <RuleCards rules={idKinds} dense />
+        <Note text="help.specs.ids.rule" />
       </HelpSection>
-
-      <HelpSection section={specSections.follows} intro="help.specs.follows.intro">
-        <SpecFlows caption="help.specs.flow.caption" flows={specFlows} lanesById={lanesById} />
-        <Note text="help.specs.follows.noChange" />
+      <HelpSection section={sections.follows}>
+        <Flows flows={specFlows} />
+        <Note text="help.specs.follows.note" />
       </HelpSection>
-
-      <HelpSection section={specSections.stubs} intro="help.specs.stubs.intro">
-        <Strip steps={stubSteps} />
+      <HelpSection section={sections.stubs}>
+        <Steps steps={stubSteps} />
       </HelpSection>
-
-      <HelpSection section={specSections.specLine} intro="help.specs.specLine.intro">
-        <RuleCards rules={specLines} layout="rows" />
-        <SubTitle text="help.specs.specCheck.title" />
-        <Note text="help.specs.specCheck.intro" />
-        <RuleCards rules={specChecks} layout="rows" />
+      <HelpSection section={sections.specLine} intro="help.specs.specLine.intro">
+        <Rows rows={specLines} />
       </HelpSection>
     </>
   );
@@ -151,15 +94,14 @@ function SpecsTab() {
 function TechnicalTab() {
   return (
     <>
-      <HelpSection section={technicalSections.skills} intro="help.skills.intro">
-        <SkillCards skills={skills} />
-        <Note text="help.skills.autonomousNote" />
+      <HelpSection section={sections.skills}>
+        <Rows rows={skills} />
       </HelpSection>
-      <HelpSection section={technicalSections.roles} intro="help.roles.intro">
-        <RoleCards roles={roles} />
+      <HelpSection section={sections.roles} intro="help.roles.intro">
+        <Rows rows={roles} />
       </HelpSection>
-      <HelpSection section={technicalSections.settings} intro="help.settings.intro">
-        <RuleCards rules={settingRules} layout="rows" />
+      <HelpSection section={sections.settings} intro="help.settings.intro">
+        <Rows rows={settings} />
       </HelpSection>
     </>
   );
