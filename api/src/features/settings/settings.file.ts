@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import type { SeloSettings } from "./settings.schema.js";
 
@@ -53,12 +53,15 @@ export function createSettingsFile(path: string): SettingsFile {
       return { state: "ok", root };
     },
     // Replaced whole, atomically: Claude Code reads the file at any time, never half-written.
+    // A symlinked file (a dotfiles manager) is written through its link, with its mode kept: `env` may hold tokens.
     write: (root) => {
-      mkdirSync(dirname(path), { recursive: true });
-      const temp = `${path}.${randomUUID()}.tmp`;
+      const target = existsSync(path) ? realpathSync(path) : path;
+      const mode = existsSync(target) ? statSync(target).mode : undefined;
+      mkdirSync(dirname(target), { recursive: true });
+      const temp = `${target}.${randomUUID()}.tmp`;
       try {
-        writeFileSync(temp, JSON.stringify(root, null, 2) + "\n");
-        renameSync(temp, path);
+        writeFileSync(temp, JSON.stringify(root, null, 2) + "\n", { mode });
+        renameSync(temp, target);
       } catch (err) {
         rmSync(temp, { force: true });
         throw err;

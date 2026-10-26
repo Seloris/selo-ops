@@ -38,7 +38,8 @@ Pages: none · Domain: `settings` (new), `app` · Components: `api`, `web`
 - Unreadable file's position → from V8's message (line and column, or a position, or the end of the text); none for an unexpected token, the window then gives no line and column.
 - A UTF-8 BOM before the JSON → read as no BOM; the file is written back without it.
 - A non-string `SELO_` value → shown as its JSON text, left in the file unless changed.
-- A failed write → `500` problem details naming the OS error; a save with no change writes nothing.
+- A failed read or write → `500` problem details naming the OS error; a save whose changes the file already holds writes nothing.
+- A symlinked settings file → written through its link, its file mode kept (review).
 - Demo settings file → `model`, `permissions` and one `env` key beside the defaults, so that a save shows the other keys kept.
 
 ## Stages

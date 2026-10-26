@@ -1,5 +1,5 @@
 import { mkdtempSync } from "node:fs";
-import { homedir, tmpdir } from "node:os";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
@@ -131,7 +131,7 @@ describe("demo", () => {
     // Assert
     const settings = settingsSchema.parse(res.body);
     expect(settings.state).toBe("ok");
-    expect(settings.path).not.toBe(join(homedir(), ".claude", "settings.json"));
+    expect(settings.path.startsWith(tmpdir())).toBe(true);
     expect(Object.values(settings.values).every((v) => v === null)).toBe(true);
   });
 });

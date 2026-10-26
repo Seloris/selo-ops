@@ -23,7 +23,17 @@ export interface SettingsService {
   save(changes: SettingChanges): SeloSettings;
 }
 
+const messageOf = (err: unknown) => (err instanceof Error ? err.message : String(err));
+
 export function createSettingsService({ file }: { file: SettingsFile }): SettingsService {
+  // A file that cannot be read at all (rights, a folder): its OS error, not a bare 500.
+  const readFile = () => {
+    try {
+      return file.read();
+    } catch (err) {
+      throw new AppError(500, "settings_read_failed", `The settings file could not be read: ${messageOf(err)}`);
+    }
+  };
   const toSettings = (read: SettingsRead): SeloSettings => {
     const env = read.state === "ok" ? (read.root.env as Record<string, unknown> | undefined) : undefined;
     // `settings` BR-02: as the file holds them, a value of another type shown as JSON.
@@ -33,16 +43,17 @@ export function createSettingsService({ file }: { file: SettingsFile }): Setting
   };
 
   return {
-    read: () => toSettings(file.read()),
+    read: () => toSettings(readFile()),
     // `settings` BR-03 and BR-04: the file read again, only the changed keys of `env` touched, the rest left as it is.
     save: (changes) => {
-      const current = file.read();
+      const current = readFile();
       if (current.state === "unreadable") throw new ConflictError("settings_unreadable", "The settings file is unreadable: fix it, then read it again");
-      const changed = Object.entries(changes).filter(([, v]) => v !== undefined);
-      if (changed.length === 0) return toSettings(current);
       const root = current.state === "ok" ? current.root : {};
       // Spread keeps each key's place: a changed key stays where it was, a new one goes last.
       const env: Record<string, unknown> = { ...(root.env as Record<string, unknown> | undefined) };
+      // What the file already holds is no change: nothing to write, not even a re-indented file.
+      const changed = Object.entries(changes).filter(([key, v]) => v !== undefined && v !== (env[key] ?? null));
+      if (changed.length === 0) return toSettings(current);
       for (const [key, value] of changed) {
         if (value === null) delete env[key];
         else env[key] = value;
@@ -50,9 +61,9 @@ export function createSettingsService({ file }: { file: SettingsFile }): Setting
       try {
         file.write({ ...root, env });
       } catch (err) {
-        throw new AppError(500, "settings_write_failed", `The settings file could not be written: ${err instanceof Error ? err.message : String(err)}`);
+        throw new AppError(500, "settings_write_failed", `The settings file could not be written: ${messageOf(err)}`);
       }
-      return toSettings(file.read());
+      return toSettings(readFile());
     },
   };
 }

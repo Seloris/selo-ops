@@ -1,3 +1,4 @@
+import { mkdirSync, rmSync } from "node:fs";
 import request from "supertest";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { settingsSchema } from "../../src/features/settings/settings.schema.js";
@@ -187,6 +188,58 @@ describe("settings routes", () => {
       expect(res.status).toBe(409);
       expect((res.body as ProblemDetails).code).toBe("settings_unreadable");
       expect(ctx.settings.read()).toBe("{ broken");
+    });
+
+    it.each([
+      ["whose root is not an object", "[]"],
+      ["whose env is not an object", '{"env":[]}'],
+    ])("returns 409 and writes nothing for a file %s", async (_case, content) => {
+      // Arrange
+      ctx.settings.write(content);
+
+      // Act
+      const res = await save({ SELO_ROUTING: "on" });
+
+      // Assert
+      expect(res.status).toBe(409);
+      expect(ctx.settings.read()).toBe(content);
+    });
+
+    it("writes nothing when the file already holds the changes", async () => {
+      // Arrange
+      const content = '{"env":{"SELO_ROUTING":"on"},  "model":"opus"}';
+      ctx.settings.write(content);
+
+      // Act
+      const res = await save({ SELO_ROUTING: "on", SELO_COMMIT: null });
+
+      // Assert
+      expect(res.status).toBe(200);
+      expect(ctx.settings.read()).toBe(content);
+    });
+
+    it("writes the file back without its BOM", async () => {
+      // Arrange
+      ctx.settings.write('\uFEFF{"env":{}}');
+
+      // Act
+      await save({ SELO_COMMIT: "auto" });
+
+      // Assert
+      expect(ctx.settings.read()?.startsWith("{")).toBe(true);
+    });
+
+    it("returns 500 with the OS error when the file cannot be read", async () => {
+      // Arrange
+      mkdirSync(ctx.settings.file);
+
+      // Act
+      const res = await save({ SELO_COMMIT: "auto" });
+      rmSync(ctx.settings.file, { recursive: true });
+
+      // Assert
+      expect(res.status).toBe(500);
+      expect((res.body as ProblemDetails).code).toBe("settings_read_failed");
     });
 
     it.each([
