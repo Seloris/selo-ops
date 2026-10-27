@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fichiers modifiés · explorateur</title>
+<meta name="selo:mockup" content="validated">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* selo skin "aurora", copied from the selo plugin (skins/aurora/tokens.css). Do not edit:
+   switch skins with /selo:setup skin {component} {skin}; override variables in overrides.css. */
+:root {
+  --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-size: 15px;
+  --title-size: 34px;
+  --title-weight: 500;
+  --title-tracking: -0.02em;
+  --title-transform: none;
+  --title-style: normal;
+  --label-size: 0.85em;
+  --label-weight: 500;
+  --label-transform: none;
+  --label-tracking: 0;
+  --radius: 20px;
+  --radius-control: 12px;
+  --radius-pill: 999px;
+  --check-radius: 7px;
+  --switch-radius: 999px;
+  --badge-radius: var(--radius-pill);
+  --border-width: 1px;
+  --control-h: 40px;
+  --panel-bg: var(--surface);
+  --panel-border: var(--border-width) solid var(--border);
+  --panel-pad: 32px;
+  --blur: blur(18px) saturate(140%);
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(20,184,166,.28), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.20), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.20), transparent 70%);
+  --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
+  --shadow-control: none;
+  --shadow-pop: 0 24px 60px -12px rgba(0,0,0,.35);
+  --list-gap: 8px;
+  --list-rule: none;
+  --item-pad: 12px 14px;
+  --item-bg: rgba(255,255,255,.55);
+  --item-border: var(--border-width) solid var(--border);
+  --item-rule: var(--item-border);
+  --item-radius: var(--radius-control);
+  --item-shadow: none;
+  --badge-border: 0;
+  --badge-transform: none;
+  --badge-tracking: 0;
+  --btn-border: transparent;
+  --btn-weight: 600;
+  --btn-transform: none;
+  --btn-tracking: 0;
+  --control-bg: rgba(255,255,255,.7);
+  --control-border: var(--border);
+  --control-border-on: var(--accent);
+  --accent-text: #ffffff;
+  --accent-soft: rgba(15,148,136,.12);
+  --accent-soft-text: #0b6b62;
+  --danger-text: #ffffff;
+  --focus: color-mix(in srgb, var(--accent) 35%, transparent);
+  --pop-bg: rgba(255,255,255,.95);
+  --scrim: rgba(15,17,22,.45);
+  --bg: #eef3f4;
+  --surface: rgba(255,255,255,.62);
+  --surface-2: rgba(255,255,255,.8);
+  --border: rgba(15,23,42,.09);
+  --text: #0f172a;
+  --text-muted: #55627a;
+  --accent: #0f9488;
+  --danger: #e11d48;
+  --danger-soft: rgba(225,29,72,.1);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #070b14;
+    --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(45,212,191,.32), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.18), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.28), transparent 70%);
+    --surface: rgba(255,255,255,.06);
+    --surface-2: rgba(255,255,255,.1);
+    --border: rgba(255,255,255,.14);
+    --text: #eef2ff;
+    --text-muted: #a5adc8;
+    --accent: #5eead4;
+    --accent-text: #04201b;
+    --accent-soft: rgba(94,234,212,.14);
+    --accent-soft-text: #a7f3e4;
+    --danger: #fb7185;
+    --danger-soft: rgba(251,113,133,.14);
+    --danger-text: #2a0710;
+    --control-bg: rgba(0,0,0,.25);
+    --item-bg: rgba(255,255,255,.04);
+    --pop-bg: rgba(17,22,36,.92);
+    --scrim: rgba(3,6,12,.55);
+    --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+    color-scheme: dark;
+  }
+}
+
+
+/*
+ * Element recipes: how every skin is meant to be applied. Stack-agnostic, framework-free CSS that
+ * reads the token contract only (see README.md): no literal color, radius, shadow or font.
+ * A stack ports each recipe into its own components (the react-express pack: one shared/ui
+ * component and its CSS Module per element); the class names here only label the recipes.
+ * The same rules render all seven skins: a skin changes the variables, never these rules.
+ */
+
+/* ---------- page ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: var(--bg-image);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 1.5;
+}
+:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* ---------- panel: the page's main surface ---------- */
+
+.panel {
+  display: grid;
+  gap: 28px;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--panel-pad);
+  background: var(--panel-bg);
+  border: var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+
+/* ---------- headings ---------- */
+
+.title {
+  margin: 0;
+  line-height: 1.02;
+  text-wrap: balance;
+  font-family: var(--font-display);
+  font-size: var(--title-size);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-tracking);
+  text-transform: var(--title-transform);
+  font-style: var(--title-style);
+}
+.subtitle { margin: 0; color: var(--text-muted); font-size: 0.9em; font-variant-numeric: tabular-nums; }
+
+/* ---------- field: label, control, error ---------- */
+
+.field { display: grid; gap: 6px; min-width: 0; }
+.label {
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  text-transform: var(--label-transform);
+  letter-spacing: var(--label-tracking);
+  color: var(--text-muted);
+}
+.input, .select {
+  width: 100%;
+  height: var(--control-h);
+  margin: 0;
+  padding: 0 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input::placeholder { color: var(--text-muted); opacity: 0.75; }
+.input:focus-visible, .select:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus); }
+.input[aria-invalid="true"] { border-color: var(--danger); }
+.error { margin: 8px 0 0; color: var(--danger); font-size: 0.85em; }
+
+/* search: an input with a leading icon (16px, currentColor) */
+.search { position: relative; }
+.search svg {
+  position: absolute; left: 12px; top: 50%;
+  width: 16px; height: 16px; transform: translateY(-50%);
+  color: var(--text-muted); pointer-events: none;
+}
+.search .input { padding-left: 36px; }
+
+/* select: the native control restyled, its chevron drawn by the wrapper */
+.select-wrap { position: relative; }
+.select { padding-right: 34px; cursor: pointer; }
+.select-wrap::after {
+  content: "";
+  position: absolute; right: 14px; top: 50%;
+  width: 7px; height: 7px; pointer-events: none;
+  border-right: 1.5px solid var(--text-muted);
+  border-bottom: 1.5px solid var(--text-muted);
+  transform: translateY(-70%) rotate(45deg);
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: var(--control-h);
+  padding: 0 18px;
+  white-space: nowrap;
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--btn-weight);
+  text-transform: var(--btn-transform);
+  letter-spacing: var(--btn-tracking);
+  border: var(--border-width) solid var(--btn-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  transition: transform 0.12s, filter 0.12s, background-color 0.12s, color 0.12s;
+}
+/* restores the page's ring: .btn's own shadow has the same specificity and loads later */
+.btn:focus-visible { box-shadow: 0 0 0 3px var(--focus); }
+.btn:active { transform: translate(1px, 1px); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--accent); color: var(--accent-text); }
+.btn-danger { background: var(--danger); color: var(--danger-text); }
+.btn-primary:hover:not(:disabled), .btn-danger:hover:not(:disabled) { filter: brightness(1.07); }
+.btn-quiet { background: var(--surface-2); color: var(--text); }
+/* toward the text color: darker on a light skin, lighter on a dark one */
+.btn-quiet:hover:not(:disabled) { background: color-mix(in srgb, var(--surface-2), var(--text) 8%); }
+/* ghost: a row action (delete), quiet until hovered */
+.btn-ghost {
+  height: auto; padding: 6px 10px;
+  font-size: 0.86em; font-weight: 500;
+  background: transparent; color: var(--text-muted);
+  border-color: transparent; box-shadow: none;
+}
+.btn-ghost:hover { color: var(--danger); background: var(--danger-soft); }
+.btn-ghost svg { width: 15px; height: 15px; }
+
+/* ---------- switch: a checkbox with role="switch" ---------- */
+
+.switch { display: inline-flex; align-items: center; gap: 10px; height: var(--control-h); cursor: pointer; user-select: none; font-size: 0.92em; }
+.switch input {
+  position: relative; flex: none;
+  width: 38px; height: 22px; margin: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--switch-radius);
+  transition: background-color 0.15s;
+}
+.switch input::before {
+  content: "";
+  position: absolute; top: 2px; left: 2px;
+  width: calc(18px - 2 * var(--border-width));
+  height: calc(18px - 2 * var(--border-width));
+  border-radius: var(--switch-radius);
+  background: var(--text-muted);
+  transition: transform 0.15s;
+}
+.switch input:checked { background: var(--accent); border-color: var(--control-border-on); }
+.switch input:checked::before { transform: translateX(16px); background: var(--accent-text); }
+.switch input:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- list and its rows ---------- */
+
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--list-gap); border-top: var(--list-rule); }
+/* wraps: at narrow widths the tag and the row action go to a second line instead of widening the page */
+.item {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  padding: var(--item-pad);
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-bottom: var(--item-rule);
+  border-radius: var(--item-radius);
+  box-shadow: var(--item-shadow);
+}
+/* the 120px basis keeps the text readable: the row's last items wrap before it narrows below it */
+.item-text { flex: 1 1 120px; min-width: 0; overflow-wrap: anywhere; }
+.item.is-done .item-text { color: var(--text-muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.empty {
+  padding: 28px 16px; text-align: center; color: var(--text-muted);
+  border: var(--border-width) dashed var(--border);
+  border-radius: var(--item-radius);
+}
+
+/* checkbox: the native control restyled, its tick drawn in CSS */
+.check {
+  flex: none; display: grid; place-items: center;
+  width: 20px; height: 20px; margin: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--check-radius);
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.check::after {
+  content: "";
+  width: 5px; height: 10px;
+  border: solid var(--accent-text); border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg) scale(0);
+  transition: transform 0.12s;
+}
+.check:checked { background: var(--accent); border-color: var(--control-border-on); }
+.check:checked::after { transform: translateY(-1px) rotate(45deg) scale(1); }
+.check:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- badge: a tag ---------- */
+
+.badge {
+  flex: none;
+  padding: 1px 10px;
+  line-height: 1.7;
+  font-size: 0.78em;
+  font-weight: 600;
+  text-transform: var(--badge-transform);
+  letter-spacing: var(--badge-tracking);
+  color: var(--accent-soft-text);
+  background: var(--accent-soft);
+  border: var(--badge-border);
+  border-radius: var(--badge-radius);
+}
+
+/* ---------- dialog: a native <dialog> opened with showModal() ---------- */
+
+.dialog {
+  width: min(400px, calc(100% - 32px));
+  padding: 24px;
+  color: var(--text);
+  background: var(--pop-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+.dialog::backdrop { background: var(--scrim); }
+.dialog[open] { display: grid; gap: 8px; animation: fade 0.15s ease-out; }
+.dialog h2 { margin: 0; font-family: var(--font-display); font-size: 1.3em; font-weight: var(--title-weight); text-transform: var(--title-transform); line-height: 1.2; }
+.dialog p { margin: 0; color: var(--text-muted); }
+.actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+@keyframes fade { from { opacity: 0; } }
+
+
+/* This application's own values for the skin's variables, loaded after skin.css (the selo plugin's
+   skins/README.md lists them). A dark-only value goes in a @media (prefers-color-scheme: dark) block.
+
+   Added tokens:
+   --warn, --warn-soft   amber, the second state colour the skin lacks (rose is its --danger)
+   --done                green, the dot of a finished job (sessions-live FR-10)
+   --font-mono           commands, branches, commit subjects
+   --working             sky blue, the pulsing dot of a running session; no lane's colour, not --mark's blue (sessions-live FR-10)
+   --lane-fastlane, --lane-pilot   the lanes on the help page: lime, violet (help FR-11)
+   --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
+   --lane-free           a free request: slate; the four --lane-* also colour the type of work of a session (sessions-live FR-29)
+   --lane-mockup, --lane-iterate   mockup first and the fastlane's iterate mode, beside the lanes: fuchsia, orange (help FR-11, sessions-live FR-29); orange, not --warn's amber
+   --mark                a control that holds something of the person's (the session's note button): blue
+   --flag, --flag-soft   bright yellow, the flag of a flagged session (sessions-live FR-42); not --warn's amber
+   --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage, --hue-next, --hue-trail   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia, violet, lime; --hue-next is also the next action's chip and button in the list (sessions-live FR-10)
+
+   --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
+   --bp-draft, --bp-ready, --bp-building, --bp-review, --bp-merging, --bp-done, --bp-legacy   a blueprint's state, the same in bars, legends, tags and tracks: lime, cyan, blue, violet, fuchsia, green, grey (projects FR-14); none is --mark, amber or rose
+   --delta-add, --delta-change, --delta-remove   a spec delta's lines added, changed, removed, in figures, bars and signs, and a file diff's added and removed lines: green, yellow, red; no state colour
+   --hue-progress, --hue-blueprints, --hue-specs, --hue-ideas, --hue-debt   the icons of the projects page's sections: orange, teal, emerald, sky, stone
+   --spec-page, --spec-domain, --spec-blueprint   a page spec, a domain sheet, a blueprint, wherever one shows (app FR-04): indigo, pink, teal like the blueprint lane
+   The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
+   of that scheme, so the choice wins over the system's prefers-color-scheme. */
+:root {
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+  --warn: #d97706;
+  --done: #16a34a;
+  --warn-soft: rgba(217,119,6,.15);
+  --flag: #ca8a04;
+  --flag-soft: rgba(202,138,4,.16);
+  --working: #0284c7;
+  --mark: #2563eb;
+  --lane-fastlane: #4d7c0f;
+  --lane-pilot: #7c3aed;
+  --lane-blueprint: #0f766e;
+  --lane-free: #475569;
+  --lane-mockup: #c026d3;
+  --lane-iterate: #c2410c;
+  --hue-close: #047857;
+  --hue-recap: #be185d;
+  --hue-agents: #0e7490;
+  --hue-files: #4338ca;
+  --hue-usage: #a21caf;
+  --hue-next: #7c3aed;
+  --hue-trail: #4d7c0f;
+  --kind-input: #2563eb;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #7c3aed;
+  --kind-output: #16a34a;
+    --bp-draft: #65a30d;
+    --bp-ready: #0891b2;
+    --bp-building: #1d4ed8;
+    --bp-review: #7c3aed;
+    --bp-merging: #c026d3;
+    --bp-done: #16a34a;
+    --bp-legacy: #94a3b8;
+    --delta-add: #16a34a;
+    --delta-change: #ca8a04;
+    --delta-remove: #e11d48;
+    --hue-progress: #ea580c;
+    --hue-blueprints: #0d9488;
+    --hue-specs: #047857;
+    --hue-ideas: #0369a1;
+    --hue-debt: #78716c;
+    --spec-page: #4f46e5;
+    --spec-domain: #db2777;
+    --spec-blueprint: #0f766e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --warn: #fbbf24;
+    --done: #4ade80;
+    --warn-soft: rgba(251,191,36,.16);
+    --flag: #facc15;
+    --flag-soft: rgba(250,204,21,.16);
+    --working: #38bdf8;
+    --mark: #93c5fd;
+    --lane-fastlane: #a3e635;
+    --lane-pilot: #c4b5fd;
+    --lane-blueprint: #2dd4bf;
+    --lane-free: #94a3b8;
+    --lane-mockup: #f0abfc;
+    --lane-iterate: #fb923c;
+    --hue-close: #6ee7b7;
+    --hue-recap: #f9a8d4;
+    --hue-agents: #67e8f9;
+    --hue-files: #a5b4fc;
+    --hue-usage: #f0abfc;
+    --hue-next: #c4b5fd;
+    --hue-trail: #bef264;
+    --kind-input: #60a5fa;
+    --kind-cache-read: #a8a29e;
+    --kind-cache-write: #a78bfa;
+    --kind-output: #4ade80;
+    --bp-draft: #a3e635;
+    --bp-ready: #22d3ee;
+    --bp-building: #60a5fa;
+    --bp-review: #a78bfa;
+    --bp-merging: #e879f9;
+    --bp-done: #4ade80;
+    --bp-legacy: #64748b;
+    --delta-add: #4ade80;
+    --delta-change: #facc15;
+    --delta-remove: #fb7185;
+    --hue-progress: #fdba74;
+    --hue-blueprints: #5eead4;
+    --hue-specs: #6ee7b7;
+    --hue-ideas: #7dd3fc;
+    --hue-debt: #d6d3d1;
+    --spec-page: #a5b4fc;
+    --spec-domain: #f9a8d4;
+    --spec-blueprint: #2dd4bf;
+  }
+}
+
+:root[data-theme="light"] {
+  --bg: #eef3f4;
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(20,184,166,.28), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.20), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.20), transparent 70%);
+  --surface: rgba(255,255,255,.62);
+  --surface-2: rgba(255,255,255,.8);
+  --border: rgba(15,23,42,.09);
+  --text: #0f172a;
+  --text-muted: #55627a;
+  --accent: #0f9488;
+  --accent-text: #ffffff;
+  --accent-soft: rgba(15,148,136,.12);
+  --accent-soft-text: #0b6b62;
+  --danger: #e11d48;
+  --danger-soft: rgba(225,29,72,.1);
+  --danger-text: #ffffff;
+  --control-bg: rgba(255,255,255,.7);
+  --item-bg: rgba(255,255,255,.55);
+  --pop-bg: rgba(255,255,255,.95);
+  --scrim: rgba(15,17,22,.45);
+  --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
+  --warn: #d97706;
+  --done: #16a34a;
+  --warn-soft: rgba(217,119,6,.15);
+  --flag: #ca8a04;
+  --flag-soft: rgba(202,138,4,.16);
+  --working: #0284c7;
+  --mark: #2563eb;
+  --lane-fastlane: #4d7c0f;
+  --lane-pilot: #7c3aed;
+  --lane-blueprint: #0f766e;
+  --lane-free: #475569;
+  --lane-mockup: #c026d3;
+  --lane-iterate: #c2410c;
+  --hue-close: #047857;
+  --hue-recap: #be185d;
+  --hue-agents: #0e7490;
+  --hue-files: #4338ca;
+  --hue-usage: #a21caf;
+  --hue-next: #7c3aed;
+  --hue-trail: #4d7c0f;
+  --kind-input: #2563eb;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #7c3aed;
+  --kind-output: #16a34a;
+  --bp-draft: #65a30d;
+  --bp-ready: #0891b2;
+  --bp-building: #1d4ed8;
+  --bp-review: #7c3aed;
+  --bp-merging: #c026d3;
+  --bp-done: #16a34a;
+  --bp-legacy: #94a3b8;
+  --delta-add: #16a34a;
+  --delta-change: #ca8a04;
+  --delta-remove: #e11d48;
+  --hue-progress: #ea580c;
+  --hue-blueprints: #0d9488;
+  --hue-specs: #047857;
+  --hue-ideas: #0369a1;
+  --hue-debt: #78716c;
+  --spec-page: #4f46e5;
+  --spec-domain: #db2777;
+  --spec-blueprint: #0f766e;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #070b14;
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(45,212,191,.32), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.18), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.28), transparent 70%);
+  --surface: rgba(255,255,255,.06);
+  --surface-2: rgba(255,255,255,.1);
+  --border: rgba(255,255,255,.14);
+  --text: #eef2ff;
+  --text-muted: #a5adc8;
+  --accent: #5eead4;
+  --accent-text: #04201b;
+  --accent-soft: rgba(94,234,212,.14);
+  --accent-soft-text: #a7f3e4;
+  --danger: #fb7185;
+  --danger-soft: rgba(251,113,133,.14);
+  --danger-text: #2a0710;
+  --control-bg: rgba(0,0,0,.25);
+  --item-bg: rgba(255,255,255,.04);
+  --pop-bg: rgba(17,22,36,.92);
+  --scrim: rgba(3,6,12,.55);
+  --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+  --warn: #fbbf24;
+  --done: #4ade80;
+  --warn-soft: rgba(251,191,36,.16);
+  --flag: #facc15;
+  --flag-soft: rgba(250,204,21,.16);
+  --working: #38bdf8;
+  --mark: #93c5fd;
+  --lane-fastlane: #a3e635;
+  --lane-pilot: #c4b5fd;
+  --lane-blueprint: #2dd4bf;
+  --lane-free: #94a3b8;
+  --lane-mockup: #f0abfc;
+  --lane-iterate: #fb923c;
+  --hue-close: #6ee7b7;
+  --hue-recap: #f9a8d4;
+  --hue-agents: #67e8f9;
+  --hue-files: #a5b4fc;
+  --hue-usage: #f0abfc;
+  --hue-next: #c4b5fd;
+  --hue-trail: #bef264;
+  --kind-input: #60a5fa;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #a78bfa;
+  --kind-output: #4ade80;
+  --bp-draft: #a3e635;
+  --bp-ready: #22d3ee;
+  --bp-building: #60a5fa;
+  --bp-review: #a78bfa;
+  --bp-merging: #e879f9;
+  --bp-done: #4ade80;
+  --bp-legacy: #64748b;
+  --delta-add: #4ade80;
+  --delta-change: #facc15;
+  --delta-remove: #fb7185;
+  --hue-progress: #fdba74;
+  --hue-blueprints: #5eead4;
+  --hue-specs: #6ee7b7;
+  --hue-ideas: #7dd3fc;
+  --hue-debt: #d6d3d1;
+  --spec-page: #a5b4fc;
+  --spec-domain: #f9a8d4;
+  --spec-blueprint: #2dd4bf;
+  color-scheme: dark;
+}
+
+
+/* Mockup layout */
+body { padding: 24px 16px 48px; }
+.wrap { max-width: 1360px; margin: 0 auto; display: grid; gap: 28px; }
+.wrap > h1 { margin: 0; font-size: 26px; font-weight: 500; }
+.lead { margin: -16px 0 0; color: var(--text-muted); max-width: 860px; }
+.plate { background: var(--surface); border: var(--panel-border); border-radius: var(--radius); padding: 20px; backdrop-filter: var(--blur); }
+.plate h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
+.plate .note { margin: 0 0 14px; color: var(--text-muted); font-size: 0.9em; max-width: 900px; }
+.row-plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; align-items: start; }
+.tag { margin: 0 0 6px; font-size: 0.8em; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.scroller { overflow-x: auto; padding-bottom: 6px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 12px 0 0; color: var(--text-muted); font-size: 0.86em; }
+.legend b { color: var(--text); font-weight: 600; }
+
+/* The detail's frame (SessionDetail.module.css): header, then the sections. */
+.detail { display: flex; flex-direction: column; background: var(--surface); border: var(--panel-border); border-radius: var(--radius); overflow: hidden; }
+.detail.side { width: 520px; flex: none; }
+.detail.phone { width: 360px; flex: none; }
+.detail.full { width: 1240px; min-height: 760px; }
+.dhead { display: flex; flex-direction: column; gap: 8px; padding: 14px 20px 12px; border-bottom: var(--border-width) solid var(--border); }
+.drow { display: flex; align-items: flex-start; gap: 8px; }
+.state { display: flex; flex: 1; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
+.badge { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 10px; font-size: 0.78em; font-weight: 600; border-radius: var(--radius-pill); color: var(--working); background: color-mix(in srgb, var(--working) 14%, transparent); }
+.badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .3; transform: scale(.7); } }
+.iconbtn { display: inline-grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: var(--radius-control); background: none; color: var(--text-muted); cursor: pointer; }
+.iconbtn:hover { background: var(--surface-2); color: var(--text); }
+.iconbtn svg { width: 15px; height: 15px; }
+.dtitle { margin: 0; font-size: 1.12em; font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
+.dmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.85em; color: var(--text-muted); }
+.mono { font-family: var(--font-mono); font-size: 0.93em; }
+.lane-bp { color: var(--lane-blueprint); }
+.dactions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; font: inherit; font-size: 0.9em; font-weight: 600; border: var(--border-width) solid transparent; border-radius: var(--radius-control); cursor: pointer; }
+.btn svg { width: 14px; height: 14px; }
+.btn-primary { background: var(--accent); color: var(--accent-text); }
+.btn-quiet { background: var(--surface-2); color: var(--text); }
+.btn-warn { margin-left: auto; background: var(--warn-soft); color: var(--warn); }
+.dbody { flex: 1; overflow: auto; padding: 0 20px 16px; }
+
+/* A section and its heading (SessionDetail.module.css). */
+.section { padding: 12px 0; border-bottom: var(--border-width) solid var(--border); }
+.section:last-child { border-bottom: 0; }
+.stitle { display: flex; align-items: center; gap: 8px; margin: 0; padding: 2px; font-size: 0.83em; font-weight: 600; }
+.chip { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: calc(var(--radius-control) / 2); color: var(--hue); background: color-mix(in srgb, var(--hue) 16%, transparent); }
+.chip svg { width: 13px; height: 13px; }
+.h-files { --hue: var(--hue-files); } .h-usage { --hue: var(--hue-usage); } .h-agents { --hue: var(--hue-agents); } .h-trail { --hue: var(--hue-trail); } .h-muted { --hue: var(--text-muted); }
+.count { padding: 0 7px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+.summary { flex: 1; min-width: 0; overflow: hidden; color: var(--text-muted); font-weight: 400; text-overflow: ellipsis; white-space: nowrap; }
+.fold { margin-left: auto; color: var(--text-muted); display: inline-flex; }
+.fold svg { width: 14px; height: 14px; }
+.sbody { margin-top: 8px; }
+svg.i { width: 14px; height: 14px; flex: none; }
+
+/* ---- What changes: the explorer ---- */
+/* The totals line under the heading: files, lines added and removed, the uncommitted ones. */
+.totals { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0 0 8px; font-size: 0.85em; color: var(--text-muted); }
+.plus { color: var(--delta-add); font-variant-numeric: tabular-nums; }
+.minus { color: var(--delta-remove); font-variant-numeric: tabular-nums; }
+.dirty { display: inline-flex; align-items: center; gap: 5px; }
+.dirty::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
+
+/* The tree (FileTree.module.css), plus a status letter and the line counts at the end of each file row. */
+.tree, .tree ul { margin: 0; padding: 0; list-style: none; }
+.tree { font-family: var(--font-mono); font-size: 0.85em; line-height: 1.5; }
+.tree ul { margin-left: 7px; padding-left: 12px; border-left: var(--border-width) solid var(--border); }
+.node { display: flex; align-items: center; gap: 6px; min-width: 0; width: 100%; padding: 2px 4px; border: 0; border-radius: var(--radius-control); background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.node:hover { background: var(--surface-2); }
+.node svg { flex: none; width: 14px; height: 14px; color: var(--text-muted); }
+.node .fold-ic { color: var(--text-muted); }
+.node .folder-ic { color: var(--hue-files); }
+.node.file { padding-left: 24px; }
+.node.file.selected { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--hue-files); }
+.node.file.open .name { font-weight: 600; }
+.name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.node .n { flex: none; margin-left: auto; color: var(--text-muted); font-size: 0.9em; }
+.stat { flex: none; margin-left: auto; display: inline-flex; gap: 6px; font-size: 0.9em; font-variant-numeric: tabular-nums; }
+.st { flex: none; width: 14px; text-align: center; font-size: 0.85em; font-weight: 600; }
+.st-m { color: var(--delta-change); } .st-a { color: var(--delta-add); } .st-d { color: var(--delta-remove); }
+
+/* The viewer: the file's tabs, its header, its parts. */
+.viewer { display: flex; flex-direction: column; min-width: 0; border: var(--border-width) solid var(--border); border-radius: var(--radius-control); background: var(--surface-2); overflow: hidden; }
+.tabs { display: flex; align-items: stretch; gap: 2px; padding: 6px 6px 0; overflow-x: auto; border-bottom: var(--border-width) solid var(--border); scrollbar-width: none; }
+.tab { display: inline-flex; align-items: center; gap: 6px; flex: none; height: 30px; padding: 0 6px 0 10px; border: var(--border-width) solid transparent; border-bottom: 0; border-radius: var(--radius-control) var(--radius-control) 0 0; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.8em; white-space: nowrap; cursor: pointer; background: none; }
+.tab svg { width: 13px; height: 13px; }
+.tab .x { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; color: var(--text-muted); }
+.tab:hover { color: var(--text); }
+.tab.on { color: var(--text); background: var(--surface); border-color: var(--border); margin-bottom: -1px; }
+.tab.on .x:hover { background: color-mix(in srgb, var(--text) 10%, transparent); }
+.tab.dirty-tab .name::after { content: " •"; color: var(--warn); }
+.vhead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 10px; border-bottom: var(--border-width) solid var(--border); font-size: 0.85em; }
+.crumbs { display: flex; align-items: center; gap: 4px; min-width: 0; flex: 1 1 240px; font-family: var(--font-mono); font-size: 0.93em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.crumbs .sep { color: var(--text-muted); }
+.crumbs .leaf { font-weight: 600; }
+.crumbs svg { width: 14px; height: 14px; color: var(--text-muted); flex: none; }
+.vstat { display: inline-flex; gap: 8px; font-family: var(--font-mono); font-size: 0.93em; }
+.seg { display: inline-flex; padding: 2px; border-radius: var(--radius-control); background: var(--control-bg); border: var(--border-width) solid var(--control-border); }
+.seg button { height: 22px; padding: 0 9px; border: 0; border-radius: calc(var(--radius-control) - 3px); background: none; color: var(--text-muted); font: inherit; font-size: 0.86em; font-weight: 500; cursor: pointer; }
+.seg button.on { background: var(--surface); color: var(--text); }
+.nav { display: inline-flex; align-items: center; gap: 2px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.nav .iconbtn { width: 26px; height: 26px; }
+.vhead .iconbtn { width: 26px; height: 26px; }
+/* The parts' jump bar: one pill per commit, then « Non commité »; the one in view is marked. */
+.parts { display: flex; gap: 6px; padding: 8px 10px; overflow-x: auto; border-bottom: var(--border-width) solid var(--border); scrollbar-width: none; }
+.part { display: inline-flex; flex: none; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border: var(--border-width) solid var(--border); border-radius: var(--radius-pill); background: none; color: var(--text-muted); font: inherit; font-size: 0.78em; cursor: pointer; }
+.part svg { width: 12px; height: 12px; }
+.part .sha { font-family: var(--font-mono); }
+.part .subj { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); }
+.part.on { color: var(--text); border-color: color-mix(in srgb, var(--hue-files) 50%, transparent); background: color-mix(in srgb, var(--hue-files) 10%, transparent); }
+.part.unc { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.part .pm { font-family: var(--font-mono); font-size: 0.95em; }
+
+/* The code: each part under a sticky title, lines with their two line numbers (old, new), long lines scrolling inside. */
+.code { flex: 1; overflow: auto; min-height: 0; }
+.ptitle { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--pop-bg); border-bottom: var(--border-width) solid var(--border); font-size: 0.82em; font-weight: 600; }
+.ptitle svg { width: 13px; height: 13px; color: var(--text-muted); }
+.ptitle .sha { font-family: var(--font-mono); color: var(--text-muted); font-weight: 500; }
+.ptitle .subj { font-family: var(--font-mono); font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ptitle .pm { margin-left: auto; font-family: var(--font-mono); font-weight: 500; flex: none; }
+.ptitle .pm .plus { margin-right: 6px; }
+.notice { display: flex; align-items: flex-start; gap: 6px; margin: 0; padding: 6px 10px; color: var(--text-muted); font-size: 0.8em; }
+.notice svg { width: 13px; height: 13px; margin-top: 2px; flex: none; }
+.hunk-note { margin: 0; padding: 8px 10px; color: var(--text-muted); font-size: 0.82em; }
+table.d { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.78em; line-height: 1.55; }
+table.d td { padding: 0 10px 0 0; white-space: pre; vertical-align: top; }
+td.ln { width: 1%; min-width: 34px; padding: 0 6px; text-align: right; color: var(--text-muted); opacity: .7; user-select: none; font-variant-numeric: tabular-nums; border-right: var(--border-width) solid var(--border); }
+td.ln + td.ln { border-right: 0; }
+td.sg { width: 1%; padding: 0 6px; user-select: none; color: var(--text-muted); border-right: var(--border-width) solid var(--border); }
+tr.add td { background: color-mix(in srgb, var(--delta-add) 14%, transparent); color: var(--delta-add); }
+tr.add td.ln { background: color-mix(in srgb, var(--delta-add) 22%, transparent); }
+tr.remove td { background: color-mix(in srgb, var(--delta-remove) 14%, transparent); color: var(--delta-remove); }
+tr.remove td.ln { background: color-mix(in srgb, var(--delta-remove) 22%, transparent); }
+tr.hunk td { color: var(--hue-files); background: color-mix(in srgb, var(--hue-files) 8%, transparent); }
+tr.ctx td { color: var(--text); }
+tr.fold-ln td { color: var(--text-muted); font-style: italic; cursor: pointer; }
+tr.fold-ln td:hover { background: var(--surface-2); }
+.code.sbs table.d td.ln { min-width: 30px; }
+.cut { margin: 0; padding: 6px 10px; color: var(--text-muted); font-size: 0.8em; border-top: var(--border-width) dashed var(--border); }
+
+/* The IDE layout in full screen: the explorer beside the viewer, the viewer as tall as the screen allows. */
+.ide { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 0; height: 620px; border: var(--border-width) solid var(--border); border-radius: var(--radius-control); overflow: hidden; background: var(--item-bg); }
+.ide .explorer { display: flex; flex-direction: column; min-width: 0; border-right: var(--border-width) solid var(--border); }
+.ide .explorer .xhead { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: var(--border-width) solid var(--border); font-size: 0.83em; font-weight: 600; }
+.ide .explorer .xhead .count { font-weight: 500; }
+.ide .explorer .xhead .iconbtn { width: 26px; height: 26px; margin-left: auto; }
+.ide .explorer .xhead .iconbtn + .iconbtn { margin-left: 0; }
+.ide .explorer .xbody { flex: 1; overflow: auto; padding: 6px 6px; }
+.ide .explorer .xfoot { padding: 8px 12px; border-top: var(--border-width) solid var(--border); font-size: 0.82em; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+.ide .viewer { border: 0; border-radius: 0; background: transparent; }
+.ide .viewer .tab.on { background: var(--surface-2); }
+.grip { position: relative; }
+.grip::after { content: ""; position: absolute; top: 50%; right: -1px; width: 3px; height: 36px; transform: translateY(-50%); border-radius: var(--radius-pill); background: var(--border); }
+.filter { display: flex; align-items: center; gap: 6px; margin: 2px 4px 6px; height: 28px; padding: 0 8px; border: var(--border-width) solid var(--control-border); border-radius: var(--radius-control); background: var(--control-bg); color: var(--text-muted); font-size: 0.82em; }
+.filter svg { width: 13px; height: 13px; }
+.kbd { display: inline-block; padding: 0 5px; border: var(--border-width) solid var(--border); border-bottom-width: 2px; border-radius: 5px; font-family: var(--font-mono); font-size: 0.85em; line-height: 1.5; color: var(--text-muted); }
+
+/* States */
+.skel { display: grid; gap: 8px; padding: 12px 10px; }
+.skel i { display: block; height: 10px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--text-muted) 18%, transparent); animation: shimmer 1.2s ease-in-out infinite; }
+.skel i:nth-child(2) { width: 85%; } .skel i:nth-child(3) { width: 60%; } .skel i:nth-child(4) { width: 92%; } .skel i:nth-child(5) { width: 40%; }
+@keyframes shimmer { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.empty { padding: 28px 16px; text-align: center; color: var(--text-muted); font-size: 0.88em; border: var(--border-width) dashed var(--border); border-radius: var(--item-radius); margin: 10px; }
+.empty svg { width: 22px; height: 22px; display: block; margin: 0 auto 8px; opacity: .7; }
+.error { display: flex; gap: 8px; align-items: flex-start; margin: 10px; padding: 10px 12px; border-radius: var(--radius-control); background: var(--danger-soft); color: var(--danger); font-size: 0.86em; }
+.error svg { width: 15px; height: 15px; flex: none; margin-top: 2px; }
+.error .btn { margin-left: auto; height: 26px; padding: 0 10px; font-size: 0.9em; background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+.states { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.states .viewer { height: 230px; }
+
+/* Side panel and phone: the section shows the tree, or the viewer in its place. */
+.detail.side .viewer, .detail.phone .viewer { height: 440px; }
+.detail.phone .vhead .seg { display: none; }
+.detail.phone .crumbs { flex-basis: 100%; }
+.detail.phone .tab { padding-left: 8px; }
+.detail.phone .tree .stat { gap: 4px; }
+.back { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 8px 0 4px; border: 0; border-radius: var(--radius-control); background: none; color: var(--text-muted); font: inherit; font-size: 0.86em; cursor: pointer; }
+.back:hover { background: var(--surface); color: var(--text); }
+.back svg { width: 14px; height: 14px; }
+
+/* The window (shared/ui Modal: a large native dialog on --pop-bg, the page behind it under --scrim). */
+.scene { position: relative; width: 1280px; min-height: 780px; padding: 36px 28px; border-radius: var(--radius-control); background: var(--bg); background-image: var(--bg-image); overflow: hidden; }
+.scene::before { content: ""; position: absolute; inset: 0; background: var(--scrim); }
+.behind { position: absolute; top: 14px; left: 28px; display: flex; gap: 10px; align-items: center; opacity: .5; font-size: 0.9em; }
+.modal { position: relative; display: flex; flex-direction: column; width: 100%; height: 708px; background: var(--pop-bg); border: var(--border-width) solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-pop); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); overflow: hidden; }
+.mhead { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: var(--border-width) solid var(--border); }
+.chip.big { width: 30px; height: 30px; border-radius: calc(var(--radius-control) / 1.5); }
+.chip.big svg { width: 16px; height: 16px; }
+.mtitles { flex: 1; min-width: 0; }
+.mtitle { margin: 0; font-family: var(--font-display); font-size: 1.15em; font-weight: var(--title-weight); line-height: 1.2; }
+.msub { display: flex; align-items: center; gap: 8px; min-width: 0; margin-top: 2px; color: var(--text-muted); font-size: 0.85em; }
+.msub .req { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msub .sep { opacity: .6; }
+.mtotals { display: inline-flex; align-items: center; gap: 10px; font-size: 0.88em; font-variant-numeric: tabular-nums; }
+.btn-sm { height: 30px; padding: 0 12px; font-size: 0.86em; }
+.btn-sm .kbd { margin-left: 2px; }
+.modal .ide { flex: 1; height: auto; min-height: 0; border: 0; border-radius: 0; background: transparent; }
+.modal .ide .viewer { background: transparent; }
+.modal .ide .viewer .tab.on { background: var(--surface-2); }
+/* The section's button that opens the window. */
+.open-row { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; }
+.open-row .hint { color: var(--text-muted); font-size: 0.82em; }
+/* 360 px: the window covers the screen. */
+.phone-modal { width: 360px; height: 640px; border-radius: 0; border: 0; }
+.phone-modal .mhead { padding: 12px 12px 10px; gap: 10px; }
+.phone-modal .mtitle { font-size: 1.05em; }
+.phone-modal .xbody { flex: 1; overflow: auto; }
+.phone-modal .vhead .seg { display: none; }
+.phone-modal .tree .stat { gap: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Fichiers modifiés : une fenêtre à part, façon IDE</h1>
+<p class="lead">Dans le détail, « Fichiers modifiés » reste un arbre, enrichi du statut (M, A, D) et des lignes ajoutées / retirées de chaque fichier. Un clic sur un fichier, ou « Explorer », ouvre une fenêtre dédiée par-dessus la page, la même quel que soit l’endroit d’où on vient (panneau latéral ou plein écran) : l’explorateur à gauche, la visionneuse de diff à droite, des onglets, les numéros de lignes, la barre des parties. Le diff ne s’empile plus sous l’arbre. Échap ou « Fermer » revient au détail.</p>
+
+<!-- ============ 1 · THE SECTION IN THE DETAIL ============ -->
+<section class="plate">
+<h2>1 · Dans le détail (panneau latéral, 520 px) : l’arbre, et un bouton pour ouvrir la fenêtre</h2>
+<p class="note">La section garde sa place et son pli. Son titre donne les totaux ; sous lui, l’arbre avec les compteurs par fichier et le bouton « Explorer » qui ouvre la fenêtre sur le premier fichier. Un clic sur un fichier ouvre la fenêtre directement sur lui. En plein écran, la carte est la même, sans diff en dessous.</p>
+<div class="scroller">
+<div class="detail side">
+  <div class="dbody" style="padding-top:4px">
+    <div class="section"><h3 class="stitle"><span class="chip h-trail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v16"/><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M11 6h9M11 12h7M11 18h9"/></svg></span>Déroulé du tour <span class="count">5</span><span class="summary">1 min à t'attendre</span><span class="fold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></h3></div>
+    <div class="section">
+      <h3 class="stitle"><span class="chip h-files"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>Fichiers modifiés <span class="count">3</span><span class="summary"><span class="plus">+41</span> <span class="minus">−9</span> · 2 non commités</span><span class="fold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></h3>
+      <div class="sbody">
+        <div class="open-row"><button class="btn btn-quiet btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M21 3l-7 7M10 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/></svg>Explorer</button><span class="hint">ou clique un fichier</span></div>
+        <ul class="tree">
+          <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">web/src</span><span class="n">3</span></button>
+            <ul>
+              <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">features/sessions</span><span class="n">2</span></button>
+                <ul>
+                  <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">pages</span><span class="n">1</span></button>
+                    <ul><li><button class="node file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg><span class="name">SessionsLivePage.tsx</span><span class="stat"><span class="plus">+6</span><span class="minus">−2</span></span><span class="st st-m" title="Modifié">M</span></button></li></ul>
+                  </li>
+                  <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">ui</span><span class="n">1</span></button>
+                    <ul><li><button class="node file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg><span class="name">SessionRow.tsx</span><span class="stat"><span class="plus">+27</span><span class="minus">−7</span></span><span class="st st-m" title="Modifié">M</span></button></li></ul>
+                  </li>
+                </ul>
+              </li>
+              <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">shared/lib/i18n</span><span class="n">1</span></button>
+                <ul><li><button class="node file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/></svg><span class="name">fr.json</span><span class="stat"><span class="plus">+8</span><span class="minus">−0</span></span><span class="st st-m" title="Modifié">M</span></button></li></ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="section"><h3 class="stitle"><span class="chip h-usage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l3.5-3.5"/><path d="M20 15a8 8 0 1 0-16 0"/></svg></span>Consommation<span class="summary">1,5M tokens consommés · 36 appels · 90 % de cache</span><span class="fold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></h3></div>
+    <div class="section"><h3 class="stitle"><span class="chip h-agents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 14h.01M15 14h.01"/></svg></span>Sous-agents <span class="count">2</span><span class="summary">selo:runner · selo:reviewer</span><span class="fold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></h3></div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- ============ 2 · THE WINDOW ============ -->
+<section class="plate">
+<h2>2 · La fenêtre « Fichiers modifiés » (1280 px)</h2>
+<p class="note">Une grande fenêtre par-dessus la page (le détail reste derrière, assombri), ouverte sur le fichier cliqué. En tête : le titre, la demande de la session et sa branche, les totaux, « Fermer » (Échap aussi). Dessous, la vue IDE : l’explorateur à gauche (300 px, redimensionnable), la visionneuse à droite avec ses onglets, le fil d’Ariane, « 2 / 3 ‹ › », le mode Unifié / Côte à côte, la barre des parties et le code numéroté.</p>
+<div class="scroller">
+<div class="scene">
+  <div class="behind"><span class="badge">En cours</span><span class="dtitle">.planning/blueprints/2026-10-22-sessions-live.md</span></div>
+  <div class="modal">
+    <div class="mhead">
+      <span class="chip h-files big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+      <div class="mtitles">
+        <h2 class="mtitle">Fichiers modifiés</h2>
+        <div class="msub"><span class="req">.planning/blueprints/2026-10-22-sessions-live.md</span><span class="sep">·</span><span class="mono">⑂ main</span><span class="sep">·</span><span>selo-ops</span></div>
+      </div>
+      <span class="mtotals"><span class="count">3 fichiers</span><span class="plus">+41</span><span class="minus">−9</span><span class="dirty">2 non commités</span></span>
+      <button class="btn btn-quiet btn-sm">Fermer <span class="kbd">Échap</span></button>
+    </div>
+    <div class="ide">
+      <aside class="explorer grip">
+        <div class="xhead">Explorateur <span class="count">3</span>
+          <button class="iconbtn" title="Tout replier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5-5 5 5M7 20l5-5 5 5"/></svg></button>
+          <button class="iconbtn" title="Vue à plat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        </div>
+        <div class="xbody">
+          <div class="filter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Filtrer les fichiers…</div>
+          <ul class="tree">
+            <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">web/src</span><span class="n">3</span></button>
+              <ul>
+                <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">features/sessions</span><span class="n">2</span></button>
+                  <ul>
+                    <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">pages</span><span class="n">1</span></button>
+                      <ul><li><button class="node file open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg><span class="name">SessionsLivePage.tsx</span><span class="stat"><span class="plus">+6</span><span class="minus">−2</span></span><span class="st st-m" title="Modifié">M</span></button></li></ul>
+                    </li>
+                    <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">ui</span><span class="n">1</span></button>
+                      <ul><li><button class="node file open selected"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg><span class="name">SessionRow.tsx</span><span class="stat"><span class="plus">+27</span><span class="minus">−7</span></span><span class="st st-m" title="Modifié">M</span></button></li></ul>
+                    </li>
+                  </ul>
+                </li>
+                <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">shared/lib/i18n</span><span class="n">1</span></button>
+                  <ul><li><button class="node file open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/></svg><span class="name">fr.json</span><span class="stat"><span class="plus">+8</span><span class="minus">−0</span></span><span class="st st-m" title="Modifié">M</span></button></li></ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="xfoot"><span>3 fichiers</span><span><span class="plus">+41</span> <span class="minus">−9</span></span><span class="dirty">2 non commités</span></div>
+      </aside>
+      <div class="viewer">
+        <div class="tabs">
+          <button class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg><span class="name">SessionsLivePage.tsx</span><span class="x">×</span></button>
+          <button class="tab on dirty-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg><span class="name">SessionRow.tsx</span><span class="x" title="Fermer l’onglet">×</span></button>
+          <button class="tab dirty-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/></svg><span class="name">fr.json</span><span class="x">×</span></button>
+        </div>
+        <div class="vhead">
+          <div class="crumbs"><span>web</span><span class="sep">›</span><span>src</span><span class="sep">›</span><span>features</span><span class="sep">›</span><span>sessions</span><span class="sep">›</span><span>ui</span><span class="sep">›</span><span class="leaf">SessionRow.tsx</span></div>
+          <span class="vstat"><span class="plus">+27</span><span class="minus">−7</span></span>
+          <div class="seg"><button class="on">Unifié</button><button>Côte à côte</button></div>
+          <span class="nav"><button class="iconbtn" title="Fichier précédent (↑)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>2 / 3<button class="iconbtn" title="Fichier suivant (↓)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></span>
+          <button class="iconbtn" title="Copier le chemin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+        </div>
+        <div class="parts">
+          <button class="part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6"/></svg><span class="sha">c41f2a8</span><span class="subj">feat(sessions-live): a fir tree on a worktree session's row</span><span class="pm"><span class="plus">+19</span> <span class="minus">−4</span></span></button>
+          <button class="part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6"/></svg><span class="sha">9b0e4d3</span><span class="subj">fix(sessions-live): review — the tree's title on hover</span><span class="pm"><span class="plus">+3</span> <span class="minus">−1</span></span></button>
+          <button class="part on unc"><span class="dirty"></span>Non commité<span class="pm"><span class="plus">+5</span> <span class="minus">−2</span></span></button>
+        </div>
+        <div class="code">
+          <div class="ptitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6"/></svg><span class="sha">9b0e4d3</span><span class="subj">fix(sessions-live): review — the tree's title on hover</span><span class="pm"><span class="plus">+3</span><span class="minus">−1</span></span></div>
+          <table class="d">
+            <tr class="hunk"><td class="ln"></td><td class="ln"></td><td class="sg"></td><td>@@ -41,7 +41,9 @@ export function SessionRow({ s, onOpen }: Props) {</td></tr>
+            <tr class="ctx"><td class="ln">41</td><td class="ln">41</td><td class="sg"> </td><td>      {s.worktree && (</td></tr>
+            <tr class="remove"><td class="ln">42</td><td class="ln"></td><td class="sg">−</td><td>        &lt;span className={styles.tree}&gt;</td></tr>
+            <tr class="add"><td class="ln"></td><td class="ln">42</td><td class="sg">+</td><td>        &lt;span className={styles.tree} title={t("sessions.row.worktree", { name: s.worktree.name })}&gt;</td></tr>
+            <tr class="ctx"><td class="ln">43</td><td class="ln">43</td><td class="sg"> </td><td>          &lt;FirTreeIcon /&gt;</td></tr>
+            <tr class="ctx"><td class="ln">44</td><td class="ln">44</td><td class="sg"> </td><td>        &lt;/span&gt;</td></tr>
+            <tr class="ctx"><td class="ln">45</td><td class="ln">45</td><td class="sg"> </td><td>      )}</td></tr>
+          </table>
+          <div class="ptitle"><span class="dirty"></span>Non commité<span class="pm"><span class="plus">+5</span><span class="minus">−2</span></span></div>
+          <p class="notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Sur un checkout partagé, cette partie peut aussi contenir les modifications d'autres sessions.</p>
+          <table class="d">
+            <tr class="hunk"><td class="ln"></td><td class="ln"></td><td class="sg"></td><td>@@ -12,6 +12,7 @@ import { FirTreeIcon, FileIcon } from "../../../shared/ui/icons.tsx";</td></tr>
+            <tr class="ctx"><td class="ln">12</td><td class="ln">12</td><td class="sg"> </td><td>import { Badge } from "../../../shared/ui/Badge.tsx";</td></tr>
+            <tr class="ctx"><td class="ln">13</td><td class="ln">13</td><td class="sg"> </td><td>import { IconButton } from "../../../shared/ui/IconButton.tsx";</td></tr>
+            <tr class="add"><td class="ln"></td><td class="ln">14</td><td class="sg">+</td><td>import { formatTokens } from "./usage.ts";</td></tr>
+            <tr class="ctx"><td class="ln">14</td><td class="ln">15</td><td class="sg"> </td><td>import styles from "./SessionRow.module.css";</td></tr>
+            <tr class="fold-ln"><td class="ln">⋯</td><td class="ln">⋯</td><td class="sg"></td><td>  48 lignes inchangées</td></tr>
+            <tr class="hunk"><td class="ln"></td><td class="ln"></td><td class="sg"></td><td>@@ -63,9 +64,12 @@ export function SessionRow({ s, onOpen }: Props) {</td></tr>
+            <tr class="ctx"><td class="ln">63</td><td class="ln">64</td><td class="sg"> </td><td>        &lt;span className={styles.context}&gt;{contextText(s)}&lt;/span&gt;</td></tr>
+            <tr class="remove"><td class="ln">64</td><td class="ln"></td><td class="sg">−</td><td>        {s.touchedFiles.length &gt; 0 &amp;&amp; &lt;span className={styles.files}&gt;{s.touchedFiles.length}&lt;/span&gt;}</td></tr>
+            <tr class="remove"><td class="ln">65</td><td class="ln"></td><td class="sg">−</td><td>        {s.usage &amp;&amp; &lt;span className={styles.tokens}&gt;{s.usage.total}&lt;/span&gt;}</td></tr>
+            <tr class="add"><td class="ln"></td><td class="ln">65</td><td class="sg">+</td><td>        {s.touchedFiles.length &gt; 0 &amp;&amp; (</td></tr>
+            <tr class="add"><td class="ln"></td><td class="ln">66</td><td class="sg">+</td><td>          &lt;span className={styles.files} title={tn("sessions.row.files", s.touchedFiles.length)}&gt;</td></tr>
+            <tr class="add"><td class="ln"></td><td class="ln">67</td><td class="sg">+</td><td>            &lt;FileIcon /&gt; {s.touchedFiles.length}</td></tr>
+            <tr class="add"><td class="ln"></td><td class="ln">68</td><td class="sg">+</td><td>          &lt;/span&gt;</td></tr>
+            <tr class="add"><td class="ln"></td><td class="ln">69</td><td class="sg">+</td><td>        )}</td></tr>
+            <tr class="ctx"><td class="ln">66</td><td class="ln">70</td><td class="sg"> </td><td>        {s.usage &amp;&amp; &lt;span className={styles.tokens}&gt;{formatTokens(s.usage.total)}&lt;/span&gt;}</td></tr>
+            <tr class="ctx"><td class="ln">67</td><td class="ln">71</td><td class="sg"> </td><td>      &lt;/div&gt;</td></tr>
+            <tr class="ctx"><td class="ln">68</td><td class="ln">72</td><td class="sg"> </td><td>    &lt;/li&gt;</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<p class="legend"><span><b>Arbre</b> : statut M / A / D et <span class="plus">+n</span> <span class="minus">−n</span> par fichier, les totaux en pied ; un fichier en gras est ouvert dans un onglet, le fond marqué est celui affiché.</span><span><b>Onglets</b> : un par fichier ouvert, « • » quand il a une partie non commitée ; <span class="kbd">↑</span> <span class="kbd">↓</span> dans l’arbre changent de fichier, <span class="kbd">Entrée</span> l’ouvre, <span class="kbd">Échap</span> ferme la fenêtre.</span><span><b>Parties</b> : une pastille par commit et « Non commité », avec ses lignes ; un clic y descend, la partie en vue est marquée ; son titre reste collé en haut pendant le défilement.</span></p>
+</section>
+
+<!-- ============ 3 · PHONE ============ -->
+<section class="plate">
+<h2>3 · 360 px : la fenêtre couvre l’écran, l’explorateur puis la visionneuse</h2>
+<p class="note">Pas la place pour deux volets : la fenêtre s’ouvre sur l’explorateur (ou directement sur le fichier cliqué), et « ‹ Fichiers » revient à l’explorateur. Le mode Unifié / Côte à côte disparaît (unifié seulement), les lignes longues défilent dans le bloc, jamais la page.</p>
+<div class="scroller">
+<div class="row-plates" style="grid-template-columns: 360px 360px; justify-content: start;">
+<div>
+<p class="tag">Écran 1 · l’explorateur</p>
+<div class="modal phone-modal">
+  <div class="mhead">
+    <span class="chip h-files big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+    <div class="mtitles"><h2 class="mtitle">Fichiers modifiés</h2><div class="msub"><span class="req">.planning/blueprints/2026-10-22-sessions-live.md</span></div></div>
+    <button class="iconbtn" title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="xhead" style="padding:8px 12px;border-bottom:var(--border-width) solid var(--border);display:flex;gap:8px;align-items:center;font-size:.83em;font-weight:600">3 fichiers <span class="count"><span class="plus">+41</span> <span class="minus">−9</span></span><span class="dirty" style="margin-left:auto;font-weight:400;color:var(--text-muted)">2 non commités</span></div>
+  <div class="xbody" style="padding:8px">
+    <div class="filter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Filtrer les fichiers…</div>
+    <ul class="tree">
+      <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">web/src</span><span class="n">3</span></button>
+        <ul>
+          <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">features/sessions</span><span class="n">2</span></button>
+            <ul>
+              <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">pages</span><span class="n">1</span></button>
+                <ul><li><button class="node file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg><span class="name">SessionsLivePage.tsx</span><span class="stat"><span class="plus">+6</span><span class="minus">−2</span></span><span class="st st-m">M</span></button></li></ul>
+              </li>
+              <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">ui</span><span class="n">1</span></button>
+                <ul><li><button class="node file selected"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg><span class="name">SessionRow.tsx</span><span class="stat"><span class="plus">+27</span><span class="minus">−7</span></span><span class="st st-m">M</span></button></li></ul>
+              </li>
+            </ul>
+          </li>
+          <li><button class="node"><svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="folder-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="name">shared/lib/i18n</span><span class="n">1</span></button>
+            <ul><li><button class="node file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/></svg><span class="name">fr.json</span><span class="stat"><span class="plus">+8</span><span class="minus">−0</span></span><span class="st st-m">M</span></button></li></ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+</div>
+<div>
+<p class="tag">Écran 2 · le fichier</p>
+<div class="modal phone-modal">
+  <div class="viewer" style="border:0;border-radius:0;background:transparent;height:100%">
+    <div class="tabs">
+      <button class="back" style="align-self:center;margin-right:2px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Fichiers</button>
+      <button class="tab on dirty-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg><span class="name">SessionRow.tsx</span><span class="x">×</span></button>
+      <button class="tab dirty-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/></svg><span class="name">fr.json</span><span class="x">×</span></button>
+      <button class="iconbtn" style="align-self:center;margin-left:auto;flex:none" title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="vhead">
+      <span class="vstat"><span class="plus">+27</span><span class="minus">−7</span></span>
+      <span class="nav" style="margin-left:auto"><button class="iconbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>2 / 3<button class="iconbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></span>
+      <div class="crumbs" style="flex-basis:100%"><span>web/src/features/sessions/ui</span><span class="sep">›</span><span class="leaf">SessionRow.tsx</span></div>
+    </div>
+    <div class="parts">
+      <button class="part"><span class="sha">c41f2a8</span><span class="pm"><span class="plus">+19</span> <span class="minus">−4</span></span></button>
+      <button class="part"><span class="sha">9b0e4d3</span><span class="pm"><span class="plus">+3</span> <span class="minus">−1</span></span></button>
+      <button class="part on unc"><span class="dirty"></span>Non commité<span class="pm"><span class="plus">+5</span> <span class="minus">−2</span></span></button>
+    </div>
+    <div class="code">
+      <div class="ptitle"><span class="dirty"></span>Non commité<span class="pm"><span class="plus">+5</span><span class="minus">−2</span></span></div>
+      <table class="d">
+        <tr class="hunk"><td class="ln"></td><td class="ln"></td><td class="sg"></td><td>@@ -12,6 +12,7 @@</td></tr>
+        <tr class="ctx"><td class="ln">12</td><td class="ln">12</td><td class="sg"> </td><td>import { Badge } from "../../../shared/ui/Badge.tsx";</td></tr>
+        <tr class="ctx"><td class="ln">13</td><td class="ln">13</td><td class="sg"> </td><td>import { IconButton } from "../../../shared/ui/IconButton.tsx";</td></tr>
+        <tr class="add"><td class="ln"></td><td class="ln">14</td><td class="sg">+</td><td>import { formatTokens } from "./usage.ts";</td></tr>
+        <tr class="ctx"><td class="ln">14</td><td class="ln">15</td><td class="sg"> </td><td>import styles from "./SessionRow.module.css";</td></tr>
+        <tr class="fold-ln"><td class="ln">⋯</td><td class="ln">⋯</td><td class="sg"></td><td>  48 lignes inchangées</td></tr>
+        <tr class="hunk"><td class="ln"></td><td class="ln"></td><td class="sg"></td><td>@@ -63,9 +64,12 @@</td></tr>
+        <tr class="ctx"><td class="ln">63</td><td class="ln">64</td><td class="sg"> </td><td>        &lt;span className={styles.context}&gt;{contextText(s)}&lt;/span&gt;</td></tr>
+        <tr class="remove"><td class="ln">64</td><td class="ln"></td><td class="sg">−</td><td>        {s.touchedFiles.length &gt; 0 &amp;&amp; &lt;span className={styles.files}&gt;…</td></tr>
+        <tr class="add"><td class="ln"></td><td class="ln">65</td><td class="sg">+</td><td>        {s.touchedFiles.length &gt; 0 &amp;&amp; (</td></tr>
+        <tr class="add"><td class="ln"></td><td class="ln">66</td><td class="sg">+</td><td>          &lt;span className={styles.files} title={tn("sessions.row.files", …)}&gt;</td></tr>
+        <tr class="add"><td class="ln"></td><td class="ln">67</td><td class="sg">+</td><td>            &lt;FileIcon /&gt; {s.touchedFiles.length}</td></tr>
+        <tr class="add"><td class="ln"></td><td class="ln">68</td><td class="sg">+</td><td>          &lt;/span&gt;</td></tr>
+        <tr class="add"><td class="ln"></td><td class="ln">69</td><td class="sg">+</td><td>        )}</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============ 4 · STATES ============ -->
+<section class="plate">
+<h2>4 · Les états de la visionneuse, dans la fenêtre</h2>
+<p class="note">Lecture en cours, dossier introuvable, fichier sans changement, commit disparu et partie tronquée. Les textes sont ceux de la page aujourd’hui ; le chargement garde l’onglet et le fil d’Ariane pour que rien ne saute. L’explorateur reste à gauche dans tous les cas (non redessiné ici).</p>
+<div class="states">
+  <div>
+    <p class="tag">Lecture du diff</p>
+    <div class="viewer">
+      <div class="tabs"><button class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/></svg><span class="name">fr.json</span><span class="x">×</span></button></div>
+      <div class="vhead"><div class="crumbs"><span>web/src/shared/lib/i18n</span><span class="sep">›</span><span class="leaf">fr.json</span></div><span class="nav">3 / 3</span></div>
+      <p class="hunk-note">Lecture du diff…</p>
+      <div class="skel"><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+  </div>
+  <div>
+    <p class="tag">Dossier disparu</p>
+    <div class="viewer">
+      <div class="tabs"><button class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg><span class="name">PromoField.tsx</span><span class="x">×</span></button></div>
+      <div class="vhead"><div class="crumbs"><span>web/src/features/cart/ui</span><span class="sep">›</span><span class="leaf">PromoField.tsx</span></div><span class="nav">2 / 3</span></div>
+      <div class="error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span>Diff indisponible : le dossier de la session n'existe plus ou n'est pas un dépôt git.</span></div>
+    </div>
+  </div>
+  <div>
+    <p class="tag">Aucun changement</p>
+    <div class="viewer">
+      <div class="tabs"><button class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM8 9h8M8 13h5"/></svg><span class="name">cart.md</span><span class="x">×</span></button></div>
+      <div class="vhead"><div class="crumbs"><span>.planning/pages</span><span class="sep">›</span><span class="leaf">cart.md</span></div><span class="nav">3 / 3</span></div>
+      <div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>Aucun changement trouvé pour ce fichier.<br><span style="font-size:.9em">Le fichier est revenu à l’état du dernier commit.</span></div>
+    </div>
+  </div>
+  <div>
+    <p class="tag">Commit disparu, partie tronquée</p>
+    <div class="viewer">
+      <div class="tabs"><button class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM8 9h8M8 13h5"/></svg><span class="name">0012_monthly_balance.sql</span><span class="x">×</span></button></div>
+      <div class="parts"><button class="part on"><span class="sha">e7a91c2</span><span class="pm">—</span></button><button class="part"><span class="sha">1d4f0b9</span><span class="pm"><span class="plus">+2 108</span> <span class="minus">−0</span></span></button></div>
+      <div class="code">
+        <div class="ptitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6"/></svg><span class="sha">e7a91c2</span><span class="subj">feat(billing): api — monthly balance table</span></div>
+        <p class="hunk-note">Diff indisponible : ce commit n'existe plus.</p>
+        <div class="ptitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6"/></svg><span class="sha">1d4f0b9</span><span class="subj">feat(billing): api — seed of the balances</span><span class="pm"><span class="plus">+2 108</span></span></div>
+        <table class="d"><tr class="add"><td class="ln"></td><td class="ln">1</td><td class="sg">+</td><td>insert into monthly_balance (account_id, month, cents) values</td></tr><tr class="add"><td class="ln"></td><td class="ln">2</td><td class="sg">+</td><td>  ('a1', '2026-01', 12050),</td></tr></table>
+        <p class="cut">Diff tronqué · 200 000 caractères affichés</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+</div>
+</body>
+</html>

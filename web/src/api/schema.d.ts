@@ -313,6 +313,62 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/sessions/{id}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Each file the session touched, with its status and lines added and removed over its recorded commits and its uncommitted part, read from git */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The files, or isAvailable false when the session's folder holds no git checkout */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FileSummary"];
+                    };
+                };
+                /** @description The session is not in the export */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description git did not answer: timed out, missing or killed */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sessions/{id}/diff": {
         parameters: {
             query?: never;
@@ -718,6 +774,17 @@ export interface components {
             /** @enum {string} */
             name: "selo" | "selo-ops";
             versions: string[];
+        };
+        FileSummary: {
+            isAvailable: boolean;
+            files: {
+                file: string;
+                /** @enum {string|null} */
+                status: "added" | "modified" | "deleted" | null;
+                added: number | null;
+                removed: number | null;
+                isUncommitted: boolean;
+            }[];
         };
         FileDiff: {
             file: string;

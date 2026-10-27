@@ -31,6 +31,8 @@ import {
 import { useArchiveSessionMutation } from "../data/useArchiveSessionMutation.ts";
 import { useSessionsQuery } from "../data/useSessionsQuery.ts";
 import { useFileDiffQuery } from "../data/useFileDiffQuery.ts";
+import { useFileSummaryQuery } from "../data/useFileSummaryQuery.ts";
+import { FilesWindow } from "../ui/FilesWindow.tsx";
 import { useSaveNoteMutation } from "../data/useSaveNoteMutation.ts";
 import { useUnarchiveSessionMutation } from "../data/useUnarchiveSessionMutation.ts";
 import { useProjectsQuery } from "../../projects/data/useProjectsQuery.ts";
@@ -47,7 +49,8 @@ import { SessionList, type SessionActions } from "../ui/SessionList.tsx";
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
 import { SettingsBar, type View } from "../ui/SettingsBar.tsx";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../ui/panelWidth.ts";
-import { desktopLinkOf, metaWidth, workLabel, outdatedIdsOf, pluginsText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
+import { desktopLinkOf, metaWidth, workLabel, outdatedIdsOf, pluginsText, requestText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
+import { buildFileTree, orderedFiles } from "../ui/fileTree.ts";
 import styles from "./SessionsLivePage.module.css";
 
 // sessions-live FR-08, FR-27 and FR-31: the view, the grouping, the detail's width and its folded sections are
@@ -120,13 +123,14 @@ export function SessionsLivePage() {
   // sessions-live FR-43: the « Nouvelle session » window, open on the project holding this folder (null: the first).
   const [newSession, setNewSession] = useState<{ folder: string | null } | null>(null);
   const projectsQuery = useProjectsQuery({ enabled: newSession !== null });
-  const isDialogOpen = noteFor !== null || archiveAsked !== null || newSession !== null;
+  // sessions-live FR-55: the « Fichiers modifiés » window, open on a session, and the file it shows (null: none).
+  const [filesOpen, setFilesOpen] = useState<{ sessionId: string; file: string | null; isFromExplorer: boolean } | null>(null);
+  const isDialogOpen = noteFor !== null || archiveAsked !== null || newSession !== null || (filesOpen !== null && filesOpen.sessionId === selectedId);
 
   const [isResizing, setResizing] = useState(false);
   // sessions-live FR-37: the detail alone on the screen, header and settings hidden, the browser in full screen
   // when it allows it; not remembered.
   const [isFullscreen, setFullscreen] = useState(false);
-  const [diffAsked, setDiffAsked] = useState<{ sessionId: string; file: string } | null>(null);
 
   const updateSettings = (patch: Partial<Settings>) => {
     const next = { ...settings, ...patch };
@@ -161,9 +165,23 @@ export function SessionsLivePage() {
   const projectsById = useMemo(() => new Map(projects.map((p) => [p.id, p])), [projects]);
   const projectName = useCallback((id: string) => projectsById.get(id)?.name ?? id, [projectsById]);
   const selected = sessions.find((s) => s.id === selectedId) ?? null;
-  // sessions-live FR-51: the file whose diff the detail shows, for the session it was asked on.
-  const diffFile = diffAsked !== null && diffAsked.sessionId === selected?.id ? diffAsked.file : null;
-  const fileDiff = useFileDiffQuery(selected?.id ?? "", diffFile);
+  // sessions-live FR-54, FR-55: git is read for the files once their section is unfolded or their window open
+  // (`session` BR-01); FR-51: the diff of the file the window shows.
+  const filesWindow = filesOpen !== null && filesOpen.sessionId === selected?.id ? filesOpen : null;
+  // Another session shown, or none: the window closed with the one it was open on, never shown again on Forward.
+  if (filesOpen !== null && filesOpen.sessionId !== selectedId) setFilesOpen(null);
+  const isFilesUnfolded = !settings.foldedSections[isFullscreen ? "fullscreen" : "panel"].includes("files");
+  const fileSummary = useFileSummaryQuery(
+    selected?.id ?? "",
+    selected !== null && !selected.isOutsideSelo && selected.touchedFiles.length > 0 && (isFilesUnfolded || filesWindow !== null),
+  );
+  const fileDiff = useFileDiffQuery(selected?.id ?? "", filesWindow?.file ?? null);
+  const openFiles = (file: string | null) => {
+    if (!selected) return;
+    setFilesOpen({ sessionId: selected.id, file: file ?? orderedFiles(buildFileTree(selected.touchedFiles))[0] ?? null, isFromExplorer: file === null });
+    // A fresh read each time the window opens.
+    if (fileSummary.data) void fileSummary.refetch();
+  };
 
   const closeDetail = useCallback(() => {
     setFullscreen(false);
@@ -421,12 +439,8 @@ export function SessionsLivePage() {
               foldedSections={settings.foldedSections[isFullscreen ? "fullscreen" : "panel"]}
               actions={actions}
               isFullscreen={isFullscreen}
-              fileDiff={
-                diffFile === null
-                  ? null
-                  : { file: diffFile, diff: fileDiff.data, isLoading: fileDiff.isPending, error: fileDiff.isError ? fileDiff.error.message : null }
-              }
-              onSelectFile={(file) => setDiffAsked(file === null ? null : { sessionId: selected.id, file })}
+              fileSummary={fileSummary.data}
+              onOpenFiles={openFiles}
               onClose={closeDetail}
               onToggleFullscreen={toggleFullscreen}
               onToggleSection={(section) => updateSettings({ foldedSections: toggleSection(settings.foldedSections, isFullscreen ? "fullscreen" : "panel", section) })}
@@ -461,6 +475,26 @@ export function SessionsLivePage() {
       >
         {archiveAsked?.note && <NoteText note={archiveAsked.note} />}
       </ConfirmDialog>
+      {selected && filesWindow && (
+        <FilesWindow
+          key={selected.id}
+          request={requestText(selected)}
+          branch={selected.branch}
+          projectName={projectName(selected.projectId)}
+          paths={selected.touchedFiles}
+          summary={fileSummary.data}
+          isSummaryFailed={fileSummary.isError}
+          shown={filesWindow.file}
+          isFromExplorer={filesWindow.isFromExplorer}
+          diff={
+            filesWindow.file === null
+              ? null
+              : { file: filesWindow.file, diff: fileDiff.data, isLoading: fileDiff.isFetching, error: fileDiff.isError ? fileDiff.error.message : null }
+          }
+          onShow={(file) => setFilesOpen({ ...filesWindow, file })}
+          onClose={() => setFilesOpen(null)}
+        />
+      )}
       {noteFor && (
         <NoteDialog
           key={noteFor.id}

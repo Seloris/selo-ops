@@ -3,13 +3,14 @@ import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { useId, useState, type CSSProperties, type ReactNode } from "react";
-import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, NoteIcon, TrailIcon, OpenIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, NoteIcon, TrailIcon, OpenIcon, PopOutIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot, type DotTone } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
-import { FileDiffView, type FileDiffState } from "./FileDiffView.tsx";
-import { FileTree } from "./FileTree.tsx";
+import type { FileSummary } from "../data/useFileSummaryQuery.ts";
+import { fileTotals } from "./fileTotals.ts";
+import { FileTree, LineCounts } from "./FileTree.tsx";
 import { hasTrail, lineColor, skillColor, trailGroups, trailLines, waitingText } from "./trail.ts";
 import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
@@ -30,11 +31,11 @@ export function SessionDetail({
   foldedSections,
   actions,
   isFullscreen,
-  fileDiff,
+  fileSummary,
   onClose,
   onToggleFullscreen,
   onToggleSection,
-  onSelectFile,
+  onOpenFiles,
 }: {
   session: Session;
   projectName: string;
@@ -43,12 +44,13 @@ export function SessionDetail({
   foldedSections: readonly DetailSection[];
   actions: SessionActions;
   isFullscreen: boolean;
-  // The file whose diff is open, null when none (sessions-live FR-51).
-  fileDiff: FileDiffState | null;
+  // Each touched file's status and lines, once git is read (sessions-live FR-54).
+  fileSummary: FileSummary | undefined;
   onClose: () => void;
   onToggleFullscreen: () => void;
   onToggleSection: (section: DetailSection) => void;
-  onSelectFile: (file: string | null) => void;
+  // Opens the « Fichiers modifiés » window on this file, or on the first one (sessions-live FR-55).
+  onOpenFiles: (file: string | null) => void;
 }) {
   // sessions-live FR-53: the trail's groups unfolded, by their start; folded by default.
   const [openGroups, setOpenGroups] = useState<ReadonlySet<string>>(new Set());
@@ -294,10 +296,34 @@ export function SessionDetail({
       )}
     </Section>
   );
+  const fileStats = fileSummary?.isAvailable ? fileSummary.files : null;
+  const totals = fileStats ? fileTotals(fileStats) : null;
+  const filesFold = fold("files", s.touchedFiles.length === 0);
   const filesSection = !s.isOutsideSelo && (
-    <Section icon={<FolderIcon />} hue="files" count={s.touchedFiles.length} title={t("sessions.detail.files")} summary={s.touchedFiles.length ? s.touchedFiles.map((f) => f.split("/").pop()).join(" · ") : t("sessions.detail.none")} {...fold("files", s.touchedFiles.length === 0)}>
-      <FileTree paths={s.touchedFiles} selected={fileDiff?.file ?? null} onSelect={(file) => onSelectFile(file === fileDiff?.file ? null : file)} />
-      {fileDiff && <FileDiffView state={fileDiff} onClose={() => onSelectFile(null)} />}
+    <Section
+      icon={<FolderIcon />}
+      hue="files"
+      count={s.touchedFiles.length}
+      title={t("sessions.detail.files")}
+      summary={s.touchedFiles.length ? s.touchedFiles.map((f) => f.split("/").pop()).join(" · ") : t("sessions.detail.none")}
+      aside={
+        totals && !filesFold.isFolded ? (
+          <>
+            <LineCounts added={totals.added} removed={totals.removed} />
+            {totals.uncommitted > 0 && ` · ${tn("sessions.files.uncommitted", totals.uncommitted)}`}
+          </>
+        ) : null
+      }
+      {...filesFold}
+    >
+      <div className={styles.openFiles}>
+        <Button size="sm" onClick={() => onOpenFiles(null)}>
+          <PopOutIcon />
+          {t("sessions.files.explore")}
+        </Button>
+        <span className={styles.muted}>{t("sessions.files.hint")}</span>
+      </div>
+      <FileTree paths={s.touchedFiles} selected={null} onSelect={(file) => onOpenFiles(file)} stats={fileStats ? new Map(fileStats.map((f) => [f.file, f])) : undefined} />
     </Section>
   );
   const settingsSection = (
@@ -460,7 +486,7 @@ function Section({
   // What the heading keeps showing while the section is folded.
   summary?: ReactNode;
   // What the heading shows folded or not.
-  aside?: string | null;
+  aside?: ReactNode;
   // Nothing more than the summary to show: the heading alone, with no chevron.
   isEmpty: boolean;
   isFolded: boolean;

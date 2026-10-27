@@ -5,7 +5,8 @@ import { sessionsKeys } from "./sessionsKeys.ts";
 
 export type FileDiff = components["schemas"]["FileDiff"];
 
-// sessions-live FR-51: read once per click, never on the 5 s refresh (`session` BR-01).
+// sessions-live FR-51: read each time the file is shown, never on the 5 s refresh (`session` BR-01); a tab shown again
+// keeps its last diff on screen while git is read again.
 export function useFileDiffQuery(id: string, file: string | null) {
   return useQuery({
     queryKey: sessionsKeys.diff(id, file ?? ""),
@@ -15,7 +16,9 @@ export function useFileDiffQuery(id: string, file: string | null) {
       return data;
     },
     enabled: file !== null,
-    staleTime: Infinity,
-    gcTime: 0,
+    staleTime: 0,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 }

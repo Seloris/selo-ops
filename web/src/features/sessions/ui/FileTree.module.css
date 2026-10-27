@@ -88,3 +88,55 @@
   color: var(--text-muted);
   font-size: 0.9em;
 }
+
+/* « Vue à plat »: no chevron to line up with. */
+.file.flat {
+  padding-left: 4px;
+}
+
+/* Open in a tab of the window. */
+.file.open .name {
+  font-weight: 600;
+}
+
+.stat {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding-left: 6px;
+  font-size: 0.9em;
+}
+
+.counts {
+  display: inline-flex;
+  gap: 4px;
+  font-family: var(--font-mono);
+}
+
+.plus {
+  color: var(--delta-add);
+}
+
+.minus {
+  color: var(--delta-remove);
+}
+
+.status {
+  width: 1.2em;
+  text-align: center;
+  font-weight: 700;
+}
+
+.added {
+  color: var(--delta-add);
+}
+
+.modified {
+  color: var(--delta-change);
+}
+
+.deleted {
+  color: var(--delta-remove);
+}

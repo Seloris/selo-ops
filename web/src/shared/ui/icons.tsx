@@ -529,3 +529,19 @@ export function BlueprintIcon() {
     </svg>
   );
 }
+
+export function PopOutIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M15 3h6v6M21 3l-7 7M10 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />
+    </svg>
+  );
+}
+
+export function FoldAllIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="m7 15 5-5 5 5M7 20l5-5 5 5" />
+    </svg>
+  );
+}

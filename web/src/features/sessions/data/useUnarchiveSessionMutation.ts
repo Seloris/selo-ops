@@ -9,6 +9,6 @@ export function useUnarchiveSessionMutation() {
       const { error } = await api.DELETE("/v1/sessions/{id}/archive", { params: { path: { id } } });
       if (error !== undefined) throw new Error(problemMessage(error));
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: sessionsKeys.all }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: sessionsKeys.list() }),
   });
 }

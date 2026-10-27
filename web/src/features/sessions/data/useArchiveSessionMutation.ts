@@ -9,6 +9,6 @@ export function useArchiveSessionMutation() {
       const { error } = await api.PUT("/v1/sessions/{id}/archive", { params: { path: { id } } });
       if (error !== undefined) throw new Error(problemMessage(error));
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: sessionsKeys.all }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: sessionsKeys.list() }),
   });
 }

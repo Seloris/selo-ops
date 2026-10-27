@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildFileTree, type FileNode } from "./fileTree.ts";
+import { buildFileTree, filterPaths, folderPaths, orderedFiles, type FileNode } from "./fileTree.ts";
 
 const names = (nodes: FileNode[]): unknown[] =>
   nodes.map((n) => (n.kind === "folder" ? { [n.name]: names(n.children) } : n.name));
@@ -41,5 +41,27 @@ describe("buildFileTree", () => {
   it("counts the files under each folder", () => {
     const [folder] = buildFileTree(["api/a.ts", "api/src/b.ts", "api/src/c.ts"]);
     expect(folder?.kind === "folder" && folder.fileCount).toBe(3);
+  });
+});
+
+describe("orderedFiles", () => {
+  it("lists the files in the tree's order, folders first", () => {
+    expect(orderedFiles(buildFileTree(["README.md", "web/b.ts", "api/a.ts"]))).toEqual(["api/a.ts", "web/b.ts", "README.md"]);
+  });
+});
+
+describe("folderPaths", () => {
+  it("lists every folder, joined chains once", () => {
+    expect(folderPaths(buildFileTree(["api/src/a.ts", "api/test/b.ts"]))).toEqual(["api", "api/src", "api/test"]);
+  });
+});
+
+describe("filterPaths", () => {
+  it("keeps the paths holding the text, whatever its case", () => {
+    expect(filterPaths(["web/SessionRow.tsx", "api/a.ts"], " row ")).toEqual(["web/SessionRow.tsx"]);
+  });
+
+  it("keeps every path for an empty text", () => {
+    expect(filterPaths(["a", "b"], "  ")).toEqual(["a", "b"]);
   });
 });

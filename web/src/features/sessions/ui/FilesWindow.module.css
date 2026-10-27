@@ -1,0 +1,168 @@
+.sub {
+  display: flex;
+  align-items: center;
+  gap: 4px 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.request {
+  min-width: 0;
+  max-width: 48ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+}
+
+.branch svg {
+  width: 13px;
+  height: 13px;
+}
+
+.totals {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+.dirty {
+  color: var(--warn);
+}
+
+/* The explorer, its grip and the viewer, each scrolling on its own. */
+.ide {
+  flex: 1;
+  /* Opaque: the dense code never shows the page through the box's translucent fill. */
+  background: var(--bg);
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--explorer-w) 6px minmax(0, 1fr);
+}
+
+.explorer {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-2);
+}
+
+.xhead {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 14px;
+  border-bottom: var(--border-width) solid var(--border);
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.count {
+  font-weight: 400;
+}
+
+.tools {
+  display: inline-flex;
+  margin-left: auto;
+}
+
+.xbody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 0 8px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--pop-bg);
+  color: var(--text-muted);
+}
+
+.filter svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.filter input {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85em;
+}
+
+.filter:focus-within {
+  border-color: var(--accent);
+}
+
+.none {
+  margin: 8px 4px;
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
+.xfoot {
+  flex: none;
+  padding: 8px 14px;
+  border-top: var(--border-width) solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
+.grip {
+  cursor: col-resize;
+  border-left: var(--border-width) solid var(--border);
+  touch-action: none;
+}
+
+.grip:hover,
+.grip:focus-visible {
+  outline: 0;
+  background: color-mix(in srgb, var(--hue-files) 30%, transparent);
+}
+
+/* sessions-live FR-57: one pane at a time, the explorer or the file. */
+@media (max-width: 640px) {
+  .headTotals {
+    display: none;
+  }
+
+  .ide {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .grip {
+    display: none;
+  }
+
+  .onViewer .explorer,
+  .onExplorer > :last-child {
+    display: none;
+  }
+}

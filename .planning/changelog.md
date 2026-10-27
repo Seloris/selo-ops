@@ -4,5 +4,6 @@ What changed in the application, for someone who reads no spec. One entry per pi
 
 ## 2026-10-27
 
+- Changed — A session's « Fichiers modifiés » now shows each file's status and lines added and removed, and opens the files in a window of their own, like an editor: an explorer with a filter on the left, tabs and the diff on the right, its lines numbered, unified or side by side, with a bar to jump between its commits.
 - Changed — In a session's « Déroulé du tour », the same step repeated in a row now reads as one line, with a pip per pass and its total time; a chevron unfolds the passes, and the subagents sit indented under the step they started in.
 - Added — In the sessions list, a session working in a worktree shows a small fir tree; hovering or tapping it gives the worktree's name, its branch and its folder, and the search also finds a session by its worktree's name.

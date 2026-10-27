@@ -571,3 +571,12 @@
   border: var(--item-border);
   border-radius: var(--item-radius);
 }
+
+/* sessions-live FR-54: « Explorer » above the tree. */
+.openFiles {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+}

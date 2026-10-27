@@ -10,6 +10,6 @@ export function useSaveNoteMutation() {
       const { error } = await api.PUT("/v1/sessions/{id}/note", { params: { path: { id } }, body: { text } });
       if (error !== undefined) throw new Error(problemMessage(error));
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: sessionsKeys.all }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: sessionsKeys.list() }),
   });
 }

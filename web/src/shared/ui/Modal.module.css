@@ -18,6 +18,8 @@
 /* Qualified by [open]: a closed dialog stays hidden. */
 .modal[open] {
   display: grid;
+  /* One track no wider than the screen: a wide content scrolls inside the box, never widens it. */
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   animation: fade 0.15s ease-out;
 }
@@ -34,6 +36,19 @@
   box-shadow: var(--shadow-pop);
   -webkit-backdrop-filter: var(--blur);
   backdrop-filter: var(--blur);
+}
+
+/* A tall, wide box: its body lays out its own panes, which scroll on their own. */
+.wide {
+  width: min(1280px, calc(100% - 32px));
+  height: calc(100dvh - 64px);
+}
+
+.wide .body {
+  flex: 1;
+  display: flex;
+  padding: 0;
+  overflow: hidden;
 }
 
 /* The box fills the screen, its content kept to a readable width. */
@@ -60,8 +75,18 @@
   border-bottom: var(--border-width) solid var(--border);
 }
 
-.title {
+.titles {
   flex: 1;
+  min-width: 0;
+}
+
+.subtitle {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
+.title {
   margin: 0;
   font-family: var(--font-display);
   font-size: 1.3em;
@@ -100,6 +125,10 @@
   /* The footer at the bottom of the screen, however short the body. */
   .body {
     flex: 1;
+  }
+
+  .wide .body {
+    padding: 0;
   }
 
   .head,

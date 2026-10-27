@@ -53,3 +53,19 @@ export function buildFileTree(paths: string[]): FileNode[] {
   }
   return toNodes(root, "");
 }
+
+// The files in the order the tree shows them, folders first (sessions-live FR-56's « ‹ 2 / 3 › »).
+export function orderedFiles(nodes: FileNode[]): string[] {
+  return nodes.flatMap((n) => (n.kind === "file" ? [n.path] : orderedFiles(n.children)));
+}
+
+// Every folder of the tree, for « Tout replier » (sessions-live FR-55).
+export function folderPaths(nodes: FileNode[]): string[] {
+  return nodes.flatMap((n) => (n.kind === "file" ? [] : [n.path, ...folderPaths(n.children)]));
+}
+
+// « Filtrer les fichiers… »: the paths that hold the text typed, whatever its case (sessions-live FR-55).
+export function filterPaths(paths: string[], query: string): string[] {
+  const text = query.trim().toLowerCase();
+  return text === "" ? paths : paths.filter((p) => p.toLowerCase().includes(text));
+}

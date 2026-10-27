@@ -5,16 +5,24 @@ import { CloseIcon, CollapseIcon, ExpandIcon } from "./icons.tsx";
 import styles from "./Modal.module.css";
 
 // A large native dialog over the page, open while mounted: Échap, « Fermer » or a click on the backdrop closes it.
+// `subtitle` sits under the title, `aside` before « Fermer ». `size="wide"` gives a tall, wide box whose body has no padding
+// and does not scroll, for a view that lays out and scrolls its own panes.
 // `footer` stays at the bottom of the box while the body scrolls. With `fullscreen` labels, an icon button beside « Fermer » fills the screen with it (the browser's too); Échap then leaves the full screen first.
 export function Modal({
   title,
   closeLabel,
+  subtitle,
+  aside,
+  size = "md",
   fullscreen,
   footer,
   onClose,
   children,
 }: {
   title: string;
+  subtitle?: ReactNode;
+  aside?: ReactNode;
+  size?: "md" | "wide";
   closeLabel: string;
   fullscreen?: { enter: string; exit: string };
   footer?: ReactNode;
@@ -74,11 +82,15 @@ export function Modal({
         if (event.target === event.currentTarget && pressTarget.current === event.currentTarget) event.currentTarget.close();
       }}
     >
-      <div className={isFull ? `${styles.box} ${styles.full}` : styles.box}>
+      <div className={[styles.box, size === "wide" ? styles.wide : "", isFull ? styles.full : ""].filter(Boolean).join(" ")}>
         <div className={styles.head}>
-          <h2 id={titleId} className={styles.title}>
-            {title}
-          </h2>
+          <div className={styles.titles}>
+            <h2 id={titleId} className={styles.title}>
+              {title}
+            </h2>
+            {subtitle && <div className={styles.subtitle}>{subtitle}</div>}
+          </div>
+          {aside}
           {fullscreen && (
             <span className={styles.fullscreen}>
               <IconButton label={isFull ? fullscreen.exit : fullscreen.enter} aria-pressed={isFull} onClick={toggleFull}>
