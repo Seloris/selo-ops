@@ -125,7 +125,7 @@ const SESSIONS: DemoSession[] = [
     request: "Relire le travail d’hier sur la synchro des photos",
     model: OPUS, effort: "medium", perms: "default", blockers: ["not-done", "subagents"],
     subagents: [{ type: "selo:reviewer", task: "relecture de 4 commits", phase: "working" }] },
-  // The two flows beside the lanes (help FR-17): a mockup iterated turn by turn, a fastlane's iterate loop (`session` BR-22).
+  // The mockup and iterate colours (help FR-11): a mockup iterated turn by turn, a fastlane's iterate loop (`session` BR-22).
   { id: "e4b7c1d2-8a3f-4e60-b95d-2c1f0a7e6d34", project: "atelier-web", flow: "free", skill: "mockup", phase: "awaiting-answer", age: 90,
     trail: [[1500, "mockup", null, null, "working"], [1320, "mockup", null, null, "awaiting-answer"], [1200, "mockup", null, null, "working"], [1100, "mockup", null, null, "awaiting-answer"], [400, "mockup", null, null, "working"], [90, "mockup", null, null, "awaiting-answer"]],
     request: "Une fiche produit avec la galerie à gauche et le choix de la taille toujours visible",
