@@ -2,12 +2,12 @@ import { NotFoundError } from "../../shared/errors.js";
 import type { Clock } from "../../shared/clock.js";
 import { desktopSessionIdOf, toDesktopLink, type DesktopSessionReader } from "./sessions.desktop.js";
 import type { ExportRun, ExportUsage, OpsExportReader, ProjectFile, SessionFile } from "./sessions.export.js";
-import type { GitDiffReader } from "./sessions.git.js";
+import type { FileStat, GitDiffReader } from "./sessions.git.js";
 import type { InstalledPluginReader } from "./sessions.plugins.js";
 import type { GitPlace, OutsideSession, OutsideSessionReader, PermissionWait } from "./sessions.outside.js";
 import type { DesktopSessionLinkRepository, SessionArchiveRepository, SessionNoteRepository } from "./sessions.repository.js";
 import type { SessionArchive } from "./sessions.table.js";
-import { closeBlockerSchema, type CloseBlocker, type FileDiff, type Project, type Session, type SessionsResponse, type Usage } from "./sessions.schema.js";
+import { closeBlockerSchema, type CloseBlocker, type FileDiff, type FileSummary, type Project, type Session, type SessionsResponse, type Usage } from "./sessions.schema.js";
 
 // The plugin cuts a run's request at this length.
 const REQUEST_LIMIT = 200;
@@ -63,6 +63,31 @@ const EXPORT_MAX_RUNS = 100;
 // A recorded sha as git prints it; anything else never reaches git.
 const SHA = /^[0-9a-f]{4,40}$/i;
 const GIT_PARALLEL = 4;
+
+// The commits the export recorded for the session's runs, oldest run first, each sha once: only a hex sha reaches git.
+function recordedCommits(session: SessionFile): Map<string, string> {
+  const commits = new Map<string, string>();
+  const runs = [...session.runs, ...(session.current ? [session.current] : [])].sort((a, b) => Date.parse(a.since) - Date.parse(b.since));
+  for (const run of runs) for (const c of run.commits ?? []) if (SHA.test(c.sha) && !commits.has(c.sha)) commits.set(c.sha, c.subject);
+  return commits;
+}
+
+const STATUS = { A: "added", M: "modified", D: "deleted" } as const;
+
+// One file over its parts, oldest first: deleted when the last part removes it, added when the first creates it.
+function summarize(file: string, parts: FileStat[][], uncommitted: FileStat[]): FileSummary["files"][number] {
+  const stats = parts.flatMap((part) => part.filter((s) => s.file === file));
+  const first = stats[0];
+  const last = stats[stats.length - 1];
+  const sum = (key: "added" | "removed") => stats.reduce<number | null>((total, s) => (total === null || s[key] === null ? null : total + s[key]), 0);
+  return {
+    file,
+    status: !first || !last ? null : last.status === "D" ? STATUS.D : STATUS[first.status === "A" ? "A" : "M"],
+    added: sum("added"),
+    removed: sum("removed"),
+    isUncommitted: uncommitted.some((s) => s.file === file),
+  };
+}
 
 const BLOCKERS = new Set<string>(closeBlockerSchema.options);
 
@@ -338,6 +363,22 @@ export function createSessionService({
       await archives.remove(id);
     },
 
+    // `session` BR-01: each touched file's status and lines, over its recorded commits, then its uncommitted part.
+    async fileSummary(id: string): Promise<FileSummary> {
+      const session = opsExport.read().sessions.find((s) => s.sessionId === id);
+      if (!session) throw new NotFoundError("Session", id);
+      if (!(await git.isCheckout(session.root))) return { isAvailable: false, files: [] };
+      const touched = session.touchedFiles ?? [];
+      const shas = [...recordedCommits(session).keys()];
+      const parts: FileStat[][] = [];
+      for (let i = 0; i < shas.length; i += GIT_PARALLEL) {
+        const read = await Promise.all(shas.slice(i, i + GIT_PARALLEL).map((sha) => git.commitStats(session.root, sha, touched)));
+        for (const stats of read) if (stats) parts.push(stats);
+      }
+      const uncommitted = await git.uncommittedStats(session.root, touched);
+      return { isAvailable: true, files: touched.map((file) => summarize(file, [...parts, uncommitted], uncommitted)) };
+    },
+
     // `session` BR-01: only a file the session touched, only commits the export recorded, so nothing the caller
     // sends reaches git but a path and a sha it already holds.
     async fileDiff(id: string, file: string): Promise<FileDiff> {
@@ -345,9 +386,7 @@ export function createSessionService({
       if (!session) throw new NotFoundError("Session", id);
       if (!(session.touchedFiles ?? []).includes(file)) throw new NotFoundError("Touched file", file);
       if (!(await git.isCheckout(session.root))) return { file, isAvailable: false, commits: [], uncommitted: null };
-      const commits = new Map<string, string>();
-      const runs = [...session.runs, ...(session.current ? [session.current] : [])].sort((a, b) => Date.parse(a.since) - Date.parse(b.since));
-      for (const run of runs) for (const c of run.commits ?? []) if (SHA.test(c.sha) && !commits.has(c.sha)) commits.set(c.sha, c.subject);
+      const commits = recordedCommits(session);
       // A few git processes at once: a long session's commits neither queue for minutes nor flood the machine.
       const entries = [...commits];
       const texts: Awaited<ReturnType<GitDiffReader["commitDiff"]>>[] = [];

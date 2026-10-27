@@ -1198,6 +1198,63 @@
           "versions"
         ]
       },
+      "FileSummary": {
+        "type": "object",
+        "properties": {
+          "isAvailable": {
+            "type": "boolean"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "added",
+                    "modified",
+                    "deleted",
+                    null
+                  ]
+                },
+                "added": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "removed": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "isUncommitted": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "file",
+                "status",
+                "added",
+                "removed",
+                "isUncommitted"
+              ]
+            }
+          }
+        },
+        "required": [
+          "isAvailable",
+          "files"
+        ]
+      },
       "FileDiff": {
         "type": "object",
         "properties": {
@@ -1848,6 +1905,54 @@
           },
           "404": {
             "description": "The session is neither in the export nor running outside selo",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sessions/{id}/files": {
+      "get": {
+        "summary": "Each file the session touched, with its status and lines added and removed over its recorded commits and its uncommitted part, read from git",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The files, or isAvailable false when the session's folder holds no git checkout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The session is not in the export",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "git did not answer: timed out, missing or killed",
             "content": {
               "application/problem+json": {
                 "schema": {

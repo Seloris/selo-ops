@@ -191,6 +191,27 @@ export const fileDiffSchema = z
   })
   .meta({ id: "FileDiff" });
 
+// What each touched file went through, summed over the session's recorded commits and its uncommitted part, read from
+// git when the person asks for the files (`session` BR-01).
+export const fileSummarySchema = z
+  .object({
+    // False when the session's folder is gone or is no git checkout: nothing else is read.
+    isAvailable: z.boolean(),
+    // One entry per touched file, in the export's order.
+    files: z.array(
+      z.object({
+        file: z.string(),
+        // Deleted when its last part removes it, added when its first part creates it; null when no part changes it.
+        status: z.enum(["added", "modified", "deleted"]).nullable(),
+        // Null when a part of it is binary.
+        added: z.number().int().nullable(),
+        removed: z.number().int().nullable(),
+        isUncommitted: z.boolean(),
+      }),
+    ),
+  })
+  .meta({ id: "FileSummary" });
+
 export type Session = z.infer<typeof sessionSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type InstalledPlugin = z.infer<typeof installedPluginSchema>;
@@ -199,6 +220,7 @@ export type SessionState = z.infer<typeof sessionStateSchema>;
 export type CloseBlocker = z.infer<typeof closeBlockerSchema>;
 export type Usage = z.infer<typeof usageSchema>;
 export type FileDiff = z.infer<typeof fileDiffSchema>;
+export type FileSummary = z.infer<typeof fileSummarySchema>;
 
 const problem = (description: string) => ({
   description,
@@ -245,6 +267,18 @@ registry.registerPath({
     204: { description: "Saved, or removed" },
     400: problem("The text is missing or longer than 200 characters"),
     404: problem("The session is neither in the export nor running outside selo"),
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/sessions/{id}/files",
+  summary: "Each file the session touched, with its status and lines added and removed over its recorded commits and its uncommitted part, read from git",
+  request: { params: sessionParamsSchema },
+  responses: {
+    200: { description: "The files, or isAvailable false when the session's folder holds no git checkout", content: { "application/json": { schema: fileSummarySchema } } },
+    404: problem("The session is not in the export"),
+    502: problem("git did not answer: timed out, missing or killed"),
   },
 });
 
