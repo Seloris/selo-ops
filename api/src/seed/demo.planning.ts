@@ -249,7 +249,7 @@ const toExportBlueprint = (b: DemoBlueprint, at: (secondsAgo: number) => string)
     decisions: b.decisions,
     stages: b.state === "legacy" ? [] : b.stages.map((st, i) => ({ number: i + 1, component: st[0], commit: commitOf(b, st), sha: st[2], done: st[2] !== null })),
     progress: { reviewDone: b.state === "merging" || b.state === "done", specMerged: b.state === "done" },
-    next: isOpen && b.state !== "draft" ? { prompt: `/selo:${b.state === "review" ? "review" : "build"} ${file}` } : null,
+    next: isOpen && b.state !== "draft" ? { prompt: `/selo-flow:${b.state === "review" ? "review" : "build"} ${file}` } : null,
     sessions: [],
     modifiedAt: at(6 * HOUR),
   };

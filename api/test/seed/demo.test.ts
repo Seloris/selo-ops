@@ -112,6 +112,9 @@ describe("demo", { timeout: 30_000 }, () => {
     expect(blueprints.some((b) => b.worktreeBranch !== null)).toBe(true);
     expect(projects.flatMap((p) => p.mockups).some((m) => m.worktreeBranch !== null)).toBe(true);
     expect(blueprints.some((b) => b.sessionIds.length > 0)).toBe(true);
+    const nextPrompts = blueprints.flatMap((b) => (b.nextPrompt ? [b.nextPrompt] : []));
+    expect(nextPrompts.length).toBeGreaterThan(0);
+    expect(nextPrompts.every((p) => p.startsWith("/selo-flow:"))).toBe(true);
     expect(projects.some((p) => !p.hasPlanning)).toBe(true);
     expect(projects.some((p) => p.ideaCount > 0 && p.debtCount > 0)).toBe(true);
     for (const p of projects.filter((x) => x.hasPlanning)) {
