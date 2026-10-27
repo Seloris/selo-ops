@@ -2,7 +2,7 @@ import { t } from "../../../shared/lib/i18n/index.ts";
 import { Checkbox } from "../../../shared/ui/Checkbox.tsx";
 import { Dropdown, DropdownCheck, DropdownSeparator } from "../../../shared/ui/Dropdown.tsx";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
-import { CloseIcon, GridIcon, ListIcon } from "../../../shared/ui/icons.tsx";
+import { CloseIcon, FocusIcon, GridIcon, ListIcon } from "../../../shared/ui/icons.tsx";
 import { SearchInput } from "../../../shared/ui/SearchInput.tsx";
 import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import type { Grouping, Project } from "../data/sessionView.ts";
@@ -15,7 +15,7 @@ export interface ProjectItem {
   openCount: number;
 }
 
-// sessions-live FR-03 to FR-07.
+// sessions-live FR-03 to FR-07, and FR-58's button.
 export function SettingsBar({
   view,
   onView,
@@ -33,6 +33,7 @@ export function SettingsBar({
   onShowClosed,
   search,
   onSearch,
+  onZen,
 }: {
   view: View;
   onView: (view: View) => void;
@@ -50,6 +51,7 @@ export function SettingsBar({
   onShowClosed: (show: boolean) => void;
   search: string;
   onSearch: (search: string) => void;
+  onZen(): void;
 }) {
   const checked = projects.filter((p) => projectIds === null || projectIds.has(p.project.id));
   const projectsLabel =
@@ -134,6 +136,9 @@ export function SettingsBar({
           </span>
         )}
       </div>
+      <IconButton label={t("sessions.zen.enter")} onClick={onZen}>
+        <FocusIcon />
+      </IconButton>
     </div>
   );
 }

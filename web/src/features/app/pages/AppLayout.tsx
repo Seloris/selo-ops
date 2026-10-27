@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { Outlet, ScrollRestoration, useLocation } from "react-router";
+import { AppHeaderContext } from "../../../shared/lib/appHeader.ts";
 import { useSessionFlags } from "../../../shared/lib/flags.ts";
 import { useNotifySetting } from "../../../shared/lib/notifications.ts";
 import { t } from "../../../shared/lib/i18n/index.ts";
@@ -13,7 +14,7 @@ import { HelpDialog } from "../../help/ui/HelpDialog.tsx";
 import { AppHeader } from "../ui/AppHeader.tsx";
 
 // app FR-03: every page renders under the shared header, which scrolls away with the page;
-// its height goes to --app-header-h, for a page that fills the rest of the screen.
+// its height goes to --app-header-h, for a page that fills the rest of the screen. A page may hide it (sessions-live FR-58).
 export function AppLayout() {
   const [theme, setTheme] = useTheme();
   const notify = useNotifySetting();
@@ -36,24 +37,32 @@ export function AppLayout() {
   const closeSettings = () => setSettingsOpening(null);
   const shellRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const [isHeaderHidden, setHeaderHidden] = useState(false);
 
   useLayoutEffect(() => {
     const header = headerRef.current;
-    if (!header) return;
+    if (!header) {
+      shellRef.current?.style.setProperty("--app-header-h", "0px");
+      return;
+    }
     const measure = () => shellRef.current?.style.setProperty("--app-header-h", `${header.offsetHeight}px`);
     // Before the first paint too: the observer reports only after it.
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(header);
     return () => observer.disconnect();
-  }, []);
+  }, [isHeaderHidden]);
 
   return (
     <div ref={shellRef}>
-      <div ref={headerRef}>
-        <AppHeader theme={theme} onTheme={setTheme} notify={notify} isHelpPage={pathname === "/help"} onHelp={() => setHelpOpenOn(pathname)} onSettings={openSettings} />
-      </div>
-      <Outlet />
+      {!isHeaderHidden && (
+        <div ref={headerRef}>
+          <AppHeader theme={theme} onTheme={setTheme} notify={notify} isHelpPage={pathname === "/help"} onHelp={() => setHelpOpenOn(pathname)} onSettings={openSettings} />
+        </div>
+      )}
+      <AppHeaderContext value={setHeaderHidden}>
+        <Outlet />
+      </AppHeaderContext>
       {isHelpOpen && <HelpDialog onClose={() => setHelpOpenOn(null)} />}
       {settingsOpening !== null && (
         <SettingsDialog

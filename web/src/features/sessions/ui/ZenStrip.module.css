@@ -1,0 +1,84 @@
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  min-height: var(--control-h);
+  padding: 4px 24px 4px 32px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+  font-size: 0.87em;
+  color: var(--text-muted);
+}
+
+.counts {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+}
+
+.todo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.todo b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.end {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 6px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.updated svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.spin {
+  animation: spin 0.9s ease-in-out 1;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .strip {
+    padding: 4px 12px 4px 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .pills {
+    order: 3;
+    flex-basis: 100%;
+  }
+}

@@ -4,6 +4,7 @@ What changed in the application, for someone who reads no spec. One entry per pi
 
 ## 2026-10-27
 
+- Added — A zen mode on Sessions live, by its button at the end of the settings bar or the Z key: the headers and the settings bar give way to a thin strip with the counts, the settings in force as pills you can remove with « × », the refresh time, « Nouvelle session » and the way out; it stays on until you leave it.
 - Added — A project's view now shows its changelog as a timeline: one node per day, newest first, each change tagged « Ajout », « Modification » or « Correction » in its own colour, with a link that opens its blueprint beside the page.
 - Changed — A mockup validated and committed in a worktree now stays under « Reprendre » in « Nouvelle session » until its worktree lands on the base branch; the help explains `--worktree`, under the lane picked and in each skill's options. ([blueprint](blueprints/2026-10-27-worktree-option.md))
 - Changed — A session's « Déroulé du tour » now reads as chapters, oldest first: one bordered block per step in its lane's colour, with its duration and the time spent waiting on you; only the chapter in progress is unfolded, a click opens a past one on its passages and subagents, and the folded heading gives the path of the lanes (« pilot › blueprint › build · Étape 1 »).

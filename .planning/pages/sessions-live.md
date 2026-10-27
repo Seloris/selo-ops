@@ -17,7 +17,13 @@ The home page of Selo Ops: every Claude Code session of the selo projects, live,
 - **FR-05** — « Projets » is a checklist of the projects with « Tous », each with its count of open sessions, all checked by default.
 - **FR-06** — « Afficher les fermées », unchecked by default, with its count, adds a « Fermées » block of the closed sessions not archived (`session` BR-03).
 - **FR-07** — The search filters on the request, the blueprint, the branch, the worktree's name (FR-52) and the project, in every block.
-- **FR-08** — The view, the grouping and the project filter (as the unchecked projects, so a new project shows) are remembered in the browser; « Afficher les fermées » and the search are not.
+- **FR-08** — The view, the grouping, the project filter (as the unchecked projects, so a new project shows) and the zen mode (FR-58) are remembered in the browser; « Afficher les fermées » and the search are not.
+
+- **FR-58** — « Mode zen », an icon-only button closing the settings bar, or the Z key typed outside a text field and with no window open, puts the page in zen mode: the app's header (`app` FR-03), the page's header and the settings bar are hidden, the list and the detail take the whole height under the zen strip (FR-59); its « Quitter le mode zen » button, or Z again, gives them back. The detail's full screen (FR-37) works the same in zen mode, and leaving it comes back to the zen mode.
+
+## Zen strip
+
+- **FR-59** — In zen mode, a thin strip tops the page: the open sessions count and their « à traiter » count, as the header's subtitle (FR-01); then one pill per setting that is not its default — « Cartes », « Par statut » or « Sans regroupement », the projects shown (« selo-ops », « 2 projets », « Aucun projet »), « Fermées affichées », the search in quotes — each with a « × » that puts that setting back to its default, nothing when every setting is at its default; at its end « Mis à jour il y a X s » (FR-02, without the plugins' versions), « Nouvelle session » as an icon (FR-43) and « Quitter le mode zen ». Below 640 px, the pills wrap under the counts.
 
 ## Sessions
 

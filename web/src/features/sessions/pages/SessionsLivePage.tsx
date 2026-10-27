@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useSearchParams } from "react-router";
+import { useHiddenAppHeader } from "../../../shared/lib/appHeader.ts";
 import { useSessionFlags } from "../../../shared/lib/flags.ts";
 import { copyText } from "../../../shared/lib/clipboard.ts";
 import { t } from "../../../shared/lib/i18n/index.ts";
@@ -48,13 +49,14 @@ import { ArchivedToggle, ClosedHeader, ProjectHeader, SessionGroup, StatusHeader
 import { SessionList, type SessionActions } from "../ui/SessionList.tsx";
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
 import { SettingsBar, type View } from "../ui/SettingsBar.tsx";
+import { ZenStrip, type ZenPill } from "../ui/ZenStrip.tsx";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../ui/panelWidth.ts";
 import { desktopLinkOf, metaWidth, workLabel, outdatedIdsOf, pluginsText, requestText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
 import { buildFileTree, orderedFiles } from "../ui/fileTree.ts";
 import styles from "./SessionsLivePage.module.css";
 
-// sessions-live FR-08, FR-27 and FR-31: the view, the grouping, the detail's width and its folded sections are
-// remembered in the browser.
+// sessions-live FR-08, FR-27, FR-31 and FR-58: the view, the grouping, the detail's width, its folded sections and the
+// zen mode are remembered in the browser.
 const SETTINGS_KEY = "selo-ops/sessions-live/settings";
 interface Settings {
   view: View;
@@ -63,6 +65,7 @@ interface Settings {
   foldedSections: FoldedSections;
   // The unchecked projects, not the checked ones: a project that appears later shows by default.
   hiddenProjectIds: string[];
+  isZen: boolean;
 }
 
 function readSettings(): Settings {
@@ -74,6 +77,7 @@ function readSettings(): Settings {
     panelWidth: parsePanelWidth(o.panelWidth),
     foldedSections: parseFoldedSections(o.foldedSections),
     hiddenProjectIds: Array.isArray(o.hiddenProjectIds) ? o.hiddenProjectIds.filter((id): id is string => typeof id === "string") : [],
+    isZen: o.isZen === true,
   };
 }
 
@@ -136,6 +140,13 @@ export function SessionsLivePage() {
     const next = { ...settings, ...patch };
     setSettings(next);
     writeStored(SETTINGS_KEY, next);
+  };
+
+  // sessions-live FR-58: the zen mode hides the app's header, the page's header and its settings bar.
+  useHiddenAppHeader(settings.isZen);
+  const toggleZen = () => {
+    setProjectsOpen(false);
+    updateSettings({ isZen: !settings.isZen });
   };
 
   // sessions-live FR-27: while the edge moves, the width goes straight to the page's style (no re-render
@@ -222,6 +233,22 @@ export function SessionsLivePage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isProjectsOpen, isFullscreen, selectedId, closeDetail, isDialogOpen]);
+
+  // sessions-live FR-58: Z switches the zen mode, outside a text field and with no window open.
+  const onZenKey = useEffectEvent(toggleZen);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      // Not in the detail's full screen, where nothing would show the change.
+      if ((e.key !== "z" && e.key !== "Z") || e.ctrlKey || e.metaKey || e.altKey || e.repeat || isDialogOpen || isFullscreen) return;
+      if (document.querySelector("dialog[open]")) return;
+      const target = e.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || target.closest("input, textarea, select"))) return;
+      e.preventDefault();
+      onZenKey();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isDialogOpen, isFullscreen]);
 
   const toastId = useRef(0);
   const showToast = useCallback((next: Omit<ToastState, "id">) => {
@@ -360,6 +387,29 @@ export function SessionsLivePage() {
         : t("sessions.empty.none");
 
   const isOnlyDetail = isPanelOpen && isFullscreen;
+
+  // sessions-live FR-59: one pill per setting that is not its default, its « × » putting it back.
+  const checkedProjects = projectIds === null ? null : projects.filter((p) => projectIds.has(p.id));
+  const zenPills: ZenPill[] = [
+    settings.view === "cards" && { key: "view", label: t("sessions.zen.cards"), onClear: () => updateSettings({ view: "list" }) },
+    settings.grouping !== "project" && {
+      key: "grouping",
+      label: t(settings.grouping === "status" ? "sessions.zen.groupStatus" : "sessions.zen.groupNone"),
+      onClear: () => updateSettings({ grouping: "project" }),
+    },
+    checkedProjects !== null && {
+      key: "projects",
+      label:
+        checkedProjects.length === 0
+          ? t("sessions.zen.projectsNone")
+          : checkedProjects.length === 1
+            ? (checkedProjects[0]?.name ?? "")
+            : t("sessions.settings.projectsSome", { count: checkedProjects.length }),
+      onClear: () => updateSettings({ hiddenProjectIds: [] }),
+    },
+    showClosed && { key: "closed", label: t("sessions.zen.showClosed"), onClear: () => setShowClosed(false) },
+    search.trim() !== "" && { key: "search", label: t("sessions.zen.search", { search: search.trim() }), onClear: () => setSearch("") },
+  ].filter((p): p is ZenPill => p !== false);
   const updatedSeconds = query.dataUpdatedAt ? Math.max(0, Math.floor((now - query.dataUpdatedAt) / 1000)) : null;
 
   return (
@@ -368,7 +418,17 @@ export function SessionsLivePage() {
       className={`${styles.app} ${isPanelOpen ? styles.withPanel : ""} ${isOnlyDetail ? styles.fullscreen : ""} ${settings.panelWidth !== null || isResizing ? styles.sized : ""} ${isResizing ? styles.resizing : ""}`}
       style={settings.panelWidth !== null ? ({ "--drawer-chosen-w": `${settings.panelWidth}px` } as CSSProperties) : undefined}
     >
-      {!isOnlyDetail && (
+      {!isOnlyDetail && settings.isZen && (
+        <ZenStrip
+          counts={counts}
+          pills={zenPills}
+          updatedSeconds={updatedSeconds}
+          isRefreshing={query.isFetching}
+          onNewSession={() => setNewSession({ folder: latestFolder })}
+          onLeave={toggleZen}
+        />
+      )}
+      {!isOnlyDetail && !settings.isZen && (
         <SessionsHeader
           counts={counts}
           updatedSeconds={updatedSeconds}
@@ -377,7 +437,7 @@ export function SessionsLivePage() {
           onNewSession={() => setNewSession({ folder: latestFolder })}
         />
       )}
-      {!isOnlyDetail && <SettingsBar
+      {!isOnlyDetail && !settings.isZen && <SettingsBar
         view={settings.view}
         onView={(view) => updateSettings({ view })}
         grouping={settings.grouping}
@@ -394,6 +454,7 @@ export function SessionsLivePage() {
         onShowClosed={setShowClosed}
         search={search}
         onSearch={setSearch}
+        onZen={toggleZen}
       />}
       <div className={styles.body}>
         <main className={styles.content}>
