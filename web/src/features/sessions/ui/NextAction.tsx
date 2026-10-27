@@ -4,6 +4,7 @@ import { t } from "../../../shared/lib/i18n/index.ts";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
 import { CheckIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
 import type { Session } from "../data/sessionView.ts";
+import { nextCommand } from "./sessionText.ts";
 import styles from "./NextAction.module.css";
 
 // sessions-live FR-21: the row's « Action suivante » button copies the command as soon as the pointer rests on it;
@@ -12,7 +13,7 @@ export function NextButton({ session, onCopy }: { session: Session; onCopy: (ses
   const [isCopied, setIsCopied] = useState(false);
   const timer = useRef<number>(undefined);
   useEffect(() => () => window.clearTimeout(timer.current), []);
-  const command = session.isArchived ? null : session.nextAction;
+  const command = nextCommand(session);
   if (!command) return <span className={styles.slot} aria-hidden="true" />;
   const icon = isCopied ? <CheckIcon /> : <PromptIcon />;
   return (

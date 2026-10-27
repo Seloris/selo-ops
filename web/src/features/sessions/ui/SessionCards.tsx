@@ -6,7 +6,7 @@ import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
 import { FlagButton, NotifySwitch } from "./FlagControls.tsx";
 import { AgeLabel, AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
-import { awaitedOf, calmText, closeText, modelText, laneColor, requestText, workLabel } from "./sessionText.ts";
+import { awaitedOf, calmText, closeText, modelText, laneColor, nextCommand, requestText, workLabel } from "./sessionText.ts";
 import { exactTokens, totalTokens } from "./usage.ts";
 import styles from "./SessionCards.module.css";
 
@@ -35,7 +35,8 @@ export function SessionCards({
       {sessions.map((s) => {
         const awaited = awaitedOf(s);
         const tint = isTodo(s) ? (s.state === "stopped" ? styles.danger : styles.warn) : "";
-        const hasNext = s.nextAction !== null && !s.isArchived;
+        const next = nextCommand(s);
+        const hasNext = next !== null;
         const isNextOpen = hasNext && nextShown.has(s.id);
         return (
           <li key={s.id} className={`${styles.card} ${tint} ${s.id === selectedId ? styles.selected : ""} ${isOpen(s) ? "" : styles.dim}`}>
@@ -77,9 +78,9 @@ export function SessionCards({
                 <NotifySwitch id={s.id} flags={actions.flags} />
               </div>
             )}
-            {isNextOpen && s.nextAction && (
+            {isNextOpen && next && (
               <div className={styles.command}>
-                <CommandBox command={s.nextAction} copyLabel={t("sessions.actions.copy")} onCopy={() => actions.onCopyNext(s)} />
+                <CommandBox command={next} copyLabel={t("sessions.actions.copy")} onCopy={() => actions.onCopyNext(s)} />
               </div>
             )}
             <div className={styles.foot}>

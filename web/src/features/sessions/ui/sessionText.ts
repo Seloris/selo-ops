@@ -70,17 +70,38 @@ export interface NextCommand {
 }
 
 // sessions-live FR-48: the resume prompt, then each next step of the done footer; a command once, with the summary a
-// next step gives it; nothing for an archived session (FR-21).
+// next step gives it; a next step on the resume prompt's blueprint takes its place; nothing for an archived session (FR-21).
 export function nextCommands(s: Pick<Session, "isArchived" | "nextAction" | "nextSteps">): NextCommand[] {
   if (s.isArchived || !s.nextAction) return [];
-  const byCommand = new Map<string, NextCommand>([[s.nextAction, { summary: null, command: s.nextAction }]]);
+  const resume: NextCommand = { summary: null, command: s.nextAction };
+  const shown = [resume];
+  const byCommand = new Map<string, NextCommand>([[s.nextAction, resume]]);
+  const resumeBlueprint = blueprintOf(s.nextAction);
+  let isResumeReplaced = false;
   for (const { summary, command } of s.nextSteps) {
     const known = byCommand.get(command);
-    if (!known) byCommand.set(command, { summary, command });
-    else known.summary ??= summary;
+    if (known) known.summary ??= summary;
+    else if (!isResumeReplaced && resumeBlueprint && blueprintOf(command) === resumeBlueprint) {
+      Object.assign(resume, { summary, command });
+      byCommand.set(command, resume);
+      isResumeReplaced = true;
+    } else {
+      const step = { summary, command };
+      shown.push(step);
+      byCommand.set(command, step);
+    }
   }
-  return [...byCommand.values()];
+  return shown;
 }
+
+// The blueprint a selo command runs on (`/selo-flow:build .planning/blueprints/x.md` → its path), else null.
+function blueprintOf(command: string): string | null {
+  const match = /^\/\S+\s+(\.planning\/blueprints\/\S+\.md)(?:\s|$)/.exec(command.trim());
+  return match?.[1] ?? null;
+}
+
+// sessions-live FR-21: the one « Action suivante » of a session, the first of its next steps, in the list, the card and the detail.
+export const nextCommand = (s: Pick<Session, "isArchived" | "nextAction" | "nextSteps">): string | null => nextCommands(s)[0]?.command ?? null;
 
 export const blockerLabel = (b: Session["blockers"][number]) => t(`sessions.blocker.${b}` as MessageKey);
 
@@ -164,7 +185,8 @@ export function rowContext(s: Session): RowContext {
   if (awaited) return { kind: "awaited", awaited };
   const step = s.state === "working" && isOpen(s) ? stepText(s) : null;
   if (step) return { kind: "step", text: step };
-  if (s.nextAction && !s.isArchived) return { kind: "next", command: s.nextAction };
+  const next = nextCommand(s);
+  if (next) return { kind: "next", command: next };
   return { kind: "none" };
 }
 

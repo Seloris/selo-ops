@@ -52,7 +52,7 @@ import { SessionsHeader } from "../ui/SessionsHeader.tsx";
 import { SettingsBar, type View } from "../ui/SettingsBar.tsx";
 import { ZenStrip, type ZenPill } from "../ui/ZenStrip.tsx";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../ui/panelWidth.ts";
-import { desktopLinkOf, metaWidth, workLabel, outdatedIdsOf, pluginsText, requestText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
+import { desktopLinkOf, metaWidth, nextCommand, workLabel, outdatedIdsOf, pluginsText, requestText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
 import { buildFileTree, orderedFiles } from "../ui/fileTree.ts";
 import styles from "./SessionsLivePage.module.css";
 
@@ -303,7 +303,7 @@ export function SessionsLivePage() {
         return next;
       }),
     onCopyNext: (s, command) =>
-      void copy(command ?? s.nextAction ?? "", t("sessions.toast.nextCopied"), t("sessions.toast.nextHint", { project: projectName(s.projectId), lane: workLabel(s) })),
+      void copy(command ?? nextCommand(s) ?? "", t("sessions.toast.nextCopied"), t("sessions.toast.nextHint", { project: projectName(s.projectId), lane: workLabel(s) })),
     onArchive: (s) => {
       // sessions-live FR-22: a finished session archives at once, unless it holds a note or is flagged.
       if (isFinished(s) && !s.note && !flags.isFlagged(s.id)) archiveNow(s.id);

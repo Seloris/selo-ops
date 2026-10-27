@@ -19,7 +19,7 @@ import {
   laneColor,
   metaText,
   metaWidth,
-  nextCommands,
+  nextCommand, nextCommands,
   workLabel,
   shownBlockers,
   toneOf,
@@ -454,6 +454,53 @@ describe("nextCommands (sessions-live FR-48)", () => {
       { summary: "Construire", command: "/selo:build b.md" },
       { summary: "Relire", command: "/selo:review" },
     ]);
+  });
+
+  it("shows a next step on the resume prompt's blueprint once, in its place, as the next step", () => {
+    const blueprint = ".planning/blueprints/2026-10-27-plugin-rename.md";
+    const s = buildSession({
+      nextAction: `/selo-flow:build ${blueprint}`,
+      nextSteps: [step("Relire", "/selo-flow:review"), step("Construire", `/selo-flow:pilot ${blueprint}`)],
+    });
+    expect(nextCommands(s)).toEqual([
+      { summary: "Construire", command: `/selo-flow:pilot ${blueprint}` },
+      { summary: "Relire", command: "/selo-flow:review" },
+    ]);
+  });
+
+  it("keeps two commands apart when only their skill matches", () => {
+    const s = buildSession({ nextAction: "/selo-flow:build .planning/blueprints/a.md", nextSteps: [step("Autre", "/selo-flow:pilot .planning/blueprints/b.md")] });
+    expect(nextCommands(s)).toEqual([
+      { summary: null, command: "/selo-flow:build .planning/blueprints/a.md" },
+      { summary: "Autre", command: "/selo-flow:pilot .planning/blueprints/b.md" },
+    ]);
+  });
+
+  it("lets only the first next step on the blueprint take the place, its options aside, the resume prompt's copies dropped", () => {
+    const build = "/selo-flow:build .planning/blueprints/a.md";
+    const pilot = "/selo-flow:pilot .planning/blueprints/a.md --autonomous";
+    const s = buildSession({
+      nextAction: build,
+      nextSteps: [step("Construire", build), step("Piloter", pilot), step("Encore", build), step("Ici", "/selo-flow:pilot .planning/blueprints/a.md")],
+    });
+    expect(nextCommands(s)).toEqual([
+      { summary: "Piloter", command: pilot },
+      { summary: "Ici", command: "/selo-flow:pilot .planning/blueprints/a.md" },
+    ]);
+  });
+
+  it("replaces nothing when the resume prompt runs on no blueprint", () => {
+    const s = buildSession({ nextAction: "/selo-flow:review", nextSteps: [step("Construire", "/selo-flow:build .planning/blueprints/a.md")] });
+    expect(nextCommands(s)).toEqual([
+      { summary: null, command: "/selo-flow:review" },
+      { summary: "Construire", command: "/selo-flow:build .planning/blueprints/a.md" },
+    ]);
+  });
+
+  it("gives the same « Action suivante » as the detail's first step", () => {
+    const s = buildSession({ nextAction: "/selo-flow:build .planning/blueprints/a.md", nextSteps: [step("Piloter", "/selo-flow:pilot .planning/blueprints/a.md")] });
+    expect(nextCommand(s)).toBe("/selo-flow:pilot .planning/blueprints/a.md");
+    expect(nextCommand(buildSession({ isArchived: true, nextAction: "/selo-flow:review" }))).toBeNull();
   });
 
   it("gives nothing without a next action, nor for an archived session", () => {
