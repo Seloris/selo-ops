@@ -27,7 +27,8 @@
   padding: 1px 4px;
 }
 
-.folder {
+.folder,
+.file {
   width: 100%;
   border: 0;
   border-radius: var(--radius-control);
@@ -38,8 +39,14 @@
   cursor: pointer;
 }
 
-.folder:hover {
+.folder:hover,
+.file:hover {
   background: var(--surface-2);
+}
+
+.file.selected {
+  background: var(--surface-2);
+  box-shadow: inset 2px 0 0 var(--hue-files);
 }
 
 .folder svg,

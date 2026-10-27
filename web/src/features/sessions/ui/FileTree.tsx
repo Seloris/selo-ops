@@ -41,8 +41,8 @@ function FileKindIcon({ path }: { path: string }) {
 }
 
 // The files a session modified, browsed folder by folder (sessions-live FR-19): every folder starts open,
-// each file with the icon of its type.
-export function FileTree({ paths }: { paths: string[] }) {
+// each file with the icon of its type; a click on a file asks for its diff (FR-51).
+export function FileTree({ paths, selected, onSelect }: { paths: string[]; selected: string | null; onSelect: (path: string) => void }) {
   const tree = useMemo(() => buildFileTree(paths), [paths]);
   const [closed, setClosed] = useState<ReadonlySet<string>>(new Set());
   const toggle = (path: string) =>
@@ -51,17 +51,33 @@ export function FileTree({ paths }: { paths: string[] }) {
       if (!next.delete(path)) next.add(path);
       return next;
     });
-  return <Nodes nodes={tree} closed={closed} onToggle={toggle} isRoot />;
+  return <Nodes nodes={tree} closed={closed} onToggle={toggle} selected={selected} onSelect={onSelect} isRoot />;
 }
 
-function Nodes({ nodes, closed, onToggle, isRoot = false }: { nodes: FileNode[]; closed: ReadonlySet<string>; onToggle: (path: string) => void; isRoot?: boolean }) {
+function Nodes({
+  nodes,
+  closed,
+  onToggle,
+  selected,
+  onSelect,
+  isRoot = false,
+}: {
+  nodes: FileNode[];
+  closed: ReadonlySet<string>;
+  onToggle: (path: string) => void;
+  selected: string | null;
+  onSelect: (path: string) => void;
+  isRoot?: boolean;
+}) {
   return (
     <ul className={isRoot ? styles.tree : styles.children}>
       {nodes.map((n) =>
         n.kind === "file" ? (
-          <li key={`file:${n.path}`} className={styles.file} title={n.path}>
-            <FileKindIcon path={n.path} />
-            <span className={styles.name}>{n.name}</span>
+          <li key={`file:${n.path}`}>
+            <button type="button" className={`${styles.file} ${n.path === selected ? styles.selected : ""}`} aria-pressed={n.path === selected} title={n.path} onClick={() => onSelect(n.path)}>
+              <FileKindIcon path={n.path} />
+              <span className={styles.name}>{n.name}</span>
+            </button>
           </li>
         ) : (
           <li key={`folder:${n.path}`}>
@@ -75,7 +91,7 @@ function Nodes({ nodes, closed, onToggle, isRoot = false }: { nodes: FileNode[];
                 {n.fileCount}
               </span>
             </button>
-            {!closed.has(n.path) && <Nodes nodes={n.children} closed={closed} onToggle={onToggle} />}
+            {!closed.has(n.path) && <Nodes nodes={n.children} closed={closed} onToggle={onToggle} selected={selected} onSelect={onSelect} />}
           </li>
         ),
       )}

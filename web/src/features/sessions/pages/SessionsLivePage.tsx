@@ -30,6 +30,7 @@ import {
 } from "../data/sessionView.ts";
 import { useArchiveSessionMutation } from "../data/useArchiveSessionMutation.ts";
 import { useSessionsQuery } from "../data/useSessionsQuery.ts";
+import { useFileDiffQuery } from "../data/useFileDiffQuery.ts";
 import { useSaveNoteMutation } from "../data/useSaveNoteMutation.ts";
 import { useUnarchiveSessionMutation } from "../data/useUnarchiveSessionMutation.ts";
 import { useProjectsQuery } from "../../projects/data/useProjectsQuery.ts";
@@ -125,6 +126,7 @@ export function SessionsLivePage() {
   // sessions-live FR-37: the detail alone on the screen, header and settings hidden, the browser in full screen
   // when it allows it; not remembered.
   const [isFullscreen, setFullscreen] = useState(false);
+  const [diffAsked, setDiffAsked] = useState<{ sessionId: string; file: string } | null>(null);
 
   const updateSettings = (patch: Partial<Settings>) => {
     const next = { ...settings, ...patch };
@@ -159,6 +161,9 @@ export function SessionsLivePage() {
   const projectsById = useMemo(() => new Map(projects.map((p) => [p.id, p])), [projects]);
   const projectName = useCallback((id: string) => projectsById.get(id)?.name ?? id, [projectsById]);
   const selected = sessions.find((s) => s.id === selectedId) ?? null;
+  // sessions-live FR-51: the file whose diff the detail shows, for the session it was asked on.
+  const diffFile = diffAsked !== null && diffAsked.sessionId === selected?.id ? diffAsked.file : null;
+  const fileDiff = useFileDiffQuery(selected?.id ?? "", diffFile);
 
   const closeDetail = useCallback(() => {
     setFullscreen(false);
@@ -416,6 +421,12 @@ export function SessionsLivePage() {
               foldedSections={settings.foldedSections[isFullscreen ? "fullscreen" : "panel"]}
               actions={actions}
               isFullscreen={isFullscreen}
+              fileDiff={
+                diffFile === null
+                  ? null
+                  : { file: diffFile, diff: fileDiff.data, isLoading: fileDiff.isPending, error: fileDiff.isError ? fileDiff.error.message : null }
+              }
+              onSelectFile={(file) => setDiffAsked(file === null ? null : { sessionId: selected.id, file })}
               onClose={closeDetail}
               onToggleFullscreen={toggleFullscreen}
               onToggleSection={(section) => updateSettings({ foldedSections: toggleSection(settings.foldedSections, isFullscreen ? "fullscreen" : "panel", section) })}

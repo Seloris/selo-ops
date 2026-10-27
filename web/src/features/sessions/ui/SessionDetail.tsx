@@ -8,6 +8,7 @@ import { StatusDot, type DotTone } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import { ageMs, isTodo, type Session } from "../data/sessionView.ts";
 import type { DetailSection } from "./detailSections.ts";
+import { FileDiffView, type FileDiffState } from "./FileDiffView.tsx";
 import { FileTree } from "./FileTree.tsx";
 import { hasTrail, lineColor, skillColor, timelineItems, trailLines, waitingText } from "./trail.ts";
 import { totalTokens, usageSummary } from "./usage.ts";
@@ -29,9 +30,11 @@ export function SessionDetail({
   foldedSections,
   actions,
   isFullscreen,
+  fileDiff,
   onClose,
   onToggleFullscreen,
   onToggleSection,
+  onSelectFile,
 }: {
   session: Session;
   projectName: string;
@@ -40,9 +43,12 @@ export function SessionDetail({
   foldedSections: readonly DetailSection[];
   actions: SessionActions;
   isFullscreen: boolean;
+  // The file whose diff is open, null when none (sessions-live FR-51).
+  fileDiff: FileDiffState | null;
   onClose: () => void;
   onToggleFullscreen: () => void;
   onToggleSection: (section: DetailSection) => void;
+  onSelectFile: (file: string | null) => void;
 }) {
   const awaited = awaitedOf(s);
   const blockers = shownBlockers(s);
@@ -221,7 +227,8 @@ export function SessionDetail({
   );
   const filesSection = !s.isOutsideSelo && (
     <Section icon={<FolderIcon />} hue="files" count={s.touchedFiles.length} title={t("sessions.detail.files")} summary={s.touchedFiles.length ? s.touchedFiles.map((f) => f.split("/").pop()).join(" · ") : t("sessions.detail.none")} {...fold("files", s.touchedFiles.length === 0)}>
-      <FileTree paths={s.touchedFiles} />
+      <FileTree paths={s.touchedFiles} selected={fileDiff?.file ?? null} onSelect={(file) => onSelectFile(file === fileDiff?.file ? null : file)} />
+      {fileDiff && <FileDiffView state={fileDiff} onClose={() => onSelectFile(null)} />}
     </Section>
   );
   const settingsSection = (

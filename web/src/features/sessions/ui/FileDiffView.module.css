@@ -1,0 +1,124 @@
+.diff {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: var(--border-width) solid var(--border);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.file {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.part {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.partTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.partTitle svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+}
+
+.sha {
+  flex: none;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.subject {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note,
+.notice {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.notice svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+}
+
+/* Long lines scroll inside the block, never the panel. */
+.code {
+  margin: 0;
+  max-height: 420px;
+  overflow: auto;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  line-height: 1.5;
+}
+
+.line {
+  display: block;
+  min-width: max-content;
+  padding: 0 10px;
+  white-space: pre;
+}
+
+.add {
+  background: color-mix(in srgb, var(--delta-add) 14%, transparent);
+  color: var(--delta-add);
+}
+
+.remove {
+  background: color-mix(in srgb, var(--delta-remove) 14%, transparent);
+  color: var(--delta-remove);
+}
+
+.hunk {
+  color: var(--hue-files);
+}
+
+.meta {
+  color: var(--text-muted);
+}
+
+.context {
+  color: var(--text);
+}

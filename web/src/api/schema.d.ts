@@ -313,6 +313,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/sessions/{id}/diff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The diff of one file the session touched: each recorded commit's part, then the uncommitted part, read from git */
+        get: {
+            parameters: {
+                query: {
+                    file: string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The file's diff, or isAvailable false when the session's folder holds no git checkout */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FileDiff"];
+                    };
+                };
+                /** @description The file is missing */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description The session is not in the export, or did not touch the file */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description git did not answer: timed out, missing or killed */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/settings": {
         parameters: {
             query?: never;
@@ -651,6 +718,20 @@ export interface components {
             /** @enum {string} */
             name: "selo" | "selo-ops";
             versions: string[];
+        };
+        FileDiff: {
+            file: string;
+            isAvailable: boolean;
+            commits: {
+                sha: string;
+                subject: string;
+                diff: string | null;
+                isCut: boolean;
+            }[];
+            uncommitted: {
+                diff: string;
+                isCut: boolean;
+            } | null;
         };
         SeloSettings: {
             path: string;

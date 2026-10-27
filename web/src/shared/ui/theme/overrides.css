@@ -16,7 +16,7 @@
 
    --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
    --bp-draft, --bp-ready, --bp-building, --bp-review, --bp-merging, --bp-done, --bp-legacy   a blueprint's state, the same in bars, legends, tags and tracks: lime, cyan, blue, violet, fuchsia, green, grey (projects FR-14); none is --mark, amber or rose
-   --delta-add, --delta-change, --delta-remove   a spec delta's lines added, changed, removed, in figures, bars and signs: green, yellow, red; no state colour
+   --delta-add, --delta-change, --delta-remove   a spec delta's lines added, changed, removed, in figures, bars and signs, and a file diff's added and removed lines: green, yellow, red; no state colour
    --hue-progress, --hue-blueprints, --hue-specs, --hue-ideas, --hue-debt   the icons of the projects page's sections: orange, teal, emerald, sky, stone
    --spec-page, --spec-domain, --spec-blueprint   a page spec, a domain sheet, a blueprint, wherever one shows (app FR-04): indigo, pink, teal like the blueprint lane
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
