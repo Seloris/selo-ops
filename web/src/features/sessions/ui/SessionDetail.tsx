@@ -11,7 +11,7 @@ import type { DetailSection } from "./detailSections.ts";
 import type { FileSummary } from "../data/useFileSummaryQuery.ts";
 import { fileTotals } from "./fileTotals.ts";
 import { FileTree, LineCounts } from "./FileTree.tsx";
-import { currentRunSince, earlierRuns, hasTrail, lineColor, skillColor, trailChapters, trailLines, trailPath, type Chapter, type TrailLine } from "./trail.ts";
+import { currentRunSince, earlierRuns, hasTrail, lineColor, skillColor, trailChapters, trailLines, trailPath, type Chapter, type TrailLine, type TrailRun } from "./trail.ts";
 import { runRequestText, runTimeText, totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
@@ -32,6 +32,7 @@ export function SessionDetail({
   actions,
   isFullscreen,
   fileSummary,
+  earlierTrails,
   onClose,
   onToggleFullscreen,
   onToggleSection,
@@ -46,6 +47,8 @@ export function SessionDetail({
   isFullscreen: boolean;
   // Each touched file's status and lines, once git is read (sessions-live FR-54).
   fileSummary: FileSummary | undefined;
+  // The earlier prompts' history, once read (sessions-live FR-41).
+  earlierTrails: readonly TrailRun[] | undefined;
   onClose: () => void;
   onToggleFullscreen: () => void;
   onToggleSection: (section: DetailSection) => void;
@@ -56,7 +59,7 @@ export function SessionDetail({
   // while it is the last one of its prompt, so a new chapter folds the one before it.
   const [chapterChoices, setChapterChoices] = useState<ReadonlyMap<string, boolean>>(new Map());
   const toggleChapter = (at: string, isOpen: boolean) => setChapterChoices((choices) => new Map(choices).set(at, !isOpen));
-  // The earlier prompts the person unfolded, by their run: folded until then.
+  // The earlier prompts the person unfolded, by their start: folded until then.
   const [runChoices, setRunChoices] = useState<ReadonlyMap<string, boolean>>(new Map());
   const toggleRun = (id: string, isOpen: boolean) => setRunChoices((choices) => new Map(choices).set(id, !isOpen));
   const awaited = awaitedOf(s);
@@ -144,7 +147,7 @@ export function SessionDetail({
     });
   const trail = toned(trailLines(s.trail, s.mode), true);
   const { chapters, isRunning, durationText: runDuration, waitingText: runWaiting } = trailChapters(trail, s.subagents, now, isSessionOver);
-  const earlier = earlierRuns(s).map((run) => ({ run, ...trailChapters(toned(trailLines(run.trail, run.mode), false), run.subagents, now, true) }));
+  const earlier = earlierRuns(s, earlierTrails).map((run) => ({ run, ...trailChapters(toned(trailLines(run.trail, run.mode), false), run.subagents, now, true) }));
   const path = trailPath(chapters);
   const lastChapter = chapters[chapters.length - 1];
   const lastLine = trail[trail.length - 1];
@@ -279,10 +282,10 @@ export function SessionDetail({
     >
       <ol className={styles.chapters}>
         {earlier.map(({ run, chapters: runChapters, durationText }) => {
-          const isOpen = runChoices.get(run.id) ?? false;
+          const isOpen = runChoices.get(run.since) ?? false;
           return (
-            <li key={run.id} className={styles.prompt}>
-              <button type="button" className={styles.promptRow} aria-expanded={isOpen} onClick={() => toggleRun(run.id, isOpen)}>
+            <li key={run.since} className={styles.prompt}>
+              <button type="button" className={styles.promptRow} aria-expanded={isOpen} onClick={() => toggleRun(run.since, isOpen)}>
                 <span className={styles.when}>{runTimeText(run.since, now)}</span>
                 <span className={styles.promptText} title={runRequestText(run)}>
                   {runRequestText(run)}

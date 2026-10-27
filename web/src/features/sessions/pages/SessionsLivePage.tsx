@@ -33,6 +33,7 @@ import { useArchiveSessionMutation } from "../data/useArchiveSessionMutation.ts"
 import { useSessionsQuery } from "../data/useSessionsQuery.ts";
 import { useFileDiffQuery } from "../data/useFileDiffQuery.ts";
 import { useFileSummaryQuery } from "../data/useFileSummaryQuery.ts";
+import { useSessionTrailsQuery } from "../data/useSessionTrailsQuery.ts";
 import { FilesWindow } from "../ui/FilesWindow.tsx";
 import { useSaveNoteMutation } from "../data/useSaveNoteMutation.ts";
 import { useUnarchiveSessionMutation } from "../data/useUnarchiveSessionMutation.ts";
@@ -186,6 +187,10 @@ export function SessionsLivePage() {
     selected?.id ?? "",
     selected !== null && !selected.isOutsideSelo && selected.touchedFiles.length > 0 && (isFilesUnfolded || filesWindow !== null),
   );
+  // sessions-live FR-41: the earlier prompts' history, read while « Déroulé de la session » is unfolded.
+  const isTrailUnfolded = !settings.foldedSections[isFullscreen ? "fullscreen" : "panel"].includes("trail");
+  const latestRun = selected?.runs[selected.runs.length - 1]?.since ?? "";
+  const trails = useSessionTrailsQuery(selected?.id ?? "", latestRun, selected !== null && !selected.isOutsideSelo && selected.runs.length > 1 && isTrailUnfolded);
   const fileDiff = useFileDiffQuery(selected?.id ?? "", filesWindow?.file ?? null);
   const openFiles = (file: string | null) => {
     if (!selected) return;
@@ -502,6 +507,7 @@ export function SessionsLivePage() {
               actions={actions}
               isFullscreen={isFullscreen}
               fileSummary={fileSummary.data}
+              earlierTrails={trails.data?.runs}
               onOpenFiles={openFiles}
               onClose={closeDetail}
               onToggleFullscreen={toggleFullscreen}

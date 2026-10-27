@@ -1,5 +1,6 @@
 import { t } from "../../../shared/lib/i18n/index.ts";
 import type { Session } from "../data/sessionView.ts";
+import type { SessionTrails } from "../data/useSessionTrailsQuery.ts";
 import { age, LOOP_SUBSTEPS, stepText } from "./sessionText.ts";
 
 // sessions-live FR-41: each prompt's history as the export keeps it, oldest first, read as chapters (FR-53).
@@ -44,13 +45,18 @@ export const lineColor = (l: TrailLine): string | undefined => (l.isLoop ? "var(
 
 export const hasTrail = (s: Session) => !s.isOutsideSelo && s.trail.length > 0;
 
-export type TrailRun = Session["runs"][number];
+export type TrailRun = SessionTrails["runs"][number];
 
-// sessions-live FR-41: the session's earlier prompts that kept a history, oldest first; the current one is the session's own.
-// The current prompt's start: its run's, else its first line kept.
-export const currentRunSince = (s: Pick<Session, "runs" | "trail">): string | null => s.runs.find((r) => r.isCurrent)?.since ?? s.trail[0]?.at ?? null;
+// The current prompt's start: its run's, the latest kept, else its first line kept.
+export const currentRunSince = (s: Pick<Session, "runs" | "trail">): string | null => s.runs[s.runs.length - 1]?.since ?? s.trail[0]?.at ?? null;
 
-export const earlierRuns = (s: Pick<Session, "isOutsideSelo" | "runs">): TrailRun[] => (s.isOutsideSelo ? [] : s.runs.filter((r) => !r.isCurrent && r.trail.length > 0));
+// sessions-live FR-41: the session's earlier prompts that kept a history, oldest first; none outside selo. A prompt
+// that started with the current one or after (a history read across a new prompt) is never an earlier one.
+export function earlierRuns(s: Pick<Session, "isOutsideSelo" | "runs" | "trail">, runs: readonly TrailRun[] | undefined): TrailRun[] {
+  const since = currentRunSince(s);
+  if (s.isOutsideSelo || !runs) return [];
+  return runs.filter((r) => r.trail.length > 0 && (since === null || Date.parse(r.since) < Date.parse(since)));
+}
 
 export function trailLines(trail: TrailEntry[], mode: string | null = null): TrailLine[] {
   const durations = durationsOf(trail);

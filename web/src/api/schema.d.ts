@@ -369,6 +369,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/sessions/{id}/trails": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The history of each earlier main run of the session, oldest first, with its subagents */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The earlier runs, none when the session has one run */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionTrails"];
+                    };
+                };
+                /** @description The session is not in the export */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sessions/{id}/diff": {
         parameters: {
             query?: never;
@@ -695,28 +742,12 @@ export interface components {
             usage: components["schemas"]["Usage"];
             runUsage: components["schemas"]["RunUsage"];
             runs: {
-                id: string;
-                isCurrent: boolean;
-                mode: string | null;
                 /** Format: date-time */
                 since: string;
                 request: string;
                 isRequestCut: boolean;
                 isRequestImage: boolean;
                 usage: components["schemas"]["RunUsage"];
-                trail: components["schemas"]["TrailEntry"][];
-                isTrailCut: boolean;
-                subagents: {
-                    type: string;
-                    task: string | null;
-                    state: components["schemas"]["SessionState"];
-                    /** Format: date-time */
-                    since: string;
-                    /** Format: date-time */
-                    updatedAt: string;
-                    model: string | null;
-                    usage: components["schemas"]["Usage"];
-                }[];
             }[];
             isRunListCut: boolean;
             touchedFiles: string[];
@@ -800,6 +831,29 @@ export interface components {
                 added: number | null;
                 removed: number | null;
                 isUncommitted: boolean;
+            }[];
+        };
+        SessionTrails: {
+            runs: {
+                /** Format: date-time */
+                since: string;
+                request: string;
+                isRequestCut: boolean;
+                isRequestImage: boolean;
+                mode: string | null;
+                trail: components["schemas"]["TrailEntry"][];
+                isTrailCut: boolean;
+                subagents: {
+                    type: string;
+                    task: string | null;
+                    state: components["schemas"]["SessionState"];
+                    /** Format: date-time */
+                    since: string;
+                    /** Format: date-time */
+                    updatedAt: string;
+                    model: string | null;
+                    usage: components["schemas"]["Usage"];
+                }[];
             }[];
         };
         FileDiff: {

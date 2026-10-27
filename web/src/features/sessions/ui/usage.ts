@@ -88,7 +88,7 @@ export function runTimeText(iso: string, now: number): string {
 }
 
 // sessions-live FR-36, `session` BR-10: « … » when the export cut the request; an unreadable one says so.
-export function runRequestText(run: SessionRun): string {
+export function runRequestText(run: Pick<SessionRun, "request" | "isRequestCut" | "isRequestImage">): string {
   if (!run.request) return t(run.isRequestImage ? "sessions.request.image" : "sessions.request.empty");
   return run.isRequestCut ? `${run.request}…` : run.request;
 }
