@@ -8,7 +8,7 @@ import styles from "./HelpPage.module.css";
 export function HelpPage() {
   return (
     <main className={styles.page}>
-      <Panel>
+      <Panel width="wide">
         <header className={styles.header}>
           <PageTitle>{t("help.page.title")}</PageTitle>
         </header>

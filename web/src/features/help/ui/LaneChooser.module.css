@@ -1,0 +1,556 @@
+/* help FR-11: each lane or flow sets --c. */
+.c-fastlane {
+  --c: var(--lane-fastlane);
+}
+
+.c-blueprint {
+  --c: var(--lane-blueprint);
+}
+
+.c-pilot {
+  --c: var(--lane-pilot);
+}
+
+.c-mockup {
+  --c: var(--lane-mockup);
+}
+
+.c-iterate {
+  --c: var(--lane-iterate);
+}
+
+.dot {
+  flex: none;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--c);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent);
+}
+
+.code {
+  padding: 1px 7px;
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  line-height: 1.7;
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  overflow-wrap: anywhere;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* help FR-02: the three questions side by side, one under the other when narrow. */
+.chooser {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.question {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--item-radius);
+}
+
+.pending {
+  border-style: dashed;
+}
+
+.questionHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.number {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-pill);
+}
+
+.answered .number {
+  color: var(--accent-text);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.questionText {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.note {
+  margin-left: auto;
+  font-size: 0.8em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.choices {
+  display: grid;
+  gap: 6px;
+}
+
+.choice {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 10px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.92em;
+  text-align: left;
+  color: var(--text);
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: border-color 0.12s, background-color 0.12s;
+}
+
+.choice:hover:not([aria-disabled="true"]) {
+  border-color: color-mix(in srgb, var(--text) 25%, var(--control-border));
+}
+
+.choice small {
+  grid-column: 1 / -1;
+  font-size: 0.84em;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.pending .choice {
+  color: var(--text-muted);
+}
+
+.choice.on {
+  font-weight: 500;
+  color: var(--text);
+  border-color: var(--c, var(--accent));
+  background: color-mix(in srgb, var(--c, var(--accent)) 14%, transparent);
+}
+
+.check {
+  font-weight: 700;
+  color: var(--c, var(--accent));
+}
+
+/* Closed, yet still focusable: a keyboard reaches the hint that says why. */
+.choice[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Before any lane: the place of the result, dashed. */
+.empty {
+  margin: 0;
+  padding: 16px 18px;
+  color: var(--text-muted);
+  border: var(--border-width) dashed var(--border);
+  border-radius: var(--item-radius);
+}
+
+.emptyFoot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.unsure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+/* help FR-02: the lane picked, in its colour, and its exact prompts. */
+.result {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px 18px;
+  border-radius: var(--item-radius);
+  border: var(--border-width) solid color-mix(in srgb, var(--c) 45%, transparent);
+  border-left: 3px solid var(--c);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 14%, transparent), transparent 85%);
+}
+
+.resultHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.resultTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.05em;
+  font-weight: 600;
+  color: var(--c);
+}
+
+.chip {
+  padding: 1px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  font-weight: 600;
+  line-height: 1.7;
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+  border-radius: var(--radius-pill);
+}
+
+.why {
+  font-size: 0.86em;
+  color: var(--text-muted);
+}
+
+.why b {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.then {
+  margin-top: -2px;
+  padding-left: 2px;
+  font-size: 0.82em;
+  color: var(--text-muted);
+}
+
+.prompt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 14px;
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.command {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  overflow-wrap: anywhere;
+}
+
+.placeholder {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* The options take the lane's colour, or the prompt's own (the mockup's). */
+.option {
+  color: var(--c);
+}
+
+.resultText {
+  margin: 0;
+  font-size: 0.95em;
+}
+
+.resultFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.flowToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 0.86em;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.flowToggle:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.flowToggle svg {
+  width: 15px;
+  height: 15px;
+}
+
+.chevron {
+  display: inline-flex;
+  transition: transform 0.15s;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+/* help FR-20: the flow of the lane picked, folded by default. */
+/* Its rows follow their own width, not the window's: the page's panel is narrower than the popup. */
+.flowMap {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--item-radius);
+  border: var(--border-width) solid var(--border);
+  background: var(--surface);
+  container-type: inline-size;
+}
+
+.flowHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+.flowHead b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.95em;
+}
+
+.legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 9px;
+  border-radius: var(--radius-pill);
+  border: var(--border-width) solid var(--border);
+  background: var(--surface-2);
+}
+
+.track {
+  display: grid;
+  gap: 6px;
+}
+
+.trackTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.86em;
+  font-weight: 600;
+  color: var(--c);
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 10px;
+  font-size: 0.86em;
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.step b {
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.step small {
+  font-size: 0.86em;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
+.step code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  overflow-wrap: anywhere;
+}
+
+.step:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  top: 50%;
+  right: -16px;
+  transform: translateY(-50%);
+  font-weight: 600;
+  color: var(--c);
+}
+
+.on {
+  border-color: color-mix(in srgb, var(--c) 55%, transparent);
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+}
+
+.skip {
+  border-style: dashed;
+  opacity: 0.45;
+}
+
+.step.skip b {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.you {
+  border-color: color-mix(in srgb, var(--warn) 60%, transparent);
+  background: var(--warn-soft);
+}
+
+.tag {
+  justify-self: start;
+  margin-top: 2px;
+  padding: 0 7px;
+  font-size: 0.74em;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-radius: var(--radius-pill);
+}
+
+.loop {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 8px;
+  font-size: 0.72em;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--c);
+  background: var(--surface);
+  border: var(--border-width) solid color-mix(in srgb, var(--c) 45%, transparent);
+  border-radius: var(--radius-pill);
+}
+
+/* The loop's tag sits on its box's top edge: room above the row for it. */
+.track:has(.loop) .steps {
+  padding-top: 8px;
+}
+
+.join {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0 -4px 14px;
+  font-size: 0.82em;
+  color: var(--text-muted);
+}
+
+.joinArrow {
+  font-weight: 600;
+  color: var(--c);
+}
+
+.foot {
+  margin: 0;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+/* Too narrow for a row of ten boxes: they stack, arrows down. */
+@container (max-width: 760px) {
+  .steps {
+    grid-auto-flow: row;
+    gap: 14px;
+  }
+
+  .step:not(:last-child)::after {
+    content: "↓";
+    top: auto;
+    right: auto;
+    bottom: -15px;
+    left: 14px;
+    transform: none;
+  }
+
+  .loop {
+    position: static;
+    transform: none;
+    justify-self: start;
+    margin-bottom: 2px;
+  }
+
+  .track:has(.loop) .steps {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .chooser {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .prompt {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 10px 12px;
+  }
+
+  .prompt > button {
+    justify-self: start;
+  }
+
+  .resultFoot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

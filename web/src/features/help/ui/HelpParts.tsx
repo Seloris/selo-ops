@@ -3,7 +3,7 @@ import { t, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { Card } from "../../../shared/ui/Card.tsx";
 import { Segmented } from "../../../shared/ui/Segmented.tsx";
 import { SpecChip, SpecIcon, specColor } from "../../../shared/ui/SpecKind.tsx";
-import type { Branch, ColourId, DeltaMark, Flow, HelpTab, LaneId, MdDiff, MdFile, MdLine, Row, Rule, Section, Step, TreeNode } from "../content.ts";
+import type { ColourId, DeltaMark, Flow, HelpTab, LaneId, MdDiff, MdFile, MdLine, Row, Rule, Section, Step, TreeNode } from "../content.ts";
 import styles from "./HelpParts.module.css";
 
 // help FR-11: a lane's class sets --lane, which its boxes, names, prompts and dots read.
@@ -42,35 +42,7 @@ export function HelpTabs({ tabs, value, onChange }: { tabs: { value: HelpTab; la
   );
 }
 
-// help FR-02, FR-03: a question on the left, its « oui » arrow to a lane on the right, its « non » down to the next question.
-export function DecisionTree({ branches }: { branches: Branch[] }) {
-  return (
-    <ol className={styles.decision}>
-      {branches.map((branch, index) => (
-        <li key={branch.lane} className={`${styles.branch} ${laneClass(branch.lane)}`}>
-          <p className={branch.question ? styles.question : `${styles.question} ${styles.otherwise}`}>{t(branch.question ?? "help.lanes.otherwise")}</p>
-          <span className={styles.yes}>{branch.question ? t("help.lanes.yes") : ""}</span>
-          <div className={styles.laneBox}>
-            <h3 className={styles.laneTitle}>
-              <span className={styles.dot} aria-hidden="true" />
-              {t(branch.name)}
-            </h3>
-            <p className={styles.text}>{t(branch.hint)}</p>
-            <div className={styles.codes}>
-              {branch.prompts.map((prompt) => (
-                <Code key={prompt} text={prompt} />
-              ))}
-            </div>
-          </div>
-          {/* After the lane in reading order; the grid puts it under the question. */}
-          {index < branches.length - 1 && <span className={styles.no}>{t("help.lanes.no")}</span>}
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-// help FR-14, FR-17: one row of boxes joined by arrows per lane or flow, in its colour.
+// help FR-14: one row of boxes joined by arrows per lane or flow, in its colour.
 export function Flows({ flows }: { flows: Flow[] }) {
   return (
     <div className={styles.flows}>

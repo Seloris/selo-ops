@@ -10,7 +10,7 @@ export interface Section {
 
 export type LaneId = "fastlane" | "blueprint" | "pilot";
 
-// help FR-17: the two flows beside the lanes, each in a colour of its own (help FR-11).
+// help FR-11: the mockup and iterate flows wear a colour of their own beside the lanes.
 export type ColourId = LaneId | "mockup" | "iterate";
 
 // help FR-12: the three tabs of the page and of the popup.
@@ -24,7 +24,6 @@ export const helpTabs: { value: HelpTab; label: MessageKey }[] = [
 
 export const sections = {
   lanes: { id: "help-lanes", title: "help.lanes.title" },
-  flows: { id: "help-flows", title: "help.flows.title" },
   lifecycle: { id: "help-lifecycle", title: "help.lifecycle.title" },
   commits: { id: "help-commits", title: "help.commits.title" },
   where: { id: "help-where", title: "help.specs.where.title" },
@@ -38,27 +37,6 @@ export const sections = {
   settings: { id: "help-settings", title: "help.settings.title" },
 } as const satisfies Record<string, Section>;
 
-// help FR-02, FR-03: a question answered yes ends on its lane; the branch with no question is the « sinon ».
-export interface Branch {
-  question?: MessageKey;
-  lane: LaneId;
-  name: MessageKey;
-  hint: MessageKey;
-  prompts: MessageKey[];
-}
-
-export const decisionTree: Branch[] = [
-  { question: "help.lanes.leave", lane: "pilot", name: "help.lanes.pilot.name", hint: "help.lanes.pilot.hint", prompts: ["help.lanes.pilot.prompt"] },
-  {
-    question: "help.lanes.newRule",
-    lane: "blueprint",
-    name: "help.lanes.blueprint.name",
-    hint: "help.lanes.blueprint.hint",
-    prompts: ["help.lanes.blueprint.prompt", "help.lanes.blueprint.promptNext"],
-  },
-  { lane: "fastlane", name: "help.lanes.fastlane.name", hint: "help.lanes.fastlane.hint", prompts: ["help.lanes.fastlane.prompt"] },
-];
-
 // A box of a flow: a label, a prompt, or both.
 export interface FlowStep {
   label?: MessageKey;
@@ -70,20 +48,6 @@ export interface Flow {
   name: MessageKey;
   steps: FlowStep[];
 }
-
-// help FR-17.
-export const seeFirst: Flow[] = [
-  {
-    lane: "mockup",
-    name: "help.flows.mockup.name",
-    steps: [{ code: "help.flows.mockup.prompt" }, { label: "help.flows.mockup.loop" }, { label: "help.flows.validate" }, { label: "help.flows.mockup.build", code: "help.options.mockup" }],
-  },
-  {
-    lane: "iterate",
-    name: "help.flows.iterate.name",
-    steps: [{ code: "help.flows.iterate.prompt" }, { label: "help.flows.iterate.loop" }, { label: "help.flows.validate" }, { label: "help.flows.iterate.end" }],
-  },
-];
 
 // A numbered step of a band.
 export interface Step {

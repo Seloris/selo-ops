@@ -11,3 +11,7 @@
   -webkit-backdrop-filter: var(--blur);
   backdrop-filter: var(--blur);
 }
+
+.wide {
+  max-width: 1000px;
+}

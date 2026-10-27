@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import {
   commitPlaces,
-  decisionTree,
   exampleBlueprint,
   exampleDiffs,
   exampleMergeCommit,
@@ -13,7 +12,6 @@ import {
   planningTree,
   roles,
   sections,
-  seeFirst,
   settings,
   skills,
   specFlows,
@@ -21,7 +19,8 @@ import {
   stubSteps,
   whereRules,
 } from "../content.ts";
-import { DecisionTree, FileDiff, Flows, HelpSection, HelpTabs, LaneLegend, MarkdownFile, MergeArrow, Note, PlanningTree, Rows, RuleCards, Split, Steps } from "./HelpParts.tsx";
+import { LaneChooser } from "./LaneChooser.tsx";
+import { FileDiff, Flows, HelpSection, HelpTabs, LaneLegend, MarkdownFile, MergeArrow, Note, PlanningTree, Rows, RuleCards, Split, Steps } from "./HelpParts.tsx";
 
 // help FR-12: the same tabs on the page and in the popup (help FR-10), the guide first.
 export function HelpContent() {
@@ -43,16 +42,12 @@ export function HelpContent() {
   );
 }
 
-// help FR-02 to FR-05, FR-17.
+// help FR-02 to FR-05, FR-20.
 function GuideTab() {
   return (
     <>
-      <HelpSection section={sections.lanes}>
-        <DecisionTree branches={decisionTree} />
-        <Note text="help.lanes.unsure" code="help.lanes.unsurePrompt" />
-      </HelpSection>
-      <HelpSection section={sections.flows} intro="help.flows.intro">
-        <Flows flows={seeFirst} />
+      <HelpSection section={sections.lanes} intro="help.lanes.intro">
+        <LaneChooser />
       </HelpSection>
       <HelpSection section={sections.lifecycle}>
         <LaneLegend lanes={laneLegend} />

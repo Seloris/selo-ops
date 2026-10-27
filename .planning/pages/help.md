@@ -6,13 +6,13 @@ A static page that explains how selo works, so that a person picks a lane and fo
 
 ## Tabs
 
-- **FR-12** — The page opens on three tabs, « Guide », « Specs » and « Technique », « Guide » selected each time the page or the popup opens: « Guide » holds FR-02 to FR-05 and FR-17, « Specs » FR-13, FR-14 and FR-19, « Technique » FR-06, FR-07 and FR-18. The tab bar stays at the top while the page or the popup scrolls; a tab chosen while the bar is stuck opens at its top.
+- **FR-12** — The page opens on three tabs, « Guide », « Specs » and « Technique », « Guide » selected each time the page or the popup opens: « Guide » holds FR-02 to FR-05 and FR-20, « Specs » FR-13, FR-14 and FR-19, « Technique » FR-06, FR-07 and FR-18. The tab bar stays at the top while the page or the popup scrolls; a tab chosen while the bar is stuck opens at its top.
 
 ## Choosing a lane
 
-- **FR-02** — « Choisir sa voie » shows the three lanes, each in a box with its name, what it is for in one short sentence and its prompts: « Pilot autonome » (`/selo:pilot {demande} — autonomous`), « Blueprint puis build » (`/selo:blueprint {demande}`, then `/selo:build {blueprint}`) and « Fastlane » (`/selo:fastlane {demande}`); a line under them gives `/selo:pilot {demande}` to a person unsure of the lane: selo picks it and runs it with them.
-- **FR-03** — The three lanes read as a yes/no decision tree: « Vous partez et laissez l'agent finir ? » yes → Pilot autonome; no → « Nouvelle page, entité ou règle métier, ou plusieurs pages ? » yes → Blueprint puis build; « Sinon » → Fastlane; under 640 px of width each question stacks above its lane, so that a person picks a lane at a glance.
-- **FR-17** — Under the lanes, « Voir avant de committer » shows the two flows that show a change before it is committed, each as one row of boxes joined by arrows (one under the other under 640 px): « Maquette d'abord » (`/selo:mockup {demande}`, a HTML mockup touched up turn by turn, « on valide », then a lane builds it with `— mockup {fichier}`) and « Itération » (`/selo:fastlane {demande} — iterate`, one change per turn on the running app with no test or commit, « on valide », then the tests, the review and the commits once); its intro says each turn ends on « Autre chose, ou on valide ? ».
+- **FR-02** — « Choisir sa voie » asks three questions side by side (one under the other under 640 px), none answered when the page or the popup opens, each answer a button, most with a hint of a few words: « Vous restez pendant le travail ? » (« Oui, je suis là », « Non, je pars »), « Votre demande touche… » (« Une page ou un composant », « Une nouvelle page, entité ou règle, ou plusieurs pages ») and « Voir avant de coder ? » (« Non, directement », « Une maquette d'abord », « En itérant sur l'app qui tourne »); « Non, je pars » closes the second question (« selo choisit ») and « En itérant », which « Une nouvelle page, entité ou règle, ou plusieurs pages » closes too, an answer it rules out being dropped, so that a person only meets the choices that exist.
+- **FR-03** — Under the questions, once they are answered (the second one aside when the person leaves), a card in the lane's colour names the lane, its option (`--iterate`, `--mockup`, `--autonomous`), the answers that led to it, and its exact prompts in order, each with a « Copier » button: staying on one page or component → `/selo:fastlane {demande}` (with `--iterate` when iterating); staying on a new page, entity or rule → `/selo:blueprint {demande}`, then `/selo:build {blueprint}`; leaving → `/selo:pilot {demande} --autonomous`; a mockup first adds `/selo:mockup {demande}` before them and `--mockup .planning/mockups/{fichier}` to the lane's prompt; a sentence says what the lane then does. Before that, a dashed box says the lane appears there; in both cases a line gives `/selo:pilot {demande}` to a person unsure of the lane: selo picks it and runs it with them.
+- **FR-20** — The card's « Voir le flux », folded by default, unfolds the flow of the lane picked from the request to the JOB DONE: one row of steps joined by arrows per track (stacked, arrows down, when narrow), the mockup's or the iteration's loop first (its turns ending on « Autre chose, ou on valide ? »), then the lane's nine steps of FR-04, those it skips dashed and struck through, those waiting on the person in amber with a « vous » tag, under a legend of the three kinds of step and above one line on the worktree's landing (for the pilot, also on a simple request taking the fastlane).
 
 ## Lifecycle
 
@@ -27,7 +27,7 @@ A static page that explains how selo works, so that a person picks a lane and fo
 
 ## Technique tab
 
-- **FR-06** — « Les skills » shows one row per skill (fastlane, blueprint, build, pilot, mockup, grill, review, try, run, setup): its prompt, in its lane's colour when it runs one, what it does in one sentence, and its options (`— iterate`, `— mockup {fichier}`, `— no browser`, `— autonomous` on pilot only…).
+- **FR-06** — « Les skills » shows one row per skill (fastlane, blueprint, build, pilot, mockup, grill, review, try, run, setup): its prompt, in its lane's colour when it runs one, what it does in one sentence, and its options (`--iterate`, `--mockup {fichier}`, `--no-browser`, `--autonomous` on pilot only…).
 - **FR-07** — « Les agents » shows one row per subagent role (reviewer, runner, explorer, implementer): what it does and what it never does, in one or two sentences.
 - **FR-18** — « Vos réglages » shows the person's three selo settings, set in the `env` block of `~/.claude/settings.json` and read by the next new session: `SELO_ROUTING=on` (a free change request goes to `/selo:pilot`; off by default), `SELO_COMMIT=auto` (a fastlane commits on the base branch without the person's yes; off by default) and `SELO_MODELS={preset}` (the agents' models, `standard` by default; `SELO_MODEL_{ROLE}`, one of the five roles named, changes one).
 
@@ -36,11 +36,11 @@ A static page that explains how selo works, so that a person picks a lane and fo
 - **FR-09** — The page reads no data: it shows the same content with the API down.
 - **FR-10** — « Aide » in the header of any other page opens the same content in a popup over that page, which stays as it was; Échap, « Fermer » or a click outside the popup closes it.
 - **FR-16** — Above 640 px of width, an icon-only full-screen button beside « Fermer » makes the popup fill the screen (the browser goes full screen), its content kept to a readable width; the button then shows the reduce icon and gives the popup back, as does Échap (a second Échap closes it); closing the popup leaves the full screen; it is not remembered.
-- **FR-11** — Each lane wears its own colour: fastlane lime, pilot violet and blueprint teal; on its box in the decision tree, its row of the spec flow, its dot in the lifecycle and the prompts of the skills that run it (build with blueprint), so that a lane is told at a glance. The two flows (FR-17) wear theirs on their rows, mockup fuchsia (with the mockup skill) and iterate orange.
+- **FR-11** — Each lane wears its own colour: fastlane lime, pilot violet and blueprint teal; on its answer and its result card in « Choisir sa voie », its steps in the flow, its row of the spec flow, its dot in the lifecycle and the prompts of the skills that run it (build with blueprint), so that a lane is told at a glance. The mockup (fuchsia, with the mockup skill) and the iteration (orange) wear theirs on their answers, options and tracks.
 
 ## Non-goals
 
 - Content generated from the selo plugin's files: the page is written by hand and updated when selo changes.
 - Long explanations: each fact in a few words; the plugin's files hold the detail.
 
-Retired: FR-01, FR-08, FR-15
+Retired: FR-01, FR-08, FR-15, FR-17

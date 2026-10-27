@@ -69,10 +69,6 @@
   --lane: var(--lane-mockup);
 }
 
-.lane-iterate {
-  --lane: var(--lane-iterate);
-}
-
 .dot {
   flex: none;
   display: inline-block;
@@ -93,74 +89,7 @@
   color: var(--lane);
 }
 
-/* help FR-03: the decision tree, a question, its « oui » arrow, its lane; « non » goes down. */
-.decision {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-}
-
-.branch {
-  display: grid;
-  grid-template-columns: minmax(0, 15em) 3.5em minmax(0, 1fr);
-  align-items: center;
-  gap: 4px 0;
-}
-
-.question {
-  margin: 0;
-  padding: 10px 14px;
-  font-weight: 500;
-  text-align: center;
-  background: var(--surface-2);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-control);
-}
-
-.otherwise {
-  color: var(--text-muted);
-  border-style: dashed;
-}
-
-.no,
-.yes {
-  color: var(--text-muted);
-  font-size: 0.85em;
-  font-weight: 600;
-}
-
-.no {
-  grid-column: 1;
-  justify-self: center;
-}
-
-.no::after {
-  content: " ↓";
-}
-
-.yes {
-  text-align: center;
-  color: var(--lane);
-}
-
-.yes::after {
-  content: " →";
-}
-
-.laneBox {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-  padding: 12px 14px;
-  border-radius: var(--item-radius);
-  border: var(--border-width) solid color-mix(in srgb, var(--lane) 45%, transparent);
-  border-left: 3px solid var(--lane);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--lane) 14%, transparent), transparent 85%);
-}
-
-/* help FR-14, FR-17: rows of boxes joined by arrows. */
+/* help FR-14: rows of boxes joined by arrows. */
 /* The rows follow their own width, not the window's: the page's panel is narrower than the popup. */
 .flows {
   display: grid;
@@ -550,25 +479,6 @@
 }
 
 @media (max-width: 640px) {
-  .branch {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
-  }
-
-  .yes {
-    text-align: left;
-    padding-left: 14px;
-  }
-
-  .yes::after {
-    content: " ↓";
-  }
-
-  .yes:empty {
-    display: none;
-  }
-
-
   .row {
     grid-template-columns: minmax(0, 1fr);
   }
