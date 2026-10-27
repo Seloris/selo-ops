@@ -63,7 +63,7 @@ src/
 
 ## Design
 
-The skin named in the `component` block above: its fonts in `src/shared/ui/theme/fonts.ts` and its tokens in `skin.css` beside it (both written by setup, rewritten by `/selo:setup skin`), imported first by `main.tsx`, then `base.css` and `overrides.css`. The UI follows the selo plugin's design rules (`reference/ui-design.md`), its element recipes (`skins/recipes.css`) and the skin's `SKIN.md`, read in place; this section wins over them. Features compose the `shared/ui` components and style only their own layout; a recipe or a component two features need that `shared/ui` lacks is added there, in the same way.
+The skin named in the `component` block above: its fonts in `src/shared/ui/theme/fonts.ts` and its tokens in `skin.css` beside it (both written by setup, rewritten by `/selo-flow:setup skin`), imported first by `main.tsx`, then `base.css` and `overrides.css`. The UI follows the selo plugin's design rules (`reference/ui-design.md`), its element recipes (`skins/recipes.css`) and the skin's `SKIN.md`, read in place; this section wins over them. Features compose the `shared/ui` components and style only their own layout; a recipe or a component two features need that `shared/ui` lacks is added there, in the same way.
 
 - Variables this application changes: in `src/shared/ui/theme/overrides.css`, never in `skin.css`.
 - Rules this application adds or replaces: here, one line each.
@@ -83,6 +83,6 @@ The skin named in the `component` block above: its fonts in `src/shared/ui/theme
 ## Local run
 
 - Prerequisites: Node 22, `npm ci`.
-- Run: `/selo:run` starts the API, then the front, on this worktree's slot (http://localhost:5173 on slot 0, the port + 10 per slot); `npm run app` at the root does the same outside a session. `npm run dev` alone serves http://localhost:5173 and expects the API on http://localhost:3000.
-- Demo: `npm run demo` → http://localhost:5181 (slot 0; `/selo:run — demo` on this worktree's slot), proxied to the API's demo on port 3101, with `--force` (no stale Vite cache). `try` starts both demos and stops them after the test.
+- Run: `/selo-flow:run` starts the API, then the front, on this worktree's slot (http://localhost:5173 on slot 0, the port + 10 per slot); `npm run app` at the root does the same outside a session. `npm run dev` alone serves http://localhost:5173 and expects the API on http://localhost:3000.
+- Demo: `npm run demo` → http://localhost:5181 (slot 0; `/selo-flow:run — demo` on this worktree's slot), proxied to the API's demo on port 3101, with `--force` (no stale Vite cache). `try` starts both demos and stops them after the test.
 - `prepare` regenerates `src/api/schema.d.ts` from the API's committed handoff file; run it at the start of every front stage.

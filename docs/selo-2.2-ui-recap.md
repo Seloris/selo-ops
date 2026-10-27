@@ -1,8 +1,8 @@
 # selo 2.2 — what Selo Ops must add to its UI
 
-Recap of the plugins' release 2.2.0 (webapp-factory commit `53fc1fd`, 2026-10-22), written as the input of a Selo Ops blueprint: `/selo:blueprint` on this file. Sources: `webapp-factory/docs/revamp-2.2.0/proposal.md` (§4, §9) and `webapp-factory/docs/revamp-2.0.0/ops-export.md` (§5.1 types, §5.6 usage, §6 row "Tokens").
+Recap of the plugins' release 2.2.0 (webapp-factory commit `53fc1fd`, 2026-10-22), written as the input of a Selo Ops blueprint: `/selo-flow:blueprint` on this file. Sources: `webapp-factory/docs/revamp-2.2.0/proposal.md` (§4, §9) and `webapp-factory/docs/revamp-2.0.0/ops-export.md` (§5.1 types, §5.6 usage, §6 row "Tokens").
 
-The plugins are released locally, not pushed and not installed yet. Selo Ops sees the new fields only after `claude plugin update selo-ops@selo --scope user` and a new Claude Code session; sessions already running keep 1.0.0's hooks.
+The plugins are released locally, not pushed and not installed yet. Selo Ops sees the new fields only after `claude plugin update selo-feed@selo --scope user` and a new Claude Code session; sessions already running keep 1.0.0's hooks.
 
 ## 1. What changed in the plugins
 

@@ -17,6 +17,9 @@
       "PowerShell(git -c * push*)"
     ]
   },
+  "enabledPlugins": {
+    "selo-flow@selo": true
+  },
   "extraKnownMarketplaces": {
     "selo": {
       "source": {
@@ -24,11 +27,5 @@
         "path": "C:/WS/webapp-factory"
       }
     }
-  },
-  "enabledPlugins": {
-    "selo@selo": true
-  },
-  "env": {
-    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku"
   }
 }

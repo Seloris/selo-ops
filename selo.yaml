@@ -1,10 +1,9 @@
-selo: 2.6.0
+selo: 3.0.0
 name: selo-ops
 base_branch: main
 language:
   chat: fr
   repo: en
-models: standard
 components:
   - name: api
     path: api
