@@ -179,7 +179,7 @@ function FlowMap({ result }: { result: LaneResult }) {
 function Unsure() {
   return (
     <span className={styles.unsure}>
-      {t("help.lanes.unsure")} <code className={styles.code}>{t("help.lanes.unsurePrompt")}</code>
+      {t("help.lanes.unsure")} <code className={styles.code}>{t("help.lanes.cmd.pilot")}</code>
     </span>
   );
 }

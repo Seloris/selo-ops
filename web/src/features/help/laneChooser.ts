@@ -1,4 +1,4 @@
-import type { MessageKey } from "../../shared/lib/i18n/index.ts";
+import { t, type MessageKey } from "../../shared/lib/i18n/index.ts";
 import type { ColourId, LaneId } from "./content.ts";
 
 // help FR-02, FR-03, FR-20: three questions pick a lane, its exact prompts and the flow they run.
@@ -82,7 +82,9 @@ export interface LaneResult {
   isPilotWith?: boolean;
 }
 
-const mockupPath = "--mockup .planning/mockups/{fichier}";
+// A prompt from its translated pieces: the command and its options, as the person types them.
+const cmd = (...keys: MessageKey[]) => keys.map((key) => t(key)).join(" ");
+const withMockup = (preview: Preview): MessageKey[] => (preview === "mockup" ? ["help.lanes.option.mockupPath"] : []);
 
 const step = (id: string, state: StepState, hint = `help.lanes.step.${id}.hint`, extra: Partial<TrackStep> = {}): TrackStep => ({
   name: `help.lanes.step.${id}.name` as MessageKey,
@@ -97,18 +99,18 @@ const mockupTrack: Track = {
   colour: "mockup",
   name: "help.lanes.track.mockup",
   steps: [
-    request("/selo:mockup {demande}", "help.lanes.step.request.mockup"),
+    request(cmd("help.lanes.cmd.mockup"), "help.lanes.step.request.mockup"),
     step("draft", "on"),
     step("touchUp", "on", undefined, { loop: true }),
     step("validate", "you", "help.lanes.step.validate.mockup"),
   ],
-  join: { text: "help.lanes.join.mockup", code: "--mockup {fichier}" },
+  join: { text: "help.lanes.join.mockup", code: t("help.options.mockup") },
 };
 
 const iterateTrack: Track = {
   colour: "iterate",
   name: "help.lanes.track.iterate",
-  steps: [request("/selo:fastlane {demande} --iterate", "help.lanes.step.request.iterate"), step("change", "on", undefined, { loop: true }), step("validate", "you", "help.lanes.step.validate.iterate")],
+  steps: [request(cmd("help.lanes.cmd.fastlane", "help.options.iterate"), "help.lanes.step.request.iterate"), step("change", "on", undefined, { loop: true }), step("validate", "you", "help.lanes.step.validate.iterate")],
   join: { text: "help.lanes.join.iterate" },
 };
 
@@ -119,7 +121,7 @@ function fastlaneTrack(preview: Preview): Track {
     colour: "fastlane",
     name: "help.lanes.fastlane.name",
     steps: [
-      ...(preview === "direct" ? [request("/selo:fastlane {demande}")] : []),
+      ...(preview === "direct" ? [request(cmd("help.lanes.cmd.fastlane"))] : []),
       step("grill", "skip", "help.lanes.step.grill.skip"),
       step("blueprint", "skip", "help.lanes.step.blueprint.skip"),
       step("approval", "skip", "help.lanes.step.approval.skip"),
@@ -138,7 +140,7 @@ function blueprintTrack(preview: Preview, hasRequest = preview === "direct"): Tr
     colour: "blueprint",
     name: "help.lanes.blueprint.name",
     steps: [
-      ...(hasRequest ? [request("/selo:blueprint {demande}")] : []),
+      ...(hasRequest ? [request(cmd("help.lanes.cmd.blueprint"))] : []),
       step("grill", "on"),
       step("blueprint", "on"),
       step("approval", "you"),
@@ -156,7 +158,7 @@ function blueprintTrack(preview: Preview, hasRequest = preview === "direct"): Tr
 const pilotWithTrack = (preview: Preview): Track => ({
   colour: "pilot",
   name: "help.lanes.pilotWith.name",
-  steps: [request(`/selo:pilot {demande}${preview === "mockup" ? " --mockup {fichier}" : ""}`, "help.lanes.step.request.pilotWith"), step("pick", "on")],
+  steps: [request(cmd("help.lanes.cmd.pilot", ...(preview === "mockup" ? ["help.options.mockup" as const] : [])), "help.lanes.step.request.pilotWith"), step("pick", "on")],
   join: { text: "help.lanes.join.pilotWith" },
 });
 
@@ -165,7 +167,7 @@ function pilotTrack(preview: Preview): Track {
     colour: "pilot",
     name: "help.lanes.pilot.name",
     steps: [
-      preview === "mockup" ? step("leave", "you") : request("/selo:pilot {demande} --autonomous", "help.lanes.step.request.pilot"),
+      preview === "mockup" ? step("leave", "you") : request(cmd("help.lanes.cmd.pilot", "help.options.autonomous"), "help.lanes.step.request.pilot"),
       step("grill", "on", "help.lanes.step.grill.pilot"),
       step("blueprint", "on"),
       step("approval", "skip", "help.lanes.step.approval.pilot"),
@@ -185,17 +187,17 @@ const whyPreview: Record<Preview, MessageKey> = { direct: "help.lanes.why.direct
 export function laneFor(answers: Answers): LaneResult | null {
   const { stay, scope, preview } = answers;
   if (!stay || !preview || !isPreviewAllowed(answers, preview)) return null;
-  const drawFirst: LanePrompt[] = preview === "mockup" ? [{ command: "/selo:mockup {demande}", colour: "mockup" }] : [];
+  const drawFirst: LanePrompt[] = preview === "mockup" ? [{ command: cmd("help.lanes.cmd.mockup"), colour: "mockup" }] : [];
   const afterMockup: MessageKey | undefined = preview === "mockup" ? "help.lanes.then.mockup" : undefined;
-  const mockupOption = preview === "mockup" ? [{ label: "--mockup", colour: "mockup" as const }] : [];
+  const mockupOption = preview === "mockup" ? [{ label: t("help.lanes.option.mockup"), colour: "mockup" as const }] : [];
 
   if (stay === "leave") {
     return {
       lane: "pilot",
       name: "help.lanes.pilot.name",
-      options: [...mockupOption, { label: "--autonomous", colour: "pilot" }],
+      options: [...mockupOption, { label: t("help.options.autonomous"), colour: "pilot" }],
       why: ["help.lanes.why.leave", ...(preview === "mockup" ? [whyPreview.mockup] : [])],
-      prompts: [...drawFirst, { command: `/selo:pilot {demande}${preview === "mockup" ? ` ${mockupPath}` : ""} --autonomous`, then: afterMockup }],
+      prompts: [...drawFirst, { command: cmd("help.lanes.cmd.pilot", ...withMockup(preview), "help.options.autonomous"), then: afterMockup }],
       text: preview === "mockup" ? "help.lanes.text.pilotMockup" : "help.lanes.text.pilot",
       tracks: [...(preview === "mockup" ? [mockupTrack] : []), pilotTrack(preview)],
       foot: "help.lanes.foot.pilot",
@@ -203,7 +205,6 @@ export function laneFor(answers: Answers): LaneResult | null {
   }
   if (!scope) return null;
   const why: MessageKey[] = ["help.lanes.why.stay", `help.lanes.why.${scope}`, whyPreview[preview]];
-  const withMockup = preview === "mockup" ? ` ${mockupPath}` : "";
 
   if (scope === "unsure") {
     return {
@@ -211,7 +212,7 @@ export function laneFor(answers: Answers): LaneResult | null {
       name: "help.lanes.pilotWith.name",
       options: mockupOption,
       why,
-      prompts: [...drawFirst, { command: `/selo:pilot {demande}${withMockup}`, then: afterMockup }, { command: "/selo:build {blueprint}", then: "help.lanes.then.pilotBuild" }],
+      prompts: [...drawFirst, { command: cmd("help.lanes.cmd.pilot", ...withMockup(preview)), then: afterMockup }, { command: cmd("help.lanes.cmd.build"), then: "help.lanes.then.pilotBuild" }],
       text: preview === "mockup" ? "help.lanes.text.pilotWithMockup" : "help.lanes.text.pilotWith",
       tracks: [...(preview === "mockup" ? [mockupTrack] : []), pilotWithTrack(preview), blueprintTrack(preview, false)],
       foot: "help.lanes.foot.pilotWith",
@@ -223,9 +224,9 @@ export function laneFor(answers: Answers): LaneResult | null {
     return {
       lane: "fastlane",
       name: "help.lanes.fastlane.name",
-      options: preview === "iterate" ? [{ label: "--iterate", colour: "iterate" }] : mockupOption,
+      options: preview === "iterate" ? [{ label: t("help.options.iterate"), colour: "iterate" }] : mockupOption,
       why,
-      prompts: [...drawFirst, { command: `/selo:fastlane {demande}${preview === "iterate" ? " --iterate" : withMockup}`, then: afterMockup }],
+      prompts: [...drawFirst, { command: cmd("help.lanes.cmd.fastlane", ...(preview === "iterate" ? ["help.options.iterate" as const] : withMockup(preview))), then: afterMockup }],
       text: `help.lanes.text.fastlane.${preview}`,
       tracks: [...(preview === "mockup" ? [mockupTrack] : preview === "iterate" ? [iterateTrack] : []), fastlaneTrack(preview)],
       foot: "help.lanes.foot.worktree",
@@ -236,7 +237,7 @@ export function laneFor(answers: Answers): LaneResult | null {
     name: "help.lanes.blueprint.name",
     options: mockupOption,
     why,
-    prompts: [...drawFirst, { command: `/selo:blueprint {demande}${withMockup}`, then: afterMockup }, { command: "/selo:build {blueprint}", then: "help.lanes.then.build" }],
+    prompts: [...drawFirst, { command: cmd("help.lanes.cmd.blueprint", ...withMockup(preview)), then: afterMockup }, { command: cmd("help.lanes.cmd.build"), then: "help.lanes.then.build" }],
     text: preview === "mockup" ? "help.lanes.text.blueprint.mockup" : "help.lanes.text.blueprint.direct",
     tracks: [...(preview === "mockup" ? [mockupTrack] : []), blueprintTrack(preview)],
     foot: "help.lanes.foot.worktree",
