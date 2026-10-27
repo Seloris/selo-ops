@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { mkdirSync, utimesSync, writeFileSync } from "node:fs";
 import { uptime } from "node:os";
 import { basename, dirname, join } from "node:path";
@@ -346,6 +347,55 @@ function writeWorktree(repository: string, root: string, name: string) {
   writeFileSync(join(root, ".git"), `gitdir: ${gitDir}\n`);
 }
 
+// A real repository, so the « Ajouter un script npm run app:demo » session's files show their diff:
+// its commit, then an uncommitted change. Gives the real sha of each demo sha it commits; without git, a plain folder.
+const DEMO_RUN_SCRIPT = `import { spawn } from "node:child_process";
+
+const demo = process.argv.includes("--demo");
+spawn("node", ["run.mjs", ...(demo ? ["--demo"] : [])], { stdio: "inherit" });
+`;
+
+function writeDiffRepository(root: string, branch: string): Map<string, string> {
+  try {
+    mkdirSync(root, { recursive: true });
+    const git = (...args: string[]) => execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    git("init", "-q", "-b", branch);
+    const config: [string, string][] = [["user.name", "Demo"], ["user.email", "demo@example.com"], ["commit.gpgsign", "false"], ["core.autocrlf", "false"]];
+    for (const [key, value] of config) git("config", key, value);
+    const commit = (subject: string, files: Record<string, string>) => {
+      for (const [file, content] of Object.entries(files)) writeFileSync(join(root, file), content);
+      git("add", "--", ...Object.keys(files));
+      git("commit", "-q", "-m", subject);
+      return git("rev-parse", "--short", "HEAD");
+    };
+    commit("chore(tooling): start", { "package.json": `{
+  "name": "selo-ops",
+  "private": true,
+  "scripts": {
+    "app": "node selo-run.mjs"
+  }
+}
+` });
+    const sha = commit("tools(tooling): add app:demo script", {
+      "package.json": `{
+  "name": "selo-ops",
+  "private": true,
+  "scripts": {
+    "app": "node selo-run.mjs",
+    "app:demo": "node selo-run.mjs --demo"
+  }
+}
+`,
+      "selo-run.mjs": DEMO_RUN_SCRIPT,
+    });
+    writeFileSync(join(root, "selo-run.mjs"), DEMO_RUN_SCRIPT.replace("run.mjs", "scripts/run.mjs"));
+    return new Map([["9b0e4d3", sha]]);
+  } catch {
+    writeRepository(root, branch);
+    return new Map();
+  }
+}
+
 export interface DemoFolders {
   // The ops export the demo writes.
   opsDir: string;
@@ -369,7 +419,8 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
   const ROOT = normRoot(folders.codeDir);
   const repoOf = (project: string) => `${ROOT}/${project}/.git`;
   const rootOf = (s: DemoSession) => (s.worktree ? `${ROOT}/${s.project}/.claude/worktrees/${s.worktree}` : `${ROOT}/${s.project}`);
-  for (const [name, p] of Object.entries(PROJECTS)) writeRepository(`${ROOT}/${name}`, p.branch);
+  for (const [name, p] of Object.entries(PROJECTS)) if (name !== "selo-ops") writeRepository(`${ROOT}/${name}`, p.branch);
+  const realShas = writeDiffRepository(`${ROOT}/selo-ops`, PROJECTS["selo-ops"]?.branch ?? "main");
 
   // `project` BR-01: each project's planning, its worktrees' own blueprints in their folder.
   const worktreeRootOf = (project: string, name: string) => `${ROOT}/${project}/.claude/worktrees/${name}`;
@@ -411,6 +462,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
   );
   for (const s of SESSIONS) {
     const since = at(s.age + 600);
+    const commits = (s.commits ?? []).map((c) => ({ ...c, sha: realShas.get(c.sha) ?? c.sha }));
     const current: ExportRun = {
       id: `${s.id}:1`, agentId: null, flow: s.flow, skill: s.skill ?? null, mode: s.mode ?? null, request: s.request, task: null, blueprint: s.blueprint ?? null,
       next: (s.nextSteps ?? []).map(([text, prompt]) => ({ text, prompt })),
@@ -418,7 +470,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
       ...(s.trailCut === undefined ? {} : { trailCut: s.trailCut }),
       step: s.step ?? null, substep: s.substep ?? null, error: s.error ?? null, phase: s.phase,
       pendingCommit: s.commit ?? null, question: s.question ?? null,
-      recap: s.recap ? { text: s.recap, commits: s.commits ?? [] } : null, commits: s.commits ?? [],
+      recap: s.recap ? { text: s.recap, commits } : null, commits,
       resumePrompt: s.next ?? null, since, updatedAt: at(s.age),
     };
     const usage = USAGE[s.id];

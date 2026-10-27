@@ -2,11 +2,12 @@ import { NotFoundError } from "../../shared/errors.js";
 import type { Clock } from "../../shared/clock.js";
 import { desktopSessionIdOf, toDesktopLink, type DesktopSessionReader } from "./sessions.desktop.js";
 import type { ExportRun, ExportUsage, OpsExportReader, ProjectFile, SessionFile } from "./sessions.export.js";
+import type { GitDiffReader } from "./sessions.git.js";
 import type { InstalledPluginReader } from "./sessions.plugins.js";
 import type { GitPlace, OutsideSession, OutsideSessionReader, PermissionWait } from "./sessions.outside.js";
 import type { DesktopSessionLinkRepository, SessionArchiveRepository, SessionNoteRepository } from "./sessions.repository.js";
 import type { SessionArchive } from "./sessions.table.js";
-import { closeBlockerSchema, type CloseBlocker, type Project, type Session, type SessionsResponse, type Usage } from "./sessions.schema.js";
+import { closeBlockerSchema, type CloseBlocker, type FileDiff, type Project, type Session, type SessionsResponse, type Usage } from "./sessions.schema.js";
 
 // The plugin cuts a run's request at this length.
 const REQUEST_LIMIT = 200;
@@ -58,6 +59,10 @@ function projectsOf(ids: string[], projectFiles: ProjectFile[], outsideGit: Map<
 
 // The export keeps a session's latest 100 runs, subagents included.
 const EXPORT_MAX_RUNS = 100;
+
+// A recorded sha as git prints it; anything else never reaches git.
+const SHA = /^[0-9a-f]{4,40}$/i;
+const GIT_PARALLEL = 4;
 
 const BLOCKERS = new Set<string>(closeBlockerSchema.options);
 
@@ -243,6 +248,7 @@ export function createSessionService({
   desktopSessions,
   desktopLinks,
   installedPlugins,
+  git,
   clock,
 }: {
   opsExport: OpsExportReader;
@@ -252,6 +258,7 @@ export function createSessionService({
   desktopSessions: DesktopSessionReader;
   desktopLinks: DesktopSessionLinkRepository;
   installedPlugins: InstalledPluginReader;
+  git: GitDiffReader;
   clock: Clock;
 }) {
   // `session` BR-11: a link seen in a status file is kept, the file goes when the process ends.
@@ -329,6 +336,30 @@ export function createSessionService({
     async unarchive(id: string): Promise<void> {
       findRun(id);
       await archives.remove(id);
+    },
+
+    // `session` BR-01: only a file the session touched, only commits the export recorded, so nothing the caller
+    // sends reaches git but a path and a sha it already holds.
+    async fileDiff(id: string, file: string): Promise<FileDiff> {
+      const session = opsExport.read().sessions.find((s) => s.sessionId === id);
+      if (!session) throw new NotFoundError("Session", id);
+      if (!(session.touchedFiles ?? []).includes(file)) throw new NotFoundError("Touched file", file);
+      if (!(await git.isCheckout(session.root))) return { file, isAvailable: false, commits: [], uncommitted: null };
+      const commits = new Map<string, string>();
+      const runs = [...session.runs, ...(session.current ? [session.current] : [])].sort((a, b) => Date.parse(a.since) - Date.parse(b.since));
+      for (const run of runs) for (const c of run.commits ?? []) if (SHA.test(c.sha) && !commits.has(c.sha)) commits.set(c.sha, c.subject);
+      // A few git processes at once: a long session's commits neither queue for minutes nor flood the machine.
+      const entries = [...commits];
+      const texts: Awaited<ReturnType<GitDiffReader["commitDiff"]>>[] = [];
+      for (let i = 0; i < entries.length; i += GIT_PARALLEL) {
+        texts.push(...(await Promise.all(entries.slice(i, i + GIT_PARALLEL).map(([sha]) => git.commitDiff(session.root, sha, file)))));
+      }
+      const parts = entries.flatMap(([sha, subject], i): FileDiff["commits"] => {
+        const text = texts[i];
+        if (text === null || text === undefined) return [{ sha, subject, diff: null, isCut: false }];
+        return text.diff === "" ? [] : [{ sha, subject, ...text }];
+      });
+      return { file, isAvailable: true, commits: parts, uncommitted: await git.uncommittedDiff(session.root, file) };
     },
 
     // `session` BR-21: one note per session, kept across runs; an empty text removes it.

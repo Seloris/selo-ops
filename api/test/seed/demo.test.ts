@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
 import { migrateDatabase, openDatabase } from "../../src/db/client.js";
 import { projectFileResponseSchema, projectsResponseSchema } from "../../src/features/projects/projects.schema.js";
-import { sessionsResponseSchema } from "../../src/features/sessions/sessions.schema.js";
+import { fileDiffSchema, sessionsResponseSchema } from "../../src/features/sessions/sessions.schema.js";
 import { settingsSchema } from "../../src/features/settings/settings.schema.js";
 import { seedDemo } from "../../src/seed/demo.js";
 import { createTestClock } from "../setup.js";
@@ -29,7 +29,8 @@ async function demoApp() {
   return createApp({ db, clock, ...folders });
 }
 
-describe("demo", () => {
+// Each test seeds a fresh demo, its real repository included (git processes): slower than a route test.
+describe("demo", { timeout: 30_000 }, () => {
   it("lists a session waiting on a permission, with the command to allow", async () => {
     // Arrange
     const app = await demoApp();
@@ -119,6 +120,22 @@ describe("demo", () => {
         expect(projectFileResponseSchema.parse(read.body).text).toMatch(/^# /);
       }
     }
+  });
+
+  it("shows a file's committed and uncommitted diff", async () => {
+    // Arrange
+    const app = await demoApp();
+    const id = "d3b16f74-e0a9-4c25-87d1-4f9e2b6c0a58";
+
+    // Act
+    const script = await request(app).get(`/v1/sessions/${id}/diff`).query({ file: "selo-run.mjs" });
+
+    // Assert
+    const diff = fileDiffSchema.parse(script.body);
+    expect(diff.isAvailable).toBe(true);
+    expect(diff.commits).toHaveLength(1);
+    expect(diff.commits[0]?.diff).toContain("+spawn(");
+    expect(diff.uncommitted?.diff).toContain("+spawn(\"node\", [\"scripts/run.mjs\"");
   });
 
   it("seeds a settings file of its own, its selo settings at their defaults", async () => {

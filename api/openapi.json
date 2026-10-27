@@ -1198,6 +1198,70 @@
           "versions"
         ]
       },
+      "FileDiff": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "isAvailable": {
+            "type": "boolean"
+          },
+          "commits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sha": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "diff": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "isCut": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "sha",
+                "subject",
+                "diff",
+                "isCut"
+              ]
+            }
+          },
+          "uncommitted": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "diff": {
+                "type": "string"
+              },
+              "isCut": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "diff",
+              "isCut"
+            ]
+          }
+        },
+        "required": [
+          "file",
+          "isAvailable",
+          "commits",
+          "uncommitted"
+        ]
+      },
       "SeloSettings": {
         "type": "object",
         "properties": {
@@ -1784,6 +1848,74 @@
           },
           "404": {
             "description": "The session is neither in the export nor running outside selo",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sessions/{id}/diff": {
+      "get": {
+        "summary": "The diff of one file the session touched: each recorded commit's part, then the uncommitted part, read from git",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            "required": true,
+            "name": "file",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file's diff, or isAvailable false when the session's folder holds no git checkout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileDiff"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The file is missing",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The session is not in the export, or did not touch the file",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "git did not answer: timed out, missing or killed",
             "content": {
               "application/problem+json": {
                 "schema": {

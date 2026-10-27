@@ -172,6 +172,25 @@ export const NOTE_MAX = 200;
 // Trimmed before the length check; an empty text removes the note.
 export const noteBodySchema = z.object({ text: z.string().trim().max(NOTE_MAX) });
 
+export const fileDiffQuerySchema = z.object({ file: z.string().min(1).max(1000) });
+
+// A part of a diff, cut at 200 000 characters.
+const diffTextSchema = z.object({ diff: z.string(), isCut: z.boolean() });
+
+// What one touched file went through, read from git on a click (`session` BR-01).
+export const fileDiffSchema = z
+  .object({
+    file: z.string(),
+    // False when the session's folder is gone or is no git checkout: nothing else is read.
+    isAvailable: z.boolean(),
+    // The commits the export recorded for the session's runs that change the file, oldest first; `diff` null when git
+    // no longer has the commit (a worktree landed, then removed).
+    commits: z.array(z.object({ sha: z.string(), subject: z.string(), diff: z.string().nullable(), isCut: z.boolean() })),
+    // The file against HEAD, null when unchanged; on a shared checkout it may hold other sessions' edits.
+    uncommitted: diffTextSchema.nullable(),
+  })
+  .meta({ id: "FileDiff" });
+
 export type Session = z.infer<typeof sessionSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type InstalledPlugin = z.infer<typeof installedPluginSchema>;
@@ -179,6 +198,7 @@ export type SessionsResponse = z.infer<typeof sessionsResponseSchema>;
 export type SessionState = z.infer<typeof sessionStateSchema>;
 export type CloseBlocker = z.infer<typeof closeBlockerSchema>;
 export type Usage = z.infer<typeof usageSchema>;
+export type FileDiff = z.infer<typeof fileDiffSchema>;
 
 const problem = (description: string) => ({
   description,
@@ -225,5 +245,18 @@ registry.registerPath({
     204: { description: "Saved, or removed" },
     400: problem("The text is missing or longer than 200 characters"),
     404: problem("The session is neither in the export nor running outside selo"),
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/sessions/{id}/diff",
+  summary: "The diff of one file the session touched: each recorded commit's part, then the uncommitted part, read from git",
+  request: { params: sessionParamsSchema, query: fileDiffQuerySchema },
+  responses: {
+    200: { description: "The file's diff, or isAvailable false when the session's folder holds no git checkout", content: { "application/json": { schema: fileDiffSchema } } },
+    400: problem("The file is missing"),
+    404: problem("The session is not in the export, or did not touch the file"),
+    502: problem("git did not answer: timed out, missing or killed"),
   },
 });

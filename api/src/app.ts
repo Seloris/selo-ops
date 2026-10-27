@@ -7,6 +7,7 @@ import { createProjectService } from "./features/projects/projects.service.js";
 import { createSlotReader } from "./features/projects/projects.slots.js";
 import { createDesktopSessionReader } from "./features/sessions/sessions.desktop.js";
 import { createOpsExportReader } from "./features/sessions/sessions.export.js";
+import { createGitDiffReader } from "./features/sessions/sessions.git.js";
 import { createInstalledPluginReader } from "./features/sessions/sessions.plugins.js";
 import { createOutsideSessionReader } from "./features/sessions/sessions.outside.js";
 import { createDesktopSessionLinkRepository, createSessionArchiveRepository, createSessionNoteRepository } from "./features/sessions/sessions.repository.js";
@@ -47,6 +48,7 @@ export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjects
     desktopSessions: createDesktopSessionReader(claudeSessionsDir),
     desktopLinks: createDesktopSessionLinkRepository(db),
     installedPlugins: createInstalledPluginReader(claudePluginsFile),
+    git: createGitDiffReader(),
     clock,
   });
   app.use(sessionsRoutes({ sessions }));

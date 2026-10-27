@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { inputOf, validate } from "../../shared/validate.js";
-import { noteBodySchema, sessionParamsSchema } from "./sessions.schema.js";
+import { fileDiffQuerySchema, noteBodySchema, sessionParamsSchema } from "./sessions.schema.js";
 import type { SessionService } from "./sessions.service.js";
 
 const byId = { params: sessionParamsSchema };
 const note = { params: sessionParamsSchema, body: noteBodySchema };
+const diff = { params: sessionParamsSchema, query: fileDiffQuerySchema };
 
 // Public, like the whole application (see app.ts).
 export function sessionsRoutes({ sessions }: { sessions: SessionService }): Router {
@@ -24,6 +25,10 @@ export function sessionsRoutes({ sessions }: { sessions: SessionService }): Rout
     const { params, body } = inputOf<typeof note>(res);
     await sessions.saveNote(params.id, body.text);
     res.status(204).end();
+  });
+  router.get("/v1/sessions/:id/diff", validate(diff), async (_req, res) => {
+    const { params, query } = inputOf<typeof diff>(res);
+    res.json(await sessions.fileDiff(params.id, query.file));
   });
   return router;
 }
