@@ -44,9 +44,10 @@
   background: var(--surface-2);
 }
 
-.file.selected {
-  background: var(--surface-2);
-  box-shadow: inset 2px 0 0 var(--hue-files);
+/* A tinted row, no edge bar: an inset bar on rounded corners bends into a crescent. */
+.file.selected,
+.file.selected:hover {
+  background: color-mix(in srgb, var(--hue-files) 14%, transparent);
 }
 
 .folder svg,
