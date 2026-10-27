@@ -414,6 +414,8 @@
   "sessions.new.needBlueprint": "Choisis un blueprint pour lancer.",
   "sessions.new.guide": "Le guide de choix",
   "sessions.new.in": "Dans",
+  "sessions.new.wipTag": "WIP",
+  "sessions.new.wip": "Fenêtre en cours de refonte : à refaire.",
   "sessions.new.mode": "Mode",
   "sessions.new.mode.simple": "Simple",
   "sessions.new.mode.advanced": "Avancé",

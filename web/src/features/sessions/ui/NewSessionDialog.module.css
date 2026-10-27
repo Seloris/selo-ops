@@ -30,6 +30,21 @@
   color: var(--text-muted);
 }
 
+/* The « WIP · à refaire » notice (FR-44): neutral, it marks the window, not a state. */
+
+.wip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: var(--border-width) dashed var(--border);
+  border-radius: var(--radius-control);
+}
+
 .body {
   display: grid;
   gap: 22px;

@@ -4,6 +4,7 @@ What changed in the application, for someone who reads no spec. One entry per pi
 
 ## 2026-10-27
 
+- Added — The « Nouvelle session » window shows a « WIP » notice under its top line: the window is to be reworked.
 - Fixed — The header shows the installed selo plugins again, under their new names « selo-flow » and « selo-feed », and every command copied from the help, « Nouvelle session » and a session's next step reads `/selo-flow:…`. ([blueprint](blueprints/2026-10-27-plugin-rename.md))
 - Fixed — A session's « Action suivante » no longer lists the same next step twice when its resume prompt and its done footer give two commands for the same blueprint (build, then pilot): the footer's line shows once, with its summary, and the list, the cards and the detail copy that same command.
 - Changed — A session's history, now « Déroulé de la session », shows every prompt of the session, not only the last one: each earlier prompt is a folded line with its time, its request and its duration, opening on its own chapters and subagents; the current prompt's chapters follow, as before.

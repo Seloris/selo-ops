@@ -466,6 +466,11 @@ export function NewSessionDialog({
               />
             </span>
           </div>
+          {/* FR-44: the window is to be reworked, said where it is used. */}
+          <p className={styles.wip} role="note">
+            <Tag>{t("sessions.new.wipTag")}</Tag>
+            {t("sessions.new.wip")}
+          </p>
           <div className={styles.body}>{form.mode === "simple" ? simple : advanced}</div>
           <div className={styles.foot}>
             <CommandBox
