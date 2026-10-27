@@ -5,3 +5,4 @@ What changed in the application, for someone who reads no spec. One entry per pi
 ## 2026-10-27
 
 - Changed — In a session's « Déroulé du tour », the same step repeated in a row now reads as one line, with a pip per pass and its total time; a chevron unfolds the passes, and the subagents sit indented under the step they started in.
+- Added — In the sessions list, a session working in a worktree shows a small fir tree; hovering or tapping it gives the worktree's name, its branch and its folder, and the search also finds a session by its worktree's name.

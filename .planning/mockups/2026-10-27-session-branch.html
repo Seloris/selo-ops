@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Branche dans la liste</title>
+<meta name="selo:mockup" content="validated">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* selo skin "aurora", copied from the selo plugin (skins/aurora/tokens.css). Do not edit:
+   switch skins with /selo:setup skin {component} {skin}; override variables in overrides.css. */
+:root {
+  --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-size: 15px;
+  --title-size: 34px;
+  --title-weight: 500;
+  --title-tracking: -0.02em;
+  --title-transform: none;
+  --title-style: normal;
+  --label-size: 0.85em;
+  --label-weight: 500;
+  --label-transform: none;
+  --label-tracking: 0;
+  --radius: 20px;
+  --radius-control: 12px;
+  --radius-pill: 999px;
+  --check-radius: 7px;
+  --switch-radius: 999px;
+  --badge-radius: var(--radius-pill);
+  --border-width: 1px;
+  --control-h: 40px;
+  --panel-bg: var(--surface);
+  --panel-border: var(--border-width) solid var(--border);
+  --panel-pad: 32px;
+  --blur: blur(18px) saturate(140%);
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(20,184,166,.28), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.20), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.20), transparent 70%);
+  --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
+  --shadow-control: none;
+  --shadow-pop: 0 24px 60px -12px rgba(0,0,0,.35);
+  --list-gap: 8px;
+  --list-rule: none;
+  --item-pad: 12px 14px;
+  --item-bg: rgba(255,255,255,.55);
+  --item-border: var(--border-width) solid var(--border);
+  --item-rule: var(--item-border);
+  --item-radius: var(--radius-control);
+  --item-shadow: none;
+  --badge-border: 0;
+  --badge-transform: none;
+  --badge-tracking: 0;
+  --btn-border: transparent;
+  --btn-weight: 600;
+  --btn-transform: none;
+  --btn-tracking: 0;
+  --control-bg: rgba(255,255,255,.7);
+  --control-border: var(--border);
+  --control-border-on: var(--accent);
+  --accent-text: #ffffff;
+  --accent-soft: rgba(15,148,136,.12);
+  --accent-soft-text: #0b6b62;
+  --danger-text: #ffffff;
+  --focus: color-mix(in srgb, var(--accent) 35%, transparent);
+  --pop-bg: rgba(255,255,255,.95);
+  --scrim: rgba(15,17,22,.45);
+  --bg: #eef3f4;
+  --surface: rgba(255,255,255,.62);
+  --surface-2: rgba(255,255,255,.8);
+  --border: rgba(15,23,42,.09);
+  --text: #0f172a;
+  --text-muted: #55627a;
+  --accent: #0f9488;
+  --danger: #e11d48;
+  --danger-soft: rgba(225,29,72,.1);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #070b14;
+    --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(45,212,191,.32), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.18), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.28), transparent 70%);
+    --surface: rgba(255,255,255,.06);
+    --surface-2: rgba(255,255,255,.1);
+    --border: rgba(255,255,255,.14);
+    --text: #eef2ff;
+    --text-muted: #a5adc8;
+    --accent: #5eead4;
+    --accent-text: #04201b;
+    --accent-soft: rgba(94,234,212,.14);
+    --accent-soft-text: #a7f3e4;
+    --danger: #fb7185;
+    --danger-soft: rgba(251,113,133,.14);
+    --danger-text: #2a0710;
+    --control-bg: rgba(0,0,0,.25);
+    --item-bg: rgba(255,255,255,.04);
+    --pop-bg: rgba(17,22,36,.92);
+    --scrim: rgba(3,6,12,.55);
+    --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+    color-scheme: dark;
+  }
+}
+
+/*
+ * Element recipes: how every skin is meant to be applied. Stack-agnostic, framework-free CSS that
+ * reads the token contract only (see README.md): no literal color, radius, shadow or font.
+ * A stack ports each recipe into its own components (the react-express pack: one shared/ui
+ * component and its CSS Module per element); the class names here only label the recipes.
+ * The same rules render all seven skins: a skin changes the variables, never these rules.
+ */
+
+/* ---------- page ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: var(--bg-image);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 1.5;
+}
+:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* ---------- panel: the page's main surface ---------- */
+
+.panel {
+  display: grid;
+  gap: 28px;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--panel-pad);
+  background: var(--panel-bg);
+  border: var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+
+/* ---------- headings ---------- */
+
+.title {
+  margin: 0;
+  line-height: 1.02;
+  text-wrap: balance;
+  font-family: var(--font-display);
+  font-size: var(--title-size);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-tracking);
+  text-transform: var(--title-transform);
+  font-style: var(--title-style);
+}
+.subtitle { margin: 0; color: var(--text-muted); font-size: 0.9em; font-variant-numeric: tabular-nums; }
+
+/* ---------- field: label, control, error ---------- */
+
+.field { display: grid; gap: 6px; min-width: 0; }
+.label {
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  text-transform: var(--label-transform);
+  letter-spacing: var(--label-tracking);
+  color: var(--text-muted);
+}
+.input, .select {
+  width: 100%;
+  height: var(--control-h);
+  margin: 0;
+  padding: 0 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input::placeholder { color: var(--text-muted); opacity: 0.75; }
+.input:focus-visible, .select:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus); }
+.input[aria-invalid="true"] { border-color: var(--danger); }
+.error { margin: 8px 0 0; color: var(--danger); font-size: 0.85em; }
+
+/* search: an input with a leading icon (16px, currentColor) */
+.search { position: relative; }
+.search svg {
+  position: absolute; left: 12px; top: 50%;
+  width: 16px; height: 16px; transform: translateY(-50%);
+  color: var(--text-muted); pointer-events: none;
+}
+.search .input { padding-left: 36px; }
+
+/* select: the native control restyled, its chevron drawn by the wrapper */
+.select-wrap { position: relative; }
+.select { padding-right: 34px; cursor: pointer; }
+.select-wrap::after {
+  content: "";
+  position: absolute; right: 14px; top: 50%;
+  width: 7px; height: 7px; pointer-events: none;
+  border-right: 1.5px solid var(--text-muted);
+  border-bottom: 1.5px solid var(--text-muted);
+  transform: translateY(-70%) rotate(45deg);
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: var(--control-h);
+  padding: 0 18px;
+  white-space: nowrap;
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--btn-weight);
+  text-transform: var(--btn-transform);
+  letter-spacing: var(--btn-tracking);
+  border: var(--border-width) solid var(--btn-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  transition: transform 0.12s, filter 0.12s, background-color 0.12s, color 0.12s;
+}
+/* restores the page's ring: .btn's own shadow has the same specificity and loads later */
+.btn:focus-visible { box-shadow: 0 0 0 3px var(--focus); }
+.btn:active { transform: translate(1px, 1px); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--accent); color: var(--accent-text); }
+.btn-danger { background: var(--danger); color: var(--danger-text); }
+.btn-primary:hover:not(:disabled), .btn-danger:hover:not(:disabled) { filter: brightness(1.07); }
+.btn-quiet { background: var(--surface-2); color: var(--text); }
+/* toward the text color: darker on a light skin, lighter on a dark one */
+.btn-quiet:hover:not(:disabled) { background: color-mix(in srgb, var(--surface-2), var(--text) 8%); }
+/* ghost: a row action (delete), quiet until hovered */
+.btn-ghost {
+  height: auto; padding: 6px 10px;
+  font-size: 0.86em; font-weight: 500;
+  background: transparent; color: var(--text-muted);
+  border-color: transparent; box-shadow: none;
+}
+.btn-ghost:hover { color: var(--danger); background: var(--danger-soft); }
+.btn-ghost svg { width: 15px; height: 15px; }
+
+/* ---------- switch: a checkbox with role="switch" ---------- */
+
+.switch { display: inline-flex; align-items: center; gap: 10px; height: var(--control-h); cursor: pointer; user-select: none; font-size: 0.92em; }
+.switch input {
+  position: relative; flex: none;
+  width: 38px; height: 22px; margin: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--switch-radius);
+  transition: background-color 0.15s;
+}
+.switch input::before {
+  content: "";
+  position: absolute; top: 2px; left: 2px;
+  width: calc(18px - 2 * var(--border-width));
+  height: calc(18px - 2 * var(--border-width));
+  border-radius: var(--switch-radius);
+  background: var(--text-muted);
+  transition: transform 0.15s;
+}
+.switch input:checked { background: var(--accent); border-color: var(--control-border-on); }
+.switch input:checked::before { transform: translateX(16px); background: var(--accent-text); }
+.switch input:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- list and its rows ---------- */
+
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--list-gap); border-top: var(--list-rule); }
+/* wraps: at narrow widths the tag and the row action go to a second line instead of widening the page */
+.item {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  padding: var(--item-pad);
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-bottom: var(--item-rule);
+  border-radius: var(--item-radius);
+  box-shadow: var(--item-shadow);
+}
+/* the 120px basis keeps the text readable: the row's last items wrap before it narrows below it */
+.item-text { flex: 1 1 120px; min-width: 0; overflow-wrap: anywhere; }
+.item.is-done .item-text { color: var(--text-muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.empty {
+  padding: 28px 16px; text-align: center; color: var(--text-muted);
+  border: var(--border-width) dashed var(--border);
+  border-radius: var(--item-radius);
+}
+
+/* checkbox: the native control restyled, its tick drawn in CSS */
+.check {
+  flex: none; display: grid; place-items: center;
+  width: 20px; height: 20px; margin: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--check-radius);
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.check::after {
+  content: "";
+  width: 5px; height: 10px;
+  border: solid var(--accent-text); border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg) scale(0);
+  transition: transform 0.12s;
+}
+.check:checked { background: var(--accent); border-color: var(--control-border-on); }
+.check:checked::after { transform: translateY(-1px) rotate(45deg) scale(1); }
+.check:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- badge: a tag ---------- */
+
+.badge {
+  flex: none;
+  padding: 1px 10px;
+  line-height: 1.7;
+  font-size: 0.78em;
+  font-weight: 600;
+  text-transform: var(--badge-transform);
+  letter-spacing: var(--badge-tracking);
+  color: var(--accent-soft-text);
+  background: var(--accent-soft);
+  border: var(--badge-border);
+  border-radius: var(--badge-radius);
+}
+
+/* ---------- dialog: a native <dialog> opened with showModal() ---------- */
+
+.dialog {
+  width: min(400px, calc(100% - 32px));
+  padding: 24px;
+  color: var(--text);
+  background: var(--pop-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+.dialog::backdrop { background: var(--scrim); }
+.dialog[open] { display: grid; gap: 8px; animation: fade 0.15s ease-out; }
+.dialog h2 { margin: 0; font-family: var(--font-display); font-size: 1.3em; font-weight: var(--title-weight); text-transform: var(--title-transform); line-height: 1.2; }
+.dialog p { margin: 0; color: var(--text-muted); }
+.actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+@keyframes fade { from { opacity: 0; } }
+
+/* This application's own values for the skin's variables, loaded after skin.css (the selo plugin's
+   skins/README.md lists them). A dark-only value goes in a @media (prefers-color-scheme: dark) block.
+
+   Added tokens:
+   --warn, --warn-soft   amber, the second state colour the skin lacks (rose is its --danger)
+   --done                green, the dot of a finished job (sessions-live FR-10)
+   --font-mono           commands, branches, commit subjects
+   --working             sky blue, the pulsing dot of a running session; no lane's colour, not --mark's blue (sessions-live FR-10)
+   --lane-fastlane, --lane-pilot   the lanes on the help page: lime, violet (help FR-11)
+   --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
+   --lane-free           a free request: slate; the four --lane-* also colour the type of work of a session (sessions-live FR-29)
+   --lane-mockup, --lane-iterate   the two flows beside the lanes, mockup first and the fastlane's iterate mode: fuchsia, orange (help FR-11, sessions-live FR-29); orange, not --warn's amber
+   --mark                a control that holds something of the person's (the session's note button): blue
+   --flag, --flag-soft   bright yellow, the flag of a flagged session (sessions-live FR-42); not --warn's amber
+   --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage, --hue-next, --hue-trail   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia, violet, lime; --hue-next is also the next action's chip and button in the list (sessions-live FR-10)
+
+   --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
+   --bp-draft, --bp-ready, --bp-building, --bp-review, --bp-merging, --bp-done, --bp-legacy   a blueprint's state, the same in bars, legends, tags and tracks: lime, cyan, blue, violet, fuchsia, green, grey (projects FR-14); none is --mark, amber or rose
+   --delta-add, --delta-change, --delta-remove   a spec delta's lines added, changed, removed, in figures, bars and signs, and a file diff's added and removed lines: green, yellow, red; no state colour
+   --hue-progress, --hue-blueprints, --hue-specs, --hue-ideas, --hue-debt   the icons of the projects page's sections: orange, teal, emerald, sky, stone
+   --spec-page, --spec-domain, --spec-blueprint   a page spec, a domain sheet, a blueprint, wherever one shows (app FR-04): indigo, pink, teal like the blueprint lane
+   The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
+   of that scheme, so the choice wins over the system's prefers-color-scheme. */
+:root {
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+  --warn: #d97706;
+  --done: #16a34a;
+  --warn-soft: rgba(217,119,6,.15);
+  --flag: #ca8a04;
+  --flag-soft: rgba(202,138,4,.16);
+  --working: #0284c7;
+  --mark: #2563eb;
+  --lane-fastlane: #4d7c0f;
+  --lane-pilot: #7c3aed;
+  --lane-blueprint: #0f766e;
+  --lane-free: #475569;
+  --lane-mockup: #c026d3;
+  --lane-iterate: #c2410c;
+  --hue-close: #047857;
+  --hue-recap: #be185d;
+  --hue-agents: #0e7490;
+  --hue-files: #4338ca;
+  --hue-usage: #a21caf;
+  --hue-next: #7c3aed;
+  --hue-trail: #4d7c0f;
+  --kind-input: #2563eb;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #7c3aed;
+  --kind-output: #16a34a;
+    --bp-draft: #65a30d;
+    --bp-ready: #0891b2;
+    --bp-building: #1d4ed8;
+    --bp-review: #7c3aed;
+    --bp-merging: #c026d3;
+    --bp-done: #16a34a;
+    --bp-legacy: #94a3b8;
+    --delta-add: #16a34a;
+    --delta-change: #ca8a04;
+    --delta-remove: #e11d48;
+    --hue-progress: #ea580c;
+    --hue-blueprints: #0d9488;
+    --hue-specs: #047857;
+    --hue-ideas: #0369a1;
+    --hue-debt: #78716c;
+    --spec-page: #4f46e5;
+    --spec-domain: #db2777;
+    --spec-blueprint: #0f766e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --warn: #fbbf24;
+    --done: #4ade80;
+    --warn-soft: rgba(251,191,36,.16);
+    --flag: #facc15;
+    --flag-soft: rgba(250,204,21,.16);
+    --working: #38bdf8;
+    --mark: #93c5fd;
+    --lane-fastlane: #a3e635;
+    --lane-pilot: #c4b5fd;
+    --lane-blueprint: #2dd4bf;
+    --lane-free: #94a3b8;
+    --lane-mockup: #f0abfc;
+    --lane-iterate: #fb923c;
+    --hue-close: #6ee7b7;
+    --hue-recap: #f9a8d4;
+    --hue-agents: #67e8f9;
+    --hue-files: #a5b4fc;
+    --hue-usage: #f0abfc;
+    --hue-next: #c4b5fd;
+    --hue-trail: #bef264;
+    --kind-input: #60a5fa;
+    --kind-cache-read: #a8a29e;
+    --kind-cache-write: #a78bfa;
+    --kind-output: #4ade80;
+    --bp-draft: #a3e635;
+    --bp-ready: #22d3ee;
+    --bp-building: #60a5fa;
+    --bp-review: #a78bfa;
+    --bp-merging: #e879f9;
+    --bp-done: #4ade80;
+    --bp-legacy: #64748b;
+    --delta-add: #4ade80;
+    --delta-change: #facc15;
+    --delta-remove: #fb7185;
+    --hue-progress: #fdba74;
+    --hue-blueprints: #5eead4;
+    --hue-specs: #6ee7b7;
+    --hue-ideas: #7dd3fc;
+    --hue-debt: #d6d3d1;
+    --spec-page: #a5b4fc;
+    --spec-domain: #f9a8d4;
+    --spec-blueprint: #2dd4bf;
+  }
+}
+
+:root[data-theme="light"] {
+  --bg: #eef3f4;
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(20,184,166,.28), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.20), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.20), transparent 70%);
+  --surface: rgba(255,255,255,.62);
+  --surface-2: rgba(255,255,255,.8);
+  --border: rgba(15,23,42,.09);
+  --text: #0f172a;
+  --text-muted: #55627a;
+  --accent: #0f9488;
+  --accent-text: #ffffff;
+  --accent-soft: rgba(15,148,136,.12);
+  --accent-soft-text: #0b6b62;
+  --danger: #e11d48;
+  --danger-soft: rgba(225,29,72,.1);
+  --danger-text: #ffffff;
+  --control-bg: rgba(255,255,255,.7);
+  --item-bg: rgba(255,255,255,.55);
+  --pop-bg: rgba(255,255,255,.95);
+  --scrim: rgba(15,17,22,.45);
+  --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
+  --warn: #d97706;
+  --done: #16a34a;
+  --warn-soft: rgba(217,119,6,.15);
+  --flag: #ca8a04;
+  --flag-soft: rgba(202,138,4,.16);
+  --working: #0284c7;
+  --mark: #2563eb;
+  --lane-fastlane: #4d7c0f;
+  --lane-pilot: #7c3aed;
+  --lane-blueprint: #0f766e;
+  --lane-free: #475569;
+  --lane-mockup: #c026d3;
+  --lane-iterate: #c2410c;
+  --hue-close: #047857;
+  --hue-recap: #be185d;
+  --hue-agents: #0e7490;
+  --hue-files: #4338ca;
+  --hue-usage: #a21caf;
+  --hue-next: #7c3aed;
+  --hue-trail: #4d7c0f;
+  --kind-input: #2563eb;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #7c3aed;
+  --kind-output: #16a34a;
+  --bp-draft: #65a30d;
+  --bp-ready: #0891b2;
+  --bp-building: #1d4ed8;
+  --bp-review: #7c3aed;
+  --bp-merging: #c026d3;
+  --bp-done: #16a34a;
+  --bp-legacy: #94a3b8;
+  --delta-add: #16a34a;
+  --delta-change: #ca8a04;
+  --delta-remove: #e11d48;
+  --hue-progress: #ea580c;
+  --hue-blueprints: #0d9488;
+  --hue-specs: #047857;
+  --hue-ideas: #0369a1;
+  --hue-debt: #78716c;
+  --spec-page: #4f46e5;
+  --spec-domain: #db2777;
+  --spec-blueprint: #0f766e;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #070b14;
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(45,212,191,.32), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.18), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.28), transparent 70%);
+  --surface: rgba(255,255,255,.06);
+  --surface-2: rgba(255,255,255,.1);
+  --border: rgba(255,255,255,.14);
+  --text: #eef2ff;
+  --text-muted: #a5adc8;
+  --accent: #5eead4;
+  --accent-text: #04201b;
+  --accent-soft: rgba(94,234,212,.14);
+  --accent-soft-text: #a7f3e4;
+  --danger: #fb7185;
+  --danger-soft: rgba(251,113,133,.14);
+  --danger-text: #2a0710;
+  --control-bg: rgba(0,0,0,.25);
+  --item-bg: rgba(255,255,255,.04);
+  --pop-bg: rgba(17,22,36,.92);
+  --scrim: rgba(3,6,12,.55);
+  --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+  --warn: #fbbf24;
+  --done: #4ade80;
+  --warn-soft: rgba(251,191,36,.16);
+  --flag: #facc15;
+  --flag-soft: rgba(250,204,21,.16);
+  --working: #38bdf8;
+  --mark: #93c5fd;
+  --lane-fastlane: #a3e635;
+  --lane-pilot: #c4b5fd;
+  --lane-blueprint: #2dd4bf;
+  --lane-free: #94a3b8;
+  --lane-mockup: #f0abfc;
+  --lane-iterate: #fb923c;
+  --hue-close: #6ee7b7;
+  --hue-recap: #f9a8d4;
+  --hue-agents: #67e8f9;
+  --hue-files: #a5b4fc;
+  --hue-usage: #f0abfc;
+  --hue-next: #c4b5fd;
+  --hue-trail: #bef264;
+  --kind-input: #60a5fa;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #a78bfa;
+  --kind-output: #4ade80;
+  --bp-draft: #a3e635;
+  --bp-ready: #22d3ee;
+  --bp-building: #60a5fa;
+  --bp-review: #a78bfa;
+  --bp-merging: #e879f9;
+  --bp-done: #4ade80;
+  --bp-legacy: #64748b;
+  --delta-add: #4ade80;
+  --delta-change: #facc15;
+  --delta-remove: #fb7185;
+  --hue-progress: #fdba74;
+  --hue-blueprints: #5eead4;
+  --hue-specs: #6ee7b7;
+  --hue-ideas: #7dd3fc;
+  --hue-debt: #d6d3d1;
+  --spec-page: #a5b4fc;
+  --spec-domain: #f9a8d4;
+  --spec-blueprint: #2dd4bf;
+  color-scheme: dark;
+}
+
+/* ---- Mockup frame ---- */
+body { padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.mk-intro { max-width: 1280px; margin: 0 auto 28px; }
+.mk-intro h1 { margin: 0 0 6px; font-size: 26px; font-weight: 500; letter-spacing: -0.02em; }
+.mk-intro p { margin: 0 0 6px; color: var(--text-muted); max-width: 860px; }
+.plate { max-width: 1280px; margin: 0 auto 40px; }
+.plate > h2 { margin: 0 0 4px; font-size: 1.05em; font-weight: 600; }
+.plate > p { margin: 0 0 12px; font-size: 0.9em; color: var(--text-muted); max-width: 900px; }
+.scroller { overflow-x: auto; padding-bottom: 6px; }
+.frame { position: relative; overflow: hidden; border: var(--border-width) solid var(--border); border-radius: var(--radius-control); background-color: var(--bg); background-image: var(--bg-image); }
+.w1280 { width: 1280px; }
+.w360 { width: 360px; }
+.mobiles { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+.mobiles figure { margin: 0; }
+.mobiles figcaption { margin-top: 6px; font-size: 0.85em; color: var(--text-muted); max-width: 360px; }
+.mono { font-family: var(--font-mono); }
+svg.i { width: 15px; height: 15px; display: block; flex: none; }
+.new-here { outline: 2px dashed color-mix(in srgb, var(--accent) 70%, transparent); outline-offset: 2px; border-radius: 4px; }
+
+/* ---- App shell, copied from the page ---- */
+.nav { display: flex; align-items: center; gap: 6px; padding: 12px 32px; }
+.nav .brand { font-weight: 600; font-size: 0.86em; letter-spacing: .04em; margin-right: 14px; }
+.nav .tab { padding: 5px 12px; font-size: 0.9em; border-radius: var(--radius-control); color: var(--text-muted); }
+.nav .tab.on { background: var(--surface-2); color: var(--text); font-weight: 600; }
+.nav .grow { flex: 1; }
+.nav .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.86em; color: var(--text-muted); padding: 5px 10px; border: var(--border-width) solid var(--border); border-radius: var(--radius-control); }
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 10px 32px; }
+.top h1 { margin: 0; font-family: var(--font-display); font-size: var(--title-size); font-weight: var(--title-weight); letter-spacing: var(--title-tracking); line-height: 1.1; }
+.top .sub { margin: 0; font-size: 0.93em; color: var(--text-muted); }
+.top .sub b { color: var(--text); font-weight: 600; }
+.top .grow { flex: 1; }
+.top .meta { font-size: 0.8em; color: var(--text-muted); white-space: nowrap; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; padding: 6px 32px 14px; font-size: 0.87em; color: var(--text-muted); }
+.seg { display: inline-flex; gap: 2px; height: calc(var(--control-h) - 4px); padding: 3px; background: var(--control-bg); border: var(--border-width) solid var(--control-border); border-radius: var(--radius-control); }
+.seg span { display: inline-flex; align-items: center; padding: 0 12px; border-radius: calc(var(--radius-control) - 3px); font-weight: 500; color: var(--text-muted); white-space: nowrap; }
+.seg span.on { color: var(--accent-soft-text); background: var(--accent-soft); font-weight: 600; }
+.bar .searchbox { margin-left: auto; width: 420px; height: var(--control-h); display: flex; align-items: center; padding: 0 12px; background: var(--control-bg); border: var(--border-width) solid var(--control-border); border-radius: var(--radius-control); }
+.groups { display: grid; gap: 14px; padding: 0 32px 24px; }
+.group { padding: 4px 6px 6px; background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); box-shadow: var(--shadow-card); }
+.ghead { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 40px; padding: 4px 4px 4px 10px; }
+.ghead .name { font-weight: 600; }
+.ghead .gmeta { font-size: 0.83em; color: var(--text-muted); }
+.ghead .count { display: inline-flex; gap: 14px; margin-left: auto; font-size: 0.83em; color: var(--text-muted); align-items: center; }
+.ghead .count b { color: var(--text); font-weight: 600; }
+
+/* The list's rows (SessionList.module.css): two lines on the badge column, the request/context, the age/counts, the buttons. */
+.rows { --badge-col: 168px; display: grid; grid-template-columns: var(--badge-col) minmax(0, 1fr) auto auto; row-gap: 2px; margin: 0; padding: 0; list-style: none; }
+.rows.wide { --badge-col: 250px; }
+.r { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; border-radius: calc(var(--radius-control) - 2px); }
+.r:hover { background: var(--surface-2); }
+.r.warn { background: var(--warn-soft); }
+.r .main { grid-column: 1 / 4; min-width: 0; display: grid; grid-template-columns: subgrid; grid-template-areas: "badge request age" "meta context counts"; column-gap: 14px; row-gap: 4px; align-items: center; padding: 7px 10px 7px 12px; font-size: 0.9em; }
+.r .badge { grid-area: badge; display: flex; min-width: 0; }
+.state { display: inline-flex; align-items: center; gap: 7px; height: 22px; padding: 0 10px 0 8px; font-size: 0.86em; font-weight: 600; white-space: nowrap; color: var(--tone); background: color-mix(in srgb, var(--tone) 14%, transparent); border-radius: var(--radius-pill); }
+.state .d { width: 8px; height: 8px; border-radius: 50%; background: var(--tone); }
+.t-warn { --tone: var(--warn); }
+.t-run { --tone: var(--working); }
+.t-run .d { box-shadow: 0 0 0 3px color-mix(in srgb, var(--working) 25%, transparent); }
+.t-done { --tone: var(--done); }
+.t-turn { --tone: var(--done); background: color-mix(in srgb, var(--done) 7%, transparent); }
+.t-turn .d { background: transparent; border: 2px solid var(--done); }
+.r .req { grid-area: request; font-size: 1.04em; font-weight: 500; }
+.r .meta { grid-area: meta; padding-left: 2px; font-family: var(--font-mono); font-size: 0.84em; color: var(--text-muted); display: flex; align-items: center; gap: 0; min-width: 0; }
+.r .req, .r .txt, .cut { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.r .ctx { grid-area: context; min-width: 0; display: flex; align-items: center; gap: 7px; overflow: hidden; font-size: 0.93em; color: var(--text-muted); }
+.r .ctx.warn { font-weight: 500; color: var(--warn); }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px 0 7px; font-family: var(--font-mono); font-size: 0.92em; color: var(--hue-next); background: color-mix(in srgb, var(--hue-next) 13%, transparent); border-radius: var(--radius-pill); }
+.chip svg { width: 13px; height: 13px; }
+.r .age { grid-area: age; justify-self: end; font-size: 0.93em; color: var(--text-muted); padding-right: 24px; white-space: nowrap; }
+.r .counts { grid-area: counts; justify-self: end; display: flex; align-items: center; gap: 12px; padding-right: 24px; font-size: 0.93em; color: var(--text-muted); white-space: nowrap; }
+.r .counts span { display: inline-flex; align-items: center; gap: 4px; }
+.r .counts svg { width: 13px; height: 13px; }
+.r .acts { grid-column: 4; display: flex; align-items: center; margin-right: 4px; }
+.icon { display: grid; place-items: center; width: calc(var(--control-h) - 8px); height: calc(var(--control-h) - 8px); padding: 0; background: transparent; border: 0; border-radius: calc(var(--radius-control) - 3px); color: var(--text-muted); }
+.icon.accent { color: var(--accent); }
+.lane-free { color: var(--lane-free); } .lane-fastlane { color: var(--lane-fastlane); } .lane-blueprint { color: var(--lane-blueprint); } .lane-pilot { color: var(--lane-pilot); }
+.sep { padding: 0 6px; }
+
+/* ---- New: the branch / worktree ---- */
+.br { display: inline-flex; align-items: center; gap: 4px; min-width: 0; max-width: 26ch; color: var(--text-muted); }
+.br svg { width: 12px; height: 12px; flex: none; }
+.br .cut { min-width: 0; }
+.br.wt { color: var(--text); }
+/* Variant B: the worktree as a quiet pill */
+.wtchip { display: inline-flex; align-items: center; gap: 5px; height: 20px; max-width: 24ch; padding: 0 8px 0 6px; font-family: var(--font-mono); font-size: 0.86em; color: var(--text); background: var(--surface-2); border: var(--border-width) solid var(--border); border-radius: var(--radius-pill); }
+.wtchip svg { width: 12px; height: 12px; flex: none; }
+.tip { position: absolute; z-index: 5; display: grid; gap: 3px; padding: 9px 12px; font-size: 0.82em; background: var(--pop-bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); box-shadow: var(--shadow-pop); white-space: nowrap; }
+.tip b { font-weight: 600; }
+.tip .k { color: var(--text-muted); }
+
+/* Variant C: a fir tree alone, the worktree's name on hover */
+.tree { display: inline-grid; place-items: center; width: 20px; height: 20px; margin-left: 6px; color: var(--text); border-radius: 4px; }
+.tree svg { width: 14px; height: 14px; }
+.tree.hover { background: var(--surface-2); }
+
+/* ---- 360 px: the narrow list (below 900 px) ---- */
+.n .top, .n .nav, .n .bar { padding-left: 16px; padding-right: 16px; }
+.n .top h1 { font-size: 26px; }
+.n .groups { padding: 0 10px 16px; }
+.n .rows { grid-template-columns: minmax(0, 1fr) auto; }
+.n .r .main { grid-column: 1; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "badge age" "request request" "context context"; column-gap: 10px; padding: 8px 6px 8px 10px; }
+.n .r .age { padding-right: 0; display: flex; gap: 8px; align-items: center; }
+.n .r .req { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.n .r .meta, .n .r .counts { display: none; }
+.n .r .acts { grid-column: 2; flex-direction: column; }
+</style>
+</head>
+<body>
+<div class="mk-intro">
+  <h1>Branche ou worktree dans la liste — maquette</h1>
+  <p>Sessions live, vue Liste : chaque session dit sur quelle branche elle travaille, et si c’est dans un worktree. Rien d’autre ne bouge : ce qui est ajouté est entouré de pointillés. <b>Retenue : la variante C</b> (planche 2c et son écran mobile), un sapin pour un worktree, le nom au survol. Les variantes A et B restent pour mémoire ; elles ne sont pas à construire.</p>
+  <p>Icônes : <svg class="i" style="display:inline;vertical-align:-2px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 7v10M18 10c0 4-6 3-11.5 7"/></svg> une branche du dossier du projet, <svg class="i" style="display:inline;vertical-align:-2px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg> un worktree (autre copie du dépôt, sur sa propre branche).</p>
+</div>
+
+<!-- ============ Plate 1 : variant A ============ -->
+<section class="plate">
+  <h2>1 · Variante A — la branche sur chaque ligne, regroupé par projet, 1280 px</h2>
+  <p>La branche suit le type de travail sur la deuxième ligne, en mono et en gris. Une session de worktree prend l’icône worktree et son texte passe en couleur normale, pour se distinguer des sessions du dossier principal. Coupée avec « … » au-delà de 26 caractères ; le survol donne le worktree, la branche et le dossier.</p>
+  <div class="scroller"><div class="frame w1280" style="height:600px">
+    <div class="nav"><span class="brand">SELO OPS</span><span class="tab on">Live</span><span class="tab">Projets</span><span class="grow"></span><span class="pill">Aide</span><span class="pill">Clair · <b>Sombre</b></span></div>
+    <div class="top"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <b>1 à traiter</b></p><span class="grow"></span><span class="meta mono">selo 2.6.0 · selo-ops 2.6.0</span><span class="meta">Mis à jour il y a 2 s</span></div>
+    <div class="bar">Affichage <span class="seg"><span class="on">Liste</span><span>Cartes</span></span> Regrouper <span class="seg"><span class="on">Par projet</span><span>Par statut</span><span>Aucun</span></span><span class="searchbox">Rechercher : demande, blueprint, branche, projet</span></div>
+    <div class="groups">
+      <div class="group">
+        <div class="ghead"><span class="name">selo-ops</span><span class="gmeta mono">main</span><span class="gmeta">· 5 fichiers non commités</span><span class="count"><b>1 à traiter</b><span>3 sessions</span></span></div>
+        <ul class="rows">
+          <li class="r warn"><div class="main">
+            <span class="badge"><span class="state t-warn"><span class="d"></span>Attend ta réponse</span></span>
+            <span class="req">Graphique des durées par étape sur la page Projets</span>
+            <span class="age">2 min</span>
+            <span class="meta"><span class="lane-blueprint">blueprint</span><span class="sep">·</span><span class="br wt new-here" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span class="cut">claude/duration-chart</span></span></span>
+            <span class="ctx warn"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg><span class="txt">Barres empilées ou une ligne par étape ?</span></span>
+            <span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>4</span><span>2,3 M</span></span>
+          </div><span class="acts"><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></span><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+
+          <li class="r"><div class="main">
+            <span class="badge"><span class="state t-run"><span class="d"></span>En cours</span></span>
+            <span class="req">Signaler une session comme importante, avec ses propres notifications</span>
+            <span class="age">14 s</span>
+            <span class="meta"><span class="lane-fastlane">fastlane</span><span class="sep">·</span><span class="br new-here"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 7v10M18 10c0 4-6 3-11.5 7"/></svg><span class="cut">main</span></span></span>
+            <span class="ctx"><span class="txt">Étape 2 · tests du web</span></span>
+            <span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>3</span><span>746 k</span></span>
+          </div><span class="acts"><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></span><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+
+          <li class="r"><div class="main">
+            <span class="badge"><span class="state t-done"><span class="d"></span>Job done</span></span>
+            <span class="req">Déroulé du tour : la durée à côté de la ligne qu’elle mesure</span>
+            <span class="age">il y a 6 min</span>
+            <span class="meta"><span class="lane-pilot">pilot</span><span class="sep">·</span><span class="br wt new-here" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span class="cut">claude/trail-duration-next…</span></span></span>
+            <span class="ctx"><span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m5 8 4 4-4 4M12 17h7"/></svg>Fusionner sur main</span></span>
+            <span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>6</span><span>6,7 M</span></span>
+          </div><span class="acts"><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></span><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+        </ul>
+        <div class="tip" style="left:200px;top:288px"><b>Worktree duration-chart</b><span><span class="k">Branche</span> <span class="mono">claude/duration-chart</span></span><span class="k mono">C:\WS\selo-ops\.claude\worktrees\duration-chart</span></div>
+      </div>
+      <div class="group">
+        <div class="ghead"><span class="name">harbor-mobile</span><span class="gmeta mono">develop</span><span class="gmeta">· 1 fichier non commité</span><span class="count"><span>2 sessions</span></span></div>
+        <ul class="rows">
+          <li class="r"><div class="main">
+            <span class="badge"><span class="state t-turn"><span class="d"></span>Tour terminé</span></span>
+            <span class="req">Pourquoi la synchro hors ligne perd les photos des quais ?</span>
+            <span class="age">il y a 19 min</span>
+            <span class="meta"><span class="lane-free">libre</span><span class="sep">·</span><span class="br new-here"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 7v10M18 10c0 4-6 3-11.5 7"/></svg><span class="cut">develop</span></span></span>
+            <span class="ctx"><span class="txt">Rien d’attendu</span></span>
+            <span class="counts"><span>4,1 M</span></span>
+          </div><span class="acts"><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></span><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+        </ul>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ Plate 2 : variant B ============ -->
+<section class="plate">
+  <h2>2 · Variante B — seulement les worktrees, regroupé par projet, 1280 px</h2>
+  <p>Le bloc du projet donne déjà la branche du dossier principal (« main ») : les sessions qui y travaillent ne répètent rien. Une session de worktree porte une petite pastille avec le nom du worktree (sans le préfixe « claude/ »), le même survol que la variante A. Plus calme, mais en « Par statut » ou « Aucun » on ne voit plus la branche des sessions du dossier principal.</p>
+  <div class="scroller"><div class="frame w1280" style="height:430px">
+    <div class="top"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <b>1 à traiter</b></p><span class="grow"></span><span class="meta">Mis à jour il y a 2 s</span></div>
+    <div class="groups">
+      <div class="group">
+        <div class="ghead"><span class="name">selo-ops</span><span class="gmeta mono">main</span><span class="gmeta">· 5 fichiers non commités</span><span class="count"><b>1 à traiter</b><span>3 sessions</span></span></div>
+        <ul class="rows">
+          <li class="r warn"><div class="main">
+            <span class="badge"><span class="state t-warn"><span class="d"></span>Attend ta réponse</span></span>
+            <span class="req">Graphique des durées par étape sur la page Projets</span>
+            <span class="age">2 min</span>
+            <span class="meta"><span class="lane-blueprint">blueprint</span></span>
+            <span class="ctx warn"><span class="wtchip new-here"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span class="cut">duration-chart</span></span><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg><span class="txt">Barres empilées ou une ligne par étape ?</span></span>
+            <span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>4</span><span>2,3 M</span></span>
+          </div><span class="acts"><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></span><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+
+          <li class="r"><div class="main">
+            <span class="badge"><span class="state t-run"><span class="d"></span>En cours</span></span>
+            <span class="req">Signaler une session comme importante, avec ses propres notifications</span>
+            <span class="age">14 s</span>
+            <span class="meta"><span class="lane-fastlane">fastlane</span></span>
+            <span class="ctx"><span class="txt">Étape 2 · tests du web</span></span>
+            <span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>3</span><span>746 k</span></span>
+          </div><span class="acts"><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></span><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+
+          <li class="r"><div class="main">
+            <span class="badge"><span class="state t-done"><span class="d"></span>Job done</span></span>
+            <span class="req">Déroulé du tour : la durée à côté de la ligne qu’elle mesure</span>
+            <span class="age">il y a 6 min</span>
+            <span class="meta"><span class="lane-pilot">pilot</span></span>
+            <span class="ctx"><span class="wtchip new-here"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span class="cut">trail-duration-next</span></span><span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m5 8 4 4-4 4M12 17h7"/></svg>Fusionner sur main</span></span>
+            <span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>6</span><span>6,7 M</span></span>
+          </div><span class="acts"><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></span><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+        </ul>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ Plate 2c : variant C ============ -->
+<section class="plate">
+  <h2>2c · Variante C — un sapin pour un worktree, le nom au survol, regroupé par projet, 1280 px</h2>
+  <p>Une session du dossier principal ne change pas. Une session de worktree a un petit sapin juste après son type de travail (ou après le projet en « Aucun »), sans texte. Au survol ou au focus, une bulle donne le nom du worktree, sa branche et son dossier. C'est l'ajout le plus discret : la largeur de la colonne ne bouge presque pas. Une session est dans un worktree quand son dossier est sous <span class="mono">.claude/worktrees/</span> ; la recherche trouve aussi le nom du worktree.</p>
+  <div class="scroller"><div class="frame w1280" style="height:430px">
+    <div class="top"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <b>1 à traiter</b></p><span class="grow"></span><span class="meta">Mis à jour il y a 2 s</span></div>
+    <div class="groups">
+      <div class="group">
+        <div class="ghead"><span class="name">selo-ops</span><span class="gmeta mono">main</span><span class="gmeta">· 5 fichiers non commités</span><span class="count"><b>1 à traiter</b><span>3 sessions</span></span></div>
+        <ul class="rows">
+          <li class="r warn"><div class="main">
+            <span class="badge"><span class="state t-warn"><span class="d"></span>Attend ta réponse</span></span>
+            <span class="req">Graphique des durées par étape sur la page Projets</span>
+            <span class="age">2 min</span>
+            <span class="meta"><span class="lane-blueprint">blueprint</span><span class="tree hover new-here" aria-label="Worktree duration-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 7 9h3l-4 6h12l-4-6h3z"/><path d="M12 15v6"/></svg></span></span>
+            <span class="ctx warn"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg><span class="txt">Barres empilées ou une ligne par étape ?</span></span>
+            <span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>4</span><span>2,3 M</span></span>
+          </div><span class="acts"><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></span><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+
+          <li class="r"><div class="main">
+            <span class="badge"><span class="state t-run"><span class="d"></span>En cours</span></span>
+            <span class="req">Signaler une session comme importante, avec ses propres notifications</span>
+            <span class="age">14 s</span>
+            <span class="meta"><span class="lane-fastlane">fastlane</span></span>
+            <span class="ctx"><span class="txt">Étape 2 · tests du web</span></span>
+            <span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>3</span><span>746 k</span></span>
+          </div><span class="acts"><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></span><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+
+          <li class="r"><div class="main">
+            <span class="badge"><span class="state t-done"><span class="d"></span>Job done</span></span>
+            <span class="req">Déroulé du tour : la durée à côté de la ligne qu’elle mesure</span>
+            <span class="age">il y a 6 min</span>
+            <span class="meta"><span class="lane-pilot">pilot</span><span class="tree new-here" aria-label="Worktree trail-duration-next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 7 9h3l-4 6h12l-4-6h3z"/><path d="M12 15v6"/></svg></span></span>
+            <span class="ctx"><span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m5 8 4 4-4 4M12 17h7"/></svg>Fusionner sur main</span></span>
+            <span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>6</span><span>6,7 M</span></span>
+          </div><span class="acts"><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg></span><span class="icon"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+        </ul>
+        <div class="tip" style="left:120px;top:138px"><b>Worktree duration-chart</b><span><span class="k">Branche</span> <span class="mono">claude/duration-chart</span></span><span class="k mono">C:\WS\selo-ops\.claude\worktrees\duration-chart</span></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ Plate 3 : variant A, no grouping ============ -->
+<section class="plate">
+  <h2>3 · Variante A — « Regrouper : Aucun », 1280 px</h2>
+  <p>Sans bloc de projet, la deuxième ligne donne le type de travail, le projet puis la branche. La colonne s’élargit à la ligne la plus longue de la page (comme aujourd’hui), d’où la coupe à 26 caractères.</p>
+  <div class="scroller"><div class="frame w1280" style="height:250px">
+    <div class="groups" style="padding-top:20px">
+      <div class="group">
+        <ul class="rows wide">
+          <li class="r warn"><div class="main">
+            <span class="badge"><span class="state t-warn"><span class="d"></span>Attend ta réponse</span></span>
+            <span class="req">Graphique des durées par étape sur la page Projets</span>
+            <span class="age">2 min</span>
+            <span class="meta"><span class="lane-blueprint">blueprint</span><span class="sep">·</span>selo-ops<span class="sep">·</span><span class="br wt new-here"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span class="cut">claude/duration-chart</span></span></span>
+            <span class="ctx warn"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg><span class="txt">Barres empilées ou une ligne par étape ?</span></span>
+            <span class="counts"><span>2,3 M</span></span>
+          </div><span class="acts"><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+          <li class="r"><div class="main">
+            <span class="badge"><span class="state t-run"><span class="d"></span>En cours</span></span>
+            <span class="req">Signaler une session comme importante, avec ses propres notifications</span>
+            <span class="age">14 s</span>
+            <span class="meta"><span class="lane-fastlane">fastlane</span><span class="sep">·</span>selo-ops<span class="sep">·</span><span class="br new-here"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 7v10M18 10c0 4-6 3-11.5 7"/></svg><span class="cut">main</span></span></span>
+            <span class="ctx"><span class="txt">Étape 2 · tests du web</span></span>
+            <span class="counts"><span>746 k</span></span>
+          </div><span class="acts"><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+          <li class="r"><div class="main">
+            <span class="badge"><span class="state t-turn"><span class="d"></span>Tour terminé</span></span>
+            <span class="req">Pourquoi la synchro hors ligne perd les photos des quais ?</span>
+            <span class="age">il y a 19 min</span>
+            <span class="meta"><span class="lane-free">libre</span><span class="sep">·</span>harbor-mobile<span class="sep">·</span><span class="br new-here"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 7v10M18 10c0 4-6 3-11.5 7"/></svg><span class="cut">develop</span></span></span>
+            <span class="ctx"><span class="txt">Rien d’attendu</span></span>
+            <span class="counts"><span>4,1 M</span></span>
+          </div><span class="acts"><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+        </ul>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ Plate 4 : 360 px ============ -->
+<section class="plate">
+  <h2>4 · Mobile, 360 px — A et B</h2>
+  <p>Sous 900 px la deuxième ligne (type, projet, compteurs) disparaît déjà. La branche passe à côté de l’âge, sur la ligne du badge : en A toujours, en B seulement pour un worktree.</p>
+  <div class="mobiles">
+    <figure><div class="frame w360 n" style="height:420px">
+      <div class="top"><h1>Sessions live</h1></div>
+      <div class="groups">
+        <div class="group">
+          <div class="ghead"><span class="name">selo-ops</span><span class="gmeta mono">main</span><span class="count"><b>1 à traiter</b></span></div>
+          <ul class="rows">
+            <li class="r warn"><div class="main">
+              <span class="badge"><span class="state t-warn"><span class="d"></span>Attend ta réponse</span></span>
+              <span class="age"><span class="br wt mono new-here" style="max-width:14ch;font-size:0.84em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span class="cut">duration-chart</span></span>2 min</span>
+              <span class="req">Graphique des durées par étape sur la page Projets</span>
+              <span class="ctx warn"><span class="txt">Barres empilées ou une ligne par étape ?</span></span>
+            </div><span class="acts"><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+            <li class="r"><div class="main">
+              <span class="badge"><span class="state t-run"><span class="d"></span>En cours</span></span>
+              <span class="age"><span class="br mono new-here" style="max-width:14ch;font-size:0.84em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 7v10M18 10c0 4-6 3-11.5 7"/></svg><span class="cut">main</span></span>14 s</span>
+              <span class="req">Signaler une session comme importante, avec ses propres notifications</span>
+              <span class="ctx"><span class="txt">Étape 2 · tests du web</span></span>
+            </div><span class="acts"><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+          </ul>
+        </div>
+      </div>
+    </div><figcaption>Variante A : la branche sur chaque ligne, worktree en couleur normale.</figcaption></figure>
+
+    <figure><div class="frame w360 n" style="height:420px">
+      <div class="top"><h1>Sessions live</h1></div>
+      <div class="groups">
+        <div class="group">
+          <div class="ghead"><span class="name">selo-ops</span><span class="gmeta mono">main</span><span class="count"><b>1 à traiter</b></span></div>
+          <ul class="rows">
+            <li class="r warn"><div class="main">
+              <span class="badge"><span class="state t-warn"><span class="d"></span>Attend ta réponse</span></span>
+              <span class="age"><span class="wtchip new-here" style="max-width:15ch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span class="cut">duration-chart</span></span>2 min</span>
+              <span class="req">Graphique des durées par étape sur la page Projets</span>
+              <span class="ctx warn"><span class="txt">Barres empilées ou une ligne par étape ?</span></span>
+            </div><span class="acts"><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+            <li class="r"><div class="main">
+              <span class="badge"><span class="state t-run"><span class="d"></span>En cours</span></span>
+              <span class="age">14 s</span>
+              <span class="req">Signaler une session comme importante, avec ses propres notifications</span>
+              <span class="ctx"><span class="txt">Étape 2 · tests du web</span></span>
+            </div><span class="acts"><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+          </ul>
+        </div>
+      </div>
+    </div><figcaption>Variante B : la pastille du worktree seule, rien pour le dossier principal.</figcaption></figure>
+
+    <figure><div class="frame w360 n" style="height:420px">
+      <div class="top"><h1>Sessions live</h1></div>
+      <div class="groups">
+        <div class="group">
+          <div class="ghead"><span class="name">selo-ops</span><span class="gmeta mono">main</span><span class="count"><b>1 à traiter</b></span></div>
+          <ul class="rows">
+            <li class="r warn"><div class="main">
+              <span class="badge"><span class="state t-warn"><span class="d"></span>Attend ta réponse</span><span class="tree new-here" aria-label="Worktree duration-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 7 9h3l-4 6h12l-4-6h3z"/><path d="M12 15v6"/></svg></span></span>
+              <span class="age">2 min</span>
+              <span class="req">Graphique des durées par étape sur la page Projets</span>
+              <span class="ctx warn"><span class="txt">Barres empilées ou une ligne par étape ?</span></span>
+            </div><span class="acts"><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+            <li class="r"><div class="main">
+              <span class="badge"><span class="state t-run"><span class="d"></span>En cours</span></span>
+              <span class="age">14 s</span>
+              <span class="req">Signaler une session comme importante, avec ses propres notifications</span>
+              <span class="ctx"><span class="txt">Étape 2 · tests du web</span></span>
+            </div><span class="acts"><span class="icon accent"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></span></li>
+          </ul>
+        </div>
+      </div>
+    </div><figcaption>Variante C : le sapin juste après le badge, le nom au toucher (pas de survol sur mobile).</figcaption></figure>
+  </div>
+</section>
+</body>
+</html>

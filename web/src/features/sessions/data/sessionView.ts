@@ -56,8 +56,14 @@ export function matches(s: Session, filters: Filters, projects: Map<string, Proj
   if (filters.projectIds && !filters.projectIds.has(s.projectId)) return false;
   const q = filters.search.trim().toLowerCase();
   if (!q) return true;
-  const hay = [s.request, s.blueprint ?? "", s.branch ?? "", projects.get(s.projectId)?.name ?? ""].join(" ").toLowerCase();
+  const hay = [s.request, s.blueprint ?? "", s.branch ?? "", worktreeOf(s.folder) ?? "", projects.get(s.projectId)?.name ?? ""].join(" ").toLowerCase();
   return hay.includes(q);
+}
+
+// sessions-live FR-52: the worktree a session's folder is in, the folder right under `.claude/worktrees/`; null in a
+// base folder.
+export function worktreeOf(folder: string): string | null {
+  return /[\\/]\.claude[\\/]worktrees[\\/]([^\\/]+)/.exec(folder)?.[1] ?? null;
 }
 
 export interface Counts {

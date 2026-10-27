@@ -47,7 +47,7 @@ import { SessionList, type SessionActions } from "../ui/SessionList.tsx";
 import { SessionsHeader } from "../ui/SessionsHeader.tsx";
 import { SettingsBar, type View } from "../ui/SettingsBar.tsx";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../ui/panelWidth.ts";
-import { desktopLinkOf, metaText, workLabel, outdatedIdsOf, pluginsText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
+import { desktopLinkOf, metaWidth, workLabel, outdatedIdsOf, pluginsText, resumeCommand, stateLabel } from "../ui/sessionText.ts";
 import styles from "./SessionsLivePage.module.css";
 
 // sessions-live FR-08, FR-27 and FR-31: the view, the grouping, the detail's width and its folded sections are
@@ -290,7 +290,7 @@ export function SessionsLivePage() {
   const isList = settings.view === "list";
   const isPanelOpen = selected !== null;
   const shownLists = [...blocks.map((b) => ({ list: b.sessions, showProject: b.kind !== "project" })), { list: closed, showProject: true }, { list: archived, showProject: true }];
-  const metaChars = Math.max(0, ...shownLists.flatMap(({ list, showProject }) => list.map((s) => metaText(s, showProject ? projectName(s.projectId) : null).length)));
+  const metaChars = Math.max(0, ...shownLists.flatMap(({ list, showProject }) => list.map((s) => metaWidth(s, showProject ? projectName(s.projectId) : null))));
 
   const renderSessions = (list: Session[], showProject: boolean) =>
     isList ? (

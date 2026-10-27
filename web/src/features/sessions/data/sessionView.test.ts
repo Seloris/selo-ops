@@ -6,6 +6,7 @@ import {
   groupSessions,
   isFinished,
   matches,
+  worktreeOf,
   openCountByProject,
   sortSessions,
   type Project,
@@ -161,6 +162,35 @@ describe("matches", () => {
 
     // Assert
     expect(found).toBe(false);
+  });
+
+  it("finds a worktree's session by the worktree's name (sessions-live FR-07)", () => {
+    // Arrange
+    const session = buildSession({ branch: "wip", folder: "C:\\WS\\ledger\\.claude\\worktrees\\Duration-Chart" });
+
+    // Act
+    const found = matches(session, { projectIds: null, search: "duration-chart" }, byId);
+
+    // Assert
+    expect(found).toBe(true);
+  });
+});
+
+describe("worktreeOf", () => {
+  it.each([
+    ["a Windows folder", "C:\\WS\\ops\\.claude\\worktrees\\duration-chart", "duration-chart"],
+    ["a POSIX folder", "/home/me/ops/.claude/worktrees/trail-next", "trail-next"],
+    ["a folder inside the worktree", "C:/WS/ops/.claude/worktrees/x/web/src", "x"],
+  ])("gives the worktree's name of %s (sessions-live FR-52)", (_what, folder, name) => {
+    expect(worktreeOf(folder)).toBe(name);
+  });
+
+  it.each([
+    ["the base folder", "C:/WS/ops"],
+    ["a folder named worktrees elsewhere", "C:/WS/ops/worktrees/x"],
+    ["the worktrees folder itself", "C:/WS/ops/.claude/worktrees"],
+  ])("gives null for %s", (_what, folder) => {
+    expect(worktreeOf(folder)).toBeNull();
   });
 });
 

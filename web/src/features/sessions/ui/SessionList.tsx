@@ -1,9 +1,9 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties, type MouseEvent } from "react";
 import type { SessionFlags } from "../../../shared/lib/flags.ts";
 import { t } from "../../../shared/lib/i18n/index.ts";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
-import { NoteIcon, OpenIcon, PromptIcon } from "../../../shared/ui/icons.tsx";
-import { isOpen, isTodo, type Session } from "../data/sessionView.ts";
+import { NoteIcon, OpenIcon, PromptIcon, TreeIcon } from "../../../shared/ui/icons.tsx";
+import { isOpen, isTodo, worktreeOf, type Session } from "../data/sessionView.ts";
 import { AgeLabel, AwaitedIcon, FilesCount, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import { laneColor, requestText, rowContext, workLabel } from "./sessionText.ts";
 import { FlagButton } from "./FlagControls.tsx";
@@ -55,18 +55,24 @@ export function SessionList({
         const tint = isTodo(s) ? (s.state === "stopped" ? styles.danger : styles.warn) : "";
         return (
           <li key={s.id} className={`${styles.row} ${tint} ${s.id === selectedId ? styles.selected : ""} ${isOpen(s) ? "" : styles.dim}`}>
-            <button type="button" className={styles.main} onClick={() => actions.onOpen(s.id)} title={requestText(s)} aria-current={s.id === selectedId || undefined}>
+            <button type="button" className={styles.main} onClick={() => actions.onOpen(s.id)} aria-current={s.id === selectedId || undefined}>
               <span className={styles.badge}>
                 <StateLabel session={s} />
+                <WorktreeMark session={s} isNarrowOnly />
               </span>
-              <span className={styles.request}>{requestText(s)}</span>
+              <span className={styles.request} title={requestText(s)}>
+                {requestText(s)}
+              </span>
               <span className={styles.age}>
                 <AgeLabel session={s} now={now} />
                 <span className={styles.warningSlot}>{outdatedIds.has(s.id) && <PluginWarning session={s} />}</span>
               </span>
               <span className={styles.meta}>
-                <span style={{ color: laneColor(s) }}>{workLabel(s)}</span>
-                {showProject && ` · ${projectName(s.projectId)}`}
+                <span className={styles.metaText}>
+                  <span style={{ color: laneColor(s) }}>{workLabel(s)}</span>
+                  {showProject && ` · ${projectName(s.projectId)}`}
+                </span>
+                <WorktreeMark session={s} />
               </span>
               <RowContext session={s} />
               <span className={styles.counts}>
@@ -131,6 +137,43 @@ function NoteTip({ note }: { note: string }) {
     <span className={styles.tip}>
       <span className={styles.tipTitle}>{t("sessions.note.label")}</span>
       <span>{note}</span>
+    </span>
+  );
+}
+
+// sessions-live FR-52: a fir tree for a worktree's session, its card (name, branch, folder) shown on hover, on the
+// row's keyboard focus, or on a tap of the tree, which then does not open the detail. `isNarrowOnly`: the copy after
+// the badge, shown below 900 px only, where the second line is hidden.
+function WorktreeMark({ session, isNarrowOnly = false }: { session: Session; isNarrowOnly?: boolean }) {
+  const [isShown, setShown] = useState(false);
+  const name = worktreeOf(session.folder);
+  if (name === null) return null;
+  const toggle = (e: MouseEvent) => {
+    e.stopPropagation();
+    setShown((shown) => !shown);
+  };
+  return (
+    <span
+      className={`${styles.tree} ${isNarrowOnly ? styles.narrowTree : styles.wideTree} ${isShown ? styles.treeShown : ""}`}
+      onClick={toggle}
+      onMouseLeave={() => setShown(false)}
+    >
+      <span
+        role="img"
+        aria-label={session.branch ? t("sessions.worktree.label", { name, branch: session.branch }) : t("sessions.worktree.name", { name })}
+        className={styles.treeIcon}
+      >
+        <TreeIcon />
+      </span>
+      <span className={styles.treeTip} aria-hidden="true">
+        <b>{t("sessions.worktree.name", { name })}</b>
+        {session.branch && (
+          <span>
+            <span className={styles.treeKey}>{t("sessions.worktree.branch")}</span> <span className={styles.mono}>{session.branch}</span>
+          </span>
+        )}
+        <span className={`${styles.treeKey} ${styles.mono}`}>{session.folder}</span>
+      </span>
     </span>
   );
 }

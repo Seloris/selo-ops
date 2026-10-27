@@ -2,7 +2,7 @@ import { dayTime } from "../../../shared/lib/dayTime.ts";
 import { formatAge } from "../../../shared/lib/formatAge.ts";
 import { t, tn, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import type { DotTone } from "../../../shared/ui/StatusDot.tsx";
-import { ageMs, bucketOf, isOpen, isTodo, type InstalledPlugin, type Project, type Session } from "../data/sessionView.ts";
+import { ageMs, bucketOf, isOpen, isTodo, worktreeOf, type InstalledPlugin, type Project, type Session } from "../data/sessionView.ts";
 import { formatTokens, totalTokens } from "./usage.ts";
 
 // The words and tones a session shows, shared by its row, its card and its detail.
@@ -45,6 +45,13 @@ export function workLabel(s: WorkOf): string {
 // sessions-live FR-11: the row's second line under the badge — the type of work, then the project when shown.
 export const metaText = (s: WorkOf, project: string | null): string =>
   project === null ? workLabel(s) : `${workLabel(s)} · ${project}`;
+
+// The fir tree's room on the second line (FR-52), in the line's monospace ch.
+const TREE_CH = 4;
+
+// sessions-live FR-11: the second line's width in ch, the fir tree of a worktree's session included (FR-52).
+export const metaWidth = (s: WorkOf & Pick<Session, "folder">, project: string | null): number =>
+  metaText(s, project).length + (worktreeOf(s.folder) === null ? 0 : TREE_CH);
 
 const LANES: ReadonlySet<string> = new Set(["free", "fastlane", "blueprint", "pilot"]);
 

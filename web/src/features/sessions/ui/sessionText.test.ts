@@ -18,6 +18,7 @@ import {
   rowContext,
   laneColor,
   metaText,
+  metaWidth,
   nextCommands,
   workLabel,
   shownBlockers,
@@ -465,5 +466,15 @@ describe("metaText", () => {
   it("adds the project only when shown", () => {
     expect(metaText(buildSession({ flow: "fastlane", skill: null }), "selo-ops")).toBe("fastlane · selo-ops");
     expect(metaText(buildSession({ flow: "fastlane", skill: null }), null)).toBe("fastlane");
+  });
+});
+
+describe("metaWidth", () => {
+  it("is the second line's length in a base folder", () => {
+    expect(metaWidth(buildSession({ flow: "fastlane", folder: "C:/WS/ops" }), "ops")).toBe("fastlane · ops".length);
+  });
+
+  it("makes room for the fir tree of a worktree's session (sessions-live FR-52)", () => {
+    expect(metaWidth(buildSession({ flow: "fastlane", folder: "C:/WS/ops/.claude/worktrees/x" }), null)).toBe("fastlane".length + 4);
   });
 });

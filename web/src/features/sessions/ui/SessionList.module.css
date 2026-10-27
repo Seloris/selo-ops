@@ -80,6 +80,9 @@
 
 .meta {
   grid-area: meta;
+  min-width: 0;
+  display: flex;
+  align-items: center;
   padding-left: 2px;
   font-family: var(--font-mono);
   font-size: 0.84em;
@@ -87,7 +90,7 @@
 }
 
 .request,
-.meta,
+.metaText,
 .text {
   min-width: 0;
   overflow: hidden;
@@ -190,6 +193,105 @@
   gap: 2px;
 }
 
+/* sessions-live FR-52: the fir tree of a worktree's session, after the type of work (below 900 px, after the badge). */
+.tree {
+  position: relative;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  color: var(--text);
+  border-radius: calc(var(--radius-control) - 3px);
+}
+
+.tree:hover {
+  background: var(--surface-2);
+}
+
+.treeIcon {
+  display: grid;
+}
+
+.treeIcon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.narrowTree {
+  display: none;
+}
+
+/* A card under the tree, like IconButton's: after a short pause on hover, at once on the row's focus or a tap. */
+.treeTip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -6px;
+  z-index: 30;
+  display: grid;
+  gap: 3px;
+  width: max-content;
+  max-width: min(420px, 80vw);
+  padding: 9px 12px;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  background: var(--pop-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-pop);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px) scale(0.98);
+  transform-origin: top left;
+  transition: opacity 0.14s ease-out, transform 0.14s ease-out, visibility 0s linear 0.14s;
+}
+
+.treeTip b {
+  font-weight: 600;
+}
+
+.treeKey {
+  color: var(--text-muted);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.main:focus-visible .tree > .treeTip,
+.treeShown > .treeTip {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* Hover only where the pointer hovers: on touch a tap toggles the card, and a stuck :hover would keep it open. */
+@media (hover: hover) {
+  .tree:hover > .treeTip {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 0.14s ease-out 0.25s, transform 0.14s ease-out 0.25s, visibility 0s linear 0.25s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .treeTip,
+  .tree:hover > .treeTip {
+    transform: none;
+    transition: none;
+  }
+}
+
 .tipTitle {
   font-size: 0.8em;
   font-weight: 600;
@@ -206,7 +308,26 @@
   }
 
   .meta,
-  .counts {
+  .counts,
+  .wideTree {
     display: none;
+  }
+
+  /* The card spans the row under the badge's line, so it never leaves the screen. */
+  .row {
+    position: relative;
+  }
+
+  .narrowTree {
+    position: static;
+    display: inline-grid;
+  }
+
+  .narrowTree > .treeTip {
+    top: 36px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: none;
   }
 }

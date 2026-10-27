@@ -298,6 +298,16 @@ export function HourglassIcon() {
   );
 }
 
+// A fir tree: a session working in a worktree (sessions-live FR-52).
+export function TreeIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M12 2 7 9h3l-4 6h12l-4-6h3z" />
+      <path d="M12 15v6" />
+    </svg>
+  );
+}
+
 // A timeline: dots on a line, the run's steps one after the other.
 export function TrailIcon() {
   return (
