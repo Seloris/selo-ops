@@ -25,6 +25,6 @@ const db = openDatabase();
 await migrateDatabase(db);
 await seedDemo(db, systemClock, folders);
 const { opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile } = folders;
-createApp({ db, clock: systemClock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile }).listen(port, () => {
-  console.log(`api demo listening on http://localhost:${port}, reading ${demoDir}`);
+createApp({ db, clock: systemClock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile }).listen(port, "127.0.0.1", () => {
+  console.log(`api demo listening on http://127.0.0.1:${port}, reading ${demoDir}`);
 });

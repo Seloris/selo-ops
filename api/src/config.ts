@@ -4,6 +4,8 @@ import { z } from "zod";
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
+  // The loopback address by default: the API serves the person's sessions and file diffs, never the local network.
+  API_HOST: z.string().min(1).default("127.0.0.1"),
   PGLITE_DIR: z.string().default(".data/pglite"),
   SELO_OPS_DIR: z.string().optional(),
   CLAUDE_CONFIG_DIR: z.string().optional(),

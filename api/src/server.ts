@@ -14,6 +14,6 @@ createApp({
   claudeProjectsDir: config.claudeProjectsDir,
   claudePluginsFile: config.claudePluginsFile,
   claudeSettingsFile: config.claudeSettingsFile,
-}).listen(config.PORT, () => {
-  console.log(`api listening on http://localhost:${config.PORT}, reading ${config.opsDir}`);
+}).listen(config.PORT, config.API_HOST, () => {
+  console.log(`api listening on http://${config.API_HOST}:${config.PORT}, reading ${config.opsDir}`);
 });
