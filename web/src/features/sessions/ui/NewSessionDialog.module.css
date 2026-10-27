@@ -30,7 +30,7 @@
   color: var(--text-muted);
 }
 
-/* The « WIP · à refaire » notice (FR-44): neutral, it marks the window, not a state. */
+/* The « WIP · à refaire » notice (FR-44), in amber. */
 
 .wip {
   display: flex;
@@ -39,9 +39,9 @@
   margin: 0;
   padding: 8px 12px;
   font-size: 0.85em;
-  color: var(--text-muted);
-  background: var(--surface-2);
-  border: var(--border-width) dashed var(--border);
+  color: var(--warn);
+  background: var(--warn-soft);
+  border: var(--border-width) dashed var(--warn);
   border-radius: var(--radius-control);
 }
 

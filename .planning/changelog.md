@@ -4,6 +4,7 @@ What changed in the application, for someone who reads no spec. One entry per pi
 
 ## 2026-10-27
 
+- Changed — The « WIP » notice of the « Nouvelle session » window is now amber, so it stands out.
 - Added — The « Fichiers modifiés » window has a « Plein écran » button beside « Fermer »: the window then fills the whole screen, explorer and diff side by side over its full width, to read as much code as possible; Échap or the button gives it back.
 - Added — The « Nouvelle session » window shows a « WIP » notice under its top line: the window is to be reworked.
 - Fixed — The header shows the installed selo plugins again, under their new names « selo-flow » and « selo-feed », and every command copied from the help, « Nouvelle session » and a session's next step reads `/selo-flow:…`. ([blueprint](blueprints/2026-10-27-plugin-rename.md))
