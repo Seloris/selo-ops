@@ -37,6 +37,16 @@ Pages: `projects` · Domain: `question` (new), `session` · Components: `api`, `
 - Web → in the `projects` feature: a `QuestionList` and `AskForm` on the shared UI, a data hook polling every 2 s while a question runs; labels and elapsed time in a pure `.ts` module with its test.
 - `question` sheet's glossary, written at the merge → « question » `Question`, « préréglage » `preset`, « cible » `target`.
 
+### Decided during build
+- Read-only flags → `--tools Read,Grep,Glob` beside `--allowedTools`, `--permission-mode dontAsk`, `--disable-slash-commands`, `--strict-mcp-config`, with `--settings {"disableAllHooks":true}` (`--allowedTools` only pre-approves a tool, `--tools` removes the others; the plugins' skills and MCP servers go too, their hooks with `disableAllHooks`).
+- Run's environment → `CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`, `CLAUDE_CODE_SSE_PORT` dropped (Claude Code refuses to start inside a session's environment, an API started from a session).
+- Windows → `spawn` without a shell finds `claude.exe` on the PATH; a `claude.cmd` cannot start without a shell, `CLAUDE_BIN` then names the executable; `ENOENT`, `EINVAL`, `EACCES` → « Échec » `missing-binary` (no shell ever: the prompt is the person's text).
+- Status file of `claude -p` → not seen on this machine (only the desktop app's interactive ones); the outside-selo listing skips every stored question's run session id, so it holds either way.
+- Failure → stored as a code (`interrupted`, `timeout`, `missing-binary`, `run-failed`) and Claude Code's own words; the web words the code in French.
+- Limit → counted in memory and reserved before the insert, so two asks at once never pass 3; the 5-minute stop aborts the run, which kills the process.
+- Targets → only a blueprint or a sheet the export lists (a worktree-only blueprint in its worktree); ideas, debt, changelog or any other path `404`.
+- Demo → `ledger-api`: « Résume » answered and a free text failed (`run-failed`) on `2026-10-20-monthly-balance`, a free text answered on the project.
+
 ## Stages
 1. api — `feat(ask-claude): api — ask a headless Claude about a spec, a blueprint or the project`
 2. web — `feat(ask-claude): web — the « Questions » tab and « Demander à Claude »`
@@ -47,7 +57,7 @@ Pages: `projects` · Domain: `question` (new), `session` · Components: `api`, `
 - browser: demo at 1280 and 360 px — a blueprint's « Questions » tab, « Résume » from « En cours » to « Répondu »; a free text on a sheet; « Demander à Claude » on the project; the failed demo question; « Supprimer » with its confirmation.
 
 ## Progress
-- [ ] Stage 1 — api
+- [x] Stage 1 — api
 - [ ] Stage 2 — web
 - [ ] Review
 - [ ] Browser test

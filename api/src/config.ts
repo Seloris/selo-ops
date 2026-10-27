@@ -9,6 +9,8 @@ const envSchema = z.object({
   PGLITE_DIR: z.string().default(".data/pglite"),
   SELO_OPS_DIR: z.string().optional(),
   CLAUDE_CONFIG_DIR: z.string().optional(),
+  // The Claude Code executable that answers questions (`question` BR-01): `claude` on the PATH by default.
+  CLAUDE_BIN: z.string().min(1).default("claude"),
 });
 
 export type Config = z.infer<typeof envSchema> & { opsDir: string; claudeSessionsDir: string; claudeProjectsDir: string; claudePluginsFile: string; claudeSettingsFile: string };

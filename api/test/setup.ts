@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { sql } from "drizzle-orm";
 import { createApp } from "../src/app.js";
 import { migrateDatabase, openDatabase, type Database } from "../src/db/client.js";
+import type { QuestionRunner, RunInput, RunResult } from "../src/features/questions/questions.runner.js";
 import type { ClaudeStatusFile } from "../src/features/sessions/sessions.desktop.js";
 import type { ProjectFileInput, SessionFile } from "../src/features/sessions/sessions.export.js";
 import type { RunningStatusFile } from "../src/features/sessions/sessions.outside.js";
@@ -126,7 +127,45 @@ function createSettingsFile() {
   };
 }
 
-export async function createTestContext() {
+export interface FakeRun {
+  input: RunInput;
+  resolve(result: RunResult): void;
+  reject(error: unknown): void;
+}
+
+// Never the real `claude`: each run waits until the test settles it; an abort rejects it, as the real runner does.
+function createFakeRunner() {
+  const runs: FakeRun[] = [];
+  const pending = new Set<FakeRun>();
+  const runner: QuestionRunner = {
+    run: (input) =>
+      new Promise<RunResult>((resolve, reject) => {
+        const run: FakeRun = {
+          input,
+          resolve: (result) => {
+            pending.delete(run);
+            resolve(result);
+          },
+          reject: (error) => {
+            pending.delete(run);
+            reject(error);
+          },
+        };
+        runs.push(run);
+        pending.add(run);
+        input.signal.addEventListener("abort", () => run.reject(new Error("aborted")));
+      }),
+  };
+  // A run left working by a test ends before the next one, so that it never counts against the limit.
+  const clear = async () => {
+    for (const run of [...pending]) run.reject(new Error("test ended"));
+    runs.length = 0;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  };
+  return { runner, runs, clear };
+}
+
+export async function createTestContext({ questionTimeoutMs }: { questionTimeoutMs?: number } = {}) {
   const db: Database = openDatabase();
   await migrateDatabase(db);
   const clock = createTestClock();
@@ -136,6 +175,7 @@ export async function createTestContext() {
   const code = createCodeDir();
   const plugins = createPluginsFile();
   const settings = createSettingsFile();
+  const questions = createFakeRunner();
   const app = createApp({
     db,
     clock,
@@ -144,6 +184,8 @@ export async function createTestContext() {
     claudeProjectsDir: transcripts.dir,
     claudePluginsFile: plugins.file,
     claudeSettingsFile: settings.file,
+    questionRunner: questions.runner,
+    ...(questionTimeoutMs === undefined ? {} : { questionTimeoutMs }),
   });
   const seed = {
     ...ops.seed,
@@ -154,6 +196,7 @@ export async function createTestContext() {
     plugins: plugins.write,
   };
   const reset = async () => {
+    await questions.clear();
     const tables = await db.execute<{ table_name: string }>(sql`
       select table_name from information_schema.tables
       where table_schema = 'public' and table_name <> '__drizzle_migrations'
@@ -169,5 +212,5 @@ export async function createTestContext() {
     settings.clear();
     clock.set(EPOCH);
   };
-  return { app, db, clock, seed, code, settings, reset, clearStatus: statuses.clear };
+  return { app, db, clock, seed, code, settings, runs: questions.runs, reset, clearStatus: statuses.clear };
 }

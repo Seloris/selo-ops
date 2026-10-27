@@ -166,6 +166,12 @@ function toProject(checkouts: Checkouts, liveSessions: SessionFile[], planning: 
   };
 }
 
+export interface QuestionTarget {
+  kind: "blueprint" | "sheet" | "project";
+  // The checkout the run reads.
+  root: string;
+}
+
 export function createProjectService({ opsExport, planning, slots }: { opsExport: OpsExportReader; planning: PlanningReader; slots: SlotReader }) {
   const checkoutsOf = () => {
     const { projects, sessions } = opsExport.read();
@@ -185,6 +191,19 @@ export function createProjectService({ opsExport, planning, slots }: { opsExport
       const text = root === undefined ? null : planning.read(root, path);
       if (text === null) throw new NotFoundError("File", path);
       return { path, text };
+    },
+    // `question` BR-01: a blueprint or a sheet the export lists for the project, in the checkout holding its file; `path`
+    // null: the whole project, in its base checkout.
+    questionTarget: (id: string, path: string | null): QuestionTarget => {
+      const group = checkoutsOf().groups.find((g) => keyOf(g.base.root) === id);
+      if (group === undefined) throw new NotFoundError("Project", id);
+      if (path === null) return { kind: "project", root: group.base.root };
+      if (group.base.sheets.some((s) => s.file === path)) return { kind: "sheet", root: group.base.root };
+      if (!hasPlanningOf(group.base)) throw new NotFoundError("File", path);
+      const root = filesOf(group).get(path);
+      const isBlueprint = [group.base, ...group.worktrees].some((c) => c.blueprints.some((b) => b.file === path));
+      if (root === undefined || !isBlueprint) throw new NotFoundError("File", path);
+      return { kind: "blueprint", root };
     },
   };
 }

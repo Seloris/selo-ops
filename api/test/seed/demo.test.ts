@@ -2,13 +2,15 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import request from "supertest";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createApp } from "../../src/app.js";
 import { migrateDatabase, openDatabase } from "../../src/db/client.js";
 import { projectFileResponseSchema, projectsResponseSchema } from "../../src/features/projects/projects.schema.js";
+import { questionsResponseSchema } from "../../src/features/questions/questions.schema.js";
 import { fileDiffSchema, sessionsResponseSchema } from "../../src/features/sessions/sessions.schema.js";
 import { settingsSchema } from "../../src/features/settings/settings.schema.js";
 import { seedDemo } from "../../src/seed/demo.js";
+import { createDemoQuestionRunner } from "../../src/seed/demo.questions.js";
 import { createTestClock } from "../setup.js";
 
 async function demoApp() {
@@ -26,7 +28,7 @@ async function demoApp() {
   await migrateDatabase(db);
   const clock = createTestClock();
   await seedDemo(db, clock, folders);
-  return createApp({ db, clock, ...folders });
+  return createApp({ db, clock, ...folders, questionRunner: createDemoQuestionRunner(10) });
 }
 
 // Each test seeds a fresh demo, its real repository included (git processes): slower than a route test.
@@ -157,5 +159,25 @@ describe("demo", { timeout: 30_000 }, () => {
     expect(settings.state).toBe("ok");
     expect(settings.path.startsWith(tmpdir())).toBe(true);
     expect(Object.values(settings.values).every((v) => v === null)).toBe(true);
+  });
+
+  it("seeds an answered and a failed question on a blueprint the project lists, and answers a new one", async () => {
+    // Arrange
+    const app = await demoApp();
+    const project = projectsResponseSchema.parse((await request(app).get("/v1/projects")).body).projects.find((p) => p.name === "ledger-api");
+    const file = ".planning/blueprints/2026-10-20-monthly-balance.md";
+
+    // Act
+    const listed = await request(app).get(`/v1/projects/${project?.id ?? ""}/questions`).query({ path: file });
+    const asked = await request(app).post(`/v1/projects/${project?.id ?? ""}/questions`).send({ path: file, preset: "explain" });
+
+    // Assert
+    expect(project?.blueprints.map((b) => b.file)).toContain(file);
+    expect(questionsResponseSchema.parse(listed.body).questions.map((q) => q.state).sort()).toEqual(["answered", "failed"]);
+    expect(asked.status).toBe(202);
+    await vi.waitFor(async () => {
+      const after = questionsResponseSchema.parse((await request(app).get(`/v1/projects/${project?.id ?? ""}/questions`).query({ path: file })).body);
+      expect(after.questions[0]?.state).toBe("answered");
+    });
   });
 });

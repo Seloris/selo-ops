@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { createApp } from "./app.js";
 import { migrateDatabase, openDatabase } from "./db/client.js";
 import { seedDemo } from "./seed/demo.js";
+import { createDemoQuestionRunner } from "./seed/demo.questions.js";
 import { systemClock } from "./shared/clock.js";
 
 // The demo the browser tests run on: an in-memory database, migrated and seeded at each start, on its
@@ -25,6 +26,6 @@ const db = openDatabase();
 await migrateDatabase(db);
 await seedDemo(db, systemClock, folders);
 const { opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile } = folders;
-createApp({ db, clock: systemClock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile }).listen(port, "127.0.0.1", () => {
+createApp({ db, clock: systemClock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile, questionRunner: createDemoQuestionRunner() }).listen(port, "127.0.0.1", () => {
   console.log(`api demo listening on http://127.0.0.1:${port}, reading ${demoDir}`);
 });

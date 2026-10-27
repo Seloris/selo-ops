@@ -277,6 +277,7 @@ export function createSessionService({
   desktopLinks,
   installedPlugins,
   git,
+  questionRuns,
   clock,
 }: {
   opsExport: OpsExportReader;
@@ -287,6 +288,8 @@ export function createSessionService({
   desktopLinks: DesktopSessionLinkRepository;
   installedPlugins: InstalledPluginReader;
   git: GitDiffReader;
+  // The runs answering questions, never listed (`session` BR-12).
+  questionRuns: { runSessionIds(): Promise<Set<string>> };
   clock: Clock;
 }) {
   // `session` BR-11: a link seen in a status file is kept, the file goes when the process ends.
@@ -301,16 +304,18 @@ export function createSessionService({
 
   const currentOf = (file: SessionFile) => file.current ?? file.runs.find((r) => !r.agentId) ?? null;
 
-  // A session deleted in Claude Code is still the export's: never shown as outside selo (`session` BR-12, BR-14).
-  const exportedIds = (files: SessionFile[], deleted: Set<string>) => new Set([...files.map((s) => s.sessionId), ...deleted]);
+  // A session deleted in Claude Code is still the export's: never shown as outside selo (`session` BR-12, BR-14); nor is
+  // a question's run (`question` BR-01).
+  const exportedIds = async (files: SessionFile[], deleted: Set<string>) =>
+    new Set([...files.map((s) => s.sessionId), ...deleted, ...(await questionRuns.runSessionIds())]);
 
   // The run of a session of the export, else of a running session outside selo; gone from both: 404.
-  const findRun = (id: string): string => {
+  const findRun = async (id: string): Promise<string> => {
     const { sessions: files, deletedSessionIds } = opsExport.read();
     const file = files.find((s) => s.sessionId === id);
     const current = file && currentOf(file);
     if (current) return current.id;
-    const { outside: running } = outsideSessions.read({ exported: exportedIds(files, deletedSessionIds), now: clock.now().getTime() });
+    const { outside: running } = outsideSessions.read({ exported: await exportedIds(files, deletedSessionIds), now: clock.now().getTime() });
     const outside = running.find((o) => o.status.sessionId === id);
     if (outside) return runIdOf(outside);
     throw new NotFoundError("Session", id);
@@ -326,7 +331,7 @@ export function createSessionService({
       });
       // Every file of the export, run or not, keeps its session out of those outside selo (`session` BR-12).
       const open = withRun.filter(({ file }) => file.status !== "ended").map(({ file: { sessionId, root, rootKey } }) => ({ sessionId, root, rootKey }));
-      const { outside, permissionWaits, answerWaits } = outsideSessions.read({ exported: exportedIds(sessions, deletedSessionIds), open, now: clock.now().getTime() });
+      const { outside, permissionWaits, answerWaits } = outsideSessions.read({ exported: await exportedIds(sessions, deletedSessionIds), open, now: clock.now().getTime() });
       const byId = new Map((await archives.list()).map((a) => [a.sessionId, a]));
       const noteOf = new Map((await notes.list()).map((n) => [n.sessionId, n.text]));
       const withNote = (session: Omit<Session, "note">): Session => ({ ...session, note: noteOf.get(session.id) ?? null });
@@ -357,12 +362,12 @@ export function createSessionService({
     },
 
     async archive(id: string): Promise<void> {
-      const runId = findRun(id);
+      const runId = await findRun(id);
       await archives.save({ sessionId: id, runId, archivedAt: clock.now() });
     },
 
     async unarchive(id: string): Promise<void> {
-      findRun(id);
+      await findRun(id);
       await archives.remove(id);
     },
 
@@ -436,7 +441,7 @@ export function createSessionService({
 
     // `session` BR-21: one note per session, kept across runs; an empty text removes it.
     async saveNote(id: string, text: string): Promise<void> {
-      findRun(id);
+      await findRun(id);
       if (text === "") await notes.remove(id);
       else await notes.save({ sessionId: id, text, updatedAt: clock.now() });
     },

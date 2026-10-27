@@ -4,6 +4,10 @@ import { healthRoutes } from "./features/health/health.routes.js";
 import { createPlanningReader } from "./features/projects/projects.planning.js";
 import { projectsRoutes } from "./features/projects/projects.routes.js";
 import { createProjectService } from "./features/projects/projects.service.js";
+import { createQuestionRepository } from "./features/questions/questions.repository.js";
+import { questionsRoutes } from "./features/questions/questions.routes.js";
+import type { QuestionRunner } from "./features/questions/questions.runner.js";
+import { createQuestionService } from "./features/questions/questions.service.js";
 import { createSlotReader } from "./features/projects/projects.slots.js";
 import { createDesktopSessionReader } from "./features/sessions/sessions.desktop.js";
 import { createOpsExportReader } from "./features/sessions/sessions.export.js";
@@ -32,14 +36,19 @@ export interface AppContext {
   claudePluginsFile: string;
   // Claude Code's user settings file: read when the settings window opens, its `env` block's SELO_ keys written on a save.
   claudeSettingsFile: string;
+  // Answers the questions (`question` BR-01): Claude Code in the server, a fake in the tests and the demo.
+  questionRunner: QuestionRunner;
+  // `question` BR-04: 5 minutes unless a test says otherwise.
+  questionTimeoutMs?: number;
 }
 
 // No sign-in: a local dashboard of the developer's own sessions, every route is public.
-export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile }: AppContext) {
+export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile, questionRunner, questionTimeoutMs }: AppContext) {
   const app = express();
   app.use(express.json());
   app.use(healthRoutes({ clock }));
   const opsExport = createOpsExportReader(opsDir);
+  const questionRepository = createQuestionRepository(db);
   const sessions = createSessionService({
     opsExport,
     outsideSessions: createOutsideSessionReader(claudeSessionsDir, claudeProjectsDir),
@@ -49,10 +58,17 @@ export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjects
     desktopLinks: createDesktopSessionLinkRepository(db),
     installedPlugins: createInstalledPluginReader(claudePluginsFile),
     git: createGitDiffReader(),
+    questionRuns: questionRepository,
     clock,
   });
   app.use(sessionsRoutes({ sessions }));
-  app.use(projectsRoutes({ projects: createProjectService({ opsExport, planning: createPlanningReader(), slots: createSlotReader() }) }));
+  const projects = createProjectService({ opsExport, planning: createPlanningReader(), slots: createSlotReader() });
+  app.use(projectsRoutes({ projects }));
+  app.use(
+    questionsRoutes({
+      questions: createQuestionService({ questions: questionRepository, projects, runner: questionRunner, clock, ...(questionTimeoutMs === undefined ? {} : { timeoutMs: questionTimeoutMs }) }),
+    }),
+  );
   app.use(settingsRoutes({ settings: createSettingsService({ file: createSettingsFile(claudeSettingsFile) }) }));
   app.use(errorHandler);
   return app;

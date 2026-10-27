@@ -6,6 +6,7 @@ import type { Database } from "../db/client.js";
 import type { ExportRun, ExportRunUsage, ExportUsage, ProjectFileInput, SessionFile } from "../features/sessions/sessions.export.js";
 import { normRoot, type RunningStatusFile } from "../features/sessions/sessions.outside.js";
 import { seedPlanning } from "./demo.planning.js";
+import { seedQuestions } from "./demo.questions.js";
 import { createDesktopSessionLinkRepository, createSessionArchiveRepository, createSessionNoteRepository } from "../features/sessions/sessions.repository.js";
 import type { Clock } from "../shared/clock.js";
 
@@ -504,6 +505,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
     if (s.note !== undefined) await notes.save({ sessionId: s.id, text: s.note, updatedAt: new Date(now - s.age * 1000) });
   }
   seedOutside(folders, ROOT, now);
+  await seedQuestions(db, now, keyOf(`${ROOT}/ledger-api`));
   seedInstalledPlugins(folders.claudePluginsFile, ROOT);
   writeJson(dirname(folders.claudeSettingsFile), basename(folders.claudeSettingsFile), {
     model: "opus",
