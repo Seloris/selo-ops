@@ -206,13 +206,13 @@ describe("sessionActivity", () => {
 
   it("sums each tool and each skill over the runs, the most used first", () => {
     const runs = [
-      run([{ name: "Read", count: 2 }, { name: "Edit", count: 1 }], [{ name: "selo:build", count: 1, how: "command" }]),
-      run([{ name: "Edit", count: 4 }], [{ name: "selo:build", count: 2, how: "command" }, { name: "selo:build", count: 1, how: "tool" }]),
+      run([{ name: "Read", count: 2 }, { name: "Edit", count: 1 }], [{ name: "selo-flow:build", count: 1, how: "command" }]),
+      run([{ name: "Edit", count: 4 }], [{ name: "selo-flow:build", count: 2, how: "command" }, { name: "selo-flow:build", count: 1, how: "tool" }]),
     ];
 
     expect(sessionActivity(runs)).toEqual({
       tools: [{ name: "Edit", count: 5 }, { name: "Read", count: 2 }],
-      skills: [{ name: "selo:build", count: 3, how: "command" }, { name: "selo:build", count: 1, how: "tool" }],
+      skills: [{ name: "selo-flow:build", count: 3, how: "command" }, { name: "selo-flow:build", count: 1, how: "tool" }],
     });
   });
 

@@ -819,7 +819,7 @@ export interface components {
         };
         InstalledPlugin: {
             /** @enum {string} */
-            name: "selo" | "selo-ops";
+            name: "selo-flow" | "selo-feed";
             versions: string[];
         };
         FileSummary: {

@@ -33,7 +33,7 @@ The selo plugins were renamed: the workflow plugin `selo` is `selo-flow` (`/selo
 
 ## Progress
 - [x] Stage 1 — api
-- [ ] Stage 2 — web
-- [ ] Review
-- [ ] Browser test
+- [x] Stage 2 — web
+- [x] Review
+- [x] Browser test
 - [ ] Spec merged

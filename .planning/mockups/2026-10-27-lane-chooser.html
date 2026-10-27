@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* selo skin "aurora", copied from the selo plugin (skins/aurora/tokens.css). Do not edit:
-   switch skins with /selo:setup skin {component} {skin}; override variables in overrides.css. */
+   switch skins with /selo-flow:setup skin {component} {skin}; override variables in overrides.css. */
 :root {
   --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-sans);
@@ -788,7 +788,7 @@ svg.i { width: 15px; height: 15px; display: block; }
             </div></div>
         </div>
         <div class="result empty"><p>Répondez aux trois questions : la voie, sa commande à copier et son flux apparaissent ici.</p></div>
-        <div class="rfoot"><span></span><span class="unsure">Pas sûr ? selo choisit la voie et la mène avec vous : <code class="code">/selo:pilot {demande}</code></span></div>
+        <div class="rfoot"><span></span><span class="unsure">Pas sûr ? selo choisit la voie et la mène avec vous : <code class="code">/selo-flow:pilot {demande}</code></span></div>
       </section>
       <section class="hs"><h2 class="hs-t">Le parcours d’un travail</h2><p class="muted">Inchangé : la légende et les neuf tuiles, comme aujourd’hui.</p></section>
     </div></main>
@@ -826,9 +826,9 @@ svg.i { width: 15px; height: 15px; display: block; }
         </div>
         <div class="result" data-c="fastlane">
           <div class="rh"><h3><span class="ldot"></span>Fastlane</h3><span class="opt" data-c="iterate">--iterate</span><span class="why">Parce que : <b>vous restez</b> · <b>une page ou un composant</b> · <b>en itérant</b></span></div>
-          <div class="prompt"><span>/selo:fastlane <span class="ph">{demande}</span> <span class="fl">--iterate</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
+          <div class="prompt"><span>/selo-flow:fastlane <span class="ph">{demande}</span> <span class="fl">--iterate</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
           <p class="rtext">Une boucle : un changement par tour sur l’app qui tourne, sans test ni commit. Chaque tour finit sur « Autre chose, ou on valide ? ». Quand vous validez, la fastlane finit une seule fois : la spec, les tests, la revue, le navigateur, puis les commits sur votre oui.</p>
-          <div class="rfoot"><button class="ghost flowtoggle"><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Voir le flux</button><span class="unsure">Pas sûr ? selo choisit la voie et la mène avec vous : <code class="code">/selo:pilot {demande}</code></span></div>
+          <div class="rfoot"><button class="ghost flowtoggle"><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Voir le flux</button><span class="unsure">Pas sûr ? selo choisit la voie et la mène avec vous : <code class="code">/selo-flow:pilot {demande}</code></span></div>
         </div>
       </section>
       <section class="hs"><h2 class="hs-t">Le parcours d’un travail</h2><p class="muted">Inchangé : la légende et les neuf tuiles, comme aujourd’hui.</p></section>
@@ -867,19 +867,19 @@ svg.i { width: 15px; height: 15px; display: block; }
         </div>
         <div class="result" data-c="blueprint">
           <div class="rh"><h3><span class="ldot"></span>Blueprint puis build</h3><span class="opt" data-c="mockup">--mockup</span><span class="why">Parce que : <b>vous restez</b> · <b>une nouvelle page, entité ou règle</b> · <b>une maquette d’abord</b></span></div>
-          <div class="prompt" data-c="mockup"><span>/selo:mockup <span class="ph">{demande}</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
+          <div class="prompt" data-c="mockup"><span>/selo-flow:mockup <span class="ph">{demande}</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
           <span class="then">puis, la maquette validée :</span>
-          <div class="prompt"><span>/selo:blueprint <span class="ph">{demande}</span> <span class="fl">--mockup .planning/mockups/<span class="ph">{fichier}</span></span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
+          <div class="prompt"><span>/selo-flow:blueprint <span class="ph">{demande}</span> <span class="fl">--mockup .planning/mockups/<span class="ph">{fichier}</span></span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
           <span class="then">puis, le blueprint commité :</span>
-          <div class="prompt"><span>/selo:build <span class="ph">{blueprint}</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
+          <div class="prompt"><span>/selo-flow:build <span class="ph">{blueprint}</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
           <p class="rtext">La maquette est dessinée et retouchée jusqu’à votre « on valide ». Le blueprint écrit le plan : delta de spec, décisions, étages. Sur votre oui, build construit étage par étage, compare le navigateur à la maquette, puis fusionne le delta dans les specs.</p>
-          <div class="rfoot"><button class="ghost flowtoggle open"><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Masquer le flux</button><span class="unsure">Pas sûr ? selo choisit la voie et la mène avec vous : <code class="code">/selo:pilot {demande}</code></span></div>
+          <div class="rfoot"><button class="ghost flowtoggle open"><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Masquer le flux</button><span class="unsure">Pas sûr ? selo choisit la voie et la mène avec vous : <code class="code">/selo-flow:pilot {demande}</code></span></div>
           <div class="flowmap">
             <div class="fm-h"><span><b>Le flux</b> de cette voie, de votre demande au JOB DONE.</span><span class="fm-legend"><span><i class="on" data-c="blueprint"></i>étape de la voie</span><span><i class="skip"></i>sautée</span><span><i class="you"></i>attend vous</span></span></div>
             <div class="track" data-c="mockup">
               <div class="track-t"><span class="ldot"></span>Maquette d’abord</div>
               <ol class="fsteps">
-                <li class="fstep you"><b>Votre demande</b><small>Un écran, un changement à voir</small><code>/selo:mockup {demande}</code></li>
+                <li class="fstep you"><b>Votre demande</b><small>Un écran, un changement à voir</small><code>/selo-flow:mockup {demande}</code></li>
                 <li class="fstep on"><b>Une maquette HTML</b><small>Sur le skin du front, un état par planche</small></li>
                 <li class="fstep on"><span class="loopback">↻ Autre chose, ou on valide ?</span><b>Retouchée tour par tour</b><small>Vos remarques, une passe par tour</small></li>
                 <li class="fstep you"><b>« On valide »</b><small>Le fichier est marqué validé, non commité</small><span class="tag">vous</span></li>
@@ -939,9 +939,9 @@ svg.i { width: 15px; height: 15px; display: block; }
         </div>
         <div class="result" data-c="pilot">
           <div class="rh"><h3><span class="ldot"></span>Pilot autonome</h3><span class="opt">--autonomous</span><span class="why">Parce que : <b>vous partez</b></span></div>
-          <div class="prompt"><span>/selo:pilot <span class="ph">{demande}</span> <span class="fl">--autonomous</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
+          <div class="prompt"><span>/selo-flow:pilot <span class="ph">{demande}</span> <span class="fl">--autonomous</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
           <p class="rtext">selo choisit la voie et mène tout sans question : chaque étape prend sa réponse recommandée, une question sans réponse défendable arrête l’étape, rien de commité. Dans un worktree, il s’arrête prêt à atterrir : un seul oui, celui du squash. Depuis Selo Ops, « Nouvelle session » lance cette commande pour vous.</p>
-          <div class="rfoot"><button class="ghost flowtoggle open"><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Masquer le flux</button><span class="unsure">Pas sûr ? selo choisit la voie et la mène avec vous : <code class="code">/selo:pilot {demande}</code></span></div>
+          <div class="rfoot"><button class="ghost flowtoggle open"><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Masquer le flux</button><span class="unsure">Pas sûr ? selo choisit la voie et la mène avec vous : <code class="code">/selo-flow:pilot {demande}</code></span></div>
           <div class="flowmap">
             <div class="fm-h"><span><b>Le flux</b> de cette voie, de votre demande au JOB DONE.</span><span class="fm-legend"><span><i class="on" data-c="pilot"></i>étape de la voie</span><span><i class="skip"></i>sautée</span><span><i class="you"></i>attend vous</span></span></div>
             <div class="track" data-c="pilot">
@@ -1000,9 +1000,9 @@ svg.i { width: 15px; height: 15px; display: block; }
           <div class="result" data-c="fastlane">
             <div class="rh"><h3><span class="ldot"></span>Fastlane</h3><span class="opt" data-c="iterate">--iterate</span></div>
             <span class="why" style="font-size:0.86em;color:var(--text-muted)">Parce que : <b style="color:var(--text);font-weight:500">vous restez · une page ou un composant · en itérant</b></span>
-            <div class="prompt"><span>/selo:fastlane <span class="ph">{demande}</span> <span class="fl">--iterate</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
+            <div class="prompt"><span>/selo-flow:fastlane <span class="ph">{demande}</span> <span class="fl">--iterate</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
             <p class="rtext">Un changement par tour sur l’app qui tourne, sans test ni commit. Quand vous validez, la fastlane finit une seule fois : spec, tests, revue, navigateur, commits sur votre oui.</p>
-            <div class="rfoot"><button class="ghost flowtoggle"><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Voir le flux</button><span class="unsure">Pas sûr ? <code class="code">/selo:pilot {demande}</code></span></div>
+            <div class="rfoot"><button class="ghost flowtoggle"><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Voir le flux</button><span class="unsure">Pas sûr ? <code class="code">/selo-flow:pilot {demande}</code></span></div>
           </div>
         </section>
       </div></main>
@@ -1013,18 +1013,18 @@ svg.i { width: 15px; height: 15px; display: block; }
         <section class="hs">
           <div class="result" data-c="blueprint">
             <div class="rh"><h3><span class="ldot"></span>Blueprint puis build</h3><span class="opt" data-c="mockup">--mockup</span></div>
-            <div class="prompt" data-c="mockup"><span>/selo:mockup <span class="ph">{demande}</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
+            <div class="prompt" data-c="mockup"><span>/selo-flow:mockup <span class="ph">{demande}</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
             <span class="then">puis, la maquette validée :</span>
-            <div class="prompt"><span>/selo:blueprint <span class="ph">{demande}</span> <span class="fl">--mockup .planning/mockups/<span class="ph">{fichier}</span></span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
+            <div class="prompt"><span>/selo-flow:blueprint <span class="ph">{demande}</span> <span class="fl">--mockup .planning/mockups/<span class="ph">{fichier}</span></span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
             <span class="then">puis, le blueprint commité :</span>
-            <div class="prompt"><span>/selo:build <span class="ph">{blueprint}</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
+            <div class="prompt"><span>/selo-flow:build <span class="ph">{blueprint}</span></span><button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</button></div>
             <div class="rfoot"><button class="ghost flowtoggle open"><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Masquer le flux</button></div>
             <div class="flowmap">
               <div class="fm-h"><span><b>Le flux</b> de cette voie.</span><span class="fm-legend"><span><i class="on" data-c="blueprint"></i>étape</span><span><i class="skip"></i>sautée</span><span><i class="you"></i>vous</span></span></div>
               <div class="track" data-c="mockup">
                 <div class="track-t"><span class="ldot"></span>Maquette d’abord</div>
                 <ol class="fsteps">
-                  <li class="fstep you"><b>Votre demande</b><code>/selo:mockup {demande}</code></li>
+                  <li class="fstep you"><b>Votre demande</b><code>/selo-flow:mockup {demande}</code></li>
                   <li class="fstep on"><b>Une maquette HTML</b><small>Sur le skin du front</small></li>
                   <li class="fstep on"><span class="loopback">↻ Autre chose, ou on valide ?</span><b>Retouchée tour par tour</b></li>
                   <li class="fstep you"><b>« On valide »</b><small>Marquée validée, non commitée</small><span class="tag">vous</span></li>

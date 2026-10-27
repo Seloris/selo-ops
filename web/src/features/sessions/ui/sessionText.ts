@@ -240,10 +240,10 @@ export function pluginsText(plugins: InstalledPlugin[]): string | null {
   return plugins.map((p) => `${p.name} ${p.versions.join(" / ")}`).join(" · ");
 }
 
-// sessions-live FR-39: the session was written by a selo-ops version other than the installed ones (the header's).
-// Nothing to compare when the export gives no version or Claude Code lists no selo-ops.
+// sessions-live FR-39: the session was written by a selo-feed version other than the installed ones (the header's).
+// Nothing to compare when the export gives no version or Claude Code lists no selo-feed.
 export function isPluginOutdated(s: Session, plugins: InstalledPlugin[]): boolean {
-  const installed = plugins.find((p) => p.name === "selo-ops");
+  const installed = plugins.find((p) => p.name === "selo-feed");
   return Boolean(s.writtenBy && installed && !installed.versions.includes(s.writtenBy));
 }
 

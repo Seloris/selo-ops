@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* selo skin "aurora", copied from the selo plugin (skins/aurora/tokens.css). Do not edit:
-   switch skins with /selo:setup skin {component} {skin}; override variables in overrides.css. */
+   switch skins with /selo-flow:setup skin {component} {skin}; override variables in overrides.css. */
 :root {
   --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-sans);
@@ -795,7 +795,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
   <p>Un bouton « Réglages » dans l’en-tête ouvre une fenêtre qui modifie tes réglages selo sur cette machine : le bloc <span class="mono">env</span> de <span class="mono">~/.claude/settings.json</span>. Ce sont tes réglages, pas ceux d’un projet : ils valent pour tous tes projets selo.</p>
   <ul>
     <li><b>Modèles</b> : le preset (Standard ou Lean) règle tous les rôles d’un coup ; chaque rôle peut ensuite prendre son propre modèle (opus, sonnet, haiku, fable). Un rôle laissé sur « Selon le preset » suit le preset.</li>
-    <li><b>Routing</b> : une demande tapée sans commande passe par <span class="mono">/selo:pilot</span>, qui choisit la voie.</li>
+    <li><b>Routing</b> : une demande tapée sans commande passe par <span class="mono">/selo-flow:pilot</span>, qui choisit la voie.</li>
     <li><b>Commit</b> : la fastlane commite sans attendre ton oui.</li>
     <li><b>Quand ça s’applique</b> : aux sessions ouvertes après l’enregistrement ; une session déjà ouverte garde ses réglages.</li>
   </ul>
@@ -812,7 +812,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -893,15 +893,15 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
           <div class="roles">
             <div class="role"><span class="rn">Planifier <span class="rk">planner</span></span><span class="ra"><code>Plan</code> · blueprints et specs</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Planifier"><option selected>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
 <div class="role"><span class="rn">Implémenter <span class="rk">implementer</span></span><span class="ra"><code>general-purpose</code> · le code, en mode autonome</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Implémenter"><option selected>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
-<div class="role"><span class="rn">Relire <span class="rk">reviewer</span></span><span class="ra"><code>selo:reviewer</code> · chaque revue</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Relire"><option selected>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
-<div class="role"><span class="rn">Exécuter <span class="rk">runner</span></span><span class="ra"><code>selo:runner</code> · builds, tests, lint</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Exécuter"><option selected>Selon le preset (haiku)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
+<div class="role"><span class="rn">Relire <span class="rk">reviewer</span></span><span class="ra"><code>selo-flow:reviewer</code> · chaque revue</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Relire"><option selected>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
+<div class="role"><span class="rn">Exécuter <span class="rk">runner</span></span><span class="ra"><code>selo-flow:runner</code> · builds, tests, lint</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Exécuter"><option selected>Selon le preset (haiku)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
 <div class="role"><span class="rn">Chercher <span class="rk">explorer</span></span><span class="ra"><code>Explore</code> · recherches dans le code</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Chercher"><option selected>Selon le preset (haiku)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
           </div>
         </div>
         <div class="q">
           <span class="label">Pendant le travail</span>
           <div class="opts">
-            <div class="opt"><label class="switch"><input type="checkbox" role="switch">Router mes demandes vers pilot</label><span class="flag">SELO_ROUTING = <b>off</b></span><span class="desc">Une demande de changement tapée sans commande lance <span class="mono">/selo:pilot</span>, qui choisit la voie. Une commande <span class="mono">/selo:…</span>, une question ou une suite de travail ne change pas.</span></div>
+            <div class="opt"><label class="switch"><input type="checkbox" role="switch">Router mes demandes vers pilot</label><span class="flag">SELO_ROUTING = <b>off</b></span><span class="desc">Une demande de changement tapée sans commande lance <span class="mono">/selo-flow:pilot</span>, qui choisit la voie. Une commande <span class="mono">/selo-flow:…</span>, une question ou une suite de travail ne change pas.</span></div>
             <div class="opt"><label class="switch"><input type="checkbox" role="switch">Commiter sans me demander</label><span class="flag">SELO_COMMIT = <b>ask</b></span><span class="desc">La fastlane commite sur la branche de base sans attendre ton oui. Un build et le mode autonome ne demandent déjà jamais.</span></div>
           </div>
         </div>
@@ -928,7 +928,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -1009,15 +1009,15 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
           <div class="roles">
             <div class="role"><span class="rn">Planifier <span class="rk">planner</span></span><span class="ra"><code>Plan</code> · blueprints et specs</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Planifier"><option selected>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
 <div class="role"><span class="rn">Implémenter <span class="rk">implementer</span></span><span class="ra"><code>general-purpose</code> · le code, en mode autonome</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Implémenter"><option selected>Selon le preset (sonnet)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
-<div class="role custom"><span class="rn">Relire <span class="rk">reviewer</span><span class="tag-custom">personnalisé</span></span><span class="ra"><code>selo:reviewer</code> · chaque revue</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Relire"><option>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option selected>fable</option></select></span><button class="icon" aria-label="Revenir au preset" title="Revenir au preset"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button></div>
-<div class="role"><span class="rn">Exécuter <span class="rk">runner</span></span><span class="ra"><code>selo:runner</code> · builds, tests, lint</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Exécuter"><option selected>Selon le preset (haiku)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
+<div class="role custom"><span class="rn">Relire <span class="rk">reviewer</span><span class="tag-custom">personnalisé</span></span><span class="ra"><code>selo-flow:reviewer</code> · chaque revue</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Relire"><option>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option selected>fable</option></select></span><button class="icon" aria-label="Revenir au preset" title="Revenir au preset"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button></div>
+<div class="role"><span class="rn">Exécuter <span class="rk">runner</span></span><span class="ra"><code>selo-flow:runner</code> · builds, tests, lint</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Exécuter"><option selected>Selon le preset (haiku)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
 <div class="role custom"><span class="rn">Chercher <span class="rk">explorer</span><span class="tag-custom">personnalisé</span></span><span class="ra"><code>Explore</code> · recherches dans le code</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Chercher"><option>Selon le preset (haiku)</option><option>opus</option><option selected>sonnet</option><option>haiku</option><option>fable</option></select></span><button class="icon" aria-label="Revenir au preset" title="Revenir au preset"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button></div>
           </div>
         </div>
         <div class="q">
           <span class="label">Pendant le travail</span>
           <div class="opts">
-            <div class="opt"><label class="switch"><input type="checkbox" role="switch" checked>Router mes demandes vers pilot</label><span class="flag">SELO_ROUTING = <b>on</b></span><span class="desc">Une demande de changement tapée sans commande lance <span class="mono">/selo:pilot</span>, qui choisit la voie. Une commande <span class="mono">/selo:…</span>, une question ou une suite de travail ne change pas.</span></div>
+            <div class="opt"><label class="switch"><input type="checkbox" role="switch" checked>Router mes demandes vers pilot</label><span class="flag">SELO_ROUTING = <b>on</b></span><span class="desc">Une demande de changement tapée sans commande lance <span class="mono">/selo-flow:pilot</span>, qui choisit la voie. Une commande <span class="mono">/selo-flow:…</span>, une question ou une suite de travail ne change pas.</span></div>
             <div class="opt"><label class="switch"><input type="checkbox" role="switch">Commiter sans me demander</label><span class="flag">SELO_COMMIT = <b>ask</b></span><span class="desc">La fastlane commite sur la branche de base sans attendre ton oui. Un build et le mode autonome ne demandent déjà jamais.</span></div>
           </div>
         </div>
@@ -1051,7 +1051,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -1129,7 +1129,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -1210,13 +1210,13 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
           </div>
           <div class="roles"><div class="role"><span class="rn">Planifier <span class="rk">planner</span></span><span class="ra"><code>Plan</code> · blueprints et specs</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Planifier"><option selected>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
 <div class="role"><span class="rn">Implémenter <span class="rk">implementer</span></span><span class="ra"><code>general-purpose</code> · le code, en mode autonome</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Implémenter"><option selected>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
-<div class="role"><span class="rn">Relire <span class="rk">reviewer</span></span><span class="ra"><code>selo:reviewer</code> · chaque revue</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Relire"><option selected>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
-<div class="role"><span class="rn">Exécuter <span class="rk">runner</span></span><span class="ra"><code>selo:runner</code> · builds, tests, lint</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Exécuter"><option selected>Selon le preset (haiku)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
+<div class="role"><span class="rn">Relire <span class="rk">reviewer</span></span><span class="ra"><code>selo-flow:reviewer</code> · chaque revue</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Relire"><option selected>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
+<div class="role"><span class="rn">Exécuter <span class="rk">runner</span></span><span class="ra"><code>selo-flow:runner</code> · builds, tests, lint</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Exécuter"><option selected>Selon le preset (haiku)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
 <div class="role"><span class="rn">Chercher <span class="rk">explorer</span></span><span class="ra"><code>Explore</code> · recherches dans le code</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Chercher"><option selected>Selon le preset (haiku)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div></div>
         </div>
         <div class="q off">
           <span class="label">Pendant le travail</span>
-          <div class="opts"><div class="opt"><label class="switch"><input type="checkbox" role="switch">Router mes demandes vers pilot</label><span class="flag">SELO_ROUTING = <b>off</b></span><span class="desc">Une demande de changement tapée sans commande lance <span class="mono">/selo:pilot</span>, qui choisit la voie. Une commande <span class="mono">/selo:…</span>, une question ou une suite de travail ne change pas.</span></div><div class="opt"><label class="switch"><input type="checkbox" role="switch">Commiter sans me demander</label><span class="flag">SELO_COMMIT = <b>ask</b></span><span class="desc">La fastlane commite sur la branche de base sans attendre ton oui. Un build et le mode autonome ne demandent déjà jamais.</span></div></div>
+          <div class="opts"><div class="opt"><label class="switch"><input type="checkbox" role="switch">Router mes demandes vers pilot</label><span class="flag">SELO_ROUTING = <b>off</b></span><span class="desc">Une demande de changement tapée sans commande lance <span class="mono">/selo-flow:pilot</span>, qui choisit la voie. Une commande <span class="mono">/selo-flow:…</span>, une question ou une suite de travail ne change pas.</span></div><div class="opt"><label class="switch"><input type="checkbox" role="switch">Commiter sans me demander</label><span class="flag">SELO_COMMIT = <b>ask</b></span><span class="desc">La fastlane commite sur la branche de base sans attendre ton oui. Un build et le mode autonome ne demandent déjà jamais.</span></div></div>
         </div>
       </div>
       <div class="ns-foot">
@@ -1248,13 +1248,13 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
             </div>
             <div class="roles"><div class="role"><span class="rn">Planifier <span class="rk">planner</span></span><span class="ra"><code>Plan</code> · blueprints et specs</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Planifier"><option selected>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
 <div class="role"><span class="rn">Implémenter <span class="rk">implementer</span></span><span class="ra"><code>general-purpose</code> · le code, en mode autonome</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Implémenter"><option selected>Selon le preset (sonnet)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
-<div class="role custom"><span class="rn">Relire <span class="rk">reviewer</span><span class="tag-custom">personnalisé</span></span><span class="ra"><code>selo:reviewer</code> · chaque revue</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Relire"><option>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option selected>fable</option></select></span><button class="icon" aria-label="Revenir au preset" title="Revenir au preset"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button></div>
-<div class="role"><span class="rn">Exécuter <span class="rk">runner</span></span><span class="ra"><code>selo:runner</code> · builds, tests, lint</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Exécuter"><option selected>Selon le preset (haiku)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
+<div class="role custom"><span class="rn">Relire <span class="rk">reviewer</span><span class="tag-custom">personnalisé</span></span><span class="ra"><code>selo-flow:reviewer</code> · chaque revue</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Relire"><option>Selon le preset (opus)</option><option>opus</option><option>sonnet</option><option>haiku</option><option selected>fable</option></select></span><button class="icon" aria-label="Revenir au preset" title="Revenir au preset"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button></div>
+<div class="role"><span class="rn">Exécuter <span class="rk">runner</span></span><span class="ra"><code>selo-flow:runner</code> · builds, tests, lint</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Exécuter"><option selected>Selon le preset (haiku)</option><option>opus</option><option>sonnet</option><option>haiku</option><option>fable</option></select></span><span class="slot"></span></div>
 <div class="role custom"><span class="rn">Chercher <span class="rk">explorer</span><span class="tag-custom">personnalisé</span></span><span class="ra"><code>Explore</code> · recherches dans le code</span><span class="select-wrap"><select class="select" aria-label="Modèle pour Chercher"><option>Selon le preset (haiku)</option><option>opus</option><option selected>sonnet</option><option>haiku</option><option>fable</option></select></span><button class="icon" aria-label="Revenir au preset" title="Revenir au preset"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button></div></div>
           </div>
           <div class="q">
             <span class="label">Pendant le travail</span>
-            <div class="opts"><div class="opt"><label class="switch"><input type="checkbox" role="switch" checked>Router mes demandes vers pilot</label><span class="flag">SELO_ROUTING = <b>on</b></span><span class="desc">Une demande de changement tapée sans commande lance <span class="mono">/selo:pilot</span>, qui choisit la voie. Une commande <span class="mono">/selo:…</span>, une question ou une suite de travail ne change pas.</span></div><div class="opt"><label class="switch"><input type="checkbox" role="switch">Commiter sans me demander</label><span class="flag">SELO_COMMIT = <b>ask</b></span><span class="desc">La fastlane commite sur la branche de base sans attendre ton oui. Un build et le mode autonome ne demandent déjà jamais.</span></div></div>
+            <div class="opts"><div class="opt"><label class="switch"><input type="checkbox" role="switch" checked>Router mes demandes vers pilot</label><span class="flag">SELO_ROUTING = <b>on</b></span><span class="desc">Une demande de changement tapée sans commande lance <span class="mono">/selo-flow:pilot</span>, qui choisit la voie. Une commande <span class="mono">/selo-flow:…</span>, une question ou une suite de travail ne change pas.</span></div><div class="opt"><label class="switch"><input type="checkbox" role="switch">Commiter sans me demander</label><span class="flag">SELO_COMMIT = <b>ask</b></span><span class="desc">La fastlane commite sur la branche de base sans attendre ton oui. Un build et le mode autonome ne demandent déjà jamais.</span></div></div>
           </div>
         </div>
         <div class="ns-foot">

@@ -15,35 +15,35 @@ describe("laneFor", () => {
   });
 
   it("gives the fastlane for one page or component", () => {
-    expect(prompts({ stay: "stay", scope: "page", preview: "direct" })).toEqual(["/selo:fastlane {demande}"]);
-    expect(prompts({ stay: "stay", scope: "page", preview: "iterate" })).toEqual(["/selo:fastlane {demande} --iterate"]);
-    expect(prompts({ stay: "stay", scope: "page", preview: "mockup" })).toEqual(["/selo:mockup {demande}", "/selo:fastlane {demande} --mockup .planning/mockups/{fichier}"]);
+    expect(prompts({ stay: "stay", scope: "page", preview: "direct" })).toEqual(["/selo-flow:fastlane {demande}"]);
+    expect(prompts({ stay: "stay", scope: "page", preview: "iterate" })).toEqual(["/selo-flow:fastlane {demande} --iterate"]);
+    expect(prompts({ stay: "stay", scope: "page", preview: "mockup" })).toEqual(["/selo-flow:mockup {demande}", "/selo-flow:fastlane {demande} --mockup .planning/mockups/{fichier}"]);
   });
 
   it("gives the blueprint then build for a new page, entity or rule", () => {
-    expect(prompts({ stay: "stay", scope: "new", preview: "direct" })).toEqual(["/selo:blueprint {demande}", "/selo:build {blueprint}"]);
-    expect(prompts({ stay: "stay", scope: "new", preview: "mockup" })).toEqual(["/selo:mockup {demande}", "/selo:blueprint {demande} --mockup .planning/mockups/{fichier}", "/selo:build {blueprint}"]);
+    expect(prompts({ stay: "stay", scope: "new", preview: "direct" })).toEqual(["/selo-flow:blueprint {demande}", "/selo-flow:build {blueprint}"]);
+    expect(prompts({ stay: "stay", scope: "new", preview: "mockup" })).toEqual(["/selo-flow:mockup {demande}", "/selo-flow:blueprint {demande} --mockup .planning/mockups/{fichier}", "/selo-flow:build {blueprint}"]);
   });
 
   it("gives the autonomous pilot when the person leaves, with a mockup drawn first", () => {
-    expect(prompts({ stay: "leave", scope: "new", preview: "direct" })).toEqual(["/selo:pilot {demande} --autonomous"]);
-    expect(prompts({ stay: "leave", preview: "mockup" })).toEqual(["/selo:mockup {demande}", "/selo:pilot {demande} --mockup .planning/mockups/{fichier} --autonomous"]);
+    expect(prompts({ stay: "leave", scope: "new", preview: "direct" })).toEqual(["/selo-flow:pilot {demande} --autonomous"]);
+    expect(prompts({ stay: "leave", preview: "mockup" })).toEqual(["/selo-flow:mockup {demande}", "/selo-flow:pilot {demande} --mockup .planning/mockups/{fichier} --autonomous"]);
   });
 
   it("gives the interactive pilot to a person who stays but is unsure of the scope", () => {
-    expect(prompts({ stay: "stay", scope: "unsure", preview: "direct" })).toEqual(["/selo:pilot {demande}", "/selo:build {blueprint}"]);
-    expect(prompts({ stay: "stay", scope: "unsure", preview: "mockup" })).toEqual(["/selo:mockup {demande}", "/selo:pilot {demande} --mockup .planning/mockups/{fichier}", "/selo:build {blueprint}"]);
+    expect(prompts({ stay: "stay", scope: "unsure", preview: "direct" })).toEqual(["/selo-flow:pilot {demande}", "/selo-flow:build {blueprint}"]);
+    expect(prompts({ stay: "stay", scope: "unsure", preview: "mockup" })).toEqual(["/selo-flow:mockup {demande}", "/selo-flow:pilot {demande} --mockup .planning/mockups/{fichier}", "/selo-flow:build {blueprint}"]);
     const pilot = laneFor({ stay: "stay", scope: "unsure", preview: "direct" });
     expect(pilot).toMatchObject({ lane: "pilot", name: "help.lanes.pilotWith.name", options: [], foot: "help.lanes.foot.pilotWith" });
     expect(pilot?.why).toEqual(["help.lanes.why.stay", "help.lanes.why.unsure", "help.lanes.why.direct"]);
     expect(pilot?.tracks.map((track) => track.colour)).toEqual(["pilot", "blueprint"]);
-    expect(pilot?.tracks[0]?.steps[0]).toMatchObject({ state: "you", code: "/selo:pilot {demande}" });
+    expect(pilot?.tracks[0]?.steps[0]).toMatchObject({ state: "you", code: "/selo-flow:pilot {demande}" });
     expect(pilot?.tracks[1]?.steps[0]?.name).toBe("help.lanes.step.grill.name");
     expect(pilot?.isPilotWith).toBe(true);
     expect(laneFor({ stay: "leave", preview: "direct" })?.isPilotWith).toBeUndefined();
     const withMockup = laneFor({ stay: "stay", scope: "unsure", preview: "mockup" });
     expect(withMockup?.tracks.map((track) => track.colour)).toEqual(["mockup", "pilot", "blueprint"]);
-    expect(withMockup?.tracks[1]?.steps[0]?.code).toBe("/selo:pilot {demande} --mockup {fichier}");
+    expect(withMockup?.tracks[1]?.steps[0]?.code).toBe("/selo-flow:pilot {demande} --mockup {fichier}");
   });
 
   it("names the options in their colours and the reasons", () => {
@@ -66,7 +66,7 @@ describe("laneFor", () => {
     expect(blueprint?.tracks[1]?.steps.find((step) => step.name === "help.lanes.step.approval.name")?.state).toBe("you");
     const fastlane = laneFor({ stay: "stay", scope: "page", preview: "direct" });
     expect(fastlane?.tracks.map((track) => track.colour)).toEqual(["fastlane"]);
-    expect(fastlane?.tracks[0]?.steps[0]).toMatchObject({ name: "help.lanes.step.request.name", state: "you", code: "/selo:fastlane {demande}" });
+    expect(fastlane?.tracks[0]?.steps[0]).toMatchObject({ name: "help.lanes.step.request.name", state: "you", code: "/selo-flow:fastlane {demande}" });
     expect(fastlane?.tracks[0]?.steps.filter((step) => step.state === "skip").map((step) => step.name)).toEqual([
       "help.lanes.step.grill.name",
       "help.lanes.step.blueprint.name",
@@ -126,19 +126,19 @@ describe("the questions", () => {
 
 describe("splitPrompt", () => {
   it("parts the command, its placeholders and its options", () => {
-    expect(splitPrompt("/selo:fastlane {demande} --iterate")).toEqual([
-      { text: "/selo:fastlane " },
+    expect(splitPrompt("/selo-flow:fastlane {demande} --iterate")).toEqual([
+      { text: "/selo-flow:fastlane " },
       { text: "{demande}", isPlaceholder: true },
       { text: " " },
       { text: "--iterate", isOption: true },
     ]);
-    expect(splitPrompt("/selo:blueprint {demande} --mockup .planning/mockups/{fichier}")).toEqual([
-      { text: "/selo:blueprint " },
+    expect(splitPrompt("/selo-flow:blueprint {demande} --mockup .planning/mockups/{fichier}")).toEqual([
+      { text: "/selo-flow:blueprint " },
       { text: "{demande}", isPlaceholder: true },
       { text: " " },
       { text: "--mockup .planning/mockups/", isOption: true },
       { text: "{fichier}", isOption: true, isPlaceholder: true },
     ]);
-    expect(splitPrompt("/selo:build {blueprint}")).toEqual([{ text: "/selo:build " }, { text: "{blueprint}", isPlaceholder: true }]);
+    expect(splitPrompt("/selo-flow:build {blueprint}")).toEqual([{ text: "/selo-flow:build " }, { text: "{blueprint}", isPlaceholder: true }]);
   });
 });

@@ -28,8 +28,8 @@ import styles from "./SettingsDialog.module.css";
 const AGENTS: Record<Role, string> = {
   planner: "Plan",
   implementer: "general-purpose",
-  reviewer: "selo:reviewer",
-  runner: "selo:runner",
+  reviewer: "selo-flow:reviewer",
+  runner: "selo-flow:runner",
   explorer: "Explore",
 };
 const roleText = (role: Role, part: "" | "Use") => t(`settings.role.${role}${part}` as MessageKey);

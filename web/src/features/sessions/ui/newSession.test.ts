@@ -60,70 +60,70 @@ const project = (id: string, root: string, worktrees: string[] = [], blueprints:
 
 describe("commandOf in « Simple » (sessions-live FR-45, FR-47)", () => {
   it("opens on « Je reste là »: the pilot on the request", () => {
-    expect(commandOf(simple({ request: "  Archiver en lot  " }))).toBe("/selo:pilot Archiver en lot");
+    expect(commandOf(simple({ request: "  Archiver en lot  " }))).toBe("/selo-flow:pilot Archiver en lot");
   });
 
   it("ends with `— autonomous` on « Je m'absente »", () => {
-    expect(commandOf(simple({ request: "x", presence: "leave" }))).toBe("/selo:pilot x — autonomous");
+    expect(commandOf(simple({ request: "x", presence: "leave" }))).toBe("/selo-flow:pilot x — autonomous");
   });
 
   it("builds a chosen blueprint, or hands it to the autonomous pilot", () => {
     const resume = { kind: "blueprint", file: ".planning/blueprints/b.md" } as const;
-    expect(commandOf(simple({ resume, request: "ignored" }))).toBe("/selo:build .planning/blueprints/b.md");
-    expect(commandOf(simple({ resume, presence: "leave" }))).toBe("/selo:pilot .planning/blueprints/b.md — autonomous");
+    expect(commandOf(simple({ resume, request: "ignored" }))).toBe("/selo-flow:build .planning/blueprints/b.md");
+    expect(commandOf(simple({ resume, presence: "leave" }))).toBe("/selo-flow:pilot .planning/blueprints/b.md — autonomous");
   });
 
   it("gives the pilot a chosen mockup after the request, before `— autonomous`", () => {
     const resume = { kind: "mockup", file: ".planning/mockups/m.html" } as const;
-    expect(commandOf(simple({ resume, request: "x" }))).toBe("/selo:pilot x — mockup .planning/mockups/m.html");
-    expect(commandOf(simple({ resume, request: "x", presence: "leave" }))).toBe("/selo:pilot x — mockup .planning/mockups/m.html — autonomous");
+    expect(commandOf(simple({ resume, request: "x" }))).toBe("/selo-flow:pilot x — mockup .planning/mockups/m.html");
+    expect(commandOf(simple({ resume, request: "x", presence: "leave" }))).toBe("/selo-flow:pilot x — mockup .planning/mockups/m.html — autonomous");
   });
 
   it("ignores what only « Avancé » sets", () => {
-    expect(commandOf(simple({ skill: "fastlane", request: "x", iterate: true, noBrowser: true, touches: ["a.md"], mockupFile: "m.html" }))).toBe("/selo:pilot x");
+    expect(commandOf(simple({ skill: "fastlane", request: "x", iterate: true, noBrowser: true, touches: ["a.md"], mockupFile: "m.html" }))).toBe("/selo-flow:pilot x");
   });
 });
 
 describe("commandOf in « Avancé » (sessions-live FR-46, FR-47)", () => {
   it("opens on the autonomous pilot, the request after the skill and `— autonomous` last", () => {
-    expect(commandOf(form({ request: "  Archiver en lot  " }))).toBe("/selo:pilot Archiver en lot — autonomous");
+    expect(commandOf(form({ request: "  Archiver en lot  " }))).toBe("/selo-flow:pilot Archiver en lot — autonomous");
   });
 
   it("adds the autonomous pilot's forced lane, its stop at the blueprint and no browser, then `— autonomous`", () => {
     expect(commandOf(form({ request: "x", lane: "blueprint", untilBlueprint: true, noBrowser: true }))).toBe(
-      "/selo:pilot x — blueprint — until blueprint — no browser — autonomous",
+      "/selo-flow:pilot x — blueprint — until blueprint — no browser — autonomous",
     );
   });
 
   it("drops the stop at the blueprint when the lane is fastlane", () => {
-    expect(commandOf(form({ request: "x", lane: "fastlane", untilBlueprint: true }))).toBe("/selo:pilot x — fastlane — autonomous");
+    expect(commandOf(form({ request: "x", lane: "fastlane", untilBlueprint: true }))).toBe("/selo-flow:pilot x — fastlane — autonomous");
   });
 
   it("starts the autonomous pilot from a blueprint's file, without lane options", () => {
     expect(commandOf(form({ fromBlueprint: true, blueprintFile: ".planning/blueprints/b.md", lane: "fastlane", noBrowser: true }))).toBe(
-      "/selo:pilot .planning/blueprints/b.md — no browser — autonomous",
+      "/selo-flow:pilot .planning/blueprints/b.md — no browser — autonomous",
     );
   });
 
   it("lets selo pick the lane from a request, with no browser only", () => {
-    expect(commandOf(form({ skill: "pilot", request: "x", lane: "blueprint", untilBlueprint: true, noBrowser: true }))).toBe("/selo:pilot x — no browser");
-    expect(commandOf(form({ skill: "pilot", request: "x", fromBlueprint: true, blueprintFile: "b.md" }))).toBe("/selo:pilot x");
+    expect(commandOf(form({ skill: "pilot", request: "x", lane: "blueprint", untilBlueprint: true, noBrowser: true }))).toBe("/selo-flow:pilot x — no browser");
+    expect(commandOf(form({ skill: "pilot", request: "x", fromBlueprint: true, blueprintFile: "b.md" }))).toBe("/selo-flow:pilot x");
   });
 
   it("gives fastlane its iterate mode", () => {
-    expect(commandOf(form({ skill: "fastlane", request: "x", iterate: true, noBrowser: true }))).toBe("/selo:fastlane x — iterate — no browser");
+    expect(commandOf(form({ skill: "fastlane", request: "x", iterate: true, noBrowser: true }))).toBe("/selo-flow:fastlane x — iterate — no browser");
   });
 
   it("builds a blueprint, one stage when asked", () => {
-    expect(commandOf(form({ skill: "build", blueprintFile: ".planning/blueprints/b.md", stage: 2 }))).toBe("/selo:build .planning/blueprints/b.md — stage 2");
+    expect(commandOf(form({ skill: "build", blueprintFile: ".planning/blueprints/b.md", stage: 2 }))).toBe("/selo-flow:build .planning/blueprints/b.md — stage 2");
   });
 
   it("ignores options a skill does not take", () => {
-    expect(commandOf(form({ skill: "grill", request: "x", iterate: true, noBrowser: true, lane: "blueprint" }))).toBe("/selo:grill x");
+    expect(commandOf(form({ skill: "grill", request: "x", iterate: true, noBrowser: true, lane: "blueprint" }))).toBe("/selo-flow:grill x");
   });
 
   it("leaves review alone when no scope is given", () => {
-    expect(commandOf(form({ skill: "review" }))).toBe("/selo:review");
+    expect(commandOf(form({ skill: "review" }))).toBe("/selo-flow:review");
   });
 
   it("gives a free session the request alone", () => {
@@ -132,19 +132,19 @@ describe("commandOf in « Avancé » (sessions-live FR-46, FR-47)", () => {
 
   it("mentions each file the request touches after it, before the flags", () => {
     const touches = [".planning/pages/projects.md", ".planning/domain/project.md"];
-    expect(commandOf(form({ skill: "fastlane", request: "x", touches, iterate: true }))).toBe("/selo:fastlane x @.planning/pages/projects.md @.planning/domain/project.md — iterate");
+    expect(commandOf(form({ skill: "fastlane", request: "x", touches, iterate: true }))).toBe("/selo-flow:fastlane x @.planning/pages/projects.md @.planning/domain/project.md — iterate");
     expect(commandOf(form({ skill: "free", request: "x", touches }))).toBe("x @.planning/pages/projects.md @.planning/domain/project.md");
-    expect(commandOf(form({ skill: "review", touches }))).toBe("/selo:review @.planning/pages/projects.md @.planning/domain/project.md");
+    expect(commandOf(form({ skill: "review", touches }))).toBe("/selo-flow:review @.planning/pages/projects.md @.planning/domain/project.md");
   });
 
   it("mentions no file for a blueprint's file", () => {
-    expect(commandOf(form({ skill: "build", blueprintFile: "b.md", touches: ["a.md"] }))).toBe("/selo:build b.md");
+    expect(commandOf(form({ skill: "build", blueprintFile: "b.md", touches: ["a.md"] }))).toBe("/selo-flow:build b.md");
   });
 
   it("gives fastlane and blueprint the chosen mockup as their first flag", () => {
-    expect(commandOf(form({ skill: "fastlane", request: "x", mockupFile: "m.html", iterate: true }))).toBe("/selo:fastlane x — mockup m.html — iterate");
-    expect(commandOf(form({ skill: "blueprint", request: "x", mockupFile: "m.html" }))).toBe("/selo:blueprint x — mockup m.html");
-    expect(commandOf(form({ skill: "pilot", request: "x", mockupFile: "m.html" }))).toBe("/selo:pilot x");
+    expect(commandOf(form({ skill: "fastlane", request: "x", mockupFile: "m.html", iterate: true }))).toBe("/selo-flow:fastlane x — mockup m.html — iterate");
+    expect(commandOf(form({ skill: "blueprint", request: "x", mockupFile: "m.html" }))).toBe("/selo-flow:blueprint x — mockup m.html");
+    expect(commandOf(form({ skill: "pilot", request: "x", mockupFile: "m.html" }))).toBe("/selo-flow:pilot x");
   });
 });
 
@@ -175,8 +175,8 @@ describe("canOpen (sessions-live FR-47)", () => {
 
 describe("newSessionLink (sessions-live FR-47)", () => {
   it("opens the desktop app's new session with the command and the folder, encoded", () => {
-    expect(newSessionLink("/selo:fastlane a & b — no browser", "C:/WS/my app")).toBe(
-      "claude://code/new?q=%2Fselo%3Afastlane%20a%20%26%20b%20%E2%80%94%20no%20browser&folder=C%3A%2FWS%2Fmy%20app",
+    expect(newSessionLink("/selo-flow:fastlane a & b — no browser", "C:/WS/my app")).toBe(
+      "claude://code/new?q=%2Fselo-flow%3Afastlane%20a%20%26%20b%20%E2%80%94%20no%20browser&folder=C%3A%2FWS%2Fmy%20app",
     );
   });
 });

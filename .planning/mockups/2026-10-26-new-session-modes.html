@@ -5,7 +5,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* selo skin "aurora", copied from the selo plugin (skins/aurora/tokens.css). Do not edit:
-   switch skins with /selo:setup skin {component} {skin}; override variables in overrides.css. */
+   switch skins with /selo-flow:setup skin {component} {skin}; override variables in overrides.css. */
 :root {
   --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-sans);
@@ -826,7 +826,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
   <h1>Nouvelle session : mode simple et mode avancé</h1>
   <p>La fenêtre n’a plus qu’une colonne. Le mode simple pose deux questions : ce que tu veux faire, et si tu restes là pendant que l’agent travaille. selo choisit la voie. Le mode avancé garde tous les choix d’aujourd’hui, en puces au-dessus du formulaire au lieu d’une liste à gauche.</p>
   <ul>
-    <li><b>Simple</b> : une grande zone de texte, deux cartes « Je reste là » (<span class="mono">/selo:pilot</span>) ou « Je m’absente » (<span class="mono">/selo:pilot … — autonomous</span>), et les blueprints prêts à reprendre en un clic (<span class="mono">/selo:build</span>, ou le pilot autonome).</li>
+    <li><b>Simple</b> : une grande zone de texte, deux cartes « Je reste là » (<span class="mono">/selo-flow:pilot</span>) ou « Je m’absente » (<span class="mono">/selo-flow:pilot … — autonomous</span>), et les blueprints prêts à reprendre en un clic (<span class="mono">/selo-flow:build</span>, ou le pilot autonome).</li>
     <li><b>Avancé</b> : les 10 choix, leurs options et leurs flags, comme aujourd’hui ; la ligne « quand le choisir » ne s’affiche que pour le choix fait.</li>
     <li><b>Commun</b> : le projet en haut (« Dans selo-ops »), la commande en une ligne discrète au-dessus du bouton, « Copier et ouvrir » et <kbd>Ctrl</kbd> <kbd>↵</kbd>. Changer de mode garde le projet et la demande tapée.</li>
     <li><b>Ce que ça touche</b>, en mode avancé seulement : on peut désigner une ou plusieurs pages ou fiches du domaine du projet ; leur fichier part avec la demande, en mention <span class="mono">@</span>.</li>
@@ -846,7 +846,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -938,7 +938,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div>
   </div><p class="more">Maquetter, relire, tester, choisir la voie toi-même : passe en <a href="#">mode avancé</a>.</p></div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:pilot <span class="ph">{ta demande}</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:pilot <span class="ph">{ta demande}</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Écris ta demande ou choisis un blueprint pour lancer. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" disabled><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -959,7 +959,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -1051,7 +1051,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div>
   </div><p class="more">Maquetter, relire, tester, choisir la voie toi-même : passe en <a href="#">mode avancé</a>.</p></div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:pilot Sur la page Projets, pouvoir filtrer les blueprints par état et retenir le filtre choisi <span class="f">— autonomous</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:pilot Sur la page Projets, pouvoir filtrer les blueprints par état et retenir le filtre choisi <span class="f">— autonomous</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Claude s’ouvre dans <b>selo-ops</b>, la commande déjà tapée : il reste à appuyer sur Entrée. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" ><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -1062,7 +1062,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
 
 <section class="plate">
   <h2>3 · Simple, un blueprint choisi, 1280 px</h2>
-  <p>« Choisir » remplace la zone de texte par le blueprint ; « Écrire une demande » revient au texte, qui est gardé. Rester lance <span class="mono">/selo:build</span>, s’absenter lance <span class="mono">/selo:pilot {blueprint} — autonomous</span>. Pour un blueprint que seul un worktree contient, le dossier affiché devient celui du worktree, comme aujourd’hui.</p>
+  <p>« Choisir » remplace la zone de texte par le blueprint ; « Écrire une demande » revient au texte, qui est gardé. Rester lance <span class="mono">/selo-flow:build</span>, s’absenter lance <span class="mono">/selo-flow:pilot {blueprint} — autonomous</span>. Pour un blueprint que seul un worktree contient, le dossier affiché devient celui du worktree, comme aujourd’hui.</p>
   
   <div class="scroller"><div class="frame w1280 dim" style="min-height:760px">
     <div class="shell">    <div class="nav">
@@ -1072,7 +1072,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -1157,7 +1157,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div>
   </div><p class="more">Maquetter, relire, tester, choisir la voie toi-même : passe en <a href="#">mode avancé</a>.</p></div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:build .planning/blueprints/2026-10-22-session-archive.md</code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:build .planning/blueprints/2026-10-22-session-archive.md</code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Claude s’ouvre dans <b>selo-ops</b>, la commande déjà tapée : il reste à appuyer sur Entrée. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" ><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -1178,7 +1178,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -1278,7 +1278,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div></div>
   </div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:fastlane Resserrer les lignes de la liste des sessions <span class="f">@.planning/pages/sessions-live.md</span> <span class="f">— iterate</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:fastlane Resserrer les lignes de la liste des sessions <span class="f">@.planning/pages/sessions-live.md</span> <span class="f">— iterate</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Claude s’ouvre dans <b>selo-ops</b>, la commande déjà tapée. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" ><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -1299,7 +1299,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -1406,7 +1406,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div></div>
   </div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:fastlane Resserrer les lignes de la liste des sessions <span class="f">@.planning/pages/sessions-live.md</span> <span class="f">— iterate</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:fastlane Resserrer les lignes de la liste des sessions <span class="f">@.planning/pages/sessions-live.md</span> <span class="f">— iterate</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Claude s’ouvre dans <b>selo-ops</b>, la commande déjà tapée. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" ><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -1427,7 +1427,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -1524,7 +1524,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div></div>
   </div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:build .planning/blueprints/2026-10-25-turn-durations.md <span class="f">— stage 2</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:build .planning/blueprints/2026-10-25-turn-durations.md <span class="f">— stage 2</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Claude s’ouvre dans <b>selo-ops</b>, la commande déjà tapée. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" ><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -1567,7 +1567,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div>
   </div><p class="more">Maquetter, relire, tester, choisir la voie toi-même : passe en <a href="#">mode avancé</a>.</p></div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:pilot <span class="ph">{ta demande}</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:pilot <span class="ph">{ta demande}</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Écris ta demande ou choisis un blueprint pour lancer. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" disabled><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -1603,7 +1603,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div>
   </div><p class="more">Maquetter, relire, tester, choisir la voie toi-même : passe en <a href="#">mode avancé</a>.</p></div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:pilot Sur la page Projets, pouvoir filtrer les blueprints par état et retenir le filtre choisi <span class="f">— autonomous</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:pilot Sur la page Projets, pouvoir filtrer les blueprints par état et retenir le filtre choisi <span class="f">— autonomous</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Claude s’ouvre dans <b>selo-ops</b>, la commande déjà tapée : il reste à appuyer sur Entrée. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" ><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -1632,7 +1632,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div>
   </div><p class="more">Maquetter, relire, tester, choisir la voie toi-même : passe en <a href="#">mode avancé</a>.</p></div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:build .planning/blueprints/2026-10-22-session-archive.md</code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:build .planning/blueprints/2026-10-22-session-archive.md</code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Claude s’ouvre dans <b>selo-ops</b>, la commande déjà tapée : il reste à appuyer sur Entrée. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" ><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -1676,7 +1676,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div></div>
   </div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:fastlane Resserrer les lignes de la liste des sessions <span class="f">@.planning/pages/sessions-live.md</span> <span class="f">— iterate</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:fastlane Resserrer les lignes de la liste des sessions <span class="f">@.planning/pages/sessions-live.md</span> <span class="f">— iterate</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Claude s’ouvre dans <b>selo-ops</b>, la commande déjà tapée. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" ><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -1727,7 +1727,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div></div>
   </div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:fastlane Resserrer les lignes de la liste des sessions <span class="f">@.planning/pages/sessions-live.md</span> <span class="f">— iterate</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:fastlane Resserrer les lignes de la liste des sessions <span class="f">@.planning/pages/sessions-live.md</span> <span class="f">— iterate</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Claude s’ouvre dans <b>selo-ops</b>, la commande déjà tapée. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" ><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>
@@ -1768,7 +1768,7 @@ kbd { padding: 1px 6px; font-family: var(--font-mono); font-size: 0.85em; color:
     </div></div>
   </div>
   <div class="ns-foot">
-    <div class="cmdline"><code>/selo:build .planning/blueprints/2026-10-25-turn-durations.md <span class="f">— stage 2</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
+    <div class="cmdline"><code>/selo-flow:build .planning/blueprints/2026-10-25-turn-durations.md <span class="f">— stage 2</span></code><button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></button></div>
     <div class="footrow">
       <span class="hint">Claude s’ouvre dans <b>selo-ops</b>, la commande déjà tapée. <kbd>Ctrl</kbd> <kbd>↵</kbd></span>
       <button class="btn btn-primary" ><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Copier et ouvrir</button>

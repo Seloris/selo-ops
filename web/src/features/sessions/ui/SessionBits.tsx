@@ -19,7 +19,7 @@ export function StateLabel({ session }: { session: Session }) {
   );
 }
 
-// sessions-live FR-39: a small warning on a session written by another selo-ops version than the installed one.
+// sessions-live FR-39: a small warning on a session written by another selo-feed version than the installed one.
 export function PluginWarning({ session }: { session: Session }) {
   if (!session.writtenBy) return null;
   const text = t("sessions.pluginOutdated", { version: session.writtenBy });

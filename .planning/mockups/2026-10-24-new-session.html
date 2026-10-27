@@ -4,7 +4,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* selo skin "aurora", copied from the selo plugin (skins/aurora/tokens.css). Do not edit:
-   switch skins with /selo:setup skin {component} {skin}; override variables in overrides.css. */
+   switch skins with /selo-flow:setup skin {component} {skin}; override variables in overrides.css. */
 :root {
   --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-sans);
@@ -757,7 +757,7 @@ kbd { font-family: var(--font-mono); font-size: 0.85em; padding: 1px 6px; border
     <div class="top">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
       <span class="grow"></span>
-      <span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span>
+      <span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span>
       <span class="meta">Mis à jour il y a 2 s</span>
       <button class="btn btn-quiet sm new-here"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
@@ -864,7 +864,7 @@ kbd { font-family: var(--font-mono); font-size: 0.85em; padding: 1px 6px; border
             </div>
           </div>
           <div class="field"><span class="label">Commande</span>
-            <div class="cmd"><code><span class="lane-fastlane">/selo:fastlane</span> Dans la barre de réglages, ajouter un filtre par type de travail (libre, fastlane, blueprint, autopilot), mémorisé dans le navigateur. <span class="f">— no browser</span></code>
+            <div class="cmd"><code><span class="lane-fastlane">/selo-flow:fastlane</span> Dans la barre de réglages, ajouter un filtre par type de travail (libre, fastlane, blueprint, autopilot), mémorisé dans le navigateur. <span class="f">— no browser</span></code>
               <button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div>
           </div>
         </div>
@@ -921,7 +921,7 @@ kbd { font-family: var(--font-mono); font-size: 0.85em; padding: 1px 6px; border
             </div>
           </div>
           <div class="field"><span class="label">Commande</span>
-            <div class="cmd"><code><span class="lane-blueprint">/selo:build</span> .planning/blueprints/2026-10-24-new-session.md</code>
+            <div class="cmd"><code><span class="lane-blueprint">/selo-flow:build</span> .planning/blueprints/2026-10-24-new-session.md</code>
               <button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div>
           </div>
         </div>
@@ -979,7 +979,7 @@ kbd { font-family: var(--font-mono); font-size: 0.85em; padding: 1px 6px; border
             </div>
           </div>
           <div class="field"><span class="label">Commande</span>
-            <div class="cmd"><code><span class="lane-autopilot">/selo:autopilot</span> Archiver d’un coup toutes les sessions Job done d’un projet, depuis l’en-tête de son bloc.</code>
+            <div class="cmd"><code><span class="lane-autopilot">/selo-flow:autopilot</span> Archiver d’un coup toutes les sessions Job done d’un projet, depuis l’en-tête de son bloc.</code>
               <button class="icon" aria-label="Copier la commande"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div>
           </div>
         </div>
@@ -1000,7 +1000,7 @@ kbd { font-family: var(--font-mono); font-size: 0.85em; padding: 1px 6px; border
   <div class="scroller"><div class="frame w1280" style="height:300px">
     <div class="top" style="padding-top:22px">
       <div class="brandline"><h1>Sessions live</h1><p class="sub">5 sessions ouvertes · 2 projets · <span class="dot"></span><b>1 à traiter</b></p></div>
-      <span class="grow"></span><span class="meta plugins">selo 2.4.2 · selo-ops 2.6.0</span><span class="meta">Mis à jour il y a 1 s</span>
+      <span class="grow"></span><span class="meta plugins">selo-flow 2.4.2 · selo-feed 2.6.0</span><span class="meta">Mis à jour il y a 1 s</span>
       <button class="btn btn-quiet sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle session</button>
     </div>
     <div class="toast">
@@ -1083,7 +1083,7 @@ kbd { font-family: var(--font-mono); font-size: 0.85em; padding: 1px 6px; border
                 <div class="opt"><span class="on-label">Sans test navigateur</span><span class="ctl"><label class="switch"><input type="checkbox" role="switch" aria-label="Sans test navigateur"></label></span><span class="desc">Saute le test à la fin.</span></div>
               </div>
             </div>
-            <div class="field"><span class="label">Commande</span><div class="cmd"><code><span class="lane-fastlane">/selo:fastlane</span> <span class="ph">ta demande</span></code></div></div>
+            <div class="field"><span class="label">Commande</span><div class="cmd"><code><span class="lane-fastlane">/selo-flow:fastlane</span> <span class="ph">ta demande</span></code></div></div>
           </div>
         </div>
         <div class="ns-foot">

@@ -78,7 +78,7 @@ export const isRequestOptional = (skill: SkillId) => skill === "review" || skill
 export const hasNoBrowser = (skill: SkillId) => skill === "autonomous" || skill === "pilot" || skill === "fastlane" || skill === "build";
 export const hasMockupOption = (skill: SkillId) => skill === "fastlane" || skill === "blueprint";
 
-// The selo skill a choice runs: both pilot choices run `/selo:pilot`.
+// The selo skill a choice runs: both pilot choices run `/selo-flow:pilot`.
 export const seloSkillOf = (skill: SkillId) => (skill === "autonomous" ? "pilot" : skill);
 
 // sessions-live FR-46, FR-47: each option a skill takes, as its selo flag; the mockup first, `— autonomous` last.
@@ -101,16 +101,16 @@ const joined = (parts: string[]) => parts.filter((part) => part !== "").join(" "
 // sessions-live FR-47: « Simple » runs the pilot, or builds a chosen blueprint while the person stays.
 function simpleCommand(f: NewSessionForm): string {
   const leave = f.presence === "leave" ? ["— autonomous"] : [];
-  if (f.resume?.kind === "blueprint") return f.presence === "leave" ? joined(["/selo:pilot", f.resume.file, ...leave]) : `/selo:build ${f.resume.file}`;
+  if (f.resume?.kind === "blueprint") return f.presence === "leave" ? joined(["/selo-flow:pilot", f.resume.file, ...leave]) : `/selo-flow:build ${f.resume.file}`;
   const mockup = f.resume?.kind === "mockup" ? [`— mockup ${f.resume.file}`] : [];
-  return joined(["/selo:pilot", f.request.trim(), ...mockup, ...leave]);
+  return joined(["/selo-flow:pilot", f.request.trim(), ...mockup, ...leave]);
 }
 
 export function commandOf(f: NewSessionForm): string {
   if (f.mode === "simple") return simpleCommand(f);
   const subject = usesBlueprint(f) ? (f.blueprintFile ?? "") : joined([f.request.trim(), ...f.touches.map((file) => `@${file}`)]);
   if (f.skill === "free") return subject;
-  return joined([`/selo:${seloSkillOf(f.skill)}`, subject, ...flagsOf(f).map((flag) => `— ${flag}`)]);
+  return joined([`/selo-flow:${seloSkillOf(f.skill)}`, subject, ...flagsOf(f).map((flag) => `— ${flag}`)]);
 }
 
 export function canOpen(f: NewSessionForm): boolean {

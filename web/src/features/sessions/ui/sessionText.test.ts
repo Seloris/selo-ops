@@ -220,7 +220,7 @@ describe("toneOf", () => {
 describe("rowContext", () => {
   it("gives what is awaited first, in a session to handle", () => {
     // Act
-    const context = rowContext(buildSession({ state: "awaiting-answer", question: "A or B?", nextAction: "/selo:build x" }));
+    const context = rowContext(buildSession({ state: "awaiting-answer", question: "A or B?", nextAction: "/selo-flow:build x" }));
 
     // Assert
     expect(context).toMatchObject({ kind: "awaited", awaited: { kind: "question", text: "A or B?" } });
@@ -233,13 +233,13 @@ describe("rowContext", () => {
 
   it("gives the next action when nothing is awaited and no step runs", () => {
     // Act, Assert
-    expect(rowContext(buildSession({ state: "job-done", nextAction: "/selo:review" }))).toEqual({ kind: "next", command: "/selo:review" });
-    expect(rowContext(buildSession({ state: "working", nextAction: "/selo:review" }))).toEqual({ kind: "next", command: "/selo:review" });
+    expect(rowContext(buildSession({ state: "job-done", nextAction: "/selo-flow:review" }))).toEqual({ kind: "next", command: "/selo-flow:review" });
+    expect(rowContext(buildSession({ state: "working", nextAction: "/selo-flow:review" }))).toEqual({ kind: "next", command: "/selo-flow:review" });
   });
 
   it("gives nothing for an archived session's next action, a closed session's awaited item or a calm session", () => {
     // Act, Assert
-    expect(rowContext(buildSession({ state: "job-done", nextAction: "/selo:review", isArchived: true }))).toEqual({ kind: "none" });
+    expect(rowContext(buildSession({ state: "job-done", nextAction: "/selo-flow:review", isArchived: true }))).toEqual({ kind: "none" });
     expect(rowContext(buildSession({ state: "awaiting-answer", question: "A?", isClosed: true }))).toEqual({ kind: "none" });
     expect(rowContext(buildSession({ state: "turn-ended" }))).toEqual({ kind: "none" });
   });
@@ -341,7 +341,7 @@ describe("changedText", () => {
 
 describe("writtenByText", () => {
   it("names the plugin version that wrote the session", () => {
-    expect(writtenByText(buildSession({ writtenBy: "2.2.1" }))).toBe("selo-ops 2.2.1");
+    expect(writtenByText(buildSession({ writtenBy: "2.2.1" }))).toBe("selo-feed 2.2.1");
   });
 
   it("reads « — » when the export gives no version", () => {
@@ -353,14 +353,14 @@ describe("pluginsText", () => {
   it("names each installed plugin with its version", () => {
     expect(
       pluginsText([
-        { name: "selo", versions: ["2.2.0"] },
-        { name: "selo-ops", versions: ["2.2.1"] },
+        { name: "selo-flow", versions: ["2.2.0"] },
+        { name: "selo-feed", versions: ["2.2.1"] },
       ]),
-    ).toBe("selo 2.2.0 · selo-ops 2.2.1");
+    ).toBe("selo-flow 2.2.0 · selo-feed 2.2.1");
   });
 
   it("lists every version of a plugin installed at several", () => {
-    expect(pluginsText([{ name: "selo", versions: ["2.2.0", "2.1.0"] }])).toBe("selo 2.2.0 / 2.1.0");
+    expect(pluginsText([{ name: "selo-flow", versions: ["2.2.0", "2.1.0"] }])).toBe("selo-flow 2.2.0 / 2.1.0");
   });
 
   it("gives nothing when no plugin is known", () => {
@@ -369,7 +369,7 @@ describe("pluginsText", () => {
 });
 
 describe("isPluginOutdated", () => {
-  const installed: InstalledPlugin[] = [{ name: "selo-ops", versions: ["2.2.1"] }];
+  const installed: InstalledPlugin[] = [{ name: "selo-feed", versions: ["2.2.1"] }];
 
   it("warns when the session was written by another version than the installed one", () => {
     expect(isPluginOutdated(buildSession({ writtenBy: "2.1.0" }), installed)).toBe(true);
@@ -377,12 +377,12 @@ describe("isPluginOutdated", () => {
 
   it("stays quiet on an installed version, whichever of several", () => {
     expect(isPluginOutdated(buildSession({ writtenBy: "2.2.1" }), installed)).toBe(false);
-    expect(isPluginOutdated(buildSession({ writtenBy: "2.1.0" }), [{ name: "selo-ops", versions: ["2.2.1", "2.1.0"] }] satisfies InstalledPlugin[])).toBe(false);
+    expect(isPluginOutdated(buildSession({ writtenBy: "2.1.0" }), [{ name: "selo-feed", versions: ["2.2.1", "2.1.0"] }] satisfies InstalledPlugin[])).toBe(false);
   });
 
-  it("stays quiet with no version in the export or no selo-ops installed", () => {
+  it("stays quiet with no version in the export or no selo-feed installed", () => {
     expect(isPluginOutdated(buildSession(), installed)).toBe(false);
-    expect(isPluginOutdated(buildSession({ writtenBy: "2.1.0" }), [{ name: "selo", versions: ["2.2.0"] }] satisfies InstalledPlugin[])).toBe(false);
+    expect(isPluginOutdated(buildSession({ writtenBy: "2.1.0" }), [{ name: "selo-flow", versions: ["2.2.0"] }] satisfies InstalledPlugin[])).toBe(false);
   });
 });
 
@@ -440,19 +440,19 @@ describe("nextCommands (sessions-live FR-48)", () => {
   const step = (summary: string, command: string) => ({ summary, command });
 
   it("lists the resume prompt first, then each next step with its summary", () => {
-    const s = buildSession({ nextAction: "/selo:build b.md", nextSteps: [step("Relire", "/selo:review b.md"), step("Tester", "/selo:try")] });
+    const s = buildSession({ nextAction: "/selo-flow:build b.md", nextSteps: [step("Relire", "/selo-flow:review b.md"), step("Tester", "/selo-flow:try")] });
     expect(nextCommands(s)).toEqual([
-      { summary: null, command: "/selo:build b.md" },
-      { summary: "Relire", command: "/selo:review b.md" },
-      { summary: "Tester", command: "/selo:try" },
+      { summary: null, command: "/selo-flow:build b.md" },
+      { summary: "Relire", command: "/selo-flow:review b.md" },
+      { summary: "Tester", command: "/selo-flow:try" },
     ]);
   });
 
   it("shows a command once, with the summary a next step gives it", () => {
-    const s = buildSession({ nextAction: "/selo:build b.md", nextSteps: [step("Construire", "/selo:build b.md"), step("Relire", "/selo:review"), step("Encore", "/selo:review")] });
+    const s = buildSession({ nextAction: "/selo-flow:build b.md", nextSteps: [step("Construire", "/selo-flow:build b.md"), step("Relire", "/selo-flow:review"), step("Encore", "/selo-flow:review")] });
     expect(nextCommands(s)).toEqual([
-      { summary: "Construire", command: "/selo:build b.md" },
-      { summary: "Relire", command: "/selo:review" },
+      { summary: "Construire", command: "/selo-flow:build b.md" },
+      { summary: "Relire", command: "/selo-flow:review" },
     ]);
   });
 
@@ -505,7 +505,7 @@ describe("nextCommands (sessions-live FR-48)", () => {
 
   it("gives nothing without a next action, nor for an archived session", () => {
     expect(nextCommands(buildSession())).toEqual([]);
-    expect(nextCommands(buildSession({ isArchived: true, nextAction: "/selo:review", nextSteps: [step("Relire", "/selo:review")] }))).toEqual([]);
+    expect(nextCommands(buildSession({ isArchived: true, nextAction: "/selo-flow:review", nextSteps: [step("Relire", "/selo-flow:review")] }))).toEqual([]);
   });
 });
 
