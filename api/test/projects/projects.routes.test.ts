@@ -194,7 +194,7 @@ describe("projects", () => {
           branch: "claude/export",
           mockups: [
             buildExportMockup({ file: ".planning/mockups/2026-01-02-home.html", title: "Home", committed: true }),
-            buildExportMockup({ file: ".planning/mockups/2026-01-06-landed.html", title: "Landed", committed: true }),
+            buildExportMockup({ file: ".planning/mockups/2026-01-06-landed.html", title: "Landed", committed: false }),
             buildExportMockup({ file: ".planning/mockups/2026-01-07-export.html", title: "Export", committed: true }),
             buildExportMockup({ file: ".planning/mockups/2026-01-08-draft.html", title: "Draft", validated: false, committed: true }),
           ],
