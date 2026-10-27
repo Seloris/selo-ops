@@ -46,6 +46,10 @@ Pages: `projects` · Domain: `question` (new), `session` · Components: `api`, `
 - Limit → counted in memory and reserved before the insert, so two asks at once never pass 3; the 5-minute stop aborts the run, which kills the process.
 - Targets → only a blueprint or a sheet the export lists (a worktree-only blueprint in its worktree); ideas, debt, changelog or any other path `404`.
 - Demo → `ledger-api`: « Résume » answered and a free text failed (`run-failed`) on `2026-10-20-monthly-balance`, a free text answered on the project.
+- Stopping a run → the process tree is killed (`taskkill /T` on Windows, no shell) and its place frees once the process is gone, not at the abort (`question` BR-05 holds while it dies); a non-zero exit keeps the JSON result's own words.
+- « Demander à Claude »'s address → `?ask=project` beside `?project=`, as `?file=` opens a file (projects FR-10), so that a reload keeps the panel.
+- Refusals → the web words the status in French (`409` « 3 questions sont déjà en cours », `404`, `400`), never the API's English text.
+- Web data → one `useQuestions` hook holds the target's query and its two mutations, sharing one query key (not split in `use…Query` / `use…Mutation`).
 
 ## Stages
 1. api — `feat(ask-claude): api — ask a headless Claude about a spec, a blueprint or the project`
@@ -58,7 +62,7 @@ Pages: `projects` · Domain: `question` (new), `session` · Components: `api`, `
 
 ## Progress
 - [x] Stage 1 — api
-- [ ] Stage 2 — web
-- [ ] Review
-- [ ] Browser test
+- [x] Stage 2 — web
+- [x] Review
+- [x] Browser test
 - [ ] Spec merged

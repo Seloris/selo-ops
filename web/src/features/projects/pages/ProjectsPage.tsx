@@ -20,10 +20,13 @@ import { blueprintsTouching, pageCounts, sortProjects, type ProjectOverview } fr
 import { useProjectChangelogQuery } from "../data/useProjectChangelogQuery.ts";
 import { useProjectFileQuery } from "../data/useProjectFileQuery.ts";
 import { useProjectsQuery } from "../data/useProjectsQuery.ts";
+import { AskError, useQuestions } from "../data/useQuestions.ts";
 import { localDay } from "../ui/changelog.ts";
+import { askErrorText } from "../ui/questions.ts";
 import { ProjectCards } from "../ui/ProjectCards.tsx";
 import { ProjectPanel, type PanelSubject } from "../ui/ProjectPanel.tsx";
 import type { LiveItem } from "../ui/ProjectParts.tsx";
+import type { QuestionsState } from "../ui/QuestionsTab.tsx";
 import { DEBT_FILE, IDEAS_FILE, ProjectView } from "../ui/ProjectView.tsx";
 import styles from "./ProjectsPage.module.css";
 
@@ -55,6 +58,8 @@ export function ProjectsPage() {
   const [params, setParams] = useSearchParams();
   const projectId = params.get("project");
   const path = params.get("file");
+  // projects FR-19: the questions on the whole project, in the panel.
+  const isAsking = params.get("ask") === "project";
 
   const [panelWidth, setPanelWidth] = useState(() => parsePanelWidth(readStored(PANEL_WIDTH_KEY)));
   const [isResizing, setResizing] = useState(false);
@@ -65,10 +70,35 @@ export function ProjectsPage() {
   const projects = useMemo(() => sortProjects(query.data?.projects ?? []), [query.data]);
   // projects FR-03: a project with no selo planning does not open, even from its address.
   const project = projectId === null ? null : (projects.find((p) => p.id === projectId && p.hasPlanning) ?? null);
-  const subject = project && path ? subjectOf(project, path) : null;
+  const subject: PanelSubject | null = project && isAsking ? { kind: "ask", title: t("projects.ask.title") } : project && path ? subjectOf(project, path) : null;
   const isPanelOpen = subject !== null;
+  const isFilePanel = subject !== null && subject.kind !== "ask";
   const changelog = useProjectChangelogQuery(project?.id ?? null);
-  const file = useProjectFileQuery(isPanelOpen ? (project?.id ?? null) : null, isPanelOpen ? path : null);
+  const file = useProjectFileQuery(isFilePanel ? (project?.id ?? null) : null, isFilePanel ? path : null);
+  // projects FR-19 to FR-22: a blueprint's or a sheet's questions, or the project's; the ideas and the debt have none.
+  const hasQuestions = subject !== null && (subject.kind === "ask" || subject.kind === "blueprint" || subject.kind === "sheet");
+  const questionsOf = useQuestions(hasQuestions ? (project?.id ?? null) : null, subject?.kind === "ask" ? null : path);
+  const questions: QuestionsState | null = hasQuestions
+    ? {
+        questions: questionsOf.query.data ?? null,
+        isPending: questionsOf.query.isPending,
+        error: questionsOf.query.isError ? questionsOf.query.error.message : null,
+        isAsking: questionsOf.ask.isPending,
+        askError: questionsOf.ask.isError ? askErrorText(questionsOf.ask.error instanceof AskError && questionsOf.ask.error.status < 500 ? questionsOf.ask.error.status : null) : null,
+        isDeleting: questionsOf.remove.isPending,
+        deleteError: questionsOf.remove.isError ? t("projects.questions.deleteError", { message: questionsOf.remove.error.message || t("projects.page.errorUnknown") }) : null,
+        onAsk: (body) =>
+          questionsOf.ask.mutateAsync(body).then(
+            () => true,
+            () => false,
+          ),
+        onDelete: (id) =>
+          questionsOf.remove.mutateAsync(id).then(
+            () => true,
+            () => false,
+          ),
+      }
+    : null;
 
   const sessionsById = useMemo(() => new Map((sessionsQuery.data?.sessions ?? []).map((s) => [s.id, s])), [sessionsQuery.data]);
   const liveOf = useCallback(
@@ -97,7 +127,7 @@ export function ProjectsPage() {
 
   const closePanel = useCallback(() => {
     setFullscreen(false);
-    setAddress({ file: null });
+    setAddress({ file: null, ask: null });
   }, [setAddress, setFullscreen]);
 
   // The browser's own Échap leaves its full screen: the page follows, and the other way round (sessions-live FR-37).
@@ -122,11 +152,11 @@ export function ProjectsPage() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       if (isFullscreen) setFullscreen(false);
-      else if (path !== null) closePanel();
+      else if (path !== null || isAsking) closePanel();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isFullscreen, path, closePanel]);
+  }, [isFullscreen, path, isAsking, closePanel]);
 
   // sessions-live FR-27, for this page's panel: its own remembered width.
   const updateWidth = (width: number | null) => {
@@ -219,13 +249,14 @@ export function ProjectsPage() {
                     today={localDay(now)}
                     liveOf={liveOf}
                     ageOf={ageOf}
-                    onBack={() => setAddress({ project: null, file: null })}
-                    onOpenFile={(p) => setAddress({ file: p })}
+                    onBack={() => setAddress({ project: null, file: null, ask: null })}
+                    onOpenFile={(p) => setAddress({ file: p, ask: null })}
+                    onAsk={() => setAddress({ file: null, ask: "project" })}
                     onCopy={(prompt) => void copy(prompt)}
                   />
                 ) : (
                   <>
-                    <Button size="sm" onClick={() => setAddress({ project: null, file: null })}>
+                    <Button size="sm" onClick={() => setAddress({ project: null, file: null, ask: null })}>
                       ← {t("projects.view.back")}
                     </Button>
                     <EmptyState>{t("projects.empty.notFound")}</EmptyState>
@@ -234,7 +265,7 @@ export function ProjectsPage() {
               ) : projects.length === 0 ? (
                 <EmptyState>{t("projects.empty.none")}</EmptyState>
               ) : (
-                <ProjectCards projects={projects} liveOf={(p) => liveOf(p.sessionIds)} onOpen={(id) => setAddress({ project: id, file: null })} />
+                <ProjectCards projects={projects} liveOf={(p) => liveOf(p.sessionIds)} onOpen={(id) => setAddress({ project: id, file: null, ask: null })} />
               )}
             </>
           )}
@@ -242,9 +273,12 @@ export function ProjectsPage() {
         <Drawer isOpen={isPanelOpen} label={t("projects.panel.label")} resize={isFullscreen ? undefined : panelResize}>
           {subject && (
             <ProjectPanel
-              key={path}
+              key={subject.kind === "ask" ? "ask" : path}
               subject={subject}
               file={{ isPending: file.isPending, error: file.isError ? file.error.message : null, text: file.data?.text ?? null }}
+              questions={questions}
+              now={now}
+              age={age}
               liveOf={liveOf}
               ageOf={ageOf}
               isFullscreen={isFullscreen}

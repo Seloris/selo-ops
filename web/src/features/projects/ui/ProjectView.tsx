@@ -34,6 +34,7 @@ export function ProjectView({
   ageOf,
   onBack,
   onOpenFile,
+  onAsk,
   onCopy,
 }: {
   project: ProjectOverview;
@@ -47,6 +48,8 @@ export function ProjectView({
   ageOf: (iso: string) => string;
   onBack: () => void;
   onOpenFile: (path: string) => void;
+  // projects FR-19: opens the questions on the whole project in the panel.
+  onAsk: () => void;
   onCopy: (prompt: string) => void;
 }) {
   const open = p.blueprints.filter(isOpenBlueprint);
@@ -145,6 +148,11 @@ export function ProjectView({
             ← {t("projects.view.back")}
           </Button>
           <h2 className={styles.name}>{p.name}</h2>
+          <span className={styles.askButton}>
+            <Button size="sm" onClick={onAsk}>
+              {t("projects.ask.open")}
+            </Button>
+          </span>
         </div>
         {/* Each fact a label and its value, side by side, wrapping as a whole. */}
         <dl className={styles.facts}>

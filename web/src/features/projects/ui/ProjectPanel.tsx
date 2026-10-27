@@ -10,14 +10,18 @@ import { Tag } from "../../../shared/ui/Tag.tsx";
 import { dateOf, deltaBySheet, type Blueprint, type DeltaLine, type SpecSheet } from "../data/projectView.ts";
 import { InlineMarkdown, Markdown } from "./Markdown.tsx";
 import { DeltaBar, LiveSessions, ProgressTrack, StateTag, type LiveItem } from "./ProjectParts.tsx";
+import { QuestionsTab, type QuestionsState } from "./QuestionsTab.tsx";
 import styles from "./ProjectPanel.module.css";
 
-const TABS = ["summary", "text"] as const;
+const TABS = ["summary", "text", "questions"] as const;
+const TAB_KEYS = { summary: "projects.panel.summary", text: "projects.panel.text", questions: "projects.panel.questions" } as const;
 
 export type PanelSubject =
   | { kind: "blueprint"; blueprint: Blueprint }
   | { kind: "sheet"; sheet: SpecSheet; touching: { blueprint: Blueprint; lines: DeltaLine[] }[] }
-  | { kind: "ideas" | "debt"; title: string };
+  | { kind: "ideas" | "debt"; title: string }
+  // projects FR-19: the questions on the whole project.
+  | { kind: "ask"; title: string };
 
 export interface FileText {
   isPending: boolean;
@@ -50,10 +54,13 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-// projects FR-10 to FR-13: a blueprint, a sheet, the ideas or the debt, in the side panel, its whole text last.
+// projects FR-10 to FR-13, FR-19, FR-20: a blueprint, a sheet, the ideas, the debt or the questions on the project, in the side panel.
 export function ProjectPanel({
   subject,
   file,
+  questions,
+  now,
+  age,
   liveOf,
   ageOf,
   isFullscreen,
@@ -63,6 +70,10 @@ export function ProjectPanel({
 }: {
   subject: PanelSubject;
   file: FileText;
+  // The questions on the panel's file, or on the whole project; null for the ideas and the debt.
+  questions: QuestionsState | null;
+  now: number;
+  age: (ms: number) => string;
   liveOf: (ids: string[]) => LiveItem[];
   ageOf: (iso: string) => string;
   isFullscreen: boolean;
@@ -75,7 +86,7 @@ export function ProjectPanel({
     subject.kind === "blueprint" ? null : subject.kind === "sheet" ? t(`projects.panel.kind.${subject.sheet.kind}` as MessageKey) : t(`projects.panel.kind.${subject.kind}`);
   const sheetKind = subject.kind === "sheet" && subject.sheet.kind === "page" ? "page" : "domain";
   const none = t("projects.panel.none");
-  // The summary and the whole text in two tabs, so the delta and the decisions never show twice; the panel is keyed on its file.
+  // The summary, the whole text and the questions in three tabs, so the delta and the decisions never show twice; the panel is keyed on its file.
   const [tab, setTab] = useState<(typeof TABS)[number]>("summary");
 
   let facts: ReactNode = null;
@@ -220,21 +231,26 @@ export function ProjectPanel({
               tabIndex={tab === v ? 0 : -1}
               onClick={() => setTab(v)}
               onKeyDown={(e) => {
-                // Two tabs: either arrow moves to the other one.
+                // The arrows move to the next or the previous tab, round.
                 if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-                const next = v === "summary" ? "text" : "summary";
+                const step = e.key === "ArrowRight" ? 1 : TABS.length - 1;
+                const next = TABS[(TABS.indexOf(v) + step) % TABS.length] ?? "summary";
                 setTab(next);
                 document.getElementById(`panel-tab-${next}`)?.focus();
               }}
             >
-              {t(v === "summary" ? "projects.panel.summary" : "projects.panel.text")}
+              {t(TAB_KEYS[v])}
             </button>
           ))}
         </div>
       )}
       <div className={`${styles.body} ${isFullscreen ? styles.wide : ""}`} {...(facts ? { id: "panel-tabpanel", role: "tabpanel", "aria-labelledby": `panel-tab-${tab}` } : {})}>
-        {facts && tab === "summary" ? (
+        {subject.kind === "ask" && questions ? (
+          <QuestionsTab state={questions} hasPresets={false} now={now} age={age} />
+        ) : facts && tab === "summary" ? (
           facts
+        ) : facts && tab === "questions" && questions ? (
+          <QuestionsTab state={questions} hasPresets now={now} age={age} />
         ) : file.isPending ? (
           <LoadingState>{t("projects.panel.loading")}</LoadingState>
         ) : file.error !== null ? (

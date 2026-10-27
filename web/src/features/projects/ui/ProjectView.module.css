@@ -18,6 +18,11 @@
   gap: 8px 14px;
 }
 
+/* projects FR-19: at the end of the title's line. */
+.askButton {
+  margin-left: auto;
+}
+
 .name {
   margin: 0;
   font-size: 1.5em;
