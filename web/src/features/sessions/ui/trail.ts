@@ -63,15 +63,24 @@ export interface AgentLine {
   durationText: string;
 }
 
-export interface TimelineItem<L extends TrailLine = TrailLine> {
+export interface TrailGroup<L extends TrailLine = TrailLine> {
+  // Its first line's, the run's opening line with no skill included.
   at: string;
-  line: L | null;
-  agent: AgentLine | null;
-  state: TrailEntry["phase"];
-  // The run's line in force until the next item: the rail between them takes its colour.
-  runLine: L | null;
-  // Until the next item; null on the last.
+  // Every line it stands for, oldest first: the rail toward it takes their colours.
+  lines: L[];
+  // Its passages, oldest first: the opening line with no skill left out when it joined a labelled group.
+  passages: L[];
+  // How long each passage lasted; the last one until now while the run goes on, none once it ended.
+  passageDurations: (string | null)[];
+  // No skill and no step on any line: a request with no skill.
+  isFree: boolean;
+  // Its subagents, started while it ran, newest first.
+  agents: AgentLine[];
+  // Until the next group, the last one until now while the run goes on, until its last line once ended.
+  durationText: string;
+  // Until the next group; null on the last.
   gapText: string | null;
+  // Square root of its span: the rail toward it, from the newer group.
   weight: number;
 }
 
@@ -85,19 +94,50 @@ const agentLine = (agent: Subagent, now: number): AgentLine => {
   };
 };
 
-// sessions-live FR-41: the run's lines and its subagents, oldest first, each subagent at its start.
-export function timelineItems<L extends TrailLine>(lines: L[], agents: Subagent[], now: number): TimelineItem<L>[] {
-  // A stable sort keeps a run line before a subagent started at the same time.
-  const items = [
-    ...lines.map((line) => ({ at: line.entry.at, line, agent: null, state: line.entry.phase })),
-    ...agents.map((a) => ({ at: a.since, line: null, agent: agentLine(a, now), state: a.state })),
-  ].sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
-  let runLine: L | null = null;
-  return items.map((item, i) => {
-    runLine = item.line ?? runLine;
-    const next = items[i + 1];
-    const ms = next ? Date.parse(next.at) - Date.parse(item.at) : null;
-    return { ...item, runLine, gapText: ms === null ? null : age(ms), weight: weightOf(ms ?? now - Date.parse(item.at)) };
+// The run stops running at these: a group ending on one lasts until it.
+const ENDS: ReadonlySet<TrailEntry["phase"]> = new Set(["turn-ended", "job-done", "stopped"]);
+
+const isBare = (l: TrailLine) => !l.entry.skill && !l.entry.step && !l.entry.substep;
+const labelOf = (l: TrailLine) => [l.entry.skill, l.entry.step, l.entry.substep, l.isLoop].join("|");
+
+// sessions-live FR-53: consecutive lines of the same label as one group, each subagent under the group running when it started.
+// A closed or archived session runs no more, whatever its last line says.
+export function trailGroups<L extends TrailLine>(lines: L[], agents: Subagent[], now: number, isSessionOver = false): TrailGroup<L>[] {
+  const runs: L[][] = [];
+  for (const line of lines) {
+    const current = runs[runs.length - 1];
+    if (current && labelOf(current[current.length - 1] as L) === labelOf(line)) current.push(line);
+    else runs.push([line]);
+  }
+  // The run's opening line with no skill (the request, before its skill's first mark) belongs to what follows.
+  const [opening, next] = runs;
+  const openingJoins = opening?.length === 1 && next && isBare(opening[0] as L) && !isBare(next[0] as L);
+  const groups = openingJoins ? [[...opening, ...next], ...runs.slice(2)] : runs;
+  const starts = groups.map((g) => Date.parse((g[0] as L).entry.at));
+  const lastLine = lines[lines.length - 1];
+  const endOfRun = lastLine && (isSessionOver || ENDS.has(lastLine.entry.phase)) ? Date.parse(lastLine.entry.at) : now;
+  return groups.map((group, gi) => {
+    const passages = openingJoins && gi === 0 ? group.slice(1) : group;
+    const start = starts[gi] as number;
+    const until = starts[gi + 1];
+    const lastIndex = passages.length - 1;
+    return {
+      at: (group[0] as L).entry.at,
+      lines: group,
+      passages,
+      passageDurations: passages.map((l, i) => l.durationText ?? (until === undefined && i === lastIndex && endOfRun === now ? age(now - Date.parse(l.entry.at)) : null)),
+      isFree: group.every(isBare),
+      agents: agents
+        .filter((a) => {
+          const since = Date.parse(a.since);
+          return (gi === 0 || since >= start) && (until === undefined || since < until);
+        })
+        .sort((a, b) => Date.parse(b.since) - Date.parse(a.since))
+        .map((a) => agentLine(a, now)),
+      durationText: age((until ?? endOfRun) - start),
+      gapText: until === undefined ? null : age(until - start),
+      weight: weightOf((until ?? now) - start),
+    };
   });
 }
 

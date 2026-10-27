@@ -391,22 +391,111 @@
   --length: clamp(16px, calc(var(--weight) * 1.5px), 48px);
 }
 
-.node::after {
-  content: "";
+/* sessions-live FR-53: the rail down to the earlier group, one segment per line it stands for, oldest at the bottom. */
+.rail {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 1px;
   width: 2px;
   height: var(--length);
   margin-bottom: 3px;
+  /* A group of many lines keeps its rail's length: the oldest segments are cut. */
+  overflow: hidden;
+}
+
+.rail > span {
+  min-height: 2px;
   background: var(--tone);
 }
 
 /* A wait on the person: the line dashed. */
-.node.rail-warn::after,
-.node.rail-danger::after {
+.rail > .rail-warn,
+.rail > .rail-danger {
   background: repeating-linear-gradient(var(--tone) 0 4px, transparent 4px 7px);
 }
 
-.node.end::after {
-  display: none;
+/* A group: its chevron, its label, a pip per passage and how long it lasted. */
+.trail .group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.label {
+  min-width: 9ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  display: inline-flex;
+  flex: none;
+  /* A larger hit target than the icon, without moving it. */
+  margin: -4px 0 -4px -4px;
+  padding: 4px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.chevron svg {
+  width: 12px;
+  height: 12px;
+}
+
+.pips {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 3px;
+  height: 14px;
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+}
+
+.pips > span,
+.passage .node > span:first-child {
+  width: 6px;
+  height: 6px;
+  animation: none;
+}
+.trail .group > .muted {
+  flex: none;
+}
+
+.free {
+  color: var(--lane-free);
+  font-style: italic;
+}
+
+/* A subagent, then an unfolded passage: indented under their group, smaller dots. */
+.agent .line,
+.passage .line {
+  padding-left: 14px;
+}
+
+.agent .node > span:first-child,
+.passage .node > span:first-child {
+  width: 6px;
+  height: 6px;
+  margin: 1px 0;
+}
+
+.passage .hash,
+.passage .line,
+.passage .node > span:first-child {
+  opacity: 0.85;
+}
+
+.passage .hash {
+  font-size: 0.85em;
+}
+
+.passage .line {
+  color: var(--text-muted);
 }
 
 /* The earlier step's duration, centred on the line between the two dots. */

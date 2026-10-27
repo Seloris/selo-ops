@@ -204,6 +204,8 @@
   "sessions.detail.recap": "Récap et commits",
   "sessions.detail.trail": "Déroulé du tour",
   "sessions.trail.waiting": "{duration} à t’attendre",
+  "sessions.trail.entries_one": "{count} entrée",
+  "sessions.trail.entries_other": "{count} entrées",
   "sessions.trail.cut": "Entrées plus anciennes non gardées par l’export",
   "sessions.detail.subagents": "Sous-agents",
   "sessions.detail.files": "Fichiers modifiés",
