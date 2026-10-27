@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Déroulé repensé</title>
+<meta name="selo:mockup" content="validated">
+<meta name="description" content="La section « Déroulé du tour » du détail d'une session de Selo Ops, en chapitres, repliée et dépliée.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* selo skin "aurora", copied from the selo plugin (skins/aurora/tokens.css). Do not edit:
+   switch skins with /selo:setup skin {component} {skin}; override variables in overrides.css. */
+:root {
+  --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-size: 15px;
+  --title-size: 34px;
+  --title-weight: 500;
+  --title-tracking: -0.02em;
+  --title-transform: none;
+  --title-style: normal;
+  --label-size: 0.85em;
+  --label-weight: 500;
+  --label-transform: none;
+  --label-tracking: 0;
+  --radius: 20px;
+  --radius-control: 12px;
+  --radius-pill: 999px;
+  --check-radius: 7px;
+  --switch-radius: 999px;
+  --badge-radius: var(--radius-pill);
+  --border-width: 1px;
+  --control-h: 40px;
+  --panel-bg: var(--surface);
+  --panel-border: var(--border-width) solid var(--border);
+  --panel-pad: 32px;
+  --blur: blur(18px) saturate(140%);
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(20,184,166,.28), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.20), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.20), transparent 70%);
+  --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
+  --shadow-control: none;
+  --shadow-pop: 0 24px 60px -12px rgba(0,0,0,.35);
+  --list-gap: 8px;
+  --list-rule: none;
+  --item-pad: 12px 14px;
+  --item-bg: rgba(255,255,255,.55);
+  --item-border: var(--border-width) solid var(--border);
+  --item-rule: var(--item-border);
+  --item-radius: var(--radius-control);
+  --item-shadow: none;
+  --badge-border: 0;
+  --badge-transform: none;
+  --badge-tracking: 0;
+  --btn-border: transparent;
+  --btn-weight: 600;
+  --btn-transform: none;
+  --btn-tracking: 0;
+  --control-bg: rgba(255,255,255,.7);
+  --control-border: var(--border);
+  --control-border-on: var(--accent);
+  --accent-text: #ffffff;
+  --accent-soft: rgba(15,148,136,.12);
+  --accent-soft-text: #0b6b62;
+  --danger-text: #ffffff;
+  --focus: color-mix(in srgb, var(--accent) 35%, transparent);
+  --pop-bg: rgba(255,255,255,.95);
+  --scrim: rgba(15,17,22,.45);
+  --bg: #eef3f4;
+  --surface: rgba(255,255,255,.62);
+  --surface-2: rgba(255,255,255,.8);
+  --border: rgba(15,23,42,.09);
+  --text: #0f172a;
+  --text-muted: #55627a;
+  --accent: #0f9488;
+  --danger: #e11d48;
+  --danger-soft: rgba(225,29,72,.1);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #070b14;
+    --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(45,212,191,.32), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.18), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.28), transparent 70%);
+    --surface: rgba(255,255,255,.06);
+    --surface-2: rgba(255,255,255,.1);
+    --border: rgba(255,255,255,.14);
+    --text: #eef2ff;
+    --text-muted: #a5adc8;
+    --accent: #5eead4;
+    --accent-text: #04201b;
+    --accent-soft: rgba(94,234,212,.14);
+    --accent-soft-text: #a7f3e4;
+    --danger: #fb7185;
+    --danger-soft: rgba(251,113,133,.14);
+    --danger-text: #2a0710;
+    --control-bg: rgba(0,0,0,.25);
+    --item-bg: rgba(255,255,255,.04);
+    --pop-bg: rgba(17,22,36,.92);
+    --scrim: rgba(3,6,12,.55);
+    --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+    color-scheme: dark;
+  }
+}
+
+/*
+ * Element recipes: how every skin is meant to be applied. Stack-agnostic, framework-free CSS that
+ * reads the token contract only (see README.md): no literal color, radius, shadow or font.
+ * A stack ports each recipe into its own components (the react-express pack: one shared/ui
+ * component and its CSS Module per element); the class names here only label the recipes.
+ * The same rules render all seven skins: a skin changes the variables, never these rules.
+ */
+
+/* ---------- page ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: var(--bg-image);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 1.5;
+}
+:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* ---------- panel: the page's main surface ---------- */
+
+.panel {
+  display: grid;
+  gap: 28px;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--panel-pad);
+  background: var(--panel-bg);
+  border: var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+
+/* ---------- headings ---------- */
+
+.title {
+  margin: 0;
+  line-height: 1.02;
+  text-wrap: balance;
+  font-family: var(--font-display);
+  font-size: var(--title-size);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-tracking);
+  text-transform: var(--title-transform);
+  font-style: var(--title-style);
+}
+.subtitle { margin: 0; color: var(--text-muted); font-size: 0.9em; font-variant-numeric: tabular-nums; }
+
+/* ---------- field: label, control, error ---------- */
+
+.field { display: grid; gap: 6px; min-width: 0; }
+.label {
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  text-transform: var(--label-transform);
+  letter-spacing: var(--label-tracking);
+  color: var(--text-muted);
+}
+.input, .select {
+  width: 100%;
+  height: var(--control-h);
+  margin: 0;
+  padding: 0 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input::placeholder { color: var(--text-muted); opacity: 0.75; }
+.input:focus-visible, .select:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus); }
+.input[aria-invalid="true"] { border-color: var(--danger); }
+.error { margin: 8px 0 0; color: var(--danger); font-size: 0.85em; }
+
+/* search: an input with a leading icon (16px, currentColor) */
+.search { position: relative; }
+.search svg {
+  position: absolute; left: 12px; top: 50%;
+  width: 16px; height: 16px; transform: translateY(-50%);
+  color: var(--text-muted); pointer-events: none;
+}
+.search .input { padding-left: 36px; }
+
+/* select: the native control restyled, its chevron drawn by the wrapper */
+.select-wrap { position: relative; }
+.select { padding-right: 34px; cursor: pointer; }
+.select-wrap::after {
+  content: "";
+  position: absolute; right: 14px; top: 50%;
+  width: 7px; height: 7px; pointer-events: none;
+  border-right: 1.5px solid var(--text-muted);
+  border-bottom: 1.5px solid var(--text-muted);
+  transform: translateY(-70%) rotate(45deg);
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: var(--control-h);
+  padding: 0 18px;
+  white-space: nowrap;
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--btn-weight);
+  text-transform: var(--btn-transform);
+  letter-spacing: var(--btn-tracking);
+  border: var(--border-width) solid var(--btn-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  transition: transform 0.12s, filter 0.12s, background-color 0.12s, color 0.12s;
+}
+/* restores the page's ring: .btn's own shadow has the same specificity and loads later */
+.btn:focus-visible { box-shadow: 0 0 0 3px var(--focus); }
+.btn:active { transform: translate(1px, 1px); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--accent); color: var(--accent-text); }
+.btn-danger { background: var(--danger); color: var(--danger-text); }
+.btn-primary:hover:not(:disabled), .btn-danger:hover:not(:disabled) { filter: brightness(1.07); }
+.btn-quiet { background: var(--surface-2); color: var(--text); }
+/* toward the text color: darker on a light skin, lighter on a dark one */
+.btn-quiet:hover:not(:disabled) { background: color-mix(in srgb, var(--surface-2), var(--text) 8%); }
+/* ghost: a row action (delete), quiet until hovered */
+.btn-ghost {
+  height: auto; padding: 6px 10px;
+  font-size: 0.86em; font-weight: 500;
+  background: transparent; color: var(--text-muted);
+  border-color: transparent; box-shadow: none;
+}
+.btn-ghost:hover { color: var(--danger); background: var(--danger-soft); }
+.btn-ghost svg { width: 15px; height: 15px; }
+
+/* ---------- switch: a checkbox with role="switch" ---------- */
+
+.switch { display: inline-flex; align-items: center; gap: 10px; height: var(--control-h); cursor: pointer; user-select: none; font-size: 0.92em; }
+.switch input {
+  position: relative; flex: none;
+  width: 38px; height: 22px; margin: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background: var(--surface-2);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--switch-radius);
+  transition: background-color 0.15s;
+}
+.switch input::before {
+  content: "";
+  position: absolute; top: 2px; left: 2px;
+  width: calc(18px - 2 * var(--border-width));
+  height: calc(18px - 2 * var(--border-width));
+  border-radius: var(--switch-radius);
+  background: var(--text-muted);
+  transition: transform 0.15s;
+}
+.switch input:checked { background: var(--accent); border-color: var(--control-border-on); }
+.switch input:checked::before { transform: translateX(16px); background: var(--accent-text); }
+.switch input:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- list and its rows ---------- */
+
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--list-gap); border-top: var(--list-rule); }
+/* wraps: at narrow widths the tag and the row action go to a second line instead of widening the page */
+.item {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  padding: var(--item-pad);
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-bottom: var(--item-rule);
+  border-radius: var(--item-radius);
+  box-shadow: var(--item-shadow);
+}
+/* the 120px basis keeps the text readable: the row's last items wrap before it narrows below it */
+.item-text { flex: 1 1 120px; min-width: 0; overflow-wrap: anywhere; }
+.item.is-done .item-text { color: var(--text-muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.empty {
+  padding: 28px 16px; text-align: center; color: var(--text-muted);
+  border: var(--border-width) dashed var(--border);
+  border-radius: var(--item-radius);
+}
+
+/* checkbox: the native control restyled, its tick drawn in CSS */
+.check {
+  flex: none; display: grid; place-items: center;
+  width: 20px; height: 20px; margin: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background: var(--control-bg);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--check-radius);
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.check::after {
+  content: "";
+  width: 5px; height: 10px;
+  border: solid var(--accent-text); border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg) scale(0);
+  transition: transform 0.12s;
+}
+.check:checked { background: var(--accent); border-color: var(--control-border-on); }
+.check:checked::after { transform: translateY(-1px) rotate(45deg) scale(1); }
+.check:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- badge: a tag ---------- */
+
+.badge {
+  flex: none;
+  padding: 1px 10px;
+  line-height: 1.7;
+  font-size: 0.78em;
+  font-weight: 600;
+  text-transform: var(--badge-transform);
+  letter-spacing: var(--badge-tracking);
+  color: var(--accent-soft-text);
+  background: var(--accent-soft);
+  border: var(--badge-border);
+  border-radius: var(--badge-radius);
+}
+
+/* ---------- dialog: a native <dialog> opened with showModal() ---------- */
+
+.dialog {
+  width: min(400px, calc(100% - 32px));
+  padding: 24px;
+  color: var(--text);
+  background: var(--pop-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+.dialog::backdrop { background: var(--scrim); }
+.dialog[open] { display: grid; gap: 8px; animation: fade 0.15s ease-out; }
+.dialog h2 { margin: 0; font-family: var(--font-display); font-size: 1.3em; font-weight: var(--title-weight); text-transform: var(--title-transform); line-height: 1.2; }
+.dialog p { margin: 0; color: var(--text-muted); }
+.actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+@keyframes fade { from { opacity: 0; } }
+
+/* This application's own values for the skin's variables, loaded after skin.css (the selo plugin's
+   skins/README.md lists them). A dark-only value goes in a @media (prefers-color-scheme: dark) block.
+
+   Added tokens:
+   --warn, --warn-soft   amber, the second state colour the skin lacks (rose is its --danger)
+   --done                green, the dot of a finished job (sessions-live FR-10)
+   --font-mono           commands, branches, commit subjects
+   --working             sky blue, the pulsing dot of a running session; no lane's colour, not --mark's blue (sessions-live FR-10)
+   --lane-fastlane, --lane-pilot   the lanes on the help page: lime, violet (help FR-11)
+   --lane-blueprint      the blueprint lane on the help page: teal, its own token, not the accent (help FR-11)
+   --lane-free           a free request: slate; the four --lane-* also colour the type of work of a session (sessions-live FR-29)
+   --lane-mockup, --lane-iterate   mockup first and the fastlane's iterate mode, beside the lanes: fuchsia, orange (help FR-11, sessions-live FR-29); orange, not --warn's amber
+   --mark                a control that holds something of the person's (the session's note button): blue
+   --flag, --flag-soft   bright yellow, the flag of a flagged session (sessions-live FR-42); not --warn's amber
+   --hue-close, --hue-recap, --hue-agents, --hue-files, --hue-usage, --hue-next, --hue-trail   the icons of the session detail's sections: emerald, pink, cyan, indigo, fuchsia, violet, lime; --hue-next is also the next action's chip and button in the list (sessions-live FR-10)
+
+   --kind-input, --kind-cache-read, --kind-cache-write, --kind-output   the four kinds of tokens in the usage bars: blue, stone, violet, green
+   --bp-draft, --bp-ready, --bp-building, --bp-review, --bp-merging, --bp-done, --bp-legacy   a blueprint's state, the same in bars, legends, tags and tracks: lime, cyan, blue, violet, fuchsia, green, grey (projects FR-14); none is --mark, amber or rose
+   --delta-add, --delta-change, --delta-remove   a spec delta's lines added, changed, removed, in figures, bars and signs, and a file diff's added and removed lines: green, yellow, red; no state colour
+   --hue-progress, --hue-blueprints, --hue-specs, --hue-ideas, --hue-debt   the icons of the projects page's sections: orange, teal, emerald, sky, stone
+   --spec-page, --spec-domain, --spec-blueprint   a page spec, a domain sheet, a blueprint, wherever one shows (app FR-04): indigo, pink, teal like the blueprint lane
+   The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
+   of that scheme, so the choice wins over the system's prefers-color-scheme. */
+:root {
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+  --warn: #d97706;
+  --done: #16a34a;
+  --warn-soft: rgba(217,119,6,.15);
+  --flag: #ca8a04;
+  --flag-soft: rgba(202,138,4,.16);
+  --working: #0284c7;
+  --mark: #2563eb;
+  --lane-fastlane: #4d7c0f;
+  --lane-pilot: #7c3aed;
+  --lane-blueprint: #0f766e;
+  --lane-free: #475569;
+  --lane-mockup: #c026d3;
+  --lane-iterate: #c2410c;
+  --hue-close: #047857;
+  --hue-recap: #be185d;
+  --hue-agents: #0e7490;
+  --hue-files: #4338ca;
+  --hue-usage: #a21caf;
+  --hue-next: #7c3aed;
+  --hue-trail: #4d7c0f;
+  --kind-input: #2563eb;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #7c3aed;
+  --kind-output: #16a34a;
+    --bp-draft: #65a30d;
+    --bp-ready: #0891b2;
+    --bp-building: #1d4ed8;
+    --bp-review: #7c3aed;
+    --bp-merging: #c026d3;
+    --bp-done: #16a34a;
+    --bp-legacy: #94a3b8;
+    --delta-add: #16a34a;
+    --delta-change: #ca8a04;
+    --delta-remove: #e11d48;
+    --hue-progress: #ea580c;
+    --hue-blueprints: #0d9488;
+    --hue-specs: #047857;
+    --hue-ideas: #0369a1;
+    --hue-debt: #78716c;
+    --spec-page: #4f46e5;
+    --spec-domain: #db2777;
+    --spec-blueprint: #0f766e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --warn: #fbbf24;
+    --done: #4ade80;
+    --warn-soft: rgba(251,191,36,.16);
+    --flag: #facc15;
+    --flag-soft: rgba(250,204,21,.16);
+    --working: #38bdf8;
+    --mark: #93c5fd;
+    --lane-fastlane: #a3e635;
+    --lane-pilot: #c4b5fd;
+    --lane-blueprint: #2dd4bf;
+    --lane-free: #94a3b8;
+    --lane-mockup: #f0abfc;
+    --lane-iterate: #fb923c;
+    --hue-close: #6ee7b7;
+    --hue-recap: #f9a8d4;
+    --hue-agents: #67e8f9;
+    --hue-files: #a5b4fc;
+    --hue-usage: #f0abfc;
+    --hue-next: #c4b5fd;
+    --hue-trail: #bef264;
+    --kind-input: #60a5fa;
+    --kind-cache-read: #a8a29e;
+    --kind-cache-write: #a78bfa;
+    --kind-output: #4ade80;
+    --bp-draft: #a3e635;
+    --bp-ready: #22d3ee;
+    --bp-building: #60a5fa;
+    --bp-review: #a78bfa;
+    --bp-merging: #e879f9;
+    --bp-done: #4ade80;
+    --bp-legacy: #64748b;
+    --delta-add: #4ade80;
+    --delta-change: #facc15;
+    --delta-remove: #fb7185;
+    --hue-progress: #fdba74;
+    --hue-blueprints: #5eead4;
+    --hue-specs: #6ee7b7;
+    --hue-ideas: #7dd3fc;
+    --hue-debt: #d6d3d1;
+    --spec-page: #a5b4fc;
+    --spec-domain: #f9a8d4;
+    --spec-blueprint: #2dd4bf;
+  }
+}
+
+:root[data-theme="light"] {
+  --bg: #eef3f4;
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(20,184,166,.28), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.20), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.20), transparent 70%);
+  --surface: rgba(255,255,255,.62);
+  --surface-2: rgba(255,255,255,.8);
+  --border: rgba(15,23,42,.09);
+  --text: #0f172a;
+  --text-muted: #55627a;
+  --accent: #0f9488;
+  --accent-text: #ffffff;
+  --accent-soft: rgba(15,148,136,.12);
+  --accent-soft-text: #0b6b62;
+  --danger: #e11d48;
+  --danger-soft: rgba(225,29,72,.1);
+  --danger-text: #ffffff;
+  --control-bg: rgba(255,255,255,.7);
+  --item-bg: rgba(255,255,255,.55);
+  --pop-bg: rgba(255,255,255,.95);
+  --scrim: rgba(15,17,22,.45);
+  --shadow-card: 0 24px 48px -20px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.7);
+  --warn: #d97706;
+  --done: #16a34a;
+  --warn-soft: rgba(217,119,6,.15);
+  --flag: #ca8a04;
+  --flag-soft: rgba(202,138,4,.16);
+  --working: #0284c7;
+  --mark: #2563eb;
+  --lane-fastlane: #4d7c0f;
+  --lane-pilot: #7c3aed;
+  --lane-blueprint: #0f766e;
+  --lane-free: #475569;
+  --lane-mockup: #c026d3;
+  --lane-iterate: #c2410c;
+  --hue-close: #047857;
+  --hue-recap: #be185d;
+  --hue-agents: #0e7490;
+  --hue-files: #4338ca;
+  --hue-usage: #a21caf;
+  --hue-next: #7c3aed;
+  --hue-trail: #4d7c0f;
+  --kind-input: #2563eb;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #7c3aed;
+  --kind-output: #16a34a;
+  --bp-draft: #65a30d;
+  --bp-ready: #0891b2;
+  --bp-building: #1d4ed8;
+  --bp-review: #7c3aed;
+  --bp-merging: #c026d3;
+  --bp-done: #16a34a;
+  --bp-legacy: #94a3b8;
+  --delta-add: #16a34a;
+  --delta-change: #ca8a04;
+  --delta-remove: #e11d48;
+  --hue-progress: #ea580c;
+  --hue-blueprints: #0d9488;
+  --hue-specs: #047857;
+  --hue-ideas: #0369a1;
+  --hue-debt: #78716c;
+  --spec-page: #4f46e5;
+  --spec-domain: #db2777;
+  --spec-blueprint: #0f766e;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #070b14;
+  --bg-image: radial-gradient(55% 50% at 12% 8%, rgba(45,212,191,.32), transparent 70%), radial-gradient(45% 45% at 90% 15%, rgba(132,204,22,.18), transparent 70%), radial-gradient(60% 55% at 70% 100%, rgba(139,92,246,.28), transparent 70%);
+  --surface: rgba(255,255,255,.06);
+  --surface-2: rgba(255,255,255,.1);
+  --border: rgba(255,255,255,.14);
+  --text: #eef2ff;
+  --text-muted: #a5adc8;
+  --accent: #5eead4;
+  --accent-text: #04201b;
+  --accent-soft: rgba(94,234,212,.14);
+  --accent-soft-text: #a7f3e4;
+  --danger: #fb7185;
+  --danger-soft: rgba(251,113,133,.14);
+  --danger-text: #2a0710;
+  --control-bg: rgba(0,0,0,.25);
+  --item-bg: rgba(255,255,255,.04);
+  --pop-bg: rgba(17,22,36,.92);
+  --scrim: rgba(3,6,12,.55);
+  --shadow-card: 0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+  --warn: #fbbf24;
+  --done: #4ade80;
+  --warn-soft: rgba(251,191,36,.16);
+  --flag: #facc15;
+  --flag-soft: rgba(250,204,21,.16);
+  --working: #38bdf8;
+  --mark: #93c5fd;
+  --lane-fastlane: #a3e635;
+  --lane-pilot: #c4b5fd;
+  --lane-blueprint: #2dd4bf;
+  --lane-free: #94a3b8;
+  --lane-mockup: #f0abfc;
+  --lane-iterate: #fb923c;
+  --hue-close: #6ee7b7;
+  --hue-recap: #f9a8d4;
+  --hue-agents: #67e8f9;
+  --hue-files: #a5b4fc;
+  --hue-usage: #f0abfc;
+  --hue-next: #c4b5fd;
+  --hue-trail: #bef264;
+  --kind-input: #60a5fa;
+  --kind-cache-read: #a8a29e;
+  --kind-cache-write: #a78bfa;
+  --kind-output: #4ade80;
+  --bp-draft: #a3e635;
+  --bp-ready: #22d3ee;
+  --bp-building: #60a5fa;
+  --bp-review: #a78bfa;
+  --bp-merging: #e879f9;
+  --bp-done: #4ade80;
+  --bp-legacy: #64748b;
+  --delta-add: #4ade80;
+  --delta-change: #facc15;
+  --delta-remove: #fb7185;
+  --hue-progress: #fdba74;
+  --hue-blueprints: #5eead4;
+  --hue-specs: #6ee7b7;
+  --hue-ideas: #7dd3fc;
+  --hue-debt: #d6d3d1;
+  --spec-page: #a5b4fc;
+  --spec-domain: #f9a8d4;
+  --spec-blueprint: #2dd4bf;
+  color-scheme: dark;
+}
+
+
+/* ---------- mockup: the plates and the pieces of the session detail they copy ---------- */
+.m-page { max-width: 1180px; margin: 0 auto; padding: 32px 16px 64px; }
+.m-page > h1 { margin: 0 0 6px; font-size: 26px; font-weight: 500; letter-spacing: -0.02em; }
+.m-page > p.m-lead { margin: 0 0 28px; color: var(--text-muted); max-width: 70ch; }
+.plate { margin: 0 0 40px; }
+.plate > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
+.plate > p { margin: 0 0 14px; color: var(--text-muted); font-size: 0.93em; max-width: 80ch; }
+.row { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.col { width: 520px; max-width: 100%; display: grid; gap: 14px; }
+.col.narrow { width: 360px; }
+.cap { font-size: 0.8em; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0; }
+
+/* The detail's section card, as the full screen draws it (SessionDetail.module.css). */
+.card { padding: 12px 14px; background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+.head { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.chip { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: calc(var(--radius-control) / 2); color: var(--hue-trail); background: color-mix(in srgb, var(--hue-trail) 16%, transparent); }
+.chip svg { width: 13px; height: 13px; }
+.htitle { font-size: 0.83em; font-weight: 600; white-space: nowrap; }
+.count { padding: 0 7px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-muted); font-weight: 500; font-size: 0.83em; font-variant-numeric: tabular-nums; }
+.summary { flex: 1; min-width: 0; overflow: hidden; color: var(--text-muted); font-weight: 400; font-size: 0.86em; white-space: nowrap; text-overflow: ellipsis; display: flex; align-items: center; gap: 8px; }
+.fold { margin-left: auto; color: var(--text-muted); display: inline-flex; }
+.fold svg { width: 14px; height: 14px; }
+.body { margin-top: 10px; }
+.mono { font-family: var(--font-mono); font-size: 0.93em; }
+.muted { color: var(--text-muted); }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* The state's badge (SessionBits.module.css). */
+.state { display: inline-flex; align-items: center; gap: 6px; height: 20px; padding: 0 9px 0 7px; font-size: 0.8em; font-weight: 600; white-space: nowrap; color: var(--tone); background: color-mix(in srgb, var(--tone) 14%, transparent); border-radius: var(--radius-pill); }
+.state .dot { width: 6px; height: 6px; }
+.tone-warn { --tone: var(--warn); }
+.tone-pulse { --tone: var(--working); }
+.tone-done { --tone: var(--done); }
+.tone-idle { --tone: var(--text-muted); font-weight: 500; }
+.dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--tone, var(--text-muted)); }
+.dot.pulse { background: var(--working); animation: pulse 1.6s ease-in-out infinite; }
+.dot.ring { background: none; box-shadow: inset 0 0 0 1.5px var(--done); }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .3; transform: scale(.7); } }
+
+/* Lanes (overrides.css tokens). */
+.lane-pilot { color: var(--lane-pilot); }
+.lane-blueprint { color: var(--lane-blueprint); }
+.lane-fastlane { color: var(--lane-fastlane); }
+.lane-mockup { color: var(--lane-mockup); }
+.lane-free { color: var(--lane-free); font-style: italic; }
+.bg-pilot { --lane: var(--lane-pilot); }
+.bg-blueprint { --lane: var(--lane-blueprint); }
+.bg-fastlane { --lane: var(--lane-fastlane); }
+.bg-mockup { --lane: var(--lane-mockup); }
+.bg-free { --lane: var(--lane-free); }
+
+/* ========== Piste A — Chapitres ========== */
+.chapters { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.chapter { position: relative; display: grid; grid-template-columns: 70px 1fr auto 14px; gap: 2px 10px; align-items: baseline; padding: 8px 10px 8px 0; border-left: 3px solid var(--lane); border-radius: 0 var(--radius-control) var(--radius-control) 0; background: color-mix(in srgb, var(--lane) 6%, transparent); }
+.chapter.now { background: color-mix(in srgb, var(--working) 8%, transparent); }
+.chapter .when { padding-left: 10px; font-family: var(--font-mono); font-size: 0.8em; color: var(--text-muted); }
+.chapter .what { font-weight: 600; min-width: 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.chapter .what .skill { font-family: var(--font-mono); color: var(--lane); }
+.chapter .what .step { font-weight: 500; }
+.chapter .how { font-size: 0.86em; color: var(--text-muted); white-space: nowrap; }
+.chapter .how.live { color: var(--working); font-weight: 600; }
+.passage { display: contents; }
+.passage > span { font-size: 0.86em; color: var(--text-muted); }
+.passage .when { font-size: 0.78em; }
+.passage .what { font-weight: 400; color: var(--text-muted); padding-left: 14px; }
+.passage.wait > span { color: var(--warn); }
+.passage.wait .what { font-weight: 500; }
+.passage.wait .what::before { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 6px 1px -14px; border-radius: 50%; background: var(--warn); }
+.passage .what .ag { color: var(--text-muted); }
+.passage .what .ag b { font-weight: 500; color: var(--text); }
+.chapter .foldc { color: var(--text-muted); display: inline-flex; align-self: center; margin-right: 2px; }
+.passage .how { grid-column: 3 / -1; }
+.chapter .foldc svg { width: 12px; height: 12px; }
+.chapters .cut { padding-left: 10px; font-size: 0.83em; font-style: italic; color: var(--text-muted); }
+.chapters .nowline { display: flex; align-items: center; gap: 8px; padding: 0 0 0 10px; font-size: 0.83em; color: var(--text-muted); }
+.chapters .nowline::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.waitsum { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.86em; color: var(--text-muted); }
+.waitsum b { color: var(--warn); font-weight: 600; }
+/* Folded: the chapters' path, the lane colours, then the time. */
+.path { display: inline-flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; }
+.path .skill { font-family: var(--font-mono); font-size: 0.95em; }
+.path .sep { color: var(--text-muted); opacity: .6; }
+.path .cur { padding: 0 6px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--working) 14%, transparent); color: var(--working); font-weight: 600; }
+
+/* ========== Piste B — Frise ========== */
+.steps { display: flex; align-items: stretch; gap: 0; margin: 0; padding: 0; list-style: none; overflow: hidden; min-width: 0; }
+.steps li { position: relative; isolation: isolate; flex: 1 1 0; min-width: 0; padding: 6px 10px 6px 14px; display: grid; gap: 1px; }
+.steps li::before { content: ""; position: absolute; inset: 0; border: var(--border-width) solid var(--border); background: color-mix(in srgb, var(--lane) 8%, transparent); border-radius: 4px; clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%, 9px 50%); z-index: -1; }
+.steps li:first-child::before { clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%); border-radius: var(--radius-control) 4px 4px var(--radius-control); }
+.steps li.cur::before { background: color-mix(in srgb, var(--working) 14%, transparent); border-color: color-mix(in srgb, var(--working) 50%, transparent); }
+.steps .skill { font-family: var(--font-mono); font-size: 0.86em; font-weight: 600; color: var(--lane); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.steps .sub { font-size: 0.78em; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
+.steps li.cur .sub { color: var(--working); font-weight: 600; }
+.steps .sub .dot { width: 6px; height: 6px; }
+.track { position: relative; margin: 12px 0 0; min-width: 0; }
+.body { min-width: 0; }
+.card { min-width: 0; }
+.track .bar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; gap: 1px; background: var(--surface-2); }
+.track .bar > span { background: var(--lane); min-width: 4px; }
+.track .bar > span.wait { background: repeating-linear-gradient(135deg, var(--warn) 0 3px, color-mix(in srgb, var(--warn) 25%, transparent) 3px 6px); }
+.track .bar > span.live { background: linear-gradient(90deg, var(--lane), color-mix(in srgb, var(--lane) 35%, transparent)); }
+.track .ticks { position: relative; height: 16px; margin-top: 3px; font-family: var(--font-mono); font-size: 0.74em; color: var(--text-muted); }
+.track .ticks > span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.track .ticks > span::before { content: ""; position: absolute; left: 50%; top: -4px; width: 1px; height: 4px; background: var(--border); }
+.track .ticks > span.now { color: var(--working); font-weight: 600; transform: translateX(-100%); }
+.track .ticks > span.now::before { left: 100%; }
+.track .agents { display: grid; gap: 3px; margin-top: 6px; }
+.track .agents > div { position: relative; height: 8px; }
+.track .agents > div > span { position: absolute; top: 0; height: 8px; border-radius: 3px; background: color-mix(in srgb, var(--working) 55%, transparent); }
+.track .agents > div > span.done { background: color-mix(in srgb, var(--done) 55%, transparent); }
+.track .agents > div > span.live::after { content: ""; position: absolute; right: -3px; top: 1px; width: 6px; height: 6px; border-radius: 50%; background: var(--working); animation: pulse 1.6s ease-in-out infinite; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; font-size: 0.8em; color: var(--text-muted); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; background: var(--lane-blueprint); }
+.legend i.wait { background: repeating-linear-gradient(135deg, var(--warn) 0 3px, color-mix(in srgb, var(--warn) 25%, transparent) 3px 6px); }
+.legend i.ag { background: color-mix(in srgb, var(--working) 55%, transparent); height: 6px; }
+.agentlist { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 0.86em; }
+.agentlist li { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+.agentlist li b { font-weight: 500; color: var(--text); }
+.agentlist li .state { margin-left: auto; }
+/* Folded: the stepper alone, smaller. */
+.steps.mini li { padding: 3px 8px 3px 12px; flex: 0 0 auto; }
+.steps.mini .skill { font-weight: 500; }
+.steps.mini .sub { display: none; }
+
+/* ========== Piste C — Journal ========== */
+.journal { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; }
+.journal li { display: grid; grid-template-columns: 62px 18px 1fr auto; gap: 0 8px; align-items: center; min-height: 28px; padding: 3px 4px; border-radius: 6px; }
+.journal li.wait { background: var(--warn-soft); margin: 2px 0; }
+.journal li.now { background: color-mix(in srgb, var(--working) 10%, transparent); }
+.journal .when { font-family: var(--font-mono); font-size: 0.8em; color: var(--text-muted); }
+.journal .ic { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; color: var(--text-muted); }
+.journal .ic svg { width: 14px; height: 14px; }
+.journal li.wait .ic { color: var(--warn); }
+.journal li.now .ic { color: var(--working); }
+.journal li.agent .ic { color: var(--hue-agents); }
+.journal .txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.journal .txt .skill { font-family: var(--font-mono); font-weight: 600; }
+.journal li.wait .txt { color: var(--warn); font-weight: 500; }
+.journal li.agent .txt { padding-left: 10px; color: var(--text-muted); }
+.journal li.agent .txt b { font-weight: 500; color: var(--text); }
+.journal .dur { font-size: 0.83em; color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.journal li.wait .dur { color: var(--warn); font-weight: 600; }
+.journal li.now .dur { color: var(--working); font-weight: 600; }
+.journal li.more { grid-template-columns: 62px 1fr; }
+.journal li.more .txt { color: var(--text-muted); font-size: 0.86em; }
+.journal li.more button { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
+.journal li.cut .txt { color: var(--text-muted); font-size: 0.86em; font-style: italic; }
+.sentence { font-size: 0.93em; }
+.sentence .skill { font-family: var(--font-mono); font-weight: 600; }
+.sentence b.live { color: var(--working); }
+.sentence b.wait { color: var(--warn); }
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-trail" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="3.5" r="1.5"/><circle cx="4" cy="12.5" r="1.5"/><path d="M4 5v6M7 3.5h6M7 12.5h6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></symbol>
+  <symbol id="i-right" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l4 4-4 4"/></symbol>
+  <symbol id="i-play" viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5v9l7-4.5z"/></symbol>
+  <symbol id="i-hand" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8V3.5a1 1 0 0 1 2 0V8M8 7.5V3a1 1 0 0 1 2 0v5M10 8V4.5a1 1 0 0 1 2 0V10a4 4 0 0 1-4 4H7.5a3 3 0 0 1-2.4-1.2L3.3 10.4a1 1 0 0 1 1.5-1.3L6 10.5"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="10" height="8" rx="2"/><path d="M8 5V2.5M6 9h.01M10 9h.01M6 11.5h4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></symbol>
+  <symbol id="i-commit" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M1.5 8h4M10.5 8h4"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 3.5h11v7h-6l-3 2.5V10.5h-2z"/></symbol>
+</svg>
+
+<div class="m-page">
+<h1>Déroulé du tour — chapitres</h1>
+<p class="m-lead">Une session (pilot autonome : pilot → blueprint → commit à valider → blueprint → build), lue à la place de la timeline actuelle, dans la section « Déroulé du tour » du détail : la section repliée (son en-tête seul) et dépliée, puis une session de maquette en allers-retours, puis le mobile. Le temps se lit toujours de haut en bas, du plus ancien au plus récent : le dernier événement est en bas, près du présent.</p>
+
+<!-- ================= PISTE A ================= -->
+<section class="plate">
+<h2>Chapitres</h2>
+<p>Un chapitre par étape du travail, bordé de la couleur de sa voie. Seul le chapitre en cours est déplié ; un chapitre passé tient sur sa ligne (sa durée, dont le temps à t'attendre en ambre, ses sous-agents en nombre) et s'ouvre d'un clic pour montrer ce qui s'y est passé. Repliée, la section donne le chemin parcouru et l'étape en cours.</p>
+<div class="row">
+<div class="col">
+<p class="cap">Repliée</p>
+<div class="card">
+  <div class="head">
+    <span class="chip"><svg><use href="#i-trail"/></svg></span>
+    <span class="htitle">Déroulé du tour</span>
+    <span class="count">5</span>
+    <span class="summary">
+      <span class="path"><span class="skill lane-pilot">pilot</span><span class="sep">›</span><span class="skill lane-blueprint">blueprint</span><span class="sep">›</span><span class="cur">build · Étape 1</span></span>
+      <span class="tnum">· 7 min</span>
+      <span class="tnum" style="color:var(--warn)">· 2 min à t'attendre</span>
+    </span>
+    <span class="fold"><svg><use href="#i-right"/></svg></span>
+  </div>
+</div>
+
+<p class="cap">Dépliée</p>
+<div class="card">
+  <div class="head">
+    <span class="chip"><svg><use href="#i-trail"/></svg></span>
+    <span class="htitle">Déroulé du tour</span>
+    <span class="count">5</span>
+    <span class="summary"><span class="tnum">7 min</span><span class="tnum" style="color:var(--warn)">· 2 min à t'attendre</span></span>
+    <span class="fold"><svg><use href="#i-down"/></svg></span>
+  </div>
+  <div class="body">
+    <ol class="chapters">
+      <li class="cut">Entrées plus anciennes non gardées par l'export</li>
+      <li class="chapter bg-pilot">
+        <span class="when">13:47:58</span>
+        <span class="what"><span class="skill">pilot</span><span class="step">choisit la voie</span></span>
+        <span class="how">30 s</span>
+      </li>
+      <li class="chapter bg-blueprint">
+        <span class="when">13:48:28</span>
+        <span class="what"><span class="skill">blueprint</span><span class="step muted" style="font-weight:400">1 sous-agent</span></span>
+        <span class="how">5 min 30 · <span style="color:var(--warn)">dont 2 min à t'attendre</span></span>
+        <span class="foldc"><svg><use href="#i-right"/></svg></span>
+      </li>
+      <li class="chapter bg-blueprint now">
+        <span class="when">13:53:58</span>
+        <span class="what"><span class="skill">build</span><span class="step">Étape 1 · tests</span><span class="state tone-pulse"><span class="dot pulse"></span>En cours</span></span>
+        <span class="how live">1 min</span>
+        <span class="foldc"><svg><use href="#i-down"/></svg></span>
+        <div class="passage"><span class="when">13:54:05</span><span class="what"><span class="ag">↳ <b>runner</b> · npx vitest run checkout</span></span><span class="how live">1 min</span></div>
+      </li>
+      <li class="nowline"><span class="dot pulse"></span>maintenant · 13:55:10</li>
+    </ol>
+  </div>
+</div>
+
+<p class="cap">Le chapitre blueprint, déplié d'un clic sur sa ligne</p>
+<div class="card">
+  <div class="body" style="margin-top:0">
+    <ol class="chapters">
+      <li class="chapter bg-blueprint">
+        <span class="when">13:48:28</span>
+        <span class="what"><span class="skill">blueprint</span></span>
+        <span class="how">5 min 30</span>
+        <span class="foldc"><svg><use href="#i-down"/></svg></span>
+        <div class="passage"><span class="when">13:48:28</span><span class="what">rédige le blueprint</span><span class="how">2 min 30</span></div>
+        <div class="passage"><span class="when">13:49:40</span><span class="what"><span class="ag">↳ <b>reviewer</b> · relecture du blueprint</span></span><span class="how">1 min · terminé</span></div>
+        <div class="passage wait"><span class="when">13:50:58</span><span class="what">attend ton accord sur le commit</span><span class="how">2 min</span></div>
+        <div class="passage"><span class="when">13:52:58</span><span class="what">reprend après ton accord</span><span class="how">1 min</span></div>
+      </li>
+    </ol>
+  </div>
+</div>
+</div>
+
+<div class="col">
+<p class="cap">Dépliée · une maquette en allers-retours (6 entrées, 1 chapitre)</p>
+<div class="card">
+  <div class="head">
+    <span class="chip"><svg><use href="#i-trail"/></svg></span>
+    <span class="htitle">Déroulé du tour</span>
+    <span class="count">1</span>
+    <span class="summary"><span class="tnum">25 min</span><span class="tnum" style="color:var(--warn)">· 13 min à t'attendre</span></span>
+    <span class="fold"><svg><use href="#i-down"/></svg></span>
+  </div>
+  <div class="body">
+    <ol class="chapters">
+      <li class="chapter bg-mockup">
+        <span class="when">13:32:58</span>
+        <span class="what"><span class="skill">mockup</span><span class="step">3 allers-retours avec toi</span><span class="state tone-warn"><span class="dot" style="--tone:var(--warn)"></span>Attend ta réponse</span></span>
+        <span class="how">25 min</span>
+        <span class="foldc"><svg><use href="#i-down"/></svg></span>
+        <div class="passage"><span class="when">13:32:58</span><span class="what">dessine la maquette</span><span class="how">3 min</span></div>
+        <div class="passage wait"><span class="when">13:35:58</span><span class="what">attend ta réponse</span><span class="how">2 min</span></div>
+        <div class="passage"><span class="when">13:37:58</span><span class="what">retouche</span><span class="how">1 min 40</span></div>
+        <div class="passage wait"><span class="when">13:39:38</span><span class="what">attend ta réponse</span><span class="how">11 min</span></div>
+        <div class="passage"><span class="when">13:51:18</span><span class="what">retouche</span><span class="how">5 min</span></div>
+        <div class="passage wait"><span class="when">13:56:28</span><span class="what">attend ta réponse</span><span class="how">2 min</span></div>
+      </li>
+      <li class="nowline"><span class="dot" style="--tone:var(--warn)"></span>maintenant · 13:58:30</li>
+    </ol>
+  </div>
+</div>
+<p class="cap">Même chapitre, replié d'un clic sur son chevron</p>
+<div class="card">
+  <div class="body" style="margin-top:0">
+    <ol class="chapters">
+      <li class="chapter bg-mockup">
+        <span class="when">13:32:58</span>
+        <span class="what"><span class="skill">mockup</span><span class="step">3 allers-retours avec toi</span><span class="state tone-warn"><span class="dot" style="--tone:var(--warn)"></span>Attend ta réponse</span></span>
+        <span class="how">25 min</span>
+        <span class="foldc"><svg><use href="#i-right"/></svg></span>
+      </li>
+      <li class="nowline"><span class="dot" style="--tone:var(--warn)"></span>maintenant · 13:58:30</li>
+    </ol>
+  </div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ================= MOBILE ================= -->
+<section class="plate">
+<h2>Mobile · 360 px</h2>
+<p>La section dépliée dans le détail en plein écran d'un téléphone. L'heure passe en « 13:48 » (la seconde au survol), la durée garde sa colonne.</p>
+<div class="row">
+<div class="col narrow">
+<p class="cap">Dépliée</p>
+<div class="card">
+  <div class="head"><span class="chip"><svg><use href="#i-trail"/></svg></span><span class="htitle">Déroulé du tour</span><span class="count">5</span><span class="summary"><span class="tnum" style="color:var(--warn)">2 min à t'attendre</span></span><span class="fold"><svg><use href="#i-down"/></svg></span></div>
+  <div class="body">
+    <ol class="chapters">
+      <li class="chapter bg-pilot" style="grid-template-columns:52px 1fr auto 14px"><span class="when">13:47</span><span class="what"><span class="skill">pilot</span></span><span class="how">30 s</span></li>
+      <li class="chapter bg-blueprint" style="grid-template-columns:52px 1fr auto 14px">
+        <span class="when">13:48</span><span class="what"><span class="skill">blueprint</span></span><span class="how">5 min 30 · <span style="color:var(--warn)">2 min à t'attendre</span></span><span class="foldc"><svg><use href="#i-right"/></svg></span>
+      </li>
+      <li class="chapter bg-blueprint now" style="grid-template-columns:52px 1fr auto 14px">
+        <span class="when">13:53</span><span class="what"><span class="skill">build</span><span class="step">Étape 1 · tests</span></span><span class="how live">1 min</span>
+        <div class="passage"><span class="when">13:54</span><span class="what"><span class="ag">↳ <b>runner</b> · npx vitest run checkout</span></span><span class="how live">1 min</span></div>
+      </li>
+      <li class="nowline"><span class="dot pulse"></span>maintenant</li>
+    </ol>
+  </div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</body>
+</html>

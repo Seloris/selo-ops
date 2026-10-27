@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/sessionView.ts";
-import { hasTrail, lineColor, MAX_WEIGHT, skillColor, trailGroups, trailLines, waitingText, type Subagent, type TrailEntry } from "./trail.ts";
+import { hasTrail, lineColor, skillColor, spanText, trailChapters, trailLines, trailPath, type Subagent, type TrailEntry } from "./trail.ts";
 
 describe("skillColor", () => {
   it("colours the lane skills, build as a blueprint, mockup as its flow, and leaves the others neutral", () => {
@@ -9,6 +9,16 @@ describe("skillColor", () => {
 
     // Assert
     expect(colors).toEqual(["var(--lane-fastlane)", "var(--lane-blueprint)", "var(--lane-blueprint)", "var(--lane-pilot)", "var(--lane-mockup)", undefined, undefined]);
+  });
+});
+
+describe("spanText", () => {
+  it("reads a span under an hour to the second, an hour or more as an age", () => {
+    expect([30_000, 120_000, 330_000, 100_000, 3_600_000, 5_400_000].map(spanText)).toEqual(["30 s", "2 min", "5 min 30", "1 min 40", "1 h", "1 h 30"]);
+  });
+
+  it("never reads a negative span", () => {
+    expect(spanText(-5_000)).toBe("0 s");
   });
 });
 
@@ -34,8 +44,8 @@ describe("trailLines", () => {
     ];
 
     // Act
-    const iterate = trailLines(trail, T0, "iterate");
-    const plain = trailLines(trail, T0);
+    const iterate = trailLines(trail, "iterate");
+    const plain = trailLines(trail);
 
     // Assert
     expect(iterate.map(lineColor)).toEqual(["var(--lane-iterate)", "var(--lane-iterate)", "var(--lane-fastlane)", "var(--lane-fastlane)"]);
@@ -47,45 +57,27 @@ describe("trailLines", () => {
     const trail = [entry(0, "working"), entry(3, "awaiting-answer"), entry(5, "working"), entry(9, "working")];
 
     // Act
-    const lines = trailLines(trail, T0);
+    const lines = trailLines(trail);
 
     // Assert
     expect(lines.map((l) => l.isPastWork)).toEqual([true, false, true, false]);
   });
 
-  it("gives each line how long it lasted until the next, none on the last", () => {
+  it("gives each line how long it lasted until the next, to the second, none on the last", () => {
     // Arrange
-    const trail = [entry(0, "working"), entry(3, "awaiting-commit"), entry(9, "working")];
+    const trail = [entry(0, "working"), entry(2.5, "awaiting-commit"), entry(9, "working")];
 
     // Act
-    const lines = trailLines(trail, T0);
+    const lines = trailLines(trail);
 
     // Assert
-    expect(lines.map((l) => l.durationText)).toEqual(["3 min", "6 min", null]);
-  });
-
-  it("weighs each line by the square root of its seconds, the last one running until now", () => {
-    // Arrange: 1 min, then 4 min, then 9 min still running
-    const trail = [entry(0, "working"), entry(1, "turn-ended"), entry(5, "working")];
-
-    // Act
-    const lines = trailLines(trail, T0 + 14 * 60_000);
-
-    // Assert
-    expect(lines.map((l) => Math.round(l.weight ** 2))).toEqual([60, 240, 540]);
-  });
-
-  it("caps the weight, so a turn ended a day ago does not swallow the ribbon", () => {
-    expect(trailLines([entry(0, "turn-ended")], T0 + 24 * 3_600_000)[0]?.weight).toBe(MAX_WEIGHT);
-  });
-
-  it("never gives a negative weight to a line dated after now", () => {
-    expect(trailLines([entry(5, "working")], T0)[0]?.weight).toBe(0);
+    expect(lines.map((l) => l.durationText)).toEqual(["2 min 30", "6 min 30", null]);
+    expect(lines.map((l) => l.durationMs)).toEqual([150_000, 390_000, null]);
   });
 
   it("names the step and substep like the row does", () => {
     // Act
-    const [line] = trailLines([entry(0, "working", { step: "stage:2", substep: "tests" })], T0);
+    const [line] = trailLines([entry(0, "working", { step: "stage:2", substep: "tests" })]);
 
     // Assert
     expect(line?.stepText).toBe("Étape 2 · tests");
@@ -109,7 +101,7 @@ describe("agent lines", () => {
     const agents = [agent(0, 9), agent(2, 1, { state: "working", task: "runner · web tests" }), agent(3, 0, { task: null, type: "Explore" })];
 
     // Act
-    const items = trailGroups(trailLines([entry(0, "working")], T0), agents, T0 + 7 * 60_000)[0]?.agents.reverse() ?? [];
+    const items = trailChapters(trailLines([entry(0, "working")]), agents, T0 + 7 * 60_000).chapters[0]?.agents ?? [];
 
     // Assert
     expect(items.map((i) => i.durationText)).toEqual(["9 min", "5 min", "0 s"]);
@@ -118,155 +110,199 @@ describe("agent lines", () => {
   });
 });
 
-describe("trailGroups", () => {
-  it("merges consecutive lines of the same skill, step and substep, never two apart", () => {
+describe("trailChapters", () => {
+  it("makes one chapter of consecutive lines of the same skill and step, whatever their substep and state", () => {
     // Arrange
-    const lines = trailLines(
-      [
-        entry(0, "working", { skill: "fastlane" }),
-        entry(1, "working", { skill: "fastlane", substep: "review" }),
-        entry(3, "turn-ended", { skill: "fastlane", substep: "review" }),
-        entry(4, "working", { skill: "fastlane", substep: "review" }),
-        entry(6, "working", { skill: "fastlane", substep: "suites" }),
-        entry(7, "working", { skill: "fastlane", substep: "review" }),
-      ],
-      T0,
-    );
+    const lines = trailLines([
+      entry(0, "working", { skill: "fastlane" }),
+      entry(1, "working", { skill: "fastlane", substep: "review" }),
+      entry(3, "awaiting-commit", { skill: "fastlane", substep: "commit" }),
+      entry(4, "working", { skill: "build", step: "stage:1", substep: "tests" }),
+      entry(6, "working", { skill: "build", step: "stage:1", substep: "code" }),
+      entry(7, "working", { skill: "build", step: "stage:2", substep: "tests" }),
+    ]);
 
     // Act
-    const groups = trailGroups(lines, [], T0 + 8 * 60_000);
+    const { chapters } = trailChapters(lines, [], T0 + 8 * 60_000);
 
     // Assert
-    expect(groups.map((g) => [g.at, g.passages.map((l) => l.entry.phase)])).toEqual([
-      [at(0), ["working"]],
-      [at(1), ["working", "turn-ended", "working"]],
-      [at(6), ["working"]],
-      [at(7), ["working"]],
+    expect(chapters.map((c) => [c.at, c.passages.map((l) => l.entry.substep)])).toEqual([
+      [at(0), [null, "review", "commit"]],
+      [at(4), ["tests", "code"]],
+      [at(7), ["tests"]],
     ]);
   });
 
-  it("keeps an iterate loop's line apart from the same label after the loop", () => {
+  it("keeps an iterate loop's lines apart from the same skill after the loop", () => {
     // Arrange
-    const lines = trailLines([entry(0, "working", { skill: "fastlane", substep: "code" }), entry(2, "working", { skill: "fastlane", substep: "tests" }), entry(3, "working", { skill: "fastlane", substep: "code" })], T0, "iterate");
+    const lines = trailLines([entry(0, "working", { skill: "fastlane", substep: "code" }), entry(2, "working", { skill: "fastlane", substep: "tests" })], "iterate");
 
     // Act / Assert
-    expect(trailGroups(lines, [], T0).map((g) => g.passages.length)).toEqual([1, 1, 1]);
+    expect(trailChapters(lines, [], T0).chapters.map((c) => c.passages.length)).toEqual([1, 1]);
   });
 
-  it("folds the run's opening line with no skill into the next group, its start kept, out of its passages", () => {
+  it("folds the run's opening line with no skill into the next chapter, its start kept, out of its passages", () => {
     // Arrange
-    const lines = trailLines([entry(0, "working", { skill: null }), entry(1, "working", { skill: "review" }), entry(3, "awaiting-answer", { skill: "review" })], T0);
+    const lines = trailLines([entry(0, "working", { skill: null }), entry(1, "working", { skill: "review" }), entry(3, "awaiting-answer", { skill: "review" })]);
 
     // Act
-    const groups = trailGroups(lines, [], T0 + 5 * 60_000);
+    const { chapters } = trailChapters(lines, [], T0 + 5 * 60_000);
 
     // Assert
-    expect(groups).toHaveLength(1);
-    expect(groups[0]?.at).toBe(at(0));
-    expect(groups[0]?.lines).toHaveLength(3);
-    expect(groups[0]?.passages.map((l) => l.entry.at)).toEqual([at(1), at(3)]);
+    expect(chapters).toHaveLength(1);
+    expect(chapters[0]?.at).toBe(at(0));
+    expect(chapters[0]?.lines).toHaveLength(3);
+    expect(chapters[0]?.passages.map((l) => l.entry.at)).toEqual([at(1), at(3)]);
   });
 
-  it("makes one group of a free run, every line without a skill", () => {
+  it("makes one free chapter of a run whose lines all lack a skill", () => {
     // Arrange
-    const lines = trailLines([entry(0, "working", { skill: null }), entry(2, "awaiting-commit", { skill: null }), entry(4, "turn-ended", { skill: null })], T0);
+    const lines = trailLines([entry(0, "working", { skill: null }), entry(2, "awaiting-commit", { skill: null }), entry(4, "turn-ended", { skill: null })]);
 
     // Act
-    const [group, ...rest] = trailGroups(lines, [], T0);
+    const { chapters } = trailChapters(lines, [], T0);
 
     // Assert
-    expect(rest).toHaveLength(0);
-    expect(group?.passages).toHaveLength(3);
-    expect(group?.isFree).toBe(true);
+    expect(chapters).toHaveLength(1);
+    expect(chapters[0]?.passages).toHaveLength(3);
+    expect(chapters[0]?.isFree).toBe(true);
   });
 
-  it("lasts until the next group, the last one until now while it runs, until its last line once ended", () => {
+  it("lasts until the next chapter, the last one until now while the run goes on, until its last line once ended", () => {
     // Arrange
-    const running = trailLines([entry(0, "working", { skill: "a" }), entry(3, "working", { skill: "b" }), entry(4, "awaiting-answer", { skill: "b" })], T0);
-    const ended = trailLines([entry(0, "working", { skill: "b" }), entry(2, "job-done", { skill: "b" })], T0);
+    const running = trailLines([entry(0, "working", { skill: "a" }), entry(3, "working", { skill: "b" }), entry(4, "awaiting-answer", { skill: "b" })]);
+    const ended = trailLines([entry(0, "working", { skill: "b" }), entry(2, "job-done", { skill: "b" })]);
 
     // Act
-    const runningGroups = trailGroups(running, [], T0 + 10 * 60_000);
-    const endedGroups = trailGroups(ended, [], T0 + 10 * 60_000);
+    const runningTrail = trailChapters(running, [], T0 + 10 * 60_000);
+    const endedTrail = trailChapters(ended, [], T0 + 10 * 60_000);
 
     // Assert
-    expect(runningGroups.map((g) => g.durationText)).toEqual(["3 min", "7 min"]);
-    expect(runningGroups.map((g) => g.gapText)).toEqual(["3 min", null]);
-    expect(endedGroups.map((g) => g.durationText)).toEqual(["2 min"]);
+    expect(runningTrail.chapters.map((c) => c.durationText)).toEqual(["3 min", "7 min"]);
+    expect(runningTrail.isRunning).toBe(true);
+    expect(runningTrail.durationText).toBe("10 min");
+    expect(endedTrail.chapters.map((c) => c.durationText)).toEqual(["2 min"]);
+    expect(endedTrail.isRunning).toBe(false);
+    expect(endedTrail.durationText).toBe("2 min");
   });
 
-  it("gives each passage its own duration, the last until now while it runs, none once ended", () => {
+  it("gives each passage its own duration, the last until now while the run goes on, none once ended", () => {
     // Arrange
-    const lines = trailLines([entry(0, "working", { skill: "b" }), entry(2, "turn-ended", { skill: "b" }), entry(5, "awaiting-answer", { skill: "b" })], T0);
-    const ended = trailLines([entry(0, "working", { skill: "b" }), entry(2, "turn-ended", { skill: "b" })], T0);
+    const lines = trailLines([entry(0, "working", { skill: "b" }), entry(2, "turn-ended", { skill: "b" }), entry(5, "awaiting-answer", { skill: "b" })]);
+    const ended = trailLines([entry(0, "working", { skill: "b" }), entry(2, "turn-ended", { skill: "b" })]);
+    const durations = (c: ReturnType<typeof trailChapters>["chapters"][number] | undefined) => c?.items.map((i) => (i.kind === "passage" ? i.durationText : null));
 
     // Act / Assert
-    expect(trailGroups(lines, [], T0 + 6 * 60_000)[0]?.passageDurations).toEqual(["2 min", "3 min", "1 min"]);
-    expect(trailGroups(ended, [], T0 + 6 * 60_000)[0]?.passageDurations).toEqual(["2 min", null]);
+    expect(durations(trailChapters(lines, [], T0 + 6 * 60_000).chapters[0])).toEqual(["2 min", "3 min", "1 min"]);
+    expect(durations(trailChapters(ended, [], T0 + 6 * 60_000).chapters[0])).toEqual(["2 min", null]);
   });
 
-  it("stops the last group at its last line once the session is closed, whatever that line's state", () => {
+  it("stops the last chapter at its last line once the session is closed, whatever that line's state", () => {
     // Arrange
-    const lines = trailLines([entry(0, "working", { skill: "b" }), entry(2, "working", { skill: "b" })], T0);
+    const lines = trailLines([entry(0, "working", { skill: "b" }), entry(2, "working", { skill: "b" })]);
 
     // Act
-    const [group] = trailGroups(lines, [], T0 + 60 * 60_000, true);
+    const trail = trailChapters(lines, [], T0 + 60 * 60_000, true);
 
     // Assert
-    expect(group?.durationText).toBe("2 min");
-    expect(group?.passageDurations).toEqual(["2 min", null]);
+    expect(trail.isRunning).toBe(false);
+    expect(trail.chapters[0]?.durationText).toBe("2 min");
+    expect(trail.chapters[0]?.isLive).toBe(false);
   });
 
-  it("weighs a group by the square root of its span, so its rail is as long as the lines it stands for", () => {
-    // Arrange: 4 min, then a group still running
-    const lines = trailLines([entry(0, "working", { skill: "a" }), entry(1, "turn-ended", { skill: "a" }), entry(4, "working", { skill: "b" })], T0);
-
-    // Act
-    const [first] = trailGroups(lines, [], T0 + 5 * 60_000);
-
-    // Assert
-    expect(Math.round((first?.weight ?? 0) ** 2)).toBe(240);
-  });
-
-  it("puts each subagent under the group running when it started, newest first, an earlier one under the first group", () => {
+  it("marks the chapter in progress: the last one, its last line working, while the run goes on", () => {
     // Arrange
-    const lines = trailLines([entry(1, "working", { skill: "pilot" }), entry(2, "turn-ended", { skill: "pilot" }), entry(5, "working", { skill: "fastlane" })], T0);
-    const agents = [agent(0, 1, { task: "explorer · lane early" }), agent(2, 1, { task: "planner · blueprint a" }), agent(3, 1, { task: "implementer · build a" }), agent(5, 1, { task: "runner · web tests" })];
+    const lines = trailLines([entry(0, "working", { skill: "a" }), entry(1, "working", { skill: "b" })]);
+    const waiting = trailLines([entry(0, "working", { skill: "b" }), entry(1, "awaiting-answer", { skill: "b" })]);
 
-    // Act
-    const groups = trailGroups(lines, agents, T0 + 6 * 60_000);
-
-    // Assert
-    expect(groups.map((g) => g.agents.map((a) => a.label))).toEqual([["implementer · build a", "planner · blueprint a", "explorer · lane early"], ["runner · web tests"]]);
+    // Act / Assert
+    expect(trailChapters(lines, [], T0 + 2 * 60_000).chapters.map((c) => c.isLive)).toEqual([false, true]);
+    expect(trailChapters(waiting, [], T0 + 2 * 60_000).chapters.map((c) => c.isLive)).toEqual([false]);
   });
 
-  it("keeps a run with no line but subagents out of any group", () => {
-    expect(trailGroups([], [agent(0, 1)], T0)).toEqual([]);
+  it("sums a chapter's ended waits on the person and counts its round trips", () => {
+    // Arrange
+    const lines = trailLines([
+      entry(0, "working", { skill: "mockup" }),
+      entry(3, "awaiting-answer", { skill: "mockup" }),
+      entry(5, "working", { skill: "mockup" }),
+      entry(6, "awaiting-commit", { skill: "mockup" }),
+      entry(7, "working", { skill: "build" }),
+      entry(8, "awaiting-answer", { skill: "build" }),
+    ]);
+
+    // Act
+    const trail = trailChapters(lines, [], T0 + 10 * 60_000);
+
+    // Assert
+    expect(trail.chapters.map((c) => c.waitingText)).toEqual(["3 min à t’attendre", null]);
+    expect(trail.chapters.map((c) => c.roundTrips)).toEqual([1, 1]);
+    expect(trail.waitingText).toBe("3 min à t’attendre");
+  });
+
+  it("leaves an open wait out of the waits, and says nothing when the run never waited", () => {
+    // Arrange
+    const open = trailLines([entry(0, "working"), entry(2, "awaiting-commit")]);
+    const never = trailLines([entry(0, "working"), entry(5, "job-done")]);
+
+    // Act / Assert
+    expect(trailChapters(open, [], T0 + 5 * 60_000).waitingText).toBeNull();
+    expect(trailChapters(never, [], T0 + 5 * 60_000).waitingText).toBeNull();
+  });
+
+  it("puts each subagent under the chapter running when it started, oldest first, an earlier one under the first chapter", () => {
+    // Arrange
+    const lines = trailLines([entry(1, "working", { skill: "pilot" }), entry(2, "turn-ended", { skill: "pilot" }), entry(5, "working", { skill: "fastlane" })]);
+    const agents = [agent(3, 1, { task: "implementer · build a" }), agent(0, 1, { task: "explorer · lane early" }), agent(2, 1, { task: "planner · blueprint a" }), agent(5, 1, { task: "runner · web tests" })];
+
+    // Act
+    const { chapters } = trailChapters(lines, agents, T0 + 6 * 60_000);
+
+    // Assert
+    expect(chapters.map((c) => c.agents.map((a) => a.label))).toEqual([["explorer · lane early", "planner · blueprint a", "implementer · build a"], ["runner · web tests"]]);
+  });
+
+  it("lists a chapter's passages and subagents by time, a passage first at the same time", () => {
+    // Arrange
+    const lines = trailLines([entry(0, "working", { skill: "blueprint" }), entry(2, "awaiting-commit", { skill: "blueprint" }), entry(4, "working", { skill: "blueprint" })]);
+    const agents = [agent(1, 1, { task: "reviewer · blueprint" }), agent(2, 1, { task: "runner · spec check" })];
+
+    // Act
+    const items = trailChapters(lines, agents, T0 + 5 * 60_000).chapters[0]?.items ?? [];
+
+    // Assert
+    expect(items.map((i) => (i.kind === "passage" ? `p ${i.line.entry.phase}` : `a ${i.agent.label}`))).toEqual(["p working", "a reviewer · blueprint", "p awaiting-commit", "a runner · spec check", "p working"]);
+  });
+
+  it("keeps a run with no line but subagents out of any chapter", () => {
+    expect(trailChapters([], [agent(0, 1)], T0)).toEqual({ chapters: [], isRunning: false, durationText: null, waitingText: null });
   });
 });
 
-describe("waitingText", () => {
-  it("sums the ended waits on an answer and on a commit", () => {
+describe("trailPath", () => {
+  it("reads the chapters' skills once each in a row, a free run as « libre », the lane colours kept", () => {
     // Arrange
-    const trail = [
-      entry(0, "working"),
-      entry(2, "awaiting-answer"),
-      entry(4, "working"),
-      entry(10, "awaiting-commit"),
-      entry(14, "working"),
-      entry(20, "stopped"),
-    ];
+    const lines = trailLines([
+      entry(0, "working", { skill: null }),
+      entry(1, "working", { skill: "pilot" }),
+      entry(2, "working", { skill: "build", step: "stage:1" }),
+      entry(3, "awaiting-commit", { skill: "build", step: "stage:1" }),
+      entry(4, "working", { skill: "build", step: "stage:2" }),
+      entry(5, "working", { skill: "review" }),
+    ]);
+    const free = trailLines([entry(0, "working", { skill: null }), entry(1, "awaiting-answer", { skill: null })]);
 
-    // Act / Assert
-    expect(waitingText(trail)).toBe("6 min à t’attendre");
-  });
+    // Act
+    const path = trailPath(trailChapters(lines, [], T0 + 6 * 60_000).chapters);
+    const freePath = trailPath(trailChapters(free, [], T0 + 6 * 60_000).chapters);
 
-  it("leaves out a wait still open", () => {
-    expect(waitingText([entry(0, "working"), entry(2, "awaiting-commit")])).toBeNull();
-  });
-
-  it("says nothing when the run never waited on the person", () => {
-    expect(waitingText([entry(0, "working"), entry(5, "job-done")])).toBeNull();
+    // Assert
+    expect(path.map((p) => [p.label, p.color])).toEqual([
+      ["pilot", "var(--lane-pilot)"],
+      ["build", "var(--lane-blueprint)"],
+      ["review", undefined],
+    ]);
+    expect(freePath).toEqual([{ label: "libre", color: "var(--lane-free)" }]);
   });
 });
 

@@ -2,7 +2,7 @@ import { t, tn } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { IconButton } from "../../../shared/ui/IconButton.tsx";
-import { useId, useState, type CSSProperties, type ReactNode } from "react";
+import { Fragment, useId, useState, type CSSProperties, type ReactNode } from "react";
 import { ArchiveIcon, BranchIcon,ChevronDownIcon, ChevronRightIcon, CloseIcon, CollapseIcon, CommitIcon, DoorIcon, ExpandIcon, FolderIcon, GaugeIcon, HourglassIcon, NoteIcon, TrailIcon, OpenIcon, PopOutIcon, PromptIcon, RobotIcon, SlidersIcon, UnarchiveIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { StatusDot, type DotTone } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
@@ -11,13 +11,13 @@ import type { DetailSection } from "./detailSections.ts";
 import type { FileSummary } from "../data/useFileSummaryQuery.ts";
 import { fileTotals } from "./fileTotals.ts";
 import { FileTree, LineCounts } from "./FileTree.tsx";
-import { hasTrail, lineColor, skillColor, trailGroups, trailLines, waitingText } from "./trail.ts";
+import { hasTrail, lineColor, skillColor, trailChapters, trailLines, trailPath } from "./trail.ts";
 import { totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
 import { FlagButton, NotifySwitch } from "./FlagControls.tsx";
-import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, laneColor, nextCommands, requestText, toneOf, workLabel, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
+import { age, ageDisplay, awaitedOf, blockerHint, blockerLabel, blockerTone, calmText, closeText, createdText, laneColor, nextCommands, requestText, stageText, toneOf, workLabel, shownBlockers, stateLabel, writtenByText } from "./sessionText.ts";
 import styles from "./SessionDetail.module.css";
 import extras from "./NextAction.module.css";
 
@@ -52,14 +52,10 @@ export function SessionDetail({
   // Opens the « Fichiers modifiés » window on this file, or on the first one (sessions-live FR-55).
   onOpenFiles: (file: string | null) => void;
 }) {
-  // sessions-live FR-53: the trail's groups unfolded, by their start; folded by default.
-  const [openGroups, setOpenGroups] = useState<ReadonlySet<string>>(new Set());
-  const toggleGroup = (at: string) =>
-    setOpenGroups((open) => {
-      const next = new Set(open);
-      if (!next.delete(at)) next.add(at);
-      return next;
-    });
+  // sessions-live FR-41: the chapters the person folded or unfolded, by their start; a chapter not chosen is open
+  // while it is the last one, so a new chapter folds the one before it.
+  const [chapterChoices, setChapterChoices] = useState<ReadonlyMap<string, boolean>>(new Map());
+  const toggleChapter = (at: string, isOpen: boolean) => setChapterChoices((choices) => new Map(choices).set(at, !isOpen));
   const awaited = awaitedOf(s);
   const blockers = shownBlockers(s);
   const tag = ageDisplay(s, now);
@@ -133,142 +129,155 @@ export function SessionDetail({
       )}
     </Section>
   );
-  // sessions-live FR-41: absent outside selo and for a run with no history.
-  // A past wait reads as open; past work is muted; the last line keeps the session's closed or archived state, so it never pulses then.
-  const trail = trailLines(s.trail, now, s.mode).map((l, i, all) => {
+  // sessions-live FR-41: absent outside selo and for a run with no history. A past wait reads as open; past work is
+  // muted; the last line keeps the session's closed or archived state, so it never pulses then.
+  const isSessionOver = s.isClosed || s.isArchived;
+  const trail = trailLines(s.trail, s.mode).map((l, i, all) => {
     const isLast = i === all.length - 1;
     const tone: DotTone = l.isPastWork ? "idle" : toneOf({ ...s, state: l.entry.phase, isClosed: isLast && s.isClosed, isArchived: isLast && s.isArchived });
     return { ...l, tone };
   });
-  const groups = trailGroups(trail, s.subagents, now, s.isClosed || s.isArchived);
-  const time = (iso: string) => new Date(iso).toLocaleTimeString("fr-FR");
-  // The dot of a row; on a group's bottom row, the rail down to the earlier group, one segment per line it stands for.
-  const trailNode = (tone: DotTone, earlier: (typeof groups)[number] | undefined) => (
-    <span className={styles.node} style={{ "--weight": earlier?.weight ?? 0 } as CSSProperties}>
-      <StatusDot tone={tone} />
-      {earlier && (
-        <span className={styles.rail} aria-hidden="true">
-          {earlier.lines.map((l, i) => (
-            <span key={i} className={styles[`rail-${l.tone}`]} style={{ flexGrow: l.weight }} />
-          ))}
-        </span>
-      )}
-      {/* The time between the earlier group and this one, beside the line that stands for it. */}
-      {earlier?.gapText && (
-        <span className={styles.gap} aria-hidden="true">
-          {earlier.gapText}
-        </span>
-      )}
-    </span>
-  );
-  const trailSection = hasTrail(s) && (
+  const { chapters, isRunning, durationText: runDuration, waitingText: runWaiting } = trailChapters(trail, s.subagents, now, isSessionOver);
+  const path = trailPath(chapters);
+  const lastChapter = chapters[chapters.length - 1];
+  const lastLine = trail[trail.length - 1];
+  const timeOf = (iso: string) => new Date(iso).toLocaleTimeString("fr-FR");
+  // The time to the second; narrow, the minute alone and the second on hover.
+  const when = (iso: string) => {
+    const full = timeOf(iso);
+    return (
+      <span className={styles.when} title={full}>
+        {full.slice(0, 5)}
+        <span className={styles.sec}>{full.slice(5)}</span>
+      </span>
+    );
+  };
+  const stateWords = (state: Session["state"]) => stateLabel({ ...s, state }).toLowerCase();
+  const trailSection = hasTrail(s) && lastChapter && lastLine && (
     <Section
       icon={<TrailIcon />}
       hue="trail"
-      count={groups.reduce((n, g) => n + 1 + g.agents.length, 0)}
+      count={chapters.reduce((n, c) => n + 1 + c.agents.length, 0)}
       title={t("sessions.detail.trail")}
-      aside={waitingText(s.trail)}
+      aside={
+        <>
+          {runDuration}
+          {runWaiting && <span className={styles.warnText}>{` · ${runWaiting}`}</span>}
+        </>
+      }
       summary={
-        <span className={styles.ribbon} aria-hidden="true">
-          {trail.map((l, i) => (
-            <span key={i} className={styles[`rail-${l.tone}`]} style={{ flexGrow: l.weight }} />
-          ))}
+        <span className={styles.path}>
+          {path.map((p, i) =>
+            i < path.length - 1 ? (
+              <Fragment key={i}>
+                <span className={styles.pathSkill} style={{ color: p.color }}>
+                  {p.label}
+                </span>
+                <span className={styles.sep} aria-hidden="true">
+                  ›
+                </span>
+              </Fragment>
+            ) : (
+              <span key={i} className={`${styles.cur} ${styles[`tone-${lastLine.tone}`]}`}>
+                {p.label}
+                {stageText(lastLine.entry) && ` · ${stageText(lastLine.entry)}`}
+              </span>
+            ),
+          )}
         </span>
       }
       {...fold("trail")}
     >
-      <ul className={`${styles.lines} ${styles.trail}`}>
-        {/* Newest first: under each group its passages when unfolded, then its subagents; the rail under a group's
-            bottom row joins it to the earlier group, which lasted until this one. */}
-        {groups.map((g, gi) => ({ g, earlier: groups[gi - 1] })).reverse().flatMap(({ g, earlier }) => {
-          const last = g.passages[g.passages.length - 1] as (typeof trail)[number];
-          const count = g.passages.length;
-          const isOpen = count > 1 && openGroups.has(g.at);
-          const passages = isOpen ? g.passages.map((l, i) => ({ l, durationText: g.passageDurations[i] ?? null })).reverse() : [];
-          const bottom = g.agents.length > 0 ? "agent" : passages.length > 0 ? "passage" : "group";
-          return [
-            <li key={g.at}>
-              <span className={styles.hash}>{time(g.at)}</span>
-              {trailNode(last.tone, bottom === "group" ? earlier : undefined)}
-              <span className={`${styles.line} ${styles.group}`}>
-                {count > 1 && (
-                  <button type="button" className={styles.chevron} aria-expanded={isOpen} aria-label={`${g.isFree ? t("sessions.lane.free") : [last.entry.skill, last.stepText].filter(Boolean).join(" · ")}, ${tn("sessions.trail.entries", count)}`} onClick={() => toggleGroup(g.at)}>
-                    {isOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                  </button>
-                )}
-                <span className={styles.label}>
-                  {g.isFree ? (
-                    <span className={styles.free}>{t("sessions.lane.free")}</span>
-                  ) : (
-                    <>
-                      <span style={{ color: lineColor(last) }}>{last.entry.skill}</span>
-                      {last.entry.skill && last.stepText && " · "}
-                      {last.stepText}
-                    </>
-                  )}
-                </span>
-                {count > 1 && (
-                  <>
-                    <span className={styles.pips} title={tn("sessions.trail.entries", count)}>
-                      {g.passages.map((l, i) => (
-                        <StatusDot key={i} tone={l.tone} />
-                      ))}
-                    </span>
-                    <span className={styles.muted}>{` · ${g.durationText}`}</span>
-                  </>
-                )}
-                {/* Read with its own line, where the eye finds it beside the line below. */}
-                {g.gapText && <span className={styles.srOnly}>{`, ${g.gapText}`}</span>}
+      <ol className={styles.chapters}>
+        {s.isTrailCut && <li className={styles.cut}>{t("sessions.trail.cut")}</li>}
+        {/* Oldest first, the newest near the present: a chapter's line, then, unfolded, its passages and subagents. */}
+        {chapters.map((c, ci) => {
+          const last = c.lines[c.lines.length - 1] as (typeof trail)[number];
+          const isLast = ci === chapters.length - 1;
+          const canOpen = c.items.length > 1;
+          const isOpen = canOpen && (chapterChoices.get(c.at) ?? isLast);
+          const extras = [c.agents.length > 0 && tn("sessions.trail.agents", c.agents.length), c.roundTrips > 0 && tn("sessions.trail.roundTrips", c.roundTrips)].filter(Boolean).join(" · ");
+          const row = (
+            <>
+              {when(c.at)}
+              <span className={styles.what}>
+                {c.isFree ? <span className={styles.free}>{t("sessions.lane.free")}</span> : <span className={styles.skill}>{last.entry.skill}</span>}
+                {last.stepText && <span className={styles.step}>{last.stepText}</span>}
+                {extras && <span className={styles.extras}>{extras}</span>}
+                {isLast && <StateLabel session={{ ...s, state: last.entry.phase }} />}
               </span>
-              <span className={styles.status}>
-                {/* Always there, empty for past work, so every line fills the grid's four columns. */}
-                {last.isPastWork ? <span /> : <StateLabel session={{ ...s, state: last.entry.phase, isClosed: false, isArchived: false }} />}
+              <span className={`${styles.how} ${c.isLive ? styles.live : ""}`}>
+                <span>{c.durationText}</span>
+                {c.waitingText && <span className={styles.warnText}>{` · ${t("sessions.trail.waitingIn", { text: c.waitingText })}`}</span>}
               </span>
-            </li>,
-            ...passages.map(({ l, durationText }, i) => (
-              <li key={`${g.at}|${l.entry.at}|${i}`} className={styles.passage}>
-                <span className={styles.hash}>{time(l.entry.at)}</span>
-                {trailNode(l.tone, bottom === "passage" && i === passages.length - 1 ? earlier : undefined)}
-                <span className={styles.line}>
-                  {stateLabel({ ...s, state: l.entry.phase }).toLowerCase()}
-                  {durationText && ` · ${durationText}`}
-                </span>
-                <span className={styles.status}>
-                  <span />
-                </span>
-              </li>
-            )),
-            ...g.agents.map((a, i) => (
-              <li key={`${g.at}|${a.agent.since}|${a.label}`} className={styles.agent}>
-                <span className={styles.hash}>{time(a.agent.since)}</span>
-                {trailNode(
-                  toneOf({ ...s, state: a.agent.state, isClosed: a.agent.state === "working" && s.isClosed, isArchived: a.agent.state === "working" && s.isArchived }),
-                  i === g.agents.length - 1 ? earlier : undefined,
-                )}
-                <span className={styles.line}>
-                  <span className={styles.muted} aria-hidden="true">
-                    {"↳ "}
-                  </span>
-                  {a.parts ? (
-                    <>
-                      {a.parts.lead}
-                      <span style={{ color: skillColor(a.parts.skill) }}>{a.parts.skill}</span>
-                      {a.parts.rest}
-                    </>
-                  ) : (
-                    a.label
-                  )}
-                  {` · ${a.durationText}`}
-                </span>
-                <span className={styles.status}>
-                  <StateLabel session={{ ...s, state: a.agent.state, isClosed: false, isArchived: false }} />
-                </span>
-              </li>
-            )),
-          ];
+              <span className={styles.foldc} aria-hidden="true">
+                {canOpen && (isOpen ? <ChevronDownIcon /> : <ChevronRightIcon />)}
+              </span>
+            </>
+          );
+          return (
+            <li key={c.at} className={`${styles.chapter} ${c.isLive ? styles.now : ""}`} style={{ "--lane": c.isFree ? "var(--lane-free)" : lineColor(last) } as CSSProperties}>
+              {canOpen ? (
+                <button type="button" className={styles.chapterRow} aria-expanded={isOpen} onClick={() => toggleChapter(c.at, isOpen)}>
+                  {row}
+                </button>
+              ) : (
+                <div className={styles.chapterRow}>{row}</div>
+              )}
+              {isOpen && (
+                <ol className={styles.passages}>
+                  {c.items.map((item, i) => {
+                    if (item.kind === "passage") {
+                      const isWait = item.line.tone === "warn" || item.line.tone === "danger";
+                      return (
+                        <li key={`${i}|${item.at}`} className={`${styles.passage} ${isWait ? `${styles.wait} ${styles[`tone-${item.line.tone}`]}` : ""}`}>
+                          {when(item.at)}
+                          <span className={styles.what}>{item.line.entry.phase === "working" ? (item.line.entry.substep ?? stateWords("working")) : stateWords(item.line.entry.phase)}</span>
+                          <span className={styles.how}>
+                            <span>{item.durationText}</span>
+                          </span>
+                        </li>
+                      );
+                    }
+                    const { agent, parts, label, durationText } = item.agent;
+                    const isLive = agent.state === "working" && !isSessionOver;
+                    const end = agent.state === "job-done" || agent.state === "turn-ended" ? t("sessions.trail.ended") : stateWords(agent.state);
+                    return (
+                      <li key={`${i}|${item.at}`} className={styles.passage}>
+                        {when(item.at)}
+                        <span className={styles.what}>
+                          <span aria-hidden="true">{"↳ "}</span>
+                          {parts ? (
+                            <>
+                              <b>{parts.lead.replace(/\s*·\s*$/, "")}</b>
+                              {" · "}
+                              <span style={{ color: skillColor(parts.skill) }}>{parts.skill}</span>
+                              {parts.rest}
+                            </>
+                          ) : (
+                            <b>{label}</b>
+                          )}
+                        </span>
+                        <span className={`${styles.how} ${isLive ? styles.live : ""}`}>
+                          <span>{durationText}</span>
+                          {!isLive && <span>{` · ${end}`}</span>}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+            </li>
+          );
         })}
-        {s.isTrailCut && <li className={styles.muted}>{t("sessions.trail.cut")}</li>}
-      </ul>
+        {isRunning && (
+          <li className={styles.nowLine}>
+            <StatusDot tone={lastLine.tone} />
+            {t("sessions.trail.now")}
+            <span className={styles.nowTime}>{` · ${timeOf(new Date(now).toISOString())}`}</span>
+          </li>
+        )}
+      </ol>
     </Section>
   );
   const agentsSection = !s.isOutsideSelo && (
@@ -485,7 +494,7 @@ function Section({
   count?: number;
   // What the heading keeps showing while the section is folded.
   summary?: ReactNode;
-  // What the heading shows folded or not.
+  // What the heading shows folded or not, after the summary.
   aside?: ReactNode;
   // Nothing more than the summary to show: the heading alone, with no chevron.
   isEmpty: boolean;
@@ -514,8 +523,13 @@ function Section({
           <span className={`${styles.chip} ${HUES[hue]}`}>{icon}</span>
           {title}
           {count ? <span className={styles.count}>{count}</span> : null}
-          {aside ? <span className={styles.summary}>{aside}</span> : null}
           {isFolded && summary ? <span className={styles.summary}>{summary}</span> : null}
+          {aside ? (
+            <span className={styles.aside}>
+              {isFolded && summary ? " · " : null}
+              {aside}
+            </span>
+          ) : null}
           <span className={styles.fold}>{isFolded ? <ChevronRightIcon /> : <ChevronDownIcon />}</span>
         </button>
       </h3>

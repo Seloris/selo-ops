@@ -337,133 +337,104 @@
   color: var(--text-muted);
 }
 
-/* sessions-live FR-41: a vertical timeline, each dot joined to the next by a line in its state's colour, as long as
-   the square root of how long the step lasted, bounded at 48px (about 17 min) so a long wait keeps the lines together. */
-.rail-pulse { --tone: var(--working); }
-.rail-done,
-.rail-turn { --tone: var(--done); }
-.rail-warn { --tone: var(--warn); }
-.rail-danger { --tone: var(--danger); }
-.rail-idle,
-.rail-off { --tone: var(--text-muted); }
+/* sessions-live FR-41: the run as chapters, oldest first, each bordered with its lane's colour; the state colours
+   of the dots and pills. */
+.tone-pulse { --tone: var(--working); }
+.tone-done,
+.tone-turn { --tone: var(--done); }
+.tone-warn { --tone: var(--warn); }
+.tone-danger { --tone: var(--danger); }
+.tone-idle,
+.tone-off { --tone: var(--text-muted); }
 
-/* Columns as wide as their content, so the badge sits next to the text, aligned across lines. */
-.trail {
+.warnText {
+  color: var(--warn);
+}
+
+.chapters {
+  container-type: inline-size;
   display: grid;
-  grid-template-columns: auto auto minmax(0, max-content) auto;
-  justify-content: start;
-  justify-items: start;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9em;
+  line-height: 1.45;
+}
+
+.chapter {
+  --lane: var(--text-muted);
+  --when: 70px;
+  display: grid;
+  /* The duration column keeps under half the width, so the label keeps its share and the waits wrap under it. */
+  grid-template-columns: var(--when) minmax(0, 1fr) fit-content(45%) 14px;
+  gap: 2px 10px;
   align-items: baseline;
-  gap: 0 10px;
+  padding: 8px 10px 8px 0;
+  border-left: 3px solid var(--lane);
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+  background: color-mix(in srgb, var(--lane) 6%, transparent);
 }
 
-.trail li,
-.trail .status {
-  display: contents;
+/* The chapter in progress: on the working blue, like its duration. */
+.chapter.now {
+  background: color-mix(in srgb, var(--working) 8%, transparent);
 }
 
-/* A start-aligned item grows to its nowrap text: held to its column, a long task ends in an ellipsis. */
-.trail .line {
-  max-width: 100%;
-}
-
-/* The timeline's node already carries the dot: the badge shows its label only. */
-.trail .status > span:first-child > [aria-hidden="true"] {
-  display: none;
-}
-
-.trail li.muted {
-  display: block;
+/* Its line and its passages share the chapter's columns; stacked from the top (a subgrid aligned on the baseline
+   lands off screen in Chrome), their cells on their own baseline. */
+.chapterRow,
+.passages,
+.passage {
+  display: grid;
   grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  gap: 2px 10px;
+  align-self: start;
+  align-items: baseline;
 }
 
-.node {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  align-items: center;
-  align-self: flex-start;
-  position: relative;
-  gap: 3px;
-  width: 8px;
-  padding-top: 0.45em;
-  /* At least room for the duration written beside it. */
-  --length: clamp(16px, calc(var(--weight) * 1.5px), 48px);
-}
-
-/* sessions-live FR-53: the rail down to the earlier group, one segment per line it stands for, oldest at the bottom. */
-.rail {
-  display: flex;
-  flex-direction: column-reverse;
-  gap: 1px;
-  width: 2px;
-  height: var(--length);
-  margin-bottom: 3px;
-  /* A group of many lines keeps its rail's length: the oldest segments are cut. */
-  overflow: hidden;
-}
-
-.rail > span {
-  min-height: 2px;
-  background: var(--tone);
-}
-
-/* A wait on the person: the line dashed. */
-.rail > .rail-warn,
-.rail > .rail-danger {
-  background: repeating-linear-gradient(var(--tone) 0 4px, transparent 4px 7px);
-}
-
-/* A group: its chevron, its label, a pip per passage and how long it lasted. */
-.trail .group {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.label {
-  min-width: 9ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chevron {
-  display: inline-flex;
-  flex: none;
-  /* A larger hit target than the icon, without moving it. */
-  margin: -4px 0 -4px -4px;
-  padding: 4px;
+.chapterRow {
+  padding: 0;
   border: 0;
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
   background: none;
-  color: var(--text-muted);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button.chapterRow {
   cursor: pointer;
 }
 
-.chevron svg {
-  width: 12px;
-  height: 12px;
+.passages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.pips {
-  display: inline-flex;
-  flex: none;
+.when {
+  padding-left: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.what {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 3px;
-  height: 14px;
-  margin-left: 4px;
-  padding: 0 6px;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+  gap: 6px;
+  min-width: 0;
+  font-weight: 600;
 }
 
-.pips > span,
-.passage .node > span:first-child {
-  width: 6px;
-  height: 6px;
-  animation: none;
-}
-.trail .group > .muted {
-  flex: none;
+.skill {
+  font-family: var(--font-mono);
+  color: var(--lane);
 }
 
 .free {
@@ -471,68 +442,171 @@
   font-style: italic;
 }
 
-/* A subagent, then an unfolded passage: indented under their group, smaller dots. */
-.agent .line,
-.passage .line {
-  padding-left: 14px;
+.step {
+  font-weight: 500;
 }
 
-.agent .node > span:first-child,
-.passage .node > span:first-child {
+.extras {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* Narrow, its waits go to a second line rather than squeeze the label. */
+.how {
+  font-size: 0.86em;
+  color: var(--text-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.how > span {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.how.live {
+  color: var(--working);
+  font-weight: 600;
+}
+
+.foldc {
+  display: inline-flex;
+  align-self: center;
+  color: var(--text-muted);
+}
+
+.foldc svg {
+  width: 12px;
+  height: 12px;
+}
+
+.chapterRow:hover .foldc {
+  color: var(--text);
+}
+
+/* A passage or a subagent, indented under the chapter's line, smaller and quieter. */
+.passage > span {
+  font-size: 0.86em;
+  color: var(--text-muted);
+}
+
+.passage .when {
+  font-size: 0.78em;
+}
+
+.passage .what {
+  display: block;
+  padding-left: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 400;
+}
+
+.passage .what b {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.passage .how {
+  grid-column: 3 / -1;
+}
+
+/* A wait on the person: in its state's colour, with a dot. */
+.passage.wait > span {
+  color: var(--tone);
+}
+
+.passage.wait .what {
+  font-weight: 500;
+}
+
+.passage.wait .what::before {
+  content: "";
+  display: inline-block;
   width: 6px;
   height: 6px;
-  margin: 1px 0;
-}
-
-.passage .hash,
-.passage .line,
-.passage .node > span:first-child {
-  opacity: 0.85;
-}
-
-.passage .hash {
-  font-size: 0.85em;
-}
-
-.passage .line {
-  color: var(--text-muted);
-}
-
-/* The earlier step's duration, centred on the line between the two dots. */
-.gap {
-  position: absolute;
-  /* The node's top padding (its em, not this smaller one), then the dot (8px) and the gap (3px). */
-  top: calc(0.45em / 0.85 + 11px + var(--length) / 2);
-  left: 14px;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  font-size: 0.85em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-/* Folded: the same run as a ribbon, one segment per line. */
-.ribbon {
-  display: flex;
-  gap: 2px;
-  height: 8px;
-  overflow: hidden;
-  border-radius: var(--radius-pill);
-}
-
-.ribbon > span {
-  flex-basis: 3px;
+  margin: 0 6px 1px -14px;
+  border-radius: 50%;
   background: var(--tone);
+}
+
+.cut {
+  padding-left: 10px;
+  font-size: 0.83em;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* The present, closing the list while the run goes on. */
+.nowLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 10px;
+  font-size: 0.83em;
+  color: var(--text-muted);
+}
+
+.nowLine::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Narrow: the minute alone, the second on hover. */
+@container (max-width: 420px) {
+  .chapter {
+    --when: 52px;
+  }
+
+  .sec,
+  .nowTime {
+    display: none;
+  }
+
+  /* The waits may take two lines, so the label keeps its column. */
+  .how > .warnText {
+    white-space: normal;
+  }
+}
+
+/* The heading, folded or not: the run's duration and its waits. */
+.aside {
+  flex: none;
+  color: var(--text-muted);
+  font-weight: 400;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Folded: the chapters' path, each skill in its lane's colour, the current one as a pill in its state's colour. */
+.path {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pathSkill {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+}
+
+.sep {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.cur {
+  flex: none;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  color: var(--tone);
+  font-weight: 600;
 }
 
 .kv {

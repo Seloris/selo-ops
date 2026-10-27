@@ -144,9 +144,14 @@ export function awaitedOf(s: Session): Awaited | null {
   return { kind: "error", label: t("sessions.awaited.error"), text, full: text, isCode: s.error !== null };
 }
 
-export function stepText(s: Pick<Session, "step" | "substep">): string | null {
+// The stage alone (« Étape 2 »), null without one.
+export function stageText(s: Pick<Session, "step">): string | null {
   const stage = /^stage:(\d+)$/.exec(s.step ?? "")?.[1];
-  const step = stage ? t("sessions.step.stage", { number: stage }) : null;
+  return stage ? t("sessions.step.stage", { number: stage }) : null;
+}
+
+export function stepText(s: Pick<Session, "step" | "substep">): string | null {
+  const step = stageText(s);
   if (step && s.substep) return `${step} · ${s.substep}`;
   return step ?? s.substep;
 }

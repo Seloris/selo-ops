@@ -432,6 +432,7 @@ export function SessionsLivePage() {
         <Drawer isOpen={isPanelOpen} label={t("sessions.detail.label")} resize={isFullscreen ? undefined : panelResize}>
           {selected && (
             <SessionDetail
+              key={selected.id}
               session={selected}
               projectName={projectName(selected.projectId)}
               now={now}
