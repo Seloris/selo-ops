@@ -122,4 +122,40 @@ describe("sessions routes — run trail", () => {
     // Assert
     expect(session.mode).toBeNull();
   });
+
+  it("gives every main run its trail and the subagents started before the next one, the current run's freshest", async () => {
+    // Arrange
+    const opening = trail.slice(0, 1);
+    const first = buildRun({ since: "2026-01-01T08:00:00.000Z", request: "Ajoute un filtre", trail: opening, trailCut: true });
+    const agent = buildRun({ agentId: "a-1", request: "runner", task: "runner · web tests", since: "2026-01-01T08:10:00.000Z", updatedAt: "2026-01-01T08:12:00.000Z", phase: "job-done" });
+    const stale = buildRun({ since: "2026-01-01T09:00:00.000Z", trail: opening });
+    const current = { ...stale, trail };
+    const late = buildRun({ agentId: "a-2", request: "reviewer", since: "2026-01-01T09:00:00.000Z" });
+    ctx.seed.session(buildSessionFile({ current, runs: [stale, late, agent, first] }));
+
+    // Act
+    const session = await only();
+
+    // Assert
+    expect(session.runs).toHaveLength(2);
+    expect(session.runs[0]).toMatchObject({ id: first.id, isCurrent: false, trail: opening, isTrailCut: true, subagents: [{ type: "runner", task: "runner · web tests", state: "job-done" }] });
+    expect(session.runs[1]).toMatchObject({ id: current.id, isCurrent: true, trail, isTrailCut: false, subagents: [{ type: "reviewer" }] });
+  });
+
+  it("lists a current run the export's runs do not hold yet, its mode and its subagents its own", async () => {
+    // Arrange
+    const first = buildRun({ since: "2026-01-01T08:00:00.000Z", trail: trail.slice(0, 1) });
+    const current = buildRun({ since: "2026-01-01T09:00:00.000Z", mode: "iterate", trail });
+    const agent = buildRun({ agentId: "a-1", request: "runner", since: "2026-01-01T09:10:00.000Z" });
+    ctx.seed.session(buildSessionFile({ current, runs: [agent, first] }));
+
+    // Act
+    const session = await only();
+
+    // Assert
+    expect(session.runs).toMatchObject([
+      { id: first.id, isCurrent: false, mode: null, subagents: [] },
+      { id: current.id, isCurrent: true, mode: "iterate", trail, subagents: [{ type: "runner" }] },
+    ]);
+  });
 });

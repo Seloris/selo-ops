@@ -799,6 +799,18 @@
             "items": {
               "type": "object",
               "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "isCurrent": {
+                  "type": "boolean"
+                },
+                "mode": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "since": {
                   "type": "string",
                   "format": "date-time"
@@ -814,14 +826,75 @@
                 },
                 "usage": {
                   "$ref": "#/components/schemas/RunUsage"
+                },
+                "trail": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrailEntry"
+                  }
+                },
+                "isTrailCut": {
+                  "type": "boolean"
+                },
+                "subagents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "task": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "state": {
+                        "$ref": "#/components/schemas/SessionState"
+                      },
+                      "since": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/Usage"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "task",
+                      "state",
+                      "since",
+                      "updatedAt",
+                      "model",
+                      "usage"
+                    ]
+                  }
                 }
               },
               "required": [
+                "id",
+                "isCurrent",
+                "mode",
                 "since",
                 "request",
                 "isRequestCut",
                 "isRequestImage",
-                "usage"
+                "usage",
+                "trail",
+                "isTrailCut",
+                "subagents"
               ]
             }
           },

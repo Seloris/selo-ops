@@ -106,6 +106,16 @@ function modelOf(file: SessionFile): string | null {
     .sort((a, b) => Date.parse(b.since) - Date.parse(a.since))[0];
   return latest ? topModelOf(latest) : null;
 }
+const toSubagent = (r: ExportRun) => ({
+  type: r.request ?? "",
+  task: r.task ?? null,
+  state: r.phase,
+  since: r.since,
+  updatedAt: r.updatedAt,
+  model: topModelOf(r),
+  usage: usageOf(r.usage),
+});
+
 function toSession(
   file: SessionFile,
   current: ExportRun,
@@ -123,6 +133,8 @@ function toSession(
   const { text, isCut } = cleanRequest(current.request ?? "");
   const since = Date.parse(current.since);
   const subagents = file.runs.filter((r) => r.agentId && Date.parse(r.since) >= since);
+  // The current run from the export's freshest copy, listed even when `runs` does not hold it yet (sessions-live FR-41).
+  const mainRuns = [...file.runs.filter((r) => !r.agentId && r.id !== current.id), ...(current.agentId ? [] : [current])].sort((a, b) => Date.parse(a.since) - Date.parse(b.since));
   const isClosed = file.status === "ended";
   // A turn that ends with subagents in the background has not finished its work (`session` BR-02).
   const isCalm = current.phase === "turn-ended" || current.phase === "job-done";
@@ -168,30 +180,29 @@ function toSession(
     effort: file.effort ?? null,
     permissionMode: file.permissionMode ?? null,
     blockers: (file.close?.blockers ?? []).filter((b): b is CloseBlocker => BLOCKERS.has(b)),
-    subagents: subagents.map((r) => ({
-      type: r.request ?? "",
-      task: r.task ?? null,
-      state: r.phase,
-      since: r.since,
-      updatedAt: r.updatedAt,
-      model: topModelOf(r),
-      usage: usageOf(r.usage),
-    })),
+    subagents: subagents.map(toSubagent),
     usage: usageOf(file.usage),
     runUsage: current.usage ?? null,
-    runs: file.runs
-      .filter((r) => !r.agentId)
-      .sort((a, b) => Date.parse(a.since) - Date.parse(b.since))
-      .map((r) => {
-        const request = cleanRequest(r.request ?? "");
-        return {
-          since: r.since,
-          request: request.text,
-          isRequestCut: request.isCut,
-          isRequestImage: imageRequestRunIds.has(r.id),
-          usage: r.usage ?? null,
-        };
-      }),
+    runs: mainRuns.map((r, i) => {
+      const request = cleanRequest(r.request ?? "");
+      const from = Date.parse(r.since);
+      const until = mainRuns[i + 1] ? Date.parse((mainRuns[i + 1] as ExportRun).since) : Infinity;
+      return {
+        id: r.id,
+        isCurrent: r === current,
+        mode: r.mode ?? null,
+        since: r.since,
+        request: request.text,
+        isRequestCut: request.isCut,
+        isRequestImage: imageRequestRunIds.has(r.id),
+        usage: r.usage ?? null,
+        trail: r.trail,
+        isTrailCut: r.trailCut ?? false,
+        subagents: file.runs
+          .filter((a) => a.agentId && Date.parse(a.since) >= from && Date.parse(a.since) < until)
+          .map(toSubagent),
+      };
+    }),
     isRunListCut: file.runs.length >= EXPORT_MAX_RUNS,
     touchedFiles: file.touchedFiles ?? [],
     desktopLink: toDesktopLink(desktopSessionId),

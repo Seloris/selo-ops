@@ -57,6 +57,18 @@ export const runUsageSchema = z
   })
   .meta({ id: "RunUsage" });
 
+// `model`: the subagent's real model, the top one of its own usage (`session` BR-20); null with no usage (stopped by Esc).
+const subagentSchema = z.object({
+  type: z.string(),
+  task: z.string().nullable(),
+  state: sessionStateSchema,
+  // When it started and when the export last saw it: the turn's timeline places it and gives its duration (sessions-live FR-41).
+  since: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+  model: z.string().nullable(),
+  usage: usageSchema.nullable(),
+});
+
 export const sessionSchema = z
   .object({
     id: z.string(),
@@ -103,28 +115,31 @@ export const sessionSchema = z
     effort: z.string().nullable(),
     permissionMode: z.string().nullable(),
     blockers: z.array(closeBlockerSchema),
-    // `model`: the subagent's real model, the top one of its own usage (`session` BR-20); null with no usage (stopped by Esc).
-    subagents: z.array(
-      z.object({
-        type: z.string(),
-        task: z.string().nullable(),
-        state: sessionStateSchema,
-        // When it started and when the export last saw it: the turn's timeline places it and gives its duration (sessions-live FR-41).
-        since: z.iso.datetime(),
-        updatedAt: z.iso.datetime(),
-        model: z.string().nullable(),
-        usage: usageSchema.nullable(),
-      }),
-    ),
+    subagents: z.array(subagentSchema),
     // `session` BR-18: the session's totals, and its current main run's; null for a session outside selo or a run before
     // its first stop.
     usage: usageSchema.nullable(),
     runUsage: runUsageSchema.nullable(),
     // Every main run the export keeps, oldest first: its request, cleaned (`session` BR-10), "" when unreadable, and its
-    // usage with what it did (tools, skills, prompts), null before its first stop.
+    // usage with what it did (tools, skills, prompts), null before its first stop; its trail and the subagents started
+    // before the next main run (sessions-live FR-41), the current run's from the export's freshest copy.
     // Empty for a session outside selo.
     runs: z.array(
-      z.object({ since: z.iso.datetime(), request: z.string(), isRequestCut: z.boolean(), isRequestImage: z.boolean(), usage: runUsageSchema.nullable() }),
+      z.object({
+        id: z.string(),
+        // The session's current run, whose trail is also the session's own.
+        isCurrent: z.boolean(),
+        // `session` BR-22: `iterate` or `autonomous`, else null.
+        mode: z.string().nullable(),
+        since: z.iso.datetime(),
+        request: z.string(),
+        isRequestCut: z.boolean(),
+        isRequestImage: z.boolean(),
+        usage: runUsageSchema.nullable(),
+        trail: z.array(trailEntrySchema),
+        isTrailCut: z.boolean(),
+        subagents: z.array(subagentSchema),
+      }),
     ),
     // True once the export holds its 100 runs, subagents included: the oldest ones may be gone.
     isRunListCut: z.boolean(),
