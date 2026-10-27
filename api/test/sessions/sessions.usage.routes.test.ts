@@ -198,10 +198,10 @@ describe("sessions usage", () => {
       const session = await only();
 
       // Assert
-      expect(session.runs).toMatchObject([
-        { id: first.id, since: "2026-01-01T08:00:00.000Z", request: "Why one prompt?", isRequestCut: false, isRequestImage: false, usage: runUsage },
-        { id: unreadable.id, since: "2026-01-01T08:30:00.000Z", request: "", isRequestCut: false, isRequestImage: false, usage: null },
-        { id: current.id, since: "2026-01-01T09:00:00.000Z", request: "x".repeat(200), isRequestCut: true, isRequestImage: false, usage: runUsage },
+      expect(session.runs).toEqual([
+        { since: "2026-01-01T08:00:00.000Z", request: "Why one prompt?", isRequestCut: false, isRequestImage: false, usage: runUsage },
+        { since: "2026-01-01T08:30:00.000Z", request: "", isRequestCut: false, isRequestImage: false, usage: null },
+        { since: "2026-01-01T09:00:00.000Z", request: "x".repeat(200), isRequestCut: true, isRequestImage: false, usage: runUsage },
       ]);
       expect(session.isRunListCut).toBe(false);
     });

@@ -1,7 +1,7 @@
 import request from "supertest";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { ExportTrailEntry } from "../../src/features/sessions/sessions.export.js";
-import { sessionsResponseSchema, type Session } from "../../src/features/sessions/sessions.schema.js";
+import { sessionsResponseSchema, sessionTrailsSchema, type Session } from "../../src/features/sessions/sessions.schema.js";
 import { buildRun, buildSessionFile } from "../factories.js";
 import { createTestContext } from "../setup.js";
 
@@ -122,40 +122,79 @@ describe("sessions routes — run trail", () => {
     // Assert
     expect(session.mode).toBeNull();
   });
+});
 
-  it("gives every main run its trail and the subagents started before the next one, the current run's freshest", async () => {
-    // Arrange
-    const opening = trail.slice(0, 1);
-    const first = buildRun({ since: "2026-01-01T08:00:00.000Z", request: "Ajoute un filtre", trail: opening, trailCut: true });
-    const agent = buildRun({ agentId: "a-1", request: "runner", task: "runner · web tests", since: "2026-01-01T08:10:00.000Z", updatedAt: "2026-01-01T08:12:00.000Z", phase: "job-done" });
-    const stale = buildRun({ since: "2026-01-01T09:00:00.000Z", trail: opening });
-    const current = { ...stale, trail };
-    const late = buildRun({ agentId: "a-2", request: "reviewer", since: "2026-01-01T09:00:00.000Z" });
-    ctx.seed.session(buildSessionFile({ current, runs: [stale, late, agent, first] }));
+// sessions-live FR-41: the earlier prompts' history, read when the detail shows the session.
+describe("sessions routes — earlier runs' trails", () => {
+  let ctx: Awaited<ReturnType<typeof createTestContext>>;
 
-    // Act
-    const session = await only();
-
-    // Assert
-    expect(session.runs).toHaveLength(2);
-    expect(session.runs[0]).toMatchObject({ id: first.id, isCurrent: false, trail: opening, isTrailCut: true, subagents: [{ type: "runner", task: "runner · web tests", state: "job-done" }] });
-    expect(session.runs[1]).toMatchObject({ id: current.id, isCurrent: true, trail, isTrailCut: false, subagents: [{ type: "reviewer" }] });
+  beforeAll(async () => {
+    ctx = await createTestContext();
   });
 
-  it("lists a current run the export's runs do not hold yet, its mode and its subagents its own", async () => {
+  beforeEach(async () => {
+    await ctx.reset();
+  });
+
+  const trail: ExportTrailEntry[] = [
+    { at: "2026-01-01T08:00:00.000Z", skill: "fastlane", step: null, substep: "code", phase: "working" },
+    { at: "2026-01-01T08:20:00.000Z", skill: "fastlane", step: null, substep: "commit", phase: "job-done" },
+  ];
+
+  const trailsOf = async (id: string) => {
+    const res = await request(ctx.app).get(`/v1/sessions/${id}/trails`);
+    expect(res.status).toBe(200);
+    return sessionTrailsSchema.parse(res.body).runs;
+  };
+
+  it("gives each earlier main run its history, mode and the subagents started before the next one, never the current run", async () => {
     // Arrange
-    const first = buildRun({ since: "2026-01-01T08:00:00.000Z", trail: trail.slice(0, 1) });
-    const current = buildRun({ since: "2026-01-01T09:00:00.000Z", mode: "iterate", trail });
-    const agent = buildRun({ agentId: "a-1", request: "runner", since: "2026-01-01T09:10:00.000Z" });
-    ctx.seed.session(buildSessionFile({ current, runs: [agent, first] }));
+    const first = buildRun({ since: "2026-01-01T08:00:00.000Z", request: "Ajoute un filtre", mode: "iterate", trail, trailCut: true });
+    const agent = buildRun({ agentId: "a-1", request: "runner", task: "runner · web tests", since: "2026-01-01T08:10:00.000Z", updatedAt: "2026-01-01T08:12:00.000Z", phase: "job-done" });
+    const atNext = buildRun({ agentId: "a-2", request: "reviewer", since: "2026-01-01T09:00:00.000Z" });
+    const current = buildRun({ since: "2026-01-01T09:00:00.000Z", trail });
+    const file = buildSessionFile({ current, runs: [current, atNext, agent, first] });
+    ctx.seed.session(file);
 
     // Act
-    const session = await only();
+    const runs = await trailsOf(file.sessionId);
 
     // Assert
-    expect(session.runs).toMatchObject([
-      { id: first.id, isCurrent: false, mode: null, subagents: [] },
-      { id: current.id, isCurrent: true, mode: "iterate", trail, subagents: [{ type: "runner" }] },
+    expect(runs).toEqual([
+      {
+        since: first.since,
+        request: "Ajoute un filtre",
+        isRequestCut: false,
+        isRequestImage: false,
+        mode: "iterate",
+        trail,
+        isTrailCut: true,
+        subagents: [{ type: "runner", task: "runner · web tests", state: "job-done", since: agent.since, updatedAt: agent.updatedAt, model: null, usage: null }],
+      },
     ]);
+  });
+
+  it("bounds the last earlier run by a current run the export's runs do not hold yet", async () => {
+    // Arrange
+    const first = buildRun({ since: "2026-01-01T08:00:00.000Z", trail });
+    const agent = buildRun({ agentId: "a-1", request: "runner", since: "2026-01-01T09:10:00.000Z" });
+    const current = buildRun({ since: "2026-01-01T09:00:00.000Z", trail });
+    const file = buildSessionFile({ current, runs: [agent, first] });
+    ctx.seed.session(file);
+
+    // Act
+    const runs = await trailsOf(file.sessionId);
+
+    // Assert
+    expect(runs).toHaveLength(1);
+    expect(runs[0]?.subagents).toEqual([]);
+  });
+
+  it("returns 404 for a session the export does not hold", async () => {
+    // Act
+    const res = await request(ctx.app).get("/v1/sessions/unknown/trails");
+
+    // Assert
+    expect(res.status).toBe(404);
   });
 });

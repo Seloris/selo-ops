@@ -7,7 +7,7 @@ import type { InstalledPluginReader } from "./sessions.plugins.js";
 import type { GitPlace, OutsideSession, OutsideSessionReader, PermissionWait } from "./sessions.outside.js";
 import type { DesktopSessionLinkRepository, SessionArchiveRepository, SessionNoteRepository } from "./sessions.repository.js";
 import type { SessionArchive } from "./sessions.table.js";
-import { closeBlockerSchema, type CloseBlocker, type FileDiff, type FileSummary, type Project, type Session, type SessionsResponse, type Usage } from "./sessions.schema.js";
+import { closeBlockerSchema, type CloseBlocker, type FileDiff, type FileSummary, type Project, type Session, type SessionsResponse, type SessionTrails, type Usage } from "./sessions.schema.js";
 
 // The plugin cuts a run's request at this length.
 const REQUEST_LIMIT = 200;
@@ -106,6 +106,10 @@ function modelOf(file: SessionFile): string | null {
     .sort((a, b) => Date.parse(b.since) - Date.parse(a.since))[0];
   return latest ? topModelOf(latest) : null;
 }
+// The main runs, oldest first, the current one from the export's freshest copy, listed even when `runs` does not hold it yet.
+const mainRunsOf = (file: SessionFile, current: ExportRun) =>
+  [...file.runs.filter((r) => !r.agentId && r.id !== current.id), ...(current.agentId ? [] : [current])].sort((a, b) => Date.parse(a.since) - Date.parse(b.since));
+
 const toSubagent = (r: ExportRun) => ({
   type: r.request ?? "",
   task: r.task ?? null,
@@ -133,8 +137,6 @@ function toSession(
   const { text, isCut } = cleanRequest(current.request ?? "");
   const since = Date.parse(current.since);
   const subagents = file.runs.filter((r) => r.agentId && Date.parse(r.since) >= since);
-  // The current run from the export's freshest copy, listed even when `runs` does not hold it yet (sessions-live FR-41).
-  const mainRuns = [...file.runs.filter((r) => !r.agentId && r.id !== current.id), ...(current.agentId ? [] : [current])].sort((a, b) => Date.parse(a.since) - Date.parse(b.since));
   const isClosed = file.status === "ended";
   // A turn that ends with subagents in the background has not finished its work (`session` BR-02).
   const isCalm = current.phase === "turn-ended" || current.phase === "job-done";
@@ -183,24 +185,14 @@ function toSession(
     subagents: subagents.map(toSubagent),
     usage: usageOf(file.usage),
     runUsage: current.usage ?? null,
-    runs: mainRuns.map((r, i) => {
+    runs: mainRunsOf(file, current).map((r) => {
       const request = cleanRequest(r.request ?? "");
-      const from = Date.parse(r.since);
-      const until = mainRuns[i + 1] ? Date.parse((mainRuns[i + 1] as ExportRun).since) : Infinity;
       return {
-        id: r.id,
-        isCurrent: r === current,
-        mode: r.mode ?? null,
         since: r.since,
         request: request.text,
         isRequestCut: request.isCut,
         isRequestImage: imageRequestRunIds.has(r.id),
         usage: r.usage ?? null,
-        trail: r.trail,
-        isTrailCut: r.trailCut ?? false,
-        subagents: file.runs
-          .filter((a) => a.agentId && Date.parse(a.since) >= from && Date.parse(a.since) < until)
-          .map(toSubagent),
       };
     }),
     isRunListCut: file.runs.length >= EXPORT_MAX_RUNS,
@@ -372,6 +364,36 @@ export function createSessionService({
     async unarchive(id: string): Promise<void> {
       findRun(id);
       await archives.remove(id);
+    },
+
+    // sessions-live FR-41: the earlier main runs' history, each with the subagents started before the next main run.
+    async trails(id: string): Promise<SessionTrails> {
+      const { sessions, imageRequestRunIds } = opsExport.read();
+      const file = sessions.find((s) => s.sessionId === id);
+      const current = file && currentOf(file);
+      if (!file || !current) throw new NotFoundError("Session", id);
+      const mainRuns = mainRunsOf(file, current);
+      return {
+        runs: mainRuns.flatMap((r, i) => {
+          if (r === current) return [];
+          const request = cleanRequest(r.request ?? "");
+          const from = Date.parse(r.since);
+          const next = mainRuns[i + 1];
+          const until = next ? Date.parse(next.since) : Infinity;
+          return [
+            {
+              since: r.since,
+              request: request.text,
+              isRequestCut: request.isCut,
+              isRequestImage: imageRequestRunIds.has(r.id),
+              mode: r.mode ?? null,
+              trail: r.trail,
+              isTrailCut: r.trailCut ?? false,
+              subagents: file.runs.filter((a) => a.agentId && Date.parse(a.since) >= from && Date.parse(a.since) < until).map(toSubagent),
+            },
+          ];
+        }),
+      };
     },
 
     // `session` BR-01: each touched file's status and lines, over its recorded commits, then its uncommitted part.

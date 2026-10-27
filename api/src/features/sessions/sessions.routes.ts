@@ -26,6 +26,9 @@ export function sessionsRoutes({ sessions }: { sessions: SessionService }): Rout
     await sessions.saveNote(params.id, body.text);
     res.status(204).end();
   });
+  router.get("/v1/sessions/:id/trails", validate(byId), async (_req, res) => {
+    res.json(await sessions.trails(inputOf<typeof byId>(res).params.id));
+  });
   router.get("/v1/sessions/:id/files", validate(byId), async (_req, res) => {
     res.json(await sessions.fileSummary(inputOf<typeof byId>(res).params.id));
   });

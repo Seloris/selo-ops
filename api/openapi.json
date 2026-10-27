@@ -799,18 +799,6 @@
             "items": {
               "type": "object",
               "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "isCurrent": {
-                  "type": "boolean"
-                },
-                "mode": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
                 "since": {
                   "type": "string",
                   "format": "date-time"
@@ -826,75 +814,14 @@
                 },
                 "usage": {
                   "$ref": "#/components/schemas/RunUsage"
-                },
-                "trail": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TrailEntry"
-                  }
-                },
-                "isTrailCut": {
-                  "type": "boolean"
-                },
-                "subagents": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "type": {
-                        "type": "string"
-                      },
-                      "task": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "state": {
-                        "$ref": "#/components/schemas/SessionState"
-                      },
-                      "since": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "updatedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "model": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "usage": {
-                        "$ref": "#/components/schemas/Usage"
-                      }
-                    },
-                    "required": [
-                      "type",
-                      "task",
-                      "state",
-                      "since",
-                      "updatedAt",
-                      "model",
-                      "usage"
-                    ]
-                  }
                 }
               },
               "required": [
-                "id",
-                "isCurrent",
-                "mode",
                 "since",
                 "request",
                 "isRequestCut",
                 "isRequestImage",
-                "usage",
-                "trail",
-                "isTrailCut",
-                "subagents"
+                "usage"
               ]
             }
           },
@@ -1326,6 +1253,106 @@
         "required": [
           "isAvailable",
           "files"
+        ]
+      },
+      "SessionTrails": {
+        "type": "object",
+        "properties": {
+          "runs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "since": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "isRequestCut": {
+                  "type": "boolean"
+                },
+                "isRequestImage": {
+                  "type": "boolean"
+                },
+                "mode": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "trail": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrailEntry"
+                  }
+                },
+                "isTrailCut": {
+                  "type": "boolean"
+                },
+                "subagents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "task": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "state": {
+                        "$ref": "#/components/schemas/SessionState"
+                      },
+                      "since": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/Usage"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "task",
+                      "state",
+                      "since",
+                      "updatedAt",
+                      "model",
+                      "usage"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "since",
+                "request",
+                "isRequestCut",
+                "isRequestImage",
+                "mode",
+                "trail",
+                "isTrailCut",
+                "subagents"
+              ]
+            }
+          }
+        },
+        "required": [
+          "runs"
         ]
       },
       "FileDiff": {
@@ -2026,6 +2053,44 @@
           },
           "502": {
             "description": "git did not answer: timed out, missing or killed",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sessions/{id}/trails": {
+      "get": {
+        "summary": "The history of each earlier main run of the session, oldest first, with its subagents",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The earlier runs, none when the session has one run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionTrails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The session is not in the export",
             "content": {
               "application/problem+json": {
                 "schema": {

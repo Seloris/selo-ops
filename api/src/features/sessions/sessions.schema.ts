@@ -69,6 +69,14 @@ const subagentSchema = z.object({
   usage: usageSchema.nullable(),
 });
 
+const runSummarySchema = z.object({
+  since: z.iso.datetime(),
+  request: z.string(),
+  isRequestCut: z.boolean(),
+  isRequestImage: z.boolean(),
+  usage: runUsageSchema.nullable(),
+});
+
 export const sessionSchema = z
   .object({
     id: z.string(),
@@ -121,26 +129,9 @@ export const sessionSchema = z
     usage: usageSchema.nullable(),
     runUsage: runUsageSchema.nullable(),
     // Every main run the export keeps, oldest first: its request, cleaned (`session` BR-10), "" when unreadable, and its
-    // usage with what it did (tools, skills, prompts), null before its first stop; its trail and the subagents started
-    // before the next main run (sessions-live FR-41), the current run's from the export's freshest copy.
+    // usage with what it did (tools, skills, prompts), null before its first stop.
     // Empty for a session outside selo.
-    runs: z.array(
-      z.object({
-        id: z.string(),
-        // The session's current run, whose trail is also the session's own.
-        isCurrent: z.boolean(),
-        // `session` BR-22: `iterate` or `autonomous`, else null.
-        mode: z.string().nullable(),
-        since: z.iso.datetime(),
-        request: z.string(),
-        isRequestCut: z.boolean(),
-        isRequestImage: z.boolean(),
-        usage: runUsageSchema.nullable(),
-        trail: z.array(trailEntrySchema),
-        isTrailCut: z.boolean(),
-        subagents: z.array(subagentSchema),
-      }),
-    ),
+    runs: z.array(runSummarySchema),
     // True once the export holds its 100 runs, subagents included: the oldest ones may be gone.
     isRunListCut: z.boolean(),
     touchedFiles: z.array(z.string()),
@@ -235,12 +226,30 @@ export type SessionState = z.infer<typeof sessionStateSchema>;
 export type CloseBlocker = z.infer<typeof closeBlockerSchema>;
 export type Usage = z.infer<typeof usageSchema>;
 export type FileDiff = z.infer<typeof fileDiffSchema>;
+export type SessionTrails = z.infer<typeof sessionTrailsSchema>;
 export type FileSummary = z.infer<typeof fileSummarySchema>;
 
 const problem = (description: string) => ({
   description,
   content: { "application/problem+json": { schema: problemDetailsSchema } },
 });
+
+// sessions-live FR-41: the session's earlier main runs, oldest first, each with its history and the subagents started
+// before the next main run; read when the detail shows the session, never on the 5 s refresh.
+export const sessionTrailsSchema = z
+  .object({
+    runs: z.array(
+      runSummarySchema.omit({ usage: true }).extend({
+        // `session` BR-22: `iterate` or `autonomous`, else null.
+        mode: z.string().nullable(),
+        trail: z.array(trailEntrySchema),
+        // True once the export dropped the trail's oldest entries.
+        isTrailCut: z.boolean(),
+        subagents: z.array(subagentSchema),
+      }),
+    ),
+  })
+  .meta({ id: "SessionTrails" });
 
 registry.registerPath({
   method: "get",
@@ -294,6 +303,17 @@ registry.registerPath({
     200: { description: "The files, or isAvailable false when the session's folder holds no git checkout", content: { "application/json": { schema: fileSummarySchema } } },
     404: problem("The session is not in the export"),
     502: problem("git did not answer: timed out, missing or killed"),
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/sessions/{id}/trails",
+  summary: "The history of each earlier main run of the session, oldest first, with its subagents",
+  request: { params: sessionParamsSchema },
+  responses: {
+    200: { description: "The earlier runs, none when the session has one run", content: { "application/json": { schema: sessionTrailsSchema } } },
+    404: problem("The session is not in the export"),
   },
 });
 
