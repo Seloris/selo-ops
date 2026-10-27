@@ -65,4 +65,4 @@ Pages: `projects` · Domain: `question` (new), `session` · Components: `api`, `
 - [x] Stage 2 — web
 - [x] Review
 - [x] Browser test
-- [ ] Spec merged
+- [x] Spec merged

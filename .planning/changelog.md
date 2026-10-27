@@ -4,6 +4,7 @@ What changed in the application, for someone who reads no spec. One entry per pi
 
 ## 2026-10-27
 
+- Added — The projects page can ask Claude about a blueprint, a spec or the whole project: a « Questions » tab on a blueprint's or a sheet's panel offers « Explique-moi vite », « Résume » or a free question, and « Demander à Claude » asks about the whole project; Claude only reads the project, answers in French within a few minutes, and the answers stay until deleted. ([blueprint](blueprints/2026-10-27-ask-claude.md))
 - Changed — The « WIP » notice of the « Nouvelle session » window is now amber, so it stands out.
 - Added — The « Fichiers modifiés » window has a « Plein écran » button beside « Fermer »: the window then fills the whole screen, explorer and diff side by side over its full width, to read as much code as possible; Échap or the button gives it back.
 - Added — The « Nouvelle session » window shows a « WIP » notice under its top line: the window is to be reworked.

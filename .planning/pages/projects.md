@@ -1,6 +1,6 @@
 # Projects
 
-Route: `/projects` · Domain: `project`, `session`, `app`
+Route: `/projects` · Domain: `project`, `session`, `question`, `app`
 
 The selo projects of the developer, read from the ops export and their `.planning` files, so that the person sees at a glance where each blueprint stands and reads its specs without opening the repository.
 
@@ -27,9 +27,16 @@ The selo projects of the developer, read from the ops export and their `.plannin
 ## Side panel
 
 - **FR-10** — A click on a blueprint, a sheet, « Idées » or « Dette technique » opens it in the side panel of `sessions-live` FR-18, with its grip bar (FR-27) and full screen (FR-37); the address keeps it, Échap or the close button closes it.
-- **FR-11** — A blueprint's panel shows its title and state, then two tabs, « Résumé » open first and « Texte complet » (its whole text), so that the delta and the decisions never show twice: the summary gives its date, pages, domain sheets and components, its progress track in large with each stage's commit subject and short hash once committed, its spec delta grouped by sheet (each group with its delta bar, under a legend of the signs) with each line's « + », « ~ » or « - » and id, its Business decisions, its live sessions and its next prompt with « Copier ».
-- **FR-12** — A sheet's panel shows its title and kind, with « À bootstrapper » for a page stub (`project` BR-06), then the same two tabs: the summary gives its route, FR and BR counts, next free ids, last commit and the open blueprints touching it with their delta lines for this sheet; « Texte complet » its whole text. « Idées » and « Dette technique » show their whole text alone, with no tab.
+- **FR-11** — A blueprint's panel shows its title and state, then three tabs, « Résumé » open first, « Texte complet » (its whole text) and « Questions » (FR-20), so that the delta and the decisions never show twice: the summary gives its date, pages, domain sheets and components, its progress track in large with each stage's commit subject and short hash once committed, its spec delta grouped by sheet (each group with its delta bar, under a legend of the signs) with each line's « + », « ~ » or « - » and id, its Business decisions, its live sessions and its next prompt with « Copier ».
+- **FR-12** — A sheet's panel shows its title and kind, with « À bootstrapper » for a page stub (`project` BR-06), then the same three tabs: the summary gives its route, FR and BR counts, next free ids, last commit and the open blueprints touching it with their delta lines for this sheet; « Texte complet » its whole text. « Idées » and « Dette technique » show their whole text alone, with no tab.
 - **FR-13** — A file's whole text is shown formatted (titles, lists, ticked boxes, tables, bold, code), read from the project when the panel opens (`project` BR-01); a file that cannot be read says so and the rest of the panel stays.
+
+## Questions
+
+- **FR-19** — « Demander à Claude » in the project's view opens in the side panel (FR-10) the questions on the whole project: a free-text field with « Envoyer » and the project's questions on the whole project (FR-21).
+- **FR-20** — The « Questions » tab of a blueprint's or a sheet's panel offers « Explique-moi vite » and « Résume », each sent at a click, a free-text field with « Envoyer », then the questions on this file (FR-21) (`question` BR-03).
+- **FR-21** — Questions show newest first, each with its text or its preset's name, its age and its state (`question` BR-04): « En cours » with the time elapsed, refreshed every 2 s while one is running; « Répondu » with its answer formatted as FR-13, its model and its duration; « Échec » with its reason; « Supprimer » deletes it after a confirmation (`question` BR-06); none says « Aucune question pour l'instant ».
+- **FR-22** — « Envoyer » stays disabled while the text is empty or past 2000 characters, with its count; a refused question (`question` BR-05) or a failed send keeps the text and says why under the field.
 
 ## Whole page
 
@@ -39,7 +46,7 @@ The selo projects of the developer, read from the ops export and their `.plannin
 
 ## Non-goals
 
-- Editing a file or running a selo command: the page reads, and copies prompts only.
+- Editing a file or running a selo command: the page reads, copies prompts and asks questions (`question` BR-02) only.
 - A blueprint's mockup image and a spec's commit history.
 
 Retired:
