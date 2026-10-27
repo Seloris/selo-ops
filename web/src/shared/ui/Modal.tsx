@@ -41,16 +41,17 @@ export function Modal({
     if (dialog && !dialog.open) dialog.showModal();
   }, []);
 
-  // The browser's own Échap leaves its full screen: the dialog follows, and the other way round.
+  // The browser's own Échap leaves its full screen: the dialog follows, and the other way round. Only the dialog's own
+  // full screen: a page already full screen under it (sessions-live FR-37) stays so.
   useEffect(() => {
     const onChange = () => {
-      if (!document.fullscreenElement) setFull(false);
+      if (document.fullscreenElement !== ref.current) setFull(false);
     };
     document.addEventListener("fullscreenchange", onChange);
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
   useEffect(() => {
-    if (!isFull && document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+    if (!isFull && document.fullscreenElement === ref.current) void document.exitFullscreen().catch(() => undefined);
   }, [isFull]);
   const toggleFull = () => {
     if (isFull) return setFull(false);

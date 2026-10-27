@@ -123,6 +123,7 @@ export function FilesWindow({
       title={t("sessions.detail.files")}
       size="wide"
       closeLabel={t("sessions.files.close")}
+      fullscreen={{ enter: t("sessions.files.fullscreen"), exit: t("sessions.files.exitFullscreen") }}
       subtitle={
         <span className={styles.sub}>
           <span className={styles.request} title={request}>

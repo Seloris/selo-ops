@@ -67,6 +67,11 @@
   margin: 0 auto;
 }
 
+/* A wide box's panes take the whole screen: they are the content. */
+.wide.full .body {
+  max-width: none;
+}
+
 .head {
   display: flex;
   align-items: center;

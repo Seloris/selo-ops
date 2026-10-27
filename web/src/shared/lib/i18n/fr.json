@@ -250,6 +250,8 @@
   "sessions.files.letter.modified": "M",
   "sessions.files.letter.deleted": "D",
   "sessions.files.close": "Fermer",
+  "sessions.files.fullscreen": "Plein écran",
+  "sessions.files.exitFullscreen": "Réduire (Échap)",
   "sessions.files.explorer": "Explorateur",
   "sessions.files.filter": "Filtrer les fichiers…",
   "sessions.files.noMatch": "Aucun fichier ne correspond.",
