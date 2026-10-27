@@ -184,6 +184,17 @@ function Unsure() {
   );
 }
 
+// help FR-21: the worktree option, under the lane picked.
+function Worktree() {
+  return (
+    <p className={styles.worktree}>
+      {t("help.lanes.worktree.before")} <code className={styles.code}>{t("help.options.worktree")}</code> {t("help.lanes.worktree.middle")}{" "}
+      <code className={styles.code}>{t("help.options.autonomous")}</code>
+      {t("help.lanes.worktree.after")}
+    </p>
+  );
+}
+
 function Result({ result }: { result: LaneResult }) {
   const [isFlowOpen, setIsFlowOpen] = useState(false);
   return (
@@ -232,7 +243,7 @@ const previews: { value: Preview; label: MessageKey; colour?: ColourId }[] = [
   { value: "iterate", label: "help.lanes.preview.iterate", colour: "iterate" },
 ];
 
-// help FR-02, FR-03, FR-20: three questions, the lane they pick with its prompts to copy, and its flow on demand.
+// help FR-02, FR-03, FR-20, FR-21: three questions, the lane they pick with its prompts to copy, its flow on demand, the worktree option.
 export function LaneChooser() {
   const [answers, setAnswers] = useState<Answers>({});
   const pick = (patch: Answers) => setAnswers((current) => answer(current, patch));
@@ -265,7 +276,10 @@ export function LaneChooser() {
         </QuestionCard>
       </div>
       {result ? (
-        <Result result={result} />
+        <>
+          <Result result={result} />
+          <Worktree />
+        </>
       ) : (
         <>
           <p className={styles.empty}>{t("help.lanes.empty")}</p>

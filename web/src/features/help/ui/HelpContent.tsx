@@ -42,7 +42,7 @@ export function HelpContent() {
   );
 }
 
-// help FR-02 to FR-05, FR-20.
+// help FR-02 to FR-05, FR-20, FR-21.
 function GuideTab() {
   return (
     <>

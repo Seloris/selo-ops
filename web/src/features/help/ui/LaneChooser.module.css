@@ -189,6 +189,13 @@
   color: var(--text-muted);
 }
 
+/* help FR-21: the worktree option, under the lane picked. */
+.worktree {
+  margin: 0;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
 /* help FR-02: the lane picked, in its colour, and its exact prompts. */
 .result {
   display: grid;
