@@ -6,6 +6,7 @@ import type { Blueprint, Mockup, Project, ProjectSlot, ProjectFileResponse, Proj
 
 export const IDEAS_FILE = ".planning/ideas.md";
 export const DEBT_FILE = ".planning/technical-debt.md";
+export const CHANGELOG_FILE = ".planning/changelog.md";
 
 const norm = (path: string) => path.replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase();
 const lastSegment = (path: string) => path.replace(/\\/g, "/").replace(/\/+$/, "").split("/").pop() ?? path;
@@ -109,6 +110,7 @@ function filesOf({ base, worktrees }: Checkouts): Map<string, string> {
   for (const item of [...base.sheets, ...base.blueprints]) files.set(item.file, base.root);
   files.set(IDEAS_FILE, base.root);
   files.set(DEBT_FILE, base.root);
+  files.set(CHANGELOG_FILE, base.root);
   return files;
 }
 
@@ -175,7 +177,7 @@ export function createProjectService({ opsExport, planning, slots }: { opsExport
       const projects = groups.map((g) => toProject(g, live, planning, slots));
       return { projects: projects.sort((a, b) => a.name.localeCompare(b.name)) };
     },
-    // Only a file the export lists for the project, or its ideas or debt: never any path of the disk.
+    // Only a file the export lists for the project, or its ideas, debt or changelog: never any path of the disk.
     readFile: (id: string, path: string): ProjectFileResponse => {
       const group = checkoutsOf().groups.find((g) => keyOf(g.base.root) === id);
       if (group === undefined) throw new NotFoundError("Project", id);

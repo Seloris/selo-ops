@@ -277,6 +277,7 @@
 .hueSpecs { --hue: var(--hue-specs); }
 .hueIdeas { --hue: var(--hue-ideas); }
 .hueDebt { --hue: var(--hue-debt); }
+.hueChangelog { --hue: var(--hue-changelog); }
 
 .count {
   padding: 0 7px;

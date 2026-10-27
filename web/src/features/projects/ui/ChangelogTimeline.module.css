@@ -1,0 +1,255 @@
+.changelog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82em;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--kind);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--kind) 20%, transparent);
+}
+
+/* The line runs down the left, through each day's node and each entry's dot. */
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 8px;
+  left: 8px;
+  width: 2px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(to bottom, var(--hue-changelog), color-mix(in srgb, var(--hue-changelog) 30%, var(--border)) 35%, var(--border));
+}
+
+.day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 32px;
+}
+
+.node {
+  position: absolute;
+  top: 3px;
+  left: 2px;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--hue-changelog);
+  border-radius: var(--radius-pill);
+  /* Opaque, so the line does not run through a hollow node. */
+  background: var(--bg);
+}
+
+/* The newest day filled, with a soft ring: where the project stands today. */
+.latest .node {
+  background: var(--hue-changelog);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--hue-changelog) 24%, transparent);
+}
+
+.dayHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+.date {
+  color: var(--text);
+}
+
+.relative {
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8em;
+  font-weight: 500;
+  color: var(--hue-changelog);
+  background: color-mix(in srgb, var(--hue-changelog) 14%, transparent);
+}
+
+.dayCount {
+  font-size: 0.8em;
+  font-weight: 400;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.entries {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  position: relative;
+}
+
+/* A short tick from the line to the card. */
+.entry::before {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: -19px;
+  width: 17px;
+  height: 1px;
+  background: color-mix(in srgb, var(--kind) 45%, transparent);
+}
+
+.entryDot {
+  position: absolute;
+  top: 13px;
+  left: -27px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--kind);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--kind) 22%, transparent);
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 8.8em minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 6px 12px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.card:hover {
+  background: var(--surface-2);
+  border-color: color-mix(in srgb, var(--kind) 40%, var(--border));
+}
+
+.kindCell {
+  display: flex;
+  padding-top: 1px;
+}
+
+.text {
+  margin: 0;
+  padding-top: 2px;
+  font-size: 0.92em;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.text code {
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  border-radius: calc(var(--radius-control) / 3);
+  background: var(--surface-2);
+}
+
+.bpLink,
+.bpGone {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  margin-top: 1px;
+  padding: 0 9px;
+  font: inherit;
+  font-size: 0.78em;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: var(--radius-pill);
+}
+
+.bpLink svg,
+.bpGone svg {
+  width: 12px;
+  height: 12px;
+}
+
+.bpLink {
+  color: var(--spec-blueprint);
+  background: color-mix(in srgb, var(--spec-blueprint) 10%, transparent);
+  border: var(--border-width) solid color-mix(in srgb, var(--spec-blueprint) 45%, transparent);
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.bpLink:hover,
+.bpLink[aria-current] {
+  background: color-mix(in srgb, var(--spec-blueprint) 22%, transparent);
+}
+
+.bpLink:active {
+  background: color-mix(in srgb, var(--spec-blueprint) 30%, transparent);
+}
+
+.bpLink:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.bpGone {
+  color: var(--text-muted);
+  border: var(--border-width) dashed var(--border);
+  cursor: default;
+}
+
+.more {
+  padding-left: 32px;
+}
+
+/* Narrow: the tag above its text, the blueprint link below. */
+@container (max-width: 560px) {
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bpLink,
+  .bpGone {
+    justify-self: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .bpLink {
+    transition: none;
+  }
+}

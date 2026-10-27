@@ -17,8 +17,10 @@ import { isOpen } from "../../sessions/data/sessionView.ts";
 import { age, requestText, toneOf } from "../../sessions/ui/sessionText.ts";
 import { MIN_PANEL_WIDTH, PANEL_WIDTH_STEP, clampPanelWidth, parsePanelWidth } from "../../sessions/ui/panelWidth.ts";
 import { blueprintsTouching, pageCounts, sortProjects, type ProjectOverview } from "../data/projectView.ts";
+import { useProjectChangelogQuery } from "../data/useProjectChangelogQuery.ts";
 import { useProjectFileQuery } from "../data/useProjectFileQuery.ts";
 import { useProjectsQuery } from "../data/useProjectsQuery.ts";
+import { localDay } from "../ui/changelog.ts";
 import { ProjectCards } from "../ui/ProjectCards.tsx";
 import { ProjectPanel, type PanelSubject } from "../ui/ProjectPanel.tsx";
 import type { LiveItem } from "../ui/ProjectParts.tsx";
@@ -45,7 +47,7 @@ function subjectOf(project: ProjectOverview, path: string): PanelSubject | null 
   return null;
 }
 
-// projects FR-01 to FR-16: the cards of the projects, or one project's view; its files in the side panel.
+// projects FR-01 to FR-18: the cards of the projects, or one project's view; its files in the side panel.
 export function ProjectsPage() {
   const query = useProjectsQuery();
   const sessionsQuery = useSessionsQuery();
@@ -65,6 +67,7 @@ export function ProjectsPage() {
   const project = projectId === null ? null : (projects.find((p) => p.id === projectId && p.hasPlanning) ?? null);
   const subject = project && path ? subjectOf(project, path) : null;
   const isPanelOpen = subject !== null;
+  const changelog = useProjectChangelogQuery(project?.id ?? null);
   const file = useProjectFileQuery(isPanelOpen ? (project?.id ?? null) : null, isPanelOpen ? path : null);
 
   const sessionsById = useMemo(() => new Map((sessionsQuery.data?.sessions ?? []).map((s) => [s.id, s])), [sessionsQuery.data]);
@@ -212,6 +215,8 @@ export function ProjectsPage() {
                   <ProjectView
                     project={project}
                     openPath={isPanelOpen ? path : null}
+                    changelog={{ isPending: changelog.isPending, error: changelog.isError ? changelog.error.message : null, text: changelog.data ?? null }}
+                    today={localDay(now)}
                     liveOf={liveOf}
                     ageOf={ageOf}
                     onBack={() => setAddress({ project: null, file: null })}

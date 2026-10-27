@@ -481,11 +481,25 @@ describe("projects", () => {
       expect([ideas.status, ideas.body.text, debt.status, debt.body.text]).toEqual([200, "# Ideas\n", 200, "# Debt\n"]);
     });
 
+    it("returns the changelog of the base checkout", async () => {
+      // Arrange
+      const { root } = seedRepoWithWorktree();
+      writeFile(root, ".planning/changelog.md", "# Changelog\n\n## 2026-01-02\n\n- Added — Tags.\n");
+
+      // Act
+      const res = await readFile(rootKeyOf(root), ".planning/changelog.md");
+
+      // Assert
+      expect(res.status).toBe(200);
+      expect(res.body.text).toBe("# Changelog\n\n## 2026-01-02\n\n- Added — Tags.\n");
+    });
+
     it.each([
       ["a file the export does not list", "selo.yaml"],
       ["a path out of the project", "../ledger-api-wt/.planning/blueprints/2026-01-02-tags.md"],
       ["an absolute path", "C:/Windows/win.ini"],
       ["a listed file that cannot be read", ".planning/blueprints/2026-01-01-due-date.md"],
+      ["a missing changelog", ".planning/changelog.md"],
     ])("returns 404 for %s", async (_case, path) => {
       // Arrange
       const { root } = seedRepoWithWorktree();

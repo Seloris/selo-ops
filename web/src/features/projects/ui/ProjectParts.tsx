@@ -155,6 +155,7 @@ const HUES = {
   specs: styles.hueSpecs,
   ideas: styles.hueIdeas,
   debt: styles.hueDebt,
+  changelog: styles.hueChangelog,
 };
 
 export type Hue = keyof typeof HUES;

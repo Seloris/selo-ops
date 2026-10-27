@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import type { ExportBlueprint, ExportMockup, ExportSheet } from "../features/sessions/sessions.export.js";
 
 // The demo's `.planning` folders and the export's view of them (the projects page, `project` BR-01 to BR-04): every
-// blueprint state, a blueprint only a worktree holds, ideas and technical debt. Each file is written once, from the same
+// blueprint state, a blueprint only a worktree holds, ideas, technical debt and a changelog. Each file is written once, from the same
 // data the export's lists are built from, so a panel's text agrees with its counts.
 
 interface DemoSheet {
@@ -44,6 +44,8 @@ interface DemoPlanning {
   // sessions-live FR-50: each mockup's name, title, whether it is validated, whether it is committed, and the worktree
   // that alone holds it.
   mockups?: [string, string, boolean, boolean, string?][];
+  // projects FR-18: each day of the changelog, newest first, and its entries as written (a malformed one and a link to a blueprint gone, kept on purpose).
+  changelog?: [string, string[]][];
 }
 
 const MINUTE = 60;
@@ -88,6 +90,11 @@ export const DEMO_PLANNING: Record<string, DemoPlanning> = {
     ],
     ideas: [["invoices", "**Bulk reminder:** send a reminder to every late customer at once."], ["app", "**Dark theme:** a dark theme for late evenings."]],
     debts: ["**VAT rates hard-coded (api):** the VAT rates live in the code, not in a table. See [vat.ts](../api/src/invoices/vat.ts)."],
+    changelog: [
+      ["2026-10-24", ["Added — The invoices list has an « Exporter » button: it downloads the filtered list as a CSV file."]],
+      ["2026-10-19", ["Added — A late invoice wears a rose « En retard » tag, and its customer gets a reminder by email every Monday. ([blueprint](blueprints/2026-10-19-payment-reminders.md))",
+        "Fixed — VAT is now rounded per line, so an invoice's total matches the sum of its lines to the cent."]],
+    ],
   },
   "harbor-mobile": {
     sheets: [
@@ -150,6 +157,15 @@ export const DEMO_PLANNING: Record<string, DemoPlanning> = {
     mockups: [["2026-10-26-new-session-modes", "Nouvelle session, deux modes", true, false]],
     ideas: [["sessions-live", "**Session token count:** see the number of tokens a session used."], ["sessions-live", "**Session duration:** see when a session was created and how long it ran."], ["app", "**Terminal mode:** drive sessions from a terminal in the app."]],
     debts: ["**Export read on each poll (api):** the whole export is read again every 5 s. See [sessions.export.ts](../api/src/features/sessions/sessions.export.ts).", "**Panel width in local storage (web):** the detail's width is kept per browser only. See [panelWidth.ts](../web/src/features/sessions/ui/panelWidth.ts)."],
+    changelog: [
+      ["2026-10-27", ["Changed — A session's « Fichiers modifiés » opens the files in a window of their own, like an editor, with the diff of each.",
+        "Fixed — In the files window's explorer, the selected file reads as a softly tinted row."]],
+      ["2026-10-26", ["Added — In the sessions list, a session working in a worktree shows a small fir tree; hovering it gives the worktree's name and branch.",
+        "Changed — The same step repeated in a row of « Déroulé du tour » reads as one line, with a pip per pass.",
+        "Header moved to the top of the detail, without a kind."]],
+      ["2026-10-22", ["Added — « Sessions live » lists the open sessions grouped by project, and a click opens a session's detail beside the list. ([blueprint](blueprints/2026-10-12-sessions-list.md))"]],
+      ["2026-10-20", ["Added — Selo Ops reads the ops export of every project and never writes to it. ([blueprint](blueprints/2026-10-20-ops-export.md))"]],
+    ],
   },
 };
 
@@ -268,6 +284,8 @@ export function seedPlanning(project: string, root: string, worktreeRoot: (name:
   }
   write(root, ".planning/ideas.md", ["# Ideas", "", "The person's ideas, not yet specified.", "",
     ...[...new Set(planning.ideas.map(([scope]) => scope))].flatMap((scope) => [`## ${scope}`, "", ...planning.ideas.filter(([s]) => s === scope).map(([, text]) => `- 2026-10-20 — ${text}`), ""])].join("\n"));
+  if (planning.changelog) write(root, ".planning/changelog.md", ["# Changelog", "", "What changed in the application, for someone who reads no spec.", "",
+    ...planning.changelog.flatMap(([day, entries]) => [`## ${day}`, "", ...entries.map((e) => `- ${e}`), ""])].join("\n"));
   write(root, ".planning/technical-debt.md", ["# Technical debt", "", "A flat list, new items at the bottom.", "", ...planning.debts.map((d) => `- ${d}`), ""].join("\n"));
   const toMockup = ([name, title, validated, committed]: [string, string, boolean, boolean, string?]): ExportMockup => ({ file: `.planning/mockups/${name}.html`, title, validated, committed });
   const allMockups = planning.mockups ?? [];

@@ -121,6 +121,9 @@ describe("demo", { timeout: 30_000 }, () => {
         expect(projectFileResponseSchema.parse(read.body).text).toMatch(/^# /);
       }
     }
+    const changelogs = await Promise.all(projects.map((p) => request(app).get(`/v1/projects/${p.id}/file`).query({ path: ".planning/changelog.md" })));
+    expect(changelogs.some((r) => r.status === 200 && /^## \d{4}-\d{2}-\d{2}$/m.test(projectFileResponseSchema.parse(r.body).text))).toBe(true);
+    expect(changelogs.some((r) => r.status === 404)).toBe(true);
   });
 
   it("shows a file's committed and uncommitted diff", async () => {

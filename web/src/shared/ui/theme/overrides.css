@@ -18,6 +18,8 @@
    --bp-draft, --bp-ready, --bp-building, --bp-review, --bp-merging, --bp-done, --bp-legacy   a blueprint's state, the same in bars, legends, tags and tracks: lime, cyan, blue, violet, fuchsia, green, grey (projects FR-14); none is --mark, amber or rose
    --delta-add, --delta-change, --delta-remove   a spec delta's lines added, changed, removed, in figures, bars and signs, and a file diff's added and removed lines: green, yellow, red; no state colour
    --hue-progress, --hue-blueprints, --hue-specs, --hue-ideas, --hue-debt   the icons of the projects page's sections: orange, teal, emerald, sky, stone
+   --hue-changelog       the icon of the projects page’s « Journal des changements » (projects FR-18): plum
+   --log-added, --log-changed, --log-fixed, --log-other   a changelog entry’s kind, in its tag and its dot on the timeline: emerald, cornflower blue, purple, slate (projects FR-18); no state colour
    --spec-page, --spec-domain, --spec-blueprint   a page spec, a domain sheet, a blueprint, wherever one shows (app FR-04): indigo, pink, teal like the blueprint lane
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
    of that scheme, so the choice wins over the system's prefers-color-scheme. */
@@ -65,6 +67,11 @@
     --spec-page: #4f46e5;
     --spec-domain: #db2777;
     --spec-blueprint: #0f766e;
+    --hue-changelog: #86198f;
+    --log-added: #059669;
+    --log-changed: #3b5bdb;
+    --log-fixed: #9333ea;
+    --log-other: #64748b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -111,6 +118,11 @@
     --spec-page: #a5b4fc;
     --spec-domain: #f9a8d4;
     --spec-blueprint: #2dd4bf;
+    --hue-changelog: #f5d0fe;
+    --log-added: #34d399;
+    --log-changed: #91a7ff;
+    --log-fixed: #d8b4fe;
+    --log-other: #94a3b8;
   }
 }
 
@@ -176,6 +188,11 @@
   --spec-page: #4f46e5;
   --spec-domain: #db2777;
   --spec-blueprint: #0f766e;
+  --hue-changelog: #86198f;
+  --log-added: #059669;
+  --log-changed: #3b5bdb;
+  --log-fixed: #9333ea;
+  --log-other: #64748b;
   color-scheme: light;
 }
 
@@ -241,5 +258,10 @@
   --spec-page: #a5b4fc;
   --spec-domain: #f9a8d4;
   --spec-blueprint: #2dd4bf;
+  --hue-changelog: #f5d0fe;
+  --log-added: #34d399;
+  --log-changed: #91a7ff;
+  --log-fixed: #d8b4fe;
+  --log-other: #94a3b8;
   color-scheme: dark;
 }

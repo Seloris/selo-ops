@@ -4,7 +4,7 @@ import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { EmptyState } from "../../../shared/ui/EmptyState.tsx";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage.tsx";
-import { BlueprintIcon, BranchIcon, GaugeIcon, NoteIcon, TextFileIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { BlueprintIcon, BranchIcon, GaugeIcon, HistoryIcon, NoteIcon, TextFileIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
 import { SpecChip } from "../../../shared/ui/SpecKind.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
@@ -17,16 +17,19 @@ import {
   type ProjectOverview,
   type SpecSheet,
 } from "../data/projectView.ts";
+import { ChangelogTimeline, type ChangelogState } from "./ChangelogTimeline.tsx";
 import { DeltaFigures, DoneSummary, HueChip, LiveSessions, ProgressTrack, SectionTitle, StateBar, StateTag, Tiles, type Hue, type LiveItem } from "./ProjectParts.tsx";
 import styles from "./ProjectView.module.css";
 
 export const IDEAS_FILE = ".planning/ideas.md";
 export const DEBT_FILE = ".planning/technical-debt.md";
 
-// projects FR-05 to FR-09: one project's view, in place of the cards.
+// projects FR-05 to FR-09 and FR-18: one project's view, in place of the cards.
 export function ProjectView({
   project: p,
   openPath,
+  changelog,
+  today,
   liveOf,
   ageOf,
   onBack,
@@ -36,6 +39,9 @@ export function ProjectView({
   project: ProjectOverview;
   // The file open in the panel, marked in the lists.
   openPath: string | null;
+  changelog: ChangelogState;
+  // The local day, `YYYY-MM-DD`.
+  today: string;
   liveOf: (ids: string[]) => LiveItem[];
   // « 3 h 05 » since an ISO date.
   ageOf: (iso: string) => string;
@@ -295,6 +301,17 @@ export function ProjectView({
             )}
           </>
         )}
+      </section>
+
+      <section className={styles.section}>
+        <SectionTitle icon={<HistoryIcon />} hue="changelog" title={t("projects.changelog.title")} />
+        <ChangelogTimeline
+          changelog={changelog}
+          today={today}
+          blueprintFiles={new Set(p.blueprints.map((b) => b.file))}
+          openPath={openPath}
+          onOpenFile={onOpenFile}
+        />
       </section>
 
       <section className={styles.section}>
