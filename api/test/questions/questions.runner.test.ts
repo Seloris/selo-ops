@@ -123,6 +123,22 @@ describe("createClaudeRunner", () => {
     await expect(pending).rejects.toEqual(new RunError("run-failed", "Not logged in"));
   });
 
+  it("keeps the result's words when an API error exits non-zero", async () => {
+    // Arrange
+    const fake = fakeChild();
+    const { runner } = runnerWith(fake);
+
+    // Act
+    const pending = runner.run(input());
+    await flush();
+    out(fake).write(JSON.stringify({ is_error: true, result: "API Error: 401 invalid key" }));
+    await flush();
+    fake.child.emit("close", 1);
+
+    // Assert
+    await expect(pending).rejects.toMatchObject({ code: "run-failed", detail: "API Error: 401 invalid key" });
+  });
+
   it("fails with the result's text when Claude Code reports an error", async () => {
     // Arrange
     const fake = fakeChild();
@@ -147,9 +163,15 @@ describe("createClaudeRunner", () => {
     // Act
     const pending = runner.run(input(controller.signal));
     controller.abort("timeout");
+    let isSettled = false;
+    void pending.catch(() => (isSettled = true));
+    await flush();
+    const isSettledBeforeClose = isSettled;
+    fake.child.emit("close", null);
 
     // Assert
     await expect(pending).rejects.toBeInstanceOf(RunError);
     expect(fake.isKilled()).toBe(true);
+    expect(isSettledBeforeClose).toBe(false);
   });
 });

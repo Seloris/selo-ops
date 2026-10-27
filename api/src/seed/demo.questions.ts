@@ -20,11 +20,15 @@ export function createDemoQuestionRunner(delayMs = DEMO_ANSWER_DELAY_MS): Questi
   return {
     run: ({ signal }) =>
       new Promise((resolve, reject) => {
-        const timer = setTimeout(() => resolve({ answer: CANNED_ANSWER, model: DEMO_MODEL, durationMs: delayMs }), delayMs);
-        signal.addEventListener("abort", () => {
+        const onAbort = () => {
           clearTimeout(timer);
           reject(new RunError("run-failed", "stopped"));
-        });
+        };
+        const timer = setTimeout(() => {
+          signal.removeEventListener("abort", onAbort);
+          resolve({ answer: CANNED_ANSWER, model: DEMO_MODEL, durationMs: delayMs });
+        }, delayMs);
+        signal.addEventListener("abort", onAbort, { once: true });
       }),
   };
 }

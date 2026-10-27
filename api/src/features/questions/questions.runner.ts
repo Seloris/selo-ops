@@ -96,7 +96,29 @@ export function parseResult(stdout: string, elapsedMs: number): RunResult {
 }
 
 const OUTPUT_CAP = 4 * 1024 * 1024;
+// A stopped run frees its place once its process is gone, or after this delay if it never says so.
+const KILL_GRACE_MS = 5000;
 const STDERR_TAIL = 2000;
+
+// The JSON result's own error, when the output holds one.
+function resultError(stdout: string): RunError | null {
+  try {
+    parseResult(stdout, 0);
+    return null;
+  } catch (error) {
+    return error instanceof RunError && error.detail !== null && !error.detail.startsWith("Claude Code's output") ? error : null;
+  }
+}
+
+// On Windows `kill` ends `claude.exe` alone, not the processes it started: `taskkill /T` ends the tree, no shell.
+function killTree(child: ChildProcessWithoutNullStreams): void {
+  if (process.platform === "win32" && child.pid !== undefined) {
+    const killer = nodeSpawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], { windowsHide: true, stdio: "ignore" });
+    killer.on("error", () => child.kill());
+    return;
+  }
+  child.kill();
+}
 
 export type Spawn = (command: string, args: string[], options: SpawnOptionsWithoutStdio) => ChildProcessWithoutNullStreams;
 
@@ -123,9 +145,13 @@ export function createClaudeRunner({ bin, spawn = nodeSpawn, env = process.env }
           signal.removeEventListener("abort", onAbort);
           fn();
         };
+        let isStopping = false;
         const onAbort = () => {
-          child.kill();
-          settle(() => reject(new RunError("run-failed", "stopped")));
+          if (isStopping) return;
+          isStopping = true;
+          killTree(child);
+          // Rejected once the process is gone (its close event), so that a new run never starts beside a dying one.
+          setTimeout(() => settle(() => reject(new RunError("run-failed", "stopped"))), KILL_GRACE_MS).unref();
         };
         signal.addEventListener("abort", onAbort);
         child.stdout.setEncoding("utf8");
@@ -142,8 +168,13 @@ export function createClaudeRunner({ bin, spawn = nodeSpawn, env = process.env }
         });
         child.on("close", (exitCode) => {
           settle(() => {
+            if (isStopping) {
+              reject(new RunError("run-failed", "stopped"));
+              return;
+            }
             if (exitCode !== 0) {
-              reject(new RunError("run-failed", stderr.trim() || `exit code ${String(exitCode)}`));
+              // An API error exits non-zero with its words in the JSON result, stderr empty.
+              reject(resultError(stdout) ?? new RunError("run-failed", stderr.trim() || `exit code ${String(exitCode)}`));
               return;
             }
             try {
