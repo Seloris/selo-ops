@@ -173,6 +173,41 @@ describe("projects", () => {
       ]);
     });
 
+    it("lists a worktree's committed mockup with its branch until the base checkout holds a file of that name", async () => {
+      // Arrange
+      const root = slash(ctx.code.repo("ledger-api"));
+      const worktree = slash(ctx.code.folder("ledger-api-wt"));
+      ctx.seed.project(
+        buildProjectFile({
+          root,
+          sheets: [buildExportSheet()],
+          mockups: [
+            buildExportMockup({ file: ".planning/mockups/2026-01-02-home.html", title: "Home", committed: true }),
+            buildExportMockup({ file: ".planning/mockups/2026-01-06-landed.html", title: "Landed", committed: true }),
+          ],
+        }),
+      );
+      ctx.seed.project(
+        buildProjectFile({
+          root: worktree,
+          repo: `${root}/.git`,
+          branch: "claude/export",
+          mockups: [
+            buildExportMockup({ file: ".planning/mockups/2026-01-02-home.html", title: "Home", committed: true }),
+            buildExportMockup({ file: ".planning/mockups/2026-01-06-landed.html", title: "Landed", committed: true }),
+            buildExportMockup({ file: ".planning/mockups/2026-01-07-export.html", title: "Export", committed: true }),
+            buildExportMockup({ file: ".planning/mockups/2026-01-08-draft.html", title: "Draft", validated: false, committed: true }),
+          ],
+        }),
+      );
+
+      // Act
+      const [project] = await list();
+
+      // Assert
+      expect(project?.mockups).toEqual([{ file: ".planning/mockups/2026-01-07-export.html", title: "Export", worktreeBranch: "claude/export" }]);
+    });
+
     it("lists no mockup when the export gives none", async () => {
       // Arrange
       seedRepoWithWorktree();

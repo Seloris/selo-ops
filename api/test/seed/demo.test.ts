@@ -98,7 +98,7 @@ describe("demo", { timeout: 30_000 }, () => {
     expect(done?.nextSteps.map((n) => n.command)).toContain(done?.nextAction);
   });
 
-  it("shows every blueprint state, a worktree's own blueprint, a project without planning and readable files", async () => {
+  it("shows every blueprint state, a worktree's own blueprint and mockup, a project without planning and readable files", async () => {
     // Arrange
     const app = await demoApp();
 
@@ -110,6 +110,7 @@ describe("demo", { timeout: 30_000 }, () => {
     const blueprints = projects.flatMap((p) => p.blueprints);
     expect(new Set(blueprints.map((b) => b.state))).toEqual(new Set(["draft", "ready", "building", "review", "merging", "done", "legacy"]));
     expect(blueprints.some((b) => b.worktreeBranch !== null)).toBe(true);
+    expect(projects.flatMap((p) => p.mockups).some((m) => m.worktreeBranch !== null)).toBe(true);
     expect(blueprints.some((b) => b.sessionIds.length > 0)).toBe(true);
     expect(projects.some((p) => !p.hasPlanning)).toBe(true);
     expect(projects.some((p) => p.ideaCount > 0 && p.debtCount > 0)).toBe(true);

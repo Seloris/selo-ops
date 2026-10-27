@@ -41,8 +41,9 @@ interface DemoPlanning {
   blueprints: DemoBlueprint[];
   ideas: [string, string][];
   debts: string[];
-  // sessions-live FR-50: each mockup's name, title, whether it is validated, whether it is committed.
-  mockups?: [string, string, boolean, boolean][];
+  // sessions-live FR-50: each mockup's name, title, whether it is validated, whether it is committed, and the worktree
+  // that alone holds it.
+  mockups?: [string, string, boolean, boolean, string?][];
 }
 
 const MINUTE = 60;
@@ -121,7 +122,8 @@ export const DEMO_PLANNING: Record<string, DemoPlanning> = {
         stages: [["web", "catalog grid", "2c9e7a4"]], delta: [["catalog", "+", "FR-01", "Products show in a grid with their price."]], decisions: [] },
     ],
     ideas: [["catalog", "**Wishlist:** keep products for later."]],
-    mockups: [["2026-10-24-product-sheet", "Fiche produit", true, false], ["2026-10-25-wishlist", "Liste d’envies", false, false], ["2026-10-15-catalog", "Grille du catalogue", true, true]],
+    mockups: [["2026-10-24-product-sheet", "Fiche produit", true, false], ["2026-10-25-wishlist", "Liste d’envies", false, false], ["2026-10-15-catalog", "Grille du catalogue", true, true],
+      ["2026-10-22-one-step-checkout", "Commande en une étape", true, true, "one-step-checkout"]],
     debts: ["**No image sizes (web):** product images load at full size in the grid. See [ProductCard.tsx](../web/src/features/catalog/ui/ProductCard.tsx)."],
   },
   "selo-ops": {
@@ -267,6 +269,10 @@ export function seedPlanning(project: string, root: string, worktreeRoot: (name:
   write(root, ".planning/ideas.md", ["# Ideas", "", "The person's ideas, not yet specified.", "",
     ...[...new Set(planning.ideas.map(([scope]) => scope))].flatMap((scope) => [`## ${scope}`, "", ...planning.ideas.filter(([s]) => s === scope).map(([, text]) => `- 2026-10-20 — ${text}`), ""])].join("\n"));
   write(root, ".planning/technical-debt.md", ["# Technical debt", "", "A flat list, new items at the bottom.", "", ...planning.debts.map((d) => `- ${d}`), ""].join("\n"));
-  const mockups: ExportMockup[] = (planning.mockups ?? []).map(([name, title, validated, committed]) => ({ file: `.planning/mockups/${name}.html`, title, validated, committed }));
-  return { sheets, blueprints: base.map((b) => toExportBlueprint(b, at)), mockups, worktrees };
+  const toMockup = ([name, title, validated, committed]: [string, string, boolean, boolean, string?]): ExportMockup => ({ file: `.planning/mockups/${name}.html`, title, validated, committed });
+  const allMockups = planning.mockups ?? [];
+  const mockups = allMockups.filter(([, , , , w]) => w === undefined).map(toMockup);
+  // A worktree holds the base's committed mockups too, as of its branch.
+  const worktreeMockups = (name: string) => [...allMockups.filter(([, , , committed, w]) => w === undefined && committed), ...allMockups.filter(([, , , , w]) => w === name)].map(toMockup);
+  return { sheets, blueprints: base.map((b) => toExportBlueprint(b, at)), mockups, worktrees, worktreeMockups };
 }

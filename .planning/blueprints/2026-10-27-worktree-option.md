@@ -15,6 +15,9 @@ Pages: `sessions-live`, `help` · Domain: `project` · Components: `api`, `web`
 ## Technical defaults
 - Data source → the export as it is: the base checkout's mockup list tells whether the base branch holds the file; no change of the exporter nor of the API contract.
 
+### Decided during build
+- Demo data → atelier-web's worktree `one-step-checkout` holds a validated committed mockup of its own, beside the base's committed ones (the browser test needs one under « Reprendre »).
+
 ## Stages
 1. api — `feat(worktree-option): api — a worktree's committed mockup stays to build until it lands`
 2. web — `feat(worktree-option): web — the help documents --worktree`
@@ -25,7 +28,7 @@ Pages: `sessions-live`, `help` · Domain: `project` · Components: `api`, `web`
 - browser: the demo, help popup — the card's `--worktree` line under a lane picked, the skills' options; « Nouvelle session » — a worktree's committed mockup under « Reprendre »; 1280 px and 375 px.
 
 ## Progress
-- [ ] Stage 1 — api
+- [x] Stage 1 — api
 - [ ] Stage 2 — web
 - [ ] Review
 - [ ] Browser test

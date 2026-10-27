@@ -89,12 +89,15 @@ function toBlueprint(b: ExportBlueprint, worktreeBranch: string | null, sessionI
   };
 }
 
-// sessions-live FR-50: the validated mockups no commit holds yet, the base checkout's first, then a worktree's own
-// (`project` BR-01), the first worktree holding one winning.
+// sessions-live FR-50: the base checkout's validated mockups no commit holds yet, then a worktree's validated ones,
+// committed or not, while the base checkout holds no file of that name: selo commits a mockup drawn in a worktree at
+// once, and only its landing brings the file to the base branch (`project` BR-01). The first worktree holding one wins.
 function mockupsOf({ base, worktrees }: Checkouts): Mockup[] {
-  const toBuild = (f: ProjectFile, worktreeBranch: string | null) =>
-    f.mockups.filter((m) => m.validated && !m.committed).map((m) => ({ file: m.file, title: m.title, worktreeBranch }));
-  const all = [...toBuild(base, null), ...worktrees.flatMap((w) => toBuild(w, w.branch ?? null))];
+  const baseFiles = new Set(base.mockups.map((m) => m.file));
+  const fromBase = base.mockups.filter((m) => m.validated && !m.committed).map((m) => ({ file: m.file, title: m.title, worktreeBranch: null }));
+  const fromWorktree = (w: ProjectFile) =>
+    w.mockups.filter((m) => m.validated && !baseFiles.has(m.file)).map((m) => ({ file: m.file, title: m.title, worktreeBranch: w.branch ?? null }));
+  const all = [...fromBase, ...worktrees.flatMap(fromWorktree)];
   return all.filter((m, i) => all.findIndex((x) => x.file === m.file) === i).sort((a, b) => b.file.localeCompare(a.file));
 }
 

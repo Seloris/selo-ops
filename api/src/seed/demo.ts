@@ -434,7 +434,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
     ...SESSIONS.filter((s) => s.worktree).map((s) => ({
       schemaVersion: 1 as const, root: rootOf(s), repo: repoOf(s.project), branch: `claude/${s.worktree}`, changedCount: 2, manifest: { name: s.project },
       selo: "2.4.0", baseBranch: PROJECTS[s.project]?.branch ?? "main", aheadCount: 3, unpushedCount: null, error: null,
-      blueprints: planning.get(s.project)?.worktrees.get(s.worktree ?? "") ?? [],
+      blueprints: planning.get(s.project)?.worktrees.get(s.worktree ?? "") ?? [], mockups: planning.get(s.project)?.worktreeMockups(s.worktree ?? "") ?? [],
     })),
     // `project` BR-04: a repository with no selo planning, listed with its git counts only.
     { schemaVersion: 1 as const, root: `${ROOT}/weather-cli`, repo: repoOf("weather-cli"), branch: "main", changedCount: 1, manifest: null,
