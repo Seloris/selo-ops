@@ -219,7 +219,7 @@ function Result({ result }: { result: LaneResult }) {
           </span>
           {t(isFlowOpen ? "help.lanes.flow.hide" : "help.lanes.flow.show")}
         </button>
-        <Unsure />
+        {!result.isPilotWith && <Unsure />}
       </div>
       {isFlowOpen && <FlowMap result={result} />}
     </div>
@@ -248,6 +248,7 @@ export function LaneChooser() {
         <QuestionCard number={2} question="scope" answers={answers} note={isScopeOn ? undefined : "help.lanes.q.seloPicks"}>
           <Choice label="help.lanes.scope.page" hint="help.lanes.scope.pageHint" colour="fastlane" isOn={isScopeOn && answers.scope === "page"} isOff={!isScopeOn} onPick={() => pick({ scope: "page" })} />
           <Choice label="help.lanes.scope.new" hint="help.lanes.scope.newHint" colour="blueprint" isOn={isScopeOn && answers.scope === "new"} isOff={!isScopeOn} onPick={() => pick({ scope: "new" })} />
+          <Choice label="help.lanes.scope.unsure" hint="help.lanes.scope.unsureHint" colour="pilot" isOn={isScopeOn && answers.scope === "unsure"} isOff={!isScopeOn} onPick={() => pick({ scope: "unsure" })} />
         </QuestionCard>
         <QuestionCard number={3} question="preview" answers={answers}>
           {previews.map((preview) => (

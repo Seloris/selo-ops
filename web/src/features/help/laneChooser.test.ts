@@ -30,6 +30,22 @@ describe("laneFor", () => {
     expect(prompts({ stay: "leave", preview: "mockup" })).toEqual(["/selo:mockup {demande}", "/selo:pilot {demande} --mockup .planning/mockups/{fichier} --autonomous"]);
   });
 
+  it("gives the interactive pilot to a person who stays but is unsure of the scope", () => {
+    expect(prompts({ stay: "stay", scope: "unsure", preview: "direct" })).toEqual(["/selo:pilot {demande}", "/selo:build {blueprint}"]);
+    expect(prompts({ stay: "stay", scope: "unsure", preview: "mockup" })).toEqual(["/selo:mockup {demande}", "/selo:pilot {demande} --mockup .planning/mockups/{fichier}", "/selo:build {blueprint}"]);
+    const pilot = laneFor({ stay: "stay", scope: "unsure", preview: "direct" });
+    expect(pilot).toMatchObject({ lane: "pilot", name: "help.lanes.pilotWith.name", options: [], foot: "help.lanes.foot.pilotWith" });
+    expect(pilot?.why).toEqual(["help.lanes.why.stay", "help.lanes.why.unsure", "help.lanes.why.direct"]);
+    expect(pilot?.tracks.map((track) => track.colour)).toEqual(["pilot", "blueprint"]);
+    expect(pilot?.tracks[0]?.steps[0]).toMatchObject({ state: "you", code: "/selo:pilot {demande}" });
+    expect(pilot?.tracks[1]?.steps[0]?.name).toBe("help.lanes.step.grill.name");
+    expect(pilot?.isPilotWith).toBe(true);
+    expect(laneFor({ stay: "leave", preview: "direct" })?.isPilotWith).toBeUndefined();
+    const withMockup = laneFor({ stay: "stay", scope: "unsure", preview: "mockup" });
+    expect(withMockup?.tracks.map((track) => track.colour)).toEqual(["mockup", "pilot", "blueprint"]);
+    expect(withMockup?.tracks[1]?.steps[0]?.code).toBe("/selo:pilot {demande} --mockup {fichier}");
+  });
+
   it("names the options in their colours and the reasons", () => {
     const iterate = laneFor({ stay: "stay", scope: "page", preview: "iterate" });
     expect(iterate?.options).toEqual([{ label: "--iterate", colour: "iterate" }]);
@@ -82,6 +98,7 @@ describe("the questions", () => {
     expect(isPreviewAllowed({}, "iterate")).toBe(true);
     expect(isPreviewAllowed({ stay: "leave" }, "iterate")).toBe(false);
     expect(isPreviewAllowed({ stay: "stay", scope: "new" }, "iterate")).toBe(false);
+    expect(isPreviewAllowed({ stay: "stay", scope: "unsure" }, "iterate")).toBe(false);
     expect(isPreviewAllowed({ stay: "leave" }, "mockup")).toBe(true);
   });
 
@@ -94,6 +111,7 @@ describe("the questions", () => {
   it("says why a choice is closed", () => {
     expect(previewHint({ stay: "leave" }, "iterate")).toBe("help.lanes.preview.iterate.stayOnly");
     expect(previewHint({ stay: "stay", scope: "new" }, "iterate")).toBe("help.lanes.preview.iterate.fastlaneOnly");
+    expect(previewHint({ stay: "stay", scope: "unsure" }, "iterate")).toBe("help.lanes.preview.iterate.fastlaneOnly");
     expect(previewHint({ stay: "leave" }, "mockup")).toBe("help.lanes.preview.mockup.leave");
     expect(previewHint({}, "mockup")).toBe("help.lanes.preview.mockup.hint");
     expect(previewHint({}, "direct")).toBeUndefined();

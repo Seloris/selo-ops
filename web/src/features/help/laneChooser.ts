@@ -4,7 +4,7 @@ import type { ColourId, LaneId } from "./content.ts";
 // help FR-02, FR-03, FR-20: three questions pick a lane, its exact prompts and the flow they run.
 
 export type Stay = "stay" | "leave";
-export type Scope = "page" | "new";
+export type Scope = "page" | "new" | "unsure";
 export type Preview = "direct" | "mockup" | "iterate";
 
 export interface Answers {
@@ -18,8 +18,8 @@ export type Question = keyof Answers;
 // Leaving hands the lane to selo: the scope no longer matters.
 export const isScopeOpen = (answers: Answers) => answers.stay !== "leave";
 
-// Iterating needs the person at the running app, on the fastlane.
-export const isPreviewAllowed = (answers: Answers, preview: Preview) => preview !== "iterate" || (answers.stay !== "leave" && answers.scope !== "new");
+// Iterating needs the person at the running app, on the fastlane: a lane the person picks, never selo.
+export const isPreviewAllowed = (answers: Answers, preview: Preview) => preview !== "iterate" || (answers.stay !== "leave" && answers.scope !== "new" && answers.scope !== "unsure");
 
 export function isAnswered(answers: Answers, question: Question): boolean {
   if (question === "scope") return isScopeOpen(answers) && answers.scope !== undefined;
@@ -36,7 +36,7 @@ export function answer(answers: Answers, patch: Answers): Answers {
 export function previewHint(answers: Answers, preview: Preview): MessageKey | undefined {
   if (preview === "iterate") {
     if (answers.stay === "leave") return "help.lanes.preview.iterate.stayOnly";
-    if (answers.scope === "new") return "help.lanes.preview.iterate.fastlaneOnly";
+    if (answers.scope === "new" || answers.scope === "unsure") return "help.lanes.preview.iterate.fastlaneOnly";
     return "help.lanes.preview.iterate.hint";
   }
   if (preview === "mockup") return answers.stay === "leave" ? "help.lanes.preview.mockup.leave" : "help.lanes.preview.mockup.hint";
@@ -78,6 +78,8 @@ export interface LaneResult {
   text: MessageKey;
   tracks: Track[];
   foot: MessageKey;
+  // The card is the interactive pilot itself: no « Pas sûr ? » line under it.
+  isPilotWith?: boolean;
 }
 
 const mockupPath = "--mockup .planning/mockups/{fichier}";
@@ -131,12 +133,12 @@ function fastlaneTrack(preview: Preview): Track {
   };
 }
 
-function blueprintTrack(preview: Preview): Track {
+function blueprintTrack(preview: Preview, hasRequest = preview === "direct"): Track {
   return {
     colour: "blueprint",
     name: "help.lanes.blueprint.name",
     steps: [
-      ...(preview === "direct" ? [request("/selo:blueprint {demande}")] : []),
+      ...(hasRequest ? [request("/selo:blueprint {demande}")] : []),
       step("grill", "on"),
       step("blueprint", "on"),
       step("approval", "you"),
@@ -149,6 +151,14 @@ function blueprintTrack(preview: Preview): Track {
     ],
   };
 }
+
+// The interactive pilot: selo places the request, then runs the lane with the person.
+const pilotWithTrack = (preview: Preview): Track => ({
+  colour: "pilot",
+  name: "help.lanes.pilotWith.name",
+  steps: [request(`/selo:pilot {demande}${preview === "mockup" ? " --mockup {fichier}" : ""}`, "help.lanes.step.request.pilotWith"), step("pick", "on")],
+  join: { text: "help.lanes.join.pilotWith" },
+});
 
 function pilotTrack(preview: Preview): Track {
   return {
@@ -192,8 +202,22 @@ export function laneFor(answers: Answers): LaneResult | null {
     };
   }
   if (!scope) return null;
-  const why: MessageKey[] = ["help.lanes.why.stay", scope === "page" ? "help.lanes.why.page" : "help.lanes.why.new", whyPreview[preview]];
+  const why: MessageKey[] = ["help.lanes.why.stay", `help.lanes.why.${scope}`, whyPreview[preview]];
   const withMockup = preview === "mockup" ? ` ${mockupPath}` : "";
+
+  if (scope === "unsure") {
+    return {
+      lane: "pilot",
+      name: "help.lanes.pilotWith.name",
+      options: mockupOption,
+      why,
+      prompts: [...drawFirst, { command: `/selo:pilot {demande}${withMockup}`, then: afterMockup }, { command: "/selo:build {blueprint}", then: "help.lanes.then.pilotBuild" }],
+      text: preview === "mockup" ? "help.lanes.text.pilotWithMockup" : "help.lanes.text.pilotWith",
+      tracks: [...(preview === "mockup" ? [mockupTrack] : []), pilotWithTrack(preview), blueprintTrack(preview, false)],
+      foot: "help.lanes.foot.pilotWith",
+      isPilotWith: true,
+    };
+  }
 
   if (scope === "page") {
     return {
