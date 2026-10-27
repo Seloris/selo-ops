@@ -32,7 +32,7 @@ The selo plugins were renamed: the workflow plugin `selo` is `selo-flow` (`/selo
 - browser: demo, header shows « selo-flow … · selo-feed … »; « Nouvelle session » and the help copy `/selo-flow:` prompts; 1280 px and 375 px
 
 ## Progress
-- [ ] Stage 1 — api
+- [x] Stage 1 — api
 - [ ] Stage 2 — web
 - [ ] Review
 - [ ] Browser test

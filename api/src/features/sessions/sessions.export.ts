@@ -84,7 +84,7 @@ const runSchema = z.object({
 export const sessionFileSchema = z.object({
   schemaVersion: z.literal(1),
   writtenAt: z.iso.datetime(),
-  // The version of the selo-ops plugin that wrote the file; absent from older exports.
+  // The version of the selo-feed plugin that wrote the file; absent from older exports.
   writtenBy: z.string().nullish().catch(null),
   sessionId: z.string(),
   root: z.string(),

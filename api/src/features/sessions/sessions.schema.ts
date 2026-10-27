@@ -141,7 +141,7 @@ export const sessionSchema = z
     // A running Claude Code process with no file in the ops export (`session` BR-12): its flow is `free`, and it has no
     // recap, commits, blockers, subagents, files touched, effort nor permissions, which only the export gives.
     isOutsideSelo: z.boolean(),
-    // The version of the selo-ops plugin that wrote the session's export file; null outside selo or in an older export.
+    // The version of the selo-feed plugin that wrote the session's export file; null outside selo or in an older export.
     writtenBy: z.string().nullable(),
     // `session` BR-15: the first dated line of its transcript, else its oldest run kept, else its process's start.
     createdAt: z.iso.datetime(),
@@ -162,7 +162,7 @@ export const projectSchema = z
 // `session` BR-01: a selo plugin Claude Code lists as installed, its distinct versions highest first (several for a
 // plugin installed per project at different versions).
 export const installedPluginSchema = z
-  .object({ name: z.enum(["selo", "selo-ops"]), versions: z.array(z.string()).min(1) })
+  .object({ name: z.enum(["selo-flow", "selo-feed"]), versions: z.array(z.string()).min(1) })
   .meta({ id: "InstalledPlugin" });
 
 export const sessionsResponseSchema = z.object({

@@ -63,15 +63,17 @@ describe("sessions writer and plugin versions", () => {
       expect(sessions[0].writtenBy).toBeNull();
     });
 
-    it("returns the installed versions of selo and selo-ops only, highest first", async () => {
+    it("returns the installed versions of selo-flow and selo-feed only, highest first", async () => {
       // Arrange
       ctx.seed.plugins(
         JSON.stringify({
           version: 2,
           plugins: {
             "ponytail@ponytail": [entry("5.3.1", "project")],
-            "selo@selo": [entry("2.9.0", "project"), entry("2.10.0", "project"), entry("2.9.0", "project")],
-            "selo-ops@selo": [entry("2.2.1")],
+            "selo@selo": [entry("2.6.0", "project")],
+            "selo-ops@selo": [entry("2.6.0")],
+            "selo-flow@selo": [entry("2.9.0", "project"), entry("2.10.0", "project"), entry("2.9.0", "project")],
+            "selo-feed@selo": [entry("2.2.1")],
           },
         }),
       );
@@ -81,8 +83,8 @@ describe("sessions writer and plugin versions", () => {
 
       // Assert
       expect(plugins).toEqual([
-        { name: "selo", versions: ["2.10.0", "2.9.0"] },
-        { name: "selo-ops", versions: ["2.2.1"] },
+        { name: "selo-flow", versions: ["2.10.0", "2.9.0"] },
+        { name: "selo-feed", versions: ["2.2.1"] },
       ]);
     });
 
@@ -108,13 +110,13 @@ describe("sessions writer and plugin versions", () => {
 
     it("skips an entry with no version and keeps the others", async () => {
       // Arrange
-      ctx.seed.plugins(JSON.stringify({ plugins: { "selo@selo": [{ scope: "project" }, entry("2.1.0", "project")], "selo-ops@selo": "broken" } }));
+      ctx.seed.plugins(JSON.stringify({ plugins: { "selo-flow@selo": [{ scope: "project" }, entry("2.1.0", "project")], "selo-feed@selo": "broken" } }));
 
       // Act
       const { plugins } = await list();
 
       // Assert
-      expect(plugins).toEqual([{ name: "selo", versions: ["2.1.0"] }]);
+      expect(plugins).toEqual([{ name: "selo-flow", versions: ["2.1.0"] }]);
     });
   });
 });

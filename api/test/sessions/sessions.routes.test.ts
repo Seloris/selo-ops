@@ -89,7 +89,7 @@ describe("sessions routes", () => {
           phase: "awaiting-commit",
           pendingCommit: { subject: "feat(cart): keep promo code", body: "Spec: cart ~FR-07" },
           commits: [{ sha: "a41c9e2", subject: "docs(cart): blueprint" }],
-          resumePrompt: "/selo:build .planning/blueprints/2026-10-22-cart.md",
+          resumePrompt: "/selo-flow:build .planning/blueprints/2026-10-22-cart.md",
         }),
       });
       ctx.seed.session(file);
@@ -108,7 +108,7 @@ describe("sessions routes", () => {
         substep: "tests",
         pendingCommit: { subject: "feat(cart): keep promo code", body: "Spec: cart ~FR-07" },
         commits: [{ sha: "a41c9e2", subject: "docs(cart): blueprint" }],
-        nextAction: "/selo:build .planning/blueprints/2026-10-22-cart.md",
+        nextAction: "/selo-flow:build .planning/blueprints/2026-10-22-cart.md",
         model: null,
         effort: "medium",
         permissionMode: "acceptEdits",
@@ -121,8 +121,8 @@ describe("sessions routes", () => {
     it("gives the next steps of the run's done footer, in order", async () => {
       // Arrange
       const next = [
-        { text: "Construire les 2 étapes", prompt: "/selo:build .planning/blueprints/b.md" },
-        { text: "Relire le blueprint", prompt: "/selo:review blueprint .planning/blueprints/b.md" },
+        { text: "Construire les 2 étapes", prompt: "/selo-flow:build .planning/blueprints/b.md" },
+        { text: "Relire le blueprint", prompt: "/selo-flow:review blueprint .planning/blueprints/b.md" },
       ];
       ctx.seed.session(buildSessionFile({ current: buildRun({ phase: "job-done", next }) }));
 
@@ -131,8 +131,8 @@ describe("sessions routes", () => {
 
       // Assert
       expect(session.nextSteps).toEqual([
-        { summary: "Construire les 2 étapes", command: "/selo:build .planning/blueprints/b.md" },
-        { summary: "Relire le blueprint", command: "/selo:review blueprint .planning/blueprints/b.md" },
+        { summary: "Construire les 2 étapes", command: "/selo-flow:build .planning/blueprints/b.md" },
+        { summary: "Relire le blueprint", command: "/selo-flow:review blueprint .planning/blueprints/b.md" },
       ]);
     });
 
@@ -152,7 +152,7 @@ describe("sessions routes", () => {
 
     it("drops a next step that does not read and keeps its siblings", async () => {
       // Arrange
-      const run = { ...buildRun(), next: [{ text: "Relire", prompt: "/selo:review" }, { text: 42 }, "broken"] };
+      const run = { ...buildRun(), next: [{ text: "Relire", prompt: "/selo-flow:review" }, { text: 42 }, "broken"] };
       const file = { ...buildSessionFile(), runs: [run], current: run };
       ctx.seed.raw("sessions", `${file.sessionId}.json`, JSON.stringify(file));
 
@@ -160,31 +160,31 @@ describe("sessions routes", () => {
       const session = await only();
 
       // Assert
-      expect(session.nextSteps).toEqual([{ summary: "Relire", command: "/selo:review" }]);
+      expect(session.nextSteps).toEqual([{ summary: "Relire", command: "/selo-flow:review" }]);
     });
 
     it("falls back on the first next step for the next action when the export gives no resume prompt", async () => {
       // Arrange
-      const next = [{ text: "Relire", prompt: "/selo:review" }, { text: "Tester", prompt: "/selo:try" }];
+      const next = [{ text: "Relire", prompt: "/selo-flow:review" }, { text: "Tester", prompt: "/selo-flow:try" }];
       ctx.seed.session(buildSessionFile({ current: buildRun({ phase: "job-done", next, resumePrompt: null }) }));
 
       // Act
       const session = await only();
 
       // Assert
-      expect(session.nextAction).toBe("/selo:review");
+      expect(session.nextAction).toBe("/selo-flow:review");
     });
 
     it("keeps the resume prompt as the next action over the next steps", async () => {
       // Arrange
-      const next = [{ text: "Relire", prompt: "/selo:review" }];
-      ctx.seed.session(buildSessionFile({ current: buildRun({ phase: "job-done", next, resumePrompt: "/selo:build b.md" }) }));
+      const next = [{ text: "Relire", prompt: "/selo-flow:review" }];
+      ctx.seed.session(buildSessionFile({ current: buildRun({ phase: "job-done", next, resumePrompt: "/selo-flow:build b.md" }) }));
 
       // Act
       const session = await only();
 
       // Assert
-      expect(session.nextAction).toBe("/selo:build b.md");
+      expect(session.nextAction).toBe("/selo-flow:build b.md");
     });
 
     it("dates the session's creation by the first dated line of its transcript", async () => {
@@ -247,7 +247,7 @@ describe("sessions routes", () => {
       // Arrange
       const main = buildRun({ since: "2026-01-01T10:00:00.000Z" });
       const old = buildRun({ agentId: "a-old", request: "Explore", since: "2026-01-01T09:00:00.000Z", phase: "turn-ended" });
-      const runner = buildRun({ agentId: "a-1", request: "selo:runner", task: "api tests", since: "2026-01-01T10:05:00.000Z", updatedAt: "2026-01-01T10:07:00.000Z", phase: "working" });
+      const runner = buildRun({ agentId: "a-1", request: "selo-flow:runner", task: "api tests", since: "2026-01-01T10:05:00.000Z", updatedAt: "2026-01-01T10:07:00.000Z", phase: "working" });
       ctx.seed.session(buildSessionFile({ current: main, runs: [runner, main, old] }));
 
       // Act
@@ -255,7 +255,7 @@ describe("sessions routes", () => {
 
       // Assert
       expect(session.subagents).toEqual([
-        { type: "selo:runner", task: "api tests", state: "working", since: "2026-01-01T10:05:00.000Z", updatedAt: "2026-01-01T10:07:00.000Z", model: null, usage: null },
+        { type: "selo-flow:runner", task: "api tests", state: "working", since: "2026-01-01T10:05:00.000Z", updatedAt: "2026-01-01T10:07:00.000Z", model: null, usage: null },
       ]);
     });
 
@@ -359,8 +359,8 @@ describe("sessions routes", () => {
       // Arrange
       const main = "C:/code/selo-ops";
       const worktree = "C:/code/selo-ops/.claude/worktrees/live";
-      ctx.seed.project(buildProjectFile({ root: main, repo: `${main}/.git`, branch: "main", changedCount: 3, manifest: { name: "selo-ops" } }));
-      ctx.seed.project(buildProjectFile({ root: worktree, repo: `${main}/.git`, branch: "claude/live", changedCount: 1, manifest: { name: "selo-ops" } }));
+      ctx.seed.project(buildProjectFile({ root: main, repo: `${main}/.git`, branch: "main", changedCount: 3, manifest: { name: "selo-feed" } }));
+      ctx.seed.project(buildProjectFile({ root: worktree, repo: `${main}/.git`, branch: "claude/live", changedCount: 1, manifest: { name: "selo-feed" } }));
       const inMain = buildSessionFile({ root: main, repo: `${main}/.git` });
       const inWorktree = buildSessionFile({ root: worktree, repo: `${main}/.git` });
       ctx.seed.session(inMain);
@@ -370,7 +370,7 @@ describe("sessions routes", () => {
       const { sessions, projects } = await list();
 
       // Assert
-      expect(projects).toEqual([{ id: `${main}/.git`, name: "selo-ops", branch: "main", changedCount: 3 }]);
+      expect(projects).toEqual([{ id: `${main}/.git`, name: "selo-feed", branch: "main", changedCount: 3 }]);
       const byId = new Map(sessions.map((s) => [s.id, s]));
       expect(byId.get(inMain.sessionId)).toMatchObject({ projectId: `${main}/.git`, branch: "main" });
       expect(byId.get(inWorktree.sessionId)).toMatchObject({ projectId: `${main}/.git`, branch: "claude/live" });
@@ -380,8 +380,8 @@ describe("sessions routes", () => {
       // Arrange
       const main = "C:/code/selo-ops";
       const worktree = "C:/code/selo-ops/.claude/worktrees/live";
-      ctx.seed.project(buildProjectFile({ root: main, manifest: { name: "selo-ops" } }));
-      ctx.seed.project(buildProjectFile({ root: worktree, repo: `${main}/.git`, branch: "claude/live", manifest: { name: "selo-ops" } }));
+      ctx.seed.project(buildProjectFile({ root: main, manifest: { name: "selo-feed" } }));
+      ctx.seed.project(buildProjectFile({ root: worktree, repo: `${main}/.git`, branch: "claude/live", manifest: { name: "selo-feed" } }));
       ctx.seed.session(buildSessionFile({ root: main }));
       ctx.seed.session(buildSessionFile({ root: worktree, repo: null }));
 

@@ -197,7 +197,7 @@ function sheetText(s: DemoSheet): string {
 }
 
 function blueprintText(b: DemoBlueprint): string {
-  if (b.state === "legacy") return `# ${b.title}\n\nLegacy: a 1.0 plan moved by \`/selo:setup update\`.\n\n## Plan\n\n- The list of invoices, newest first.\n`;
+  if (b.state === "legacy") return `# ${b.title}\n\nLegacy: a 1.0 plan moved by \`/selo-flow:setup update\`.\n\n## Plan\n\n- The list of invoices, newest first.\n`;
   const allDone = b.stages.every(([, , sha]) => sha !== null);
   const reviewDone = b.state === "merging" || b.state === "done";
   const header = [`Pages: ${b.pages.map((p) => `\`${p}\``).join(", ") || "—"}`, `Domain: ${b.domain.map((d) => `\`${d}\``).join(", ") || "—"}`, `Components: ${b.components.map((c) => `\`${c}\``).join(", ")}`].join(" · ");

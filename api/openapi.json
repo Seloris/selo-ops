@@ -1181,8 +1181,8 @@
           "name": {
             "type": "string",
             "enum": [
-              "selo",
-              "selo-ops"
+              "selo-flow",
+              "selo-feed"
             ]
           },
           "versions": {

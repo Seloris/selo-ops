@@ -117,7 +117,7 @@ describe("projects", () => {
         ],
         isReviewDone: false,
         isSpecMerged: false,
-        nextPrompt: "/selo:build .planning/blueprints/2026-01-01-due-date.md",
+        nextPrompt: "/selo-flow:build .planning/blueprints/2026-01-01-due-date.md",
         decisions: ["Format → day only (no time)"],
       });
     });

@@ -72,7 +72,7 @@ const SESSIONS: DemoSession[] = [
     blueprint: "2026-10-20-monthly-balance", step: "stage:1", substep: "code",
     question: "Le statut « remboursé » compte-t-il dans le solde du mois ? (A) oui, en négatif — recommandé · (B) non · (C) seulement si le remboursement est partiel",
     model: OPUS, effort: "high", perms: "auto", blockers: ["not-done", "question", "dirty-files"],
-    subagents: [{ type: "selo:runner", task: "npm test -- balance", phase: "job-done" }],
+    subagents: [{ type: "selo-flow:runner", task: "npm test -- balance", phase: "job-done" }],
     files: ["api/src/billing/balance.ts", "api/src/billing/balance.test.ts", "api/migrations/0012_monthly_balance.sql"] },
   { id: "91d0b7e3-2c4a-4f68-b5e9-7a13c8f20d54", project: "atelier-web", flow: "fastlane", skill: "fastlane", phase: "awaiting-commit", age: 360,
     request: "Garder le code promo quand on revient au panier",
@@ -83,7 +83,7 @@ const SESSIONS: DemoSession[] = [
     request: "Pourquoi le build du front casse depuis ce matin ?",
     error: "npm run build : TS2322 — Type « string | undefined » non assignable à « string » (web/src/features/sessions/ui/SessionRow.tsx:42)",
     model: OPUS, effort: "high", perms: "default", blockers: ["not-done", "dirty-files"],
-    subagents: [{ type: "selo:runner", task: "npm run build", phase: "stopped" }],
+    subagents: [{ type: "selo-flow:runner", task: "npm run build", phase: "stopped" }],
     files: ["web/src/features/sessions/ui/SessionRow.tsx"] },
   { id: "e47c1a08-9d35-4b62-8f0e-1c5a7b93d2f4", project: "harbor-mobile", flow: "pilot", skill: "blueprint", mode: "autonomous", phase: "awaiting-answer", age: 2880,
     request: "Mode hors-ligne pour la liste des tournées : consulter et cocher les arrêts sans réseau, puis synchroniser au retour du réseau",
@@ -105,8 +105,8 @@ const SESSIONS: DemoSession[] = [
     request: ".planning/blueprints/2026-10-22-sessions-live.md", blueprint: "2026-10-22-sessions-live", step: "stage:2", substep: "code",
     model: OPUS, effort: "high", perms: "auto", blockers: ["not-done", "dirty-files", "background-tasks", "subagents"],
     subagents: [
-      { type: "selo:runner", task: "npm run build && npx eslint src/features/sessions", phase: "working" },
-      { type: "selo:reviewer", task: "relecture de l’étape 1 (api)", phase: "job-done" },
+      { type: "selo-flow:runner", task: "npm run build && npx eslint src/features/sessions", phase: "working" },
+      { type: "selo-flow:reviewer", task: "relecture de l’étape 1 (api)", phase: "job-done" },
     ],
     files: ["web/src/features/sessions/pages/SessionsLivePage.tsx", "web/src/features/sessions/ui/SessionRow.tsx", "web/src/shared/lib/i18n/fr.json"] },
   { id: "b81e0c44-6a2f-4c19-8d3e-5f07a9c2e611", project: "atelier-web", worktree: "one-step-checkout", flow: "pilot", skill: "build", mode: "autonomous", phase: "working", age: 2,
@@ -118,13 +118,13 @@ const SESSIONS: DemoSession[] = [
     blueprint: "2026-10-22-one-step-checkout", step: "stage:1", substep: "tests",
     model: OPUS, effort: "high", perms: "auto", blockers: ["not-done", "dirty-files", "subagents"],
     note: "Après : vérifier le récap fixe sur iPad, puis demander la relecture à Inès",
-    subagents: [{ type: "selo:runner", task: "npx vitest run checkout", phase: "working" }],
+    subagents: [{ type: "selo-flow:runner", task: "npx vitest run checkout", phase: "working" }],
     files: ["web/src/features/checkout/pages/CheckoutPage.tsx", "web/src/features/checkout/ui/AddressForm.tsx"] },
   { id: "c2d94f10-37a8-4e5b-a1c6-90e4b7d3f285", project: "harbor-mobile", flow: "free", skill: "review", phase: "working", age: 21,
     trail: [[620, null, null, null, "working"], [600, "review", null, null, "working"]],
     request: "Relire le travail d’hier sur la synchro des photos",
     model: OPUS, effort: "medium", perms: "default", blockers: ["not-done", "subagents"],
-    subagents: [{ type: "selo:reviewer", task: "relecture de 4 commits", phase: "working" }] },
+    subagents: [{ type: "selo-flow:reviewer", task: "relecture de 4 commits", phase: "working" }] },
   // The mockup and iterate colours (help FR-11): a mockup iterated turn by turn, a fastlane's iterate loop (`session` BR-22).
   { id: "e4b7c1d2-8a3f-4e60-b95d-2c1f0a7e6d34", project: "atelier-web", flow: "free", skill: "mockup", phase: "awaiting-answer", age: 90,
     trail: [[1500, "mockup", null, null, "working"], [1320, "mockup", null, null, "awaiting-answer"], [1200, "mockup", null, null, "working"], [1100, "mockup", null, null, "awaiting-answer"], [400, "mockup", null, null, "working"], [90, "mockup", null, null, "awaiting-answer"]],
@@ -141,10 +141,10 @@ const SESSIONS: DemoSession[] = [
     files: ["web/src/features/sessions/ui/SessionList.module.css"] },
   { id: "0d5e8b27-6a1c-4f93-8e42-c7b0a3d9f1e6", project: "selo-ops", flow: "blueprint", skill: "blueprint", phase: "job-done", age: 240,
     request: "Archiver une session à la main quand son travail est fini", blueprint: "2026-10-22-session-archive",
-    next: "/selo:build .planning/blueprints/2026-10-22-session-archive.md",
+    next: "/selo-flow:build .planning/blueprints/2026-10-22-session-archive.md",
     nextSteps: [
-      ["Construire les 2 étapes, de préférence dans une nouvelle session", "/selo:build .planning/blueprints/2026-10-22-session-archive.md"],
-      ["Relire le blueprint avant de le construire", "/selo:review blueprint .planning/blueprints/2026-10-22-session-archive.md"],
+      ["Construire les 2 étapes, de préférence dans une nouvelle session", "/selo-flow:build .planning/blueprints/2026-10-22-session-archive.md"],
+      ["Relire le blueprint avant de le construire", "/selo-flow:review blueprint .planning/blueprints/2026-10-22-session-archive.md"],
     ],
     recap: "Blueprint de l’archivage manuel prêt : 2 étapes, api puis web.",
     model: OPUS, effort: "high", perms: "default", blockers: [],
@@ -220,11 +220,11 @@ const USAGE: Record<string, DemoUsage> = {
 
 const TOOLS = ["Read", "Edit", "Bash", "Grep", "advisor", "Write", "Glob"];
 const SKILLS: { name: string; how: string }[] = [
-  { name: "selo:build", how: "command" },
+  { name: "selo-flow:build", how: "command" },
   { name: "write-api-tests", how: "tool" },
   { name: "caveman", how: "preloaded" },
   { name: "drizzle-migrations", how: "tool" },
-  { name: "selo:review", how: "command" },
+  { name: "selo-flow:review", how: "command" },
   { name: "artifact-design", how: "tool" },
   { name: "dataviz", how: "tool" },
 ];
@@ -286,7 +286,7 @@ function earlierUsageOf(model: string, scale: number, prompt: string): ExportRun
   return {
     calls: 7, tokens, byModel: [{ model, calls: 7, tokens }],
     tools: [{ name: "Edit", count: 4 }, { name: "Grep", count: 2 }, { name: "Read", count: 1 }],
-    skills: [{ name: "selo:fastlane", count: 1, how: "command" }], prompts: [{ at: prompt, calls: 7, tokens }], settled: true, partial: false,
+    skills: [{ name: "selo-flow:fastlane", count: 1, how: "command" }], prompts: [{ at: prompt, calls: 7, tokens }], settled: true, partial: false,
   };
 }
 
@@ -496,7 +496,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
       touchedFiles: s.files ?? [], close: { ok: s.blockers.length === 0, blockers: s.blockers },
       runs: [...subagents, current, ...[...earlier].reverse()], current,
     };
-    file.writtenBy = DEMO_SELO_OPS_VERSION;
+    file.writtenBy = DEMO_SELO_FEED_VERSION;
     if (usage) file.usage = sumUsage([current, ...subagents, ...earlier].flatMap((r) => (r.usage ? [r.usage] : [])));
     writeJson(join(opsDir, "sessions"), `${s.id}.json`, file);
     if (s.permission !== undefined) seedPermissionWait(folders, file, s.permission, now - s.age * 1000);
@@ -512,7 +512,7 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
   });
 }
 
-const DEMO_SELO_OPS_VERSION = "2.8.0";
+const DEMO_SELO_FEED_VERSION = "2.8.0";
 
 function seedInstalledPlugins(file: string, root: string) {
   const entry = (version: string, projectPath?: string) => ({
@@ -525,8 +525,8 @@ function seedInstalledPlugins(file: string, root: string) {
   writeJson(dirname(file), basename(file), {
     version: 2,
     plugins: {
-      "selo@selo": [entry("2.6.0", `${root}/${first}`), entry("2.5.0", `${root}/${second}`)],
-      "selo-ops@selo": [entry(DEMO_SELO_OPS_VERSION)],
+      "selo-flow@selo": [entry("2.6.0", `${root}/${first}`), entry("2.5.0", `${root}/${second}`)],
+      "selo-feed@selo": [entry(DEMO_SELO_FEED_VERSION)],
     },
   });
 }

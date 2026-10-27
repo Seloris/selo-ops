@@ -77,8 +77,8 @@ describe("demo", { timeout: 30_000 }, () => {
     const exported = sessions.filter((s) => !s.isOutsideSelo);
     expect(exported.every((s) => s.writtenBy === "2.8.0")).toBe(true);
     expect(plugins).toEqual([
-      { name: "selo", versions: ["2.6.0", "2.5.0"] },
-      { name: "selo-ops", versions: ["2.8.0"] },
+      { name: "selo-flow", versions: ["2.6.0", "2.5.0"] },
+      { name: "selo-feed", versions: ["2.8.0"] },
     ]);
   });
 

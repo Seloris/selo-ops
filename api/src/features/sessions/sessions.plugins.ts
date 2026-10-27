@@ -5,7 +5,7 @@ import type { InstalledPlugin } from "./sessions.schema.js";
 // Claude Code's list of installed plugins (`session` BR-01): `{ plugins: { "{name}@{marketplace}": [{ version, … }] } }`,
 // one entry per scope, so one per project for a plugin installed per project. Only the selo plugins are read.
 
-const SELO_PLUGINS = ["selo", "selo-ops"] as const;
+const SELO_PLUGINS = ["selo-flow", "selo-feed"] as const;
 
 const fileSchema = z.object({ plugins: z.record(z.string(), z.unknown()) });
 const entrySchema = z.object({ version: z.string().min(1) });
@@ -38,7 +38,7 @@ export function createInstalledPluginReader(file: string): InstalledPluginReader
         return [];
       }
       return SELO_PLUGINS.flatMap((name) => {
-        // By plugin name, whatever its marketplace: a selo installed from a fork is still selo.
+        // By plugin name, whatever its marketplace: a selo-flow installed from a fork is still selo-flow.
         const versions = Object.entries(plugins)
           .filter(([key]) => key.split("@")[0] === name)
           .flatMap(([, entries]) => versionsOf(entries));
