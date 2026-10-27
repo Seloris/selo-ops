@@ -22,6 +22,9 @@ The selo plugins were renamed: the workflow plugin `selo` is `selo-flow` (`/selo
 - The `InstalledPlugin` name enum → `selo-flow` | `selo-feed`; the handoff `openapi.json` and the web's generated schema follow
 - Every copied prompt, help card, settings agent name, empty-state text and demo seed → the new names
 
+### Decided during build
+- help FR-03 at the merge → every `/selo:` of FR-03 becomes `/selo-flow:`, the rest unchanged (the delta quoted a summary, not FR-03's text; the person approved this wording)
+
 ## Stages
 1. api — `fix(plugin-rename): api — read the selo-flow and selo-feed plugins`
 2. web — `fix(plugin-rename): web — selo-flow prompts and selo-feed versions`
@@ -36,4 +39,4 @@ The selo plugins were renamed: the workflow plugin `selo` is `selo-flow` (`/selo
 - [x] Stage 2 — web
 - [x] Review
 - [x] Browser test
-- [ ] Spec merged
+- [x] Spec merged
