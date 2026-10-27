@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Session } from "../data/sessionView.ts";
-import { hasTrail, lineColor, skillColor, spanText, trailChapters, trailLines, trailPath, type Subagent, type TrailEntry } from "./trail.ts";
+import { currentRunSince, earlierRuns, hasTrail, lineColor, skillColor, spanText, trailChapters, trailLines, trailPath, type Subagent, type TrailEntry } from "./trail.ts";
 
 describe("skillColor", () => {
   it("colours the lane skills, build as a blueprint, mockup as its flow, and leaves the others neutral", () => {
@@ -319,5 +319,49 @@ describe("hasTrail", () => {
 
   it("leaves the section out for a session outside selo", () => {
     expect(hasTrail(session({ isOutsideSelo: true }))).toBe(false);
+  });
+});
+
+describe("earlierRuns", () => {
+  const run = (id: string, overrides: Partial<Session["runs"][number]> = {}): Session["runs"][number] => ({
+    id,
+    isCurrent: false,
+    mode: null,
+    since: at(0),
+    request: "Ajoute un filtre",
+    isRequestCut: false,
+    isRequestImage: false,
+    usage: null,
+    trail: [entry(0, "turn-ended")],
+    isTrailCut: false,
+    subagents: [],
+    ...overrides,
+  });
+
+  it("keeps the earlier prompts with a history, oldest first, never the current one", () => {
+    // Arrange
+    const runs = [run("a"), run("b", { trail: [] }), run("c"), run("d", { isCurrent: true })];
+
+    // Act
+    const earlier = earlierRuns({ isOutsideSelo: false, runs });
+
+    // Assert
+    expect(earlier.map((r) => r.id)).toEqual(["a", "c"]);
+  });
+
+  it("gives none for a session outside selo", () => {
+    expect(earlierRuns({ isOutsideSelo: true, runs: [run("a")] })).toEqual([]);
+  });
+
+  it("starts the current prompt at its run's start, else at its first line kept", () => {
+    // Arrange
+    const trail = [entry(5, "working"), entry(9, "working")];
+
+    // Act
+    const listed = currentRunSince({ runs: [run("a"), run("b", { isCurrent: true, since: at(1) })], trail });
+    const unlisted = currentRunSince({ runs: [run("a")], trail });
+
+    // Assert
+    expect([listed, unlisted]).toEqual([at(1), at(5)]);
   });
 });

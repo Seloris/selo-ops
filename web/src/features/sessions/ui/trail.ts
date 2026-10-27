@@ -2,7 +2,7 @@ import { t } from "../../../shared/lib/i18n/index.ts";
 import type { Session } from "../data/sessionView.ts";
 import { age, LOOP_SUBSTEPS, stepText } from "./sessionText.ts";
 
-// sessions-live FR-41: the current run's history as the export keeps it, oldest first, read as chapters (FR-53).
+// sessions-live FR-41: each prompt's history as the export keeps it, oldest first, read as chapters (FR-53).
 
 export type TrailEntry = Session["trail"][number];
 
@@ -43,6 +43,14 @@ export const skillColor = (skill: string | null): string | undefined =>
 export const lineColor = (l: TrailLine): string | undefined => (l.isLoop ? "var(--lane-iterate)" : skillColor(l.entry.skill));
 
 export const hasTrail = (s: Session) => !s.isOutsideSelo && s.trail.length > 0;
+
+export type TrailRun = Session["runs"][number];
+
+// sessions-live FR-41: the session's earlier prompts that kept a history, oldest first; the current one is the session's own.
+// The current prompt's start: its run's, else its first line kept.
+export const currentRunSince = (s: Pick<Session, "runs" | "trail">): string | null => s.runs.find((r) => r.isCurrent)?.since ?? s.trail[0]?.at ?? null;
+
+export const earlierRuns = (s: Pick<Session, "isOutsideSelo" | "runs">): TrailRun[] => (s.isOutsideSelo ? [] : s.runs.filter((r) => !r.isCurrent && r.trail.length > 0));
 
 export function trailLines(trail: TrailEntry[], mode: string | null = null): TrailLine[] {
   const durations = durationsOf(trail);

@@ -538,6 +538,43 @@ button.chapterRow {
   color: var(--text-muted);
 }
 
+/* An earlier prompt of the session: its time, its request on one line, its duration; unfolded, its chapters. */
+.prompt {
+  display: grid;
+  gap: 8px;
+}
+
+.promptRow {
+  --when: 70px;
+  display: grid;
+  /* A prompt of another day carries its date: the time column widens to it. */
+  grid-template-columns: minmax(var(--when), max-content) minmax(0, 1fr) fit-content(45%) 14px;
+  gap: 2px 10px;
+  align-items: baseline;
+  padding: 6px 10px 6px 3px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button.promptRow {
+  cursor: pointer;
+}
+
+button.promptRow:hover .foldc {
+  color: var(--text);
+}
+
+.promptText {
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 /* The present, closing the list while the run goes on. */
 .nowLine {
   display: flex;
@@ -557,7 +594,8 @@ button.chapterRow {
 
 /* Narrow: the minute alone, the second on hover. */
 @container (max-width: 420px) {
-  .chapter {
+  .chapter,
+  .promptRow {
     --when: 52px;
   }
 

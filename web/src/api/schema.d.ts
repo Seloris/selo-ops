@@ -695,12 +695,28 @@ export interface components {
             usage: components["schemas"]["Usage"];
             runUsage: components["schemas"]["RunUsage"];
             runs: {
+                id: string;
+                isCurrent: boolean;
+                mode: string | null;
                 /** Format: date-time */
                 since: string;
                 request: string;
                 isRequestCut: boolean;
                 isRequestImage: boolean;
                 usage: components["schemas"]["RunUsage"];
+                trail: components["schemas"]["TrailEntry"][];
+                isTrailCut: boolean;
+                subagents: {
+                    type: string;
+                    task: string | null;
+                    state: components["schemas"]["SessionState"];
+                    /** Format: date-time */
+                    since: string;
+                    /** Format: date-time */
+                    updatedAt: string;
+                    model: string | null;
+                    usage: components["schemas"]["Usage"];
+                }[];
             }[];
             isRunListCut: boolean;
             touchedFiles: string[];

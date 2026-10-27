@@ -11,8 +11,8 @@ import type { DetailSection } from "./detailSections.ts";
 import type { FileSummary } from "../data/useFileSummaryQuery.ts";
 import { fileTotals } from "./fileTotals.ts";
 import { FileTree, LineCounts } from "./FileTree.tsx";
-import { hasTrail, lineColor, skillColor, trailChapters, trailLines, trailPath } from "./trail.ts";
-import { totalTokens, usageSummary } from "./usage.ts";
+import { currentRunSince, earlierRuns, hasTrail, lineColor, skillColor, trailChapters, trailLines, trailPath, type Chapter, type TrailLine } from "./trail.ts";
+import { runRequestText, runTimeText, totalTokens, usageSummary } from "./usage.ts";
 import { TokenCount, UsageDashboard } from "./UsageParts.tsx";
 import { AwaitedIcon, NoteText, PluginWarning, StateLabel } from "./SessionBits.tsx";
 import type { SessionActions } from "./SessionList.tsx";
@@ -53,9 +53,12 @@ export function SessionDetail({
   onOpenFiles: (file: string | null) => void;
 }) {
   // sessions-live FR-41: the chapters the person folded or unfolded, by their start; a chapter not chosen is open
-  // while it is the last one, so a new chapter folds the one before it.
+  // while it is the last one of its prompt, so a new chapter folds the one before it.
   const [chapterChoices, setChapterChoices] = useState<ReadonlyMap<string, boolean>>(new Map());
   const toggleChapter = (at: string, isOpen: boolean) => setChapterChoices((choices) => new Map(choices).set(at, !isOpen));
+  // The earlier prompts the person unfolded, by their run: folded until then.
+  const [runChoices, setRunChoices] = useState<ReadonlyMap<string, boolean>>(new Map());
+  const toggleRun = (id: string, isOpen: boolean) => setRunChoices((choices) => new Map(choices).set(id, !isOpen));
   const awaited = awaitedOf(s);
   const blockers = shownBlockers(s);
   const tag = ageDisplay(s, now);
@@ -129,15 +132,19 @@ export function SessionDetail({
       )}
     </Section>
   );
-  // sessions-live FR-41: absent outside selo and for a run with no history. A past wait reads as open; past work is
+  // sessions-live FR-41: absent outside selo and when the current run has no history. A past wait reads as open; past work is
   // muted; the last line keeps the session's closed or archived state, so it never pulses then.
   const isSessionOver = s.isClosed || s.isArchived;
-  const trail = trailLines(s.trail, s.mode).map((l, i, all) => {
-    const isLast = i === all.length - 1;
-    const tone: DotTone = l.isPastWork ? "idle" : toneOf({ ...s, state: l.entry.phase, isClosed: isLast && s.isClosed, isArchived: isLast && s.isArchived });
-    return { ...l, tone };
-  });
+  // An earlier prompt's run is over: its last line keeps its own state, never the session's closed or archived one.
+  const toned = (lines: TrailLine[], isCurrentRun: boolean) =>
+    lines.map((l, i, all) => {
+      const isLast = isCurrentRun && i === all.length - 1;
+      const tone: DotTone = l.isPastWork ? "idle" : toneOf({ ...s, state: l.entry.phase, isClosed: isLast && s.isClosed, isArchived: isLast && s.isArchived });
+      return { ...l, tone };
+    });
+  const trail = toned(trailLines(s.trail, s.mode), true);
   const { chapters, isRunning, durationText: runDuration, waitingText: runWaiting } = trailChapters(trail, s.subagents, now, isSessionOver);
+  const earlier = earlierRuns(s).map((run) => ({ run, ...trailChapters(toned(trailLines(run.trail, run.mode), false), run.subagents, now, true) }));
   const path = trailPath(chapters);
   const lastChapter = chapters[chapters.length - 1];
   const lastLine = trail[trail.length - 1];
@@ -153,47 +160,12 @@ export function SessionDetail({
     );
   };
   const stateWords = (state: Session["state"]) => stateLabel({ ...s, state }).toLowerCase();
-  const trailSection = hasTrail(s) && lastChapter && lastLine && (
-    <Section
-      icon={<TrailIcon />}
-      hue="trail"
-      count={chapters.reduce((n, c) => n + 1 + c.agents.length, 0)}
-      title={t("sessions.detail.trail")}
-      aside={
-        <>
-          {runDuration}
-          {runWaiting && <span className={styles.warnText}>{` · ${runWaiting}`}</span>}
-        </>
-      }
-      summary={
-        <span className={styles.path}>
-          {path.map((p, i) =>
-            i < path.length - 1 ? (
-              <Fragment key={i}>
-                <span className={styles.pathSkill} style={{ color: p.color }}>
-                  {p.label}
-                </span>
-                <span className={styles.sep} aria-hidden="true">
-                  ›
-                </span>
-              </Fragment>
-            ) : (
-              <span key={i} className={`${styles.cur} ${styles[`tone-${lastLine.tone}`]}`}>
-                {p.label}
-                {stageText(lastLine.entry) && ` · ${stageText(lastLine.entry)}`}
-              </span>
-            ),
-          )}
-        </span>
-      }
-      {...fold("trail")}
-    >
-      <ol className={styles.chapters}>
-        {s.isTrailCut && <li className={styles.cut}>{t("sessions.trail.cut")}</li>}
-        {/* Oldest first, the newest near the present: a chapter's line, then, unfolded, its passages and subagents. */}
-        {chapters.map((c, ci) => {
+  // Oldest first, the newest near the present: a chapter's line, then, unfolded, its passages and subagents; the state's
+  // badge on the current run's last chapter only.
+  const chapterItems = (list: Chapter<(typeof trail)[number]>[], isCurrentRun: boolean) =>
+    list.map((c, ci) => {
           const last = c.lines[c.lines.length - 1] as (typeof trail)[number];
-          const isLast = ci === chapters.length - 1;
+          const isLast = ci === list.length - 1;
           const canOpen = c.items.length > 1;
           const isOpen = canOpen && (chapterChoices.get(c.at) ?? isLast);
           const extras = [c.agents.length > 0 && tn("sessions.trail.agents", c.agents.length), c.roundTrips > 0 && tn("sessions.trail.roundTrips", c.roundTrips)].filter(Boolean).join(" · ");
@@ -204,7 +176,7 @@ export function SessionDetail({
                 {c.isFree ? <span className={styles.free}>{t("sessions.lane.free")}</span> : <span className={styles.skill}>{last.entry.skill}</span>}
                 {last.stepText && <span className={styles.step}>{last.stepText}</span>}
                 {extras && <span className={styles.extras}>{extras}</span>}
-                {isLast && <StateLabel session={{ ...s, state: last.entry.phase }} />}
+                {isLast && isCurrentRun && <StateLabel session={{ ...s, state: last.entry.phase }} />}
               </span>
               <span className={`${styles.how} ${c.isLive ? styles.live : ""}`}>
                 <span>{c.durationText}</span>
@@ -269,7 +241,84 @@ export function SessionDetail({
               )}
             </li>
           );
+    });
+  const trailSection = hasTrail(s) && lastChapter && lastLine && (
+    <Section
+      icon={<TrailIcon />}
+      hue="trail"
+      count={[chapters, ...earlier.map((r) => r.chapters)].flat().reduce((n, c) => n + 1 + c.agents.length, 0)}
+      title={t("sessions.detail.trail")}
+      aside={
+        <>
+          {runDuration}
+          {runWaiting && <span className={styles.warnText}>{` · ${runWaiting}`}</span>}
+        </>
+      }
+      summary={
+        <span className={styles.path}>
+          {path.map((p, i) =>
+            i < path.length - 1 ? (
+              <Fragment key={i}>
+                <span className={styles.pathSkill} style={{ color: p.color }}>
+                  {p.label}
+                </span>
+                <span className={styles.sep} aria-hidden="true">
+                  ›
+                </span>
+              </Fragment>
+            ) : (
+              <span key={i} className={`${styles.cur} ${styles[`tone-${lastLine.tone}`]}`}>
+                {p.label}
+                {stageText(lastLine.entry) && ` · ${stageText(lastLine.entry)}`}
+              </span>
+            ),
+          )}
+        </span>
+      }
+      {...fold("trail")}
+    >
+      <ol className={styles.chapters}>
+        {earlier.map(({ run, chapters: runChapters, durationText }) => {
+          const isOpen = runChoices.get(run.id) ?? false;
+          return (
+            <li key={run.id} className={styles.prompt}>
+              <button type="button" className={styles.promptRow} aria-expanded={isOpen} onClick={() => toggleRun(run.id, isOpen)}>
+                <span className={styles.when}>{runTimeText(run.since, now)}</span>
+                <span className={styles.promptText} title={runRequestText(run)}>
+                  {runRequestText(run)}
+                </span>
+                <span className={styles.how}>
+                  <span>{durationText}</span>
+                </span>
+                <span className={styles.foldc} aria-hidden="true">
+                  {isOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                </span>
+              </button>
+              {isOpen && (
+                <ol className={styles.chapters}>
+                  {run.isTrailCut && <li className={styles.cut}>{t("sessions.trail.cut")}</li>}
+                  {chapterItems(runChapters, false)}
+                </ol>
+              )}
+            </li>
+          );
         })}
+        {earlier.length > 0 && (
+          <li className={styles.prompt}>
+            <div className={styles.promptRow}>
+              <span className={styles.when}>{runTimeText(currentRunSince(s) ?? lastChapter.at, now)}</span>
+              <span className={styles.promptText} title={requestText(s)}>
+                {requestText(s)}
+              </span>
+              <span className={styles.how}>
+                <span>{t("sessions.trail.currentPrompt")}</span>
+              </span>
+              <span className={styles.foldc} />
+            </div>
+          </li>
+        )}
+        {s.isTrailCut && <li className={styles.cut}>{t("sessions.trail.cut")}</li>}
+        {chapterItems(chapters, true)}
         {isRunning && (
           <li className={styles.nowLine}>
             <StatusDot tone={lastLine.tone} />
