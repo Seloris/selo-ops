@@ -20,7 +20,7 @@ export type PanelSubject =
   | { kind: "blueprint"; blueprint: Blueprint }
   | { kind: "sheet"; sheet: SpecSheet; touching: { blueprint: Blueprint; lines: DeltaLine[] }[] }
   | { kind: "ideas" | "debt"; title: string }
-  // projects FR-19, FR-23: the questions on the whole project, or on all its specs.
+  // projects FR-19, FR-25: the questions on the whole project, or on all its specs.
   | { kind: "ask"; scope: "project" | "specs"; title: string };
 
 export interface FileText {

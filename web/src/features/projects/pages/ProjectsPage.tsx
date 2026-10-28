@@ -59,7 +59,7 @@ export function ProjectsPage() {
   const [params, setParams] = useSearchParams();
   const projectId = params.get("project");
   const path = params.get("file");
-  // projects FR-19, FR-23: the questions on the whole project, or on all its specs, in the panel.
+  // projects FR-19, FR-25: the questions on the whole project, or on all its specs, in the panel.
   const askParam = params.get("ask");
   const askScope = askParam === "project" || askParam === "specs" ? askParam : null;
   const isAsking = askScope !== null;

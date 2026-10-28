@@ -67,7 +67,7 @@ export function ProjectView({
   onOpenFile: (path: string) => void;
   // projects FR-19: opens the questions on the whole project in the panel.
   onAsk: () => void;
-  // projects FR-23: opens the questions on all the specs in the panel.
+  // projects FR-25: opens the questions on all the specs in the panel.
   onAskSpecs: () => void;
   onCopy: (prompt: string) => void;
 }) {

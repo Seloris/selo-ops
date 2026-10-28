@@ -8,7 +8,7 @@ Pages: `projects` · Domain: `question` · Components: `api`, `web`
 - question ~ BR-04 — « then « Répondu » with its answer, its model and its duration, » → « then « Répondu » with its answer, its model, its duration and its tokens by kind (« Entrée », « Cache lu », « Cache écrit », « Sortie », all the run's models together, as the run reports them; none for an answer kept without them), »
 - projects ~ FR-20 — « offers « Explique-moi vite » and « Résume », each sent at a click, » → « offers « Explique-moi vite », sent at a click, »
 - projects ~ FR-21 — « « Répondu » with its answer formatted as FR-13, its model and its duration; » → « « Répondu » with its answer formatted as FR-13, its model, its duration and its total tokens (`question` BR-04's four kinds summed, abbreviated as `sessions-live` FR-35), each kind's count in the tooltip, none when the answer kept no tokens; »
-- projects + FR-23 — « Demander à Claude » in the « Specs » section's header opens in the side panel (FR-10) the questions on all the project's specs: a free-text field with « Envoyer » and the questions asked on all its specs (FR-21) (`question` BR-01).
+- projects + FR-25 — « Demander à Claude » in the « Specs » section's header opens in the side panel (FR-10) the questions on all the project's specs: a free-text field with « Envoyer » and the questions asked on all its specs (FR-21) (`question` BR-01).
 
 ## Business decisions
 - Tokens → the total beside the model and the duration, the four kinds in the tooltip, on every answered question (files, all specs, whole project); no cost in $ (misleading on a subscription).
@@ -45,4 +45,4 @@ Pages: `projects` · Domain: `question` · Components: `api`, `web`
 - [x] Stage 2 — web
 - [x] Review
 - [x] Browser test
-- [ ] Spec merged
+- [x] Spec merged
