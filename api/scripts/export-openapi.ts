@@ -1,5 +1,6 @@
 import { writeFileSync } from "node:fs";
 import "../src/features/health/health.schema.js";
+import "../src/features/launches/launches.schema.js";
 import "../src/features/projects/projects.schema.js";
 import "../src/features/questions/questions.schema.js";
 import "../src/features/sessions/sessions.schema.js";
