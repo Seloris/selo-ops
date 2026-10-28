@@ -286,6 +286,51 @@ describe("sessions routes", () => {
       expect(session.state).toBe("turn-ended");
     });
 
+    it("shows a session as working while a background subagent of an older run still runs at its turn's end", async () => {
+      // Arrange
+      const main = buildRun({ since: "2026-01-01T10:00:00.000Z", phase: "turn-ended" });
+      const old = buildRun({ agentId: "a-old", since: "2026-01-01T09:00:00.000Z", phase: "working" });
+      const backgroundTasks = [{ id: "a-old", type: "subagent", status: "running", description: "Fastlane perf fix" }];
+      ctx.seed.session(buildSessionFile({ current: main, runs: [main, old], backgroundTasks }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("working");
+    });
+
+    it("keeps the turn ended when a background subagent listed running at the turn's end has finished since", async () => {
+      // Arrange
+      const main = buildRun({ since: "2026-01-01T10:00:00.000Z", phase: "turn-ended" });
+      const old = buildRun({ agentId: "a-old", since: "2026-01-01T09:00:00.000Z", phase: "turn-ended" });
+      const backgroundTasks = [{ id: "a-old", type: "subagent", status: "running", description: "Fastlane perf fix" }];
+      ctx.seed.session(buildSessionFile({ current: main, runs: [main, old], backgroundTasks }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("turn-ended");
+    });
+
+    it("keeps the turn ended while only a background shell or monitor runs", async () => {
+      // Arrange
+      const main = buildRun({ since: "2026-01-01T10:00:00.000Z", phase: "turn-ended" });
+      const backgroundTasks = [
+        { id: "b-1", type: "shell", status: "running", description: "npm run dev" },
+        { id: "b-2", type: "monitor", status: "running", description: "watch logs" },
+        { id: "a-1", type: "subagent", status: "completed", description: "Explore" },
+      ];
+      ctx.seed.session(buildSessionFile({ current: main, runs: [main], backgroundTasks }));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("turn-ended");
+    });
+
     it.each(["awaiting-answer", "awaiting-commit", "stopped"] as const)("keeps %s over a working subagent", async (phase) => {
       // Arrange
       const main = buildRun({ since: "2026-01-01T10:00:00.000Z", phase });

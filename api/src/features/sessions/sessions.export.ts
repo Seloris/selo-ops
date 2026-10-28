@@ -97,6 +97,8 @@ export const sessionFileSchema = z.object({
   effort: z.string().nullish(),
   touchedFiles: z.array(z.string()).nullish(),
   close: z.object({ ok: z.boolean(), blockers: z.array(z.string()) }).nullish(),
+  // Claude Code's background tasks at the main run's last stop (subagents, shells, monitors); absent from older exports.
+  backgroundTasks: z.array(z.object({ id: z.string(), type: z.string(), status: z.string(), description: z.string() })).nullish().catch(null),
   runs: z.array(runSchema),
   current: runSchema.nullish(),
   // Every run summed, subagents and runs the export dropped included.

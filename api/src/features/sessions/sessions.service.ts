@@ -148,9 +148,13 @@ function toSession(
   const trail = isMissedEnd
     ? [...current.trail, { at: new Date(idleSince).toISOString(), skill: lastEntry?.skill ?? null, step: lastEntry?.step ?? null, substep: lastEntry?.substep ?? null, phase: runPhase }]
     : current.trail;
-  // A turn that ends with subagents in the background has not finished its work (`session` BR-02).
+  // A turn that ends with subagents in the background has not finished its work (`session` BR-02), even one an
+  // earlier turn launched: the person's messages to it open short turns of their own. The task list is a snapshot of
+  // the last stop, so its run, fresher, must still be working too.
   const isCalm = runPhase === "turn-ended" || runPhase === "job-done";
-  const phase = !isClosed && isCalm && subagents.some((r) => r.phase === "working") ? "working" : runPhase;
+  const runningTaskIds = new Set((file.backgroundTasks ?? []).filter((t) => t.type === "subagent" && t.status === "running").map((t) => t.id));
+  const isSubagentWorking = file.runs.some((r) => r.phase === "working" && r.agentId && (Date.parse(r.since) >= since || runningTaskIds.has(r.agentId)));
+  const phase = !isClosed && isCalm && isSubagentWorking ? "working" : runPhase;
   // A permission dialog holds the run whatever its phase (`session` BR-16); a question the export missed holds a
   // working one (`session` BR-17).
   const isMissedQuestion = !permissionWait && isAnswerWait && phase === "working";
