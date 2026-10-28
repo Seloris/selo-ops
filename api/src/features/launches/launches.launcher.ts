@@ -1,10 +1,10 @@
 import { spawn as nodeSpawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { runEnvOf, type Spawn } from "../questions/questions.runner.js";
+import { killTree, runEnvOf, type Spawn } from "../questions/questions.runner.js";
 
 // `session` BR-24: a Claude Code session started in the background with Remote Control on; the selo plugins' hooks
 // export it like any other session.
 
-export type LaunchErrorCode = "missing-binary" | "launch-failed";
+export type LaunchErrorCode = "missing-binary" | "launch-failed" | "timeout";
 
 export class LaunchError extends Error {
   constructor(
@@ -48,6 +48,8 @@ export function launchArgsOf({ name, command, isAutoMode }: Omit<LaunchInput, "c
 // `--bg` returns at once; past this delay the start is a failure.
 export const LAUNCH_TIMEOUT_MS = 30_000;
 const OUTPUT_TAIL = 2000;
+// The output may still arrive after the exit (on Windows above all): read until its end, at most this long.
+const DRAIN_MS = 200;
 const ID_MAX = 200;
 
 const lastLineOf = (text: string) =>
@@ -89,9 +91,10 @@ export function createClaudeLauncher({
           clearTimeout(timer);
           fn();
         };
+        // Its whole tree ended, so that a start given up on never goes on to start a session.
         const timer = setTimeout(() => {
-          child.kill();
-          settle(() => reject(new LaunchError("launch-failed", "Claude Code did not return within 30 s")));
+          killTree(child);
+          settle(() => reject(new LaunchError("timeout", null)));
         }, timeoutMs);
         timer.unref();
         child.stdout.setEncoding("utf8");
@@ -108,7 +111,8 @@ export function createClaudeLauncher({
         });
         // `exit`, not `close`: the background session may keep the pipes it inherited open.
         child.on("exit", (exitCode) => {
-          setImmediate(() => {
+          const finish = () => {
+            clearTimeout(drain);
             child.stdout.destroy();
             child.stderr.destroy();
             settle(() => {
@@ -118,7 +122,10 @@ export function createClaudeLauncher({
               }
               resolve({ id: lastLineOf(stdout)?.slice(0, ID_MAX) ?? null });
             });
-          });
+          };
+          const drain = setTimeout(finish, DRAIN_MS);
+          if (child.stdout.readableEnded) finish();
+          else child.stdout.once("end", finish);
         });
         child.stdin.on("error", () => undefined);
         child.stdin.end();

@@ -48,6 +48,7 @@ registry.registerPath({
     400: problem("A folder that is no checkout nor worktree of the project, or an empty or invalid command"),
     404: problem("No such project"),
     409: problem("« Lancer les sessions en CLI » is off"),
-    502: problem("Claude Code was not found, or failed to start the session"),
+    502: problem("Claude Code was not found, or failed to start the session: its own words as the detail"),
+    504: problem("Claude Code did not return within 30 s"),
   },
 });

@@ -144,7 +144,7 @@ function resultError(stdout: string): RunError | null {
 }
 
 // On Windows `kill` ends `claude.exe` alone, not the processes it started: `taskkill /T` ends the tree, no shell.
-function killTree(child: ChildProcessWithoutNullStreams): void {
+export function killTree(child: ChildProcessWithoutNullStreams): void {
   if (process.platform === "win32" && child.pid !== undefined) {
     const killer = nodeSpawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], { windowsHide: true, stdio: "ignore" });
     killer.on("error", () => child.kill());

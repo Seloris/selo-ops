@@ -23,10 +23,10 @@ export function createLaunchService({
         const { id } = await launcher.launch({ cwd: target.root, name, command: input.command, isAutoMode: input.isAutoMode });
         return { id, name, folder: target.root };
       } catch (error) {
-        if (error instanceof LaunchError && error.code === "missing-binary") {
-          throw new AppError(502, "claude_not_found", `Claude Code was not found: ${error.detail ?? "no detail"}`);
-        }
-        throw new AppError(502, "launch_failed", `Claude Code failed to start the session: ${error instanceof Error ? error.message : String(error)}`);
+        // The detail is Claude Code's own words alone: the page gives the cause in its own language (FR-62).
+        if (error instanceof LaunchError && error.code === "missing-binary") throw new AppError(502, "claude_not_found", error.detail ?? "");
+        if (error instanceof LaunchError && error.code === "timeout") throw new AppError(504, "launch_timeout", "");
+        throw new AppError(502, "launch_failed", error instanceof LaunchError ? (error.detail ?? "") : error instanceof Error ? error.message : String(error));
       }
     },
   };

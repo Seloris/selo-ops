@@ -147,6 +147,20 @@ describe("POST /v1/projects/:id/sessions", () => {
     expect((res.body as ProblemDetails).code).toBe("claude_not_found");
   });
 
+  it("returns 504 launch_timeout when Claude Code does not answer in time", async () => {
+    // Arrange
+    const { root, id } = seedProject();
+    await turnCliOn();
+    ctx.answerLaunch(() => Promise.reject(new LaunchError("timeout", null)));
+
+    // Act
+    const res = await launch(id, body(root));
+
+    // Assert
+    expect(res.status).toBe(504);
+    expect((res.body as ProblemDetails).code).toBe("launch_timeout");
+  });
+
   it("returns 502 launch_failed with Claude Code's error when the start fails", async () => {
     // Arrange
     const { root, id } = seedProject();
@@ -159,6 +173,6 @@ describe("POST /v1/projects/:id/sessions", () => {
     // Assert
     expect(res.status).toBe(502);
     expect((res.body as ProblemDetails).code).toBe("launch_failed");
-    expect((res.body as ProblemDetails).detail).toContain("Not logged in");
+    expect((res.body as ProblemDetails).detail).toBe("Not logged in");
   });
 });

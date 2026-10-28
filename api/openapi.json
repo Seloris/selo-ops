@@ -2401,7 +2401,17 @@
             }
           },
           "502": {
-            "description": "Claude Code was not found, or failed to start the session",
+            "description": "Claude Code was not found, or failed to start the session: its own words as the detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Claude Code did not return within 30 s",
             "content": {
               "application/problem+json": {
                 "schema": {

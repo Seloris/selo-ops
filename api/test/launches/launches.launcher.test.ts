@@ -88,6 +88,20 @@ describe("createClaudeLauncher", () => {
     expect(options?.env).not.toHaveProperty("CLAUDECODE");
   });
 
+  it("reads the id printed after the exit", async () => {
+    // Arrange
+    const fake = fakeChild();
+    const { launcher } = launcherWith(() => fake.child);
+
+    // Act
+    const launched = launcher.launch(input);
+    fake.child.emit("exit", 0);
+    fake.out.end("bg-late\n");
+
+    // Assert
+    expect(await launched).toEqual({ id: "bg-late" });
+  });
+
   it("returns no id when claude prints none", async () => {
     // Arrange
     const fake = fakeChild();
@@ -130,7 +144,7 @@ describe("createClaudeLauncher", () => {
     await expect(launched).rejects.toMatchObject({ code: "launch-failed", detail: "Not logged in" });
   });
 
-  it("fails with launch-failed when claude does not return in time", async () => {
+  it("fails with timeout when claude does not return in time", async () => {
     // Arrange
     const fake = fakeChild();
     const { launcher } = launcherWith(() => fake.child, 20);
@@ -139,6 +153,6 @@ describe("createClaudeLauncher", () => {
     const launched = launcher.launch(input);
 
     // Assert
-    await expect(launched).rejects.toMatchObject({ code: "launch-failed" });
+    await expect(launched).rejects.toMatchObject({ code: "timeout" });
   });
 });
