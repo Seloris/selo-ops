@@ -24,6 +24,11 @@ Pages: `projects` · Domain: `question` · Components: `api`, `web`
 - Demo → one answered question on all specs with its tokens; the canned answers carry tokens, one older answer none.
 - `question` glossary at the merge → « préréglage »: « Explique-moi vite » only; « cible »: adds all the specs.
 
+### Decided during build
+- Contract → `kind: "specs"` in the ask's body and the list's query; `kind` with a path `400` on both.
+- Migrations → one generated (the four token columns), one custom deleting the `summary` rows, so the generated ones stay untouched.
+- Tokens type → the sessions' `Tokens` schema reused, so the web reads one shape for a session's and an answer's tokens.
+
 ## Stages
 1. api — `feat(ask-claude-specs): api — questions on all specs, tokens kept, « Résume » dropped`
 2. web — `feat(ask-claude-specs): web — « Demander à Claude » on the specs, tokens on each answer`
@@ -34,7 +39,7 @@ Pages: `projects` · Domain: `question` · Components: `api`, `web`
 - browser: demo at 1280 and 360 px — « Demander à Claude » on « Specs », ask, « En cours » to « Répondu » with its tokens and tooltip; a blueprint's tab without « Résume »; the whole project's questions unchanged.
 
 ## Progress
-- [ ] Stage 1 — api
+- [x] Stage 1 — api
 - [ ] Stage 2 — web
 - [ ] Review
 - [ ] Browser test

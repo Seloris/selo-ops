@@ -85,13 +85,44 @@ describe("createClaudeRunner", () => {
     // Act
     const pending = runner.run(input());
     await flush();
-    out(fake).write(JSON.stringify({ type: "result", is_error: false, result: "Réponse", duration_ms: 1234, modelUsage: { "claude-haiku-5-5": { outputTokens: 10 }, "claude-sonnet-5-5": { outputTokens: 900 } } }));
+    out(fake).write(
+      JSON.stringify({
+        type: "result",
+        is_error: false,
+        result: "Réponse",
+        duration_ms: 1234,
+        modelUsage: {
+          "claude-haiku-5-5": { inputTokens: 100, outputTokens: 10, cacheReadInputTokens: 0, cacheCreationInputTokens: 0 },
+          "claude-sonnet-5-5": { inputTokens: 5, outputTokens: 900, cacheReadInputTokens: 20_000, cacheCreationInputTokens: 3_000 },
+        },
+      }),
+    );
     fake.child.emit("close", 0);
 
     // Assert
-    await expect(pending).resolves.toEqual({ answer: "Réponse", model: "claude-sonnet-5-5", durationMs: 1234 });
+    await expect(pending).resolves.toEqual({
+      answer: "Réponse",
+      model: "claude-sonnet-5-5",
+      durationMs: 1234,
+      tokens: { input: 105, cacheRead: 20_000, cacheWrite: 3_000, output: 910 },
+    });
     expect(calls[0]).toMatchObject({ command: "claude", options: { cwd: "C:/code/ledger-api", shell: false, env: { PATH: "p" } } });
     expect(fake.stdin.join("")).toBe("Explain");
+  });
+
+  it("keeps no tokens when the result gives no usage", async () => {
+    // Arrange
+    const fake = fakeChild();
+    const { runner } = runnerWith(fake);
+
+    // Act
+    const pending = runner.run(input());
+    await flush();
+    out(fake).write(JSON.stringify({ type: "result", is_error: false, result: "Réponse", duration_ms: 10 }));
+    fake.child.emit("close", 0);
+
+    // Assert
+    await expect(pending).resolves.toMatchObject({ answer: "Réponse", tokens: null });
   });
 
   it("fails with missing-binary when the executable is not found", async () => {

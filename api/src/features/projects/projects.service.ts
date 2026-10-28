@@ -167,7 +167,7 @@ function toProject(checkouts: Checkouts, liveSessions: SessionFile[], planning: 
 }
 
 export interface QuestionTarget {
-  kind: "blueprint" | "sheet" | "project";
+  kind: "blueprint" | "sheet" | "specs" | "project";
   // The checkout the run reads.
   root: string;
 }
@@ -194,10 +194,10 @@ export function createProjectService({ opsExport, planning, slots }: { opsExport
     },
     // `question` BR-01: a blueprint or a sheet the export lists for the project, in the checkout holding its file; `path`
     // null: the whole project, in its base checkout.
-    questionTarget: (id: string, path: string | null): QuestionTarget => {
+    questionTarget: (id: string, path: string | null, isSpecs = false): QuestionTarget => {
       const group = checkoutsOf().groups.find((g) => keyOf(g.base.root) === id);
       if (group === undefined) throw new NotFoundError("Project", id);
-      if (path === null) return { kind: "project", root: group.base.root };
+      if (path === null) return { kind: isSpecs ? "specs" : "project", root: group.base.root };
       if (group.base.sheets.some((s) => s.file === path)) return { kind: "sheet", root: group.base.root };
       if (!hasPlanningOf(group.base)) throw new NotFoundError("File", path);
       const root = filesOf(group).get(path);

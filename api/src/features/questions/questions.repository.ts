@@ -2,11 +2,17 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { questions, type Question } from "./questions.table.js";
 
-export type QuestionOutcome = Pick<Question, "state" | "answer" | "error" | "errorDetail" | "model" | "durationMs" | "answeredAt">;
+export type QuestionOutcome = Pick<
+  Question,
+  "state" | "answer" | "error" | "errorDetail" | "model" | "durationMs" | "inputTokens" | "cacheReadTokens" | "cacheWriteTokens" | "outputTokens" | "answeredAt"
+>;
+
+// One file's questions, or those on all the specs or on the whole project.
+export type QuestionScope = { path: string } | { kind: "specs" | "project" };
 
 export interface QuestionRepository {
-  // Newest first; `path` null: the questions on the whole project.
-  list(projectId: string, path: string | null): Promise<Question[]>;
+  // Newest first.
+  list(projectId: string, scope: QuestionScope): Promise<Question[]>;
   find(id: string): Promise<Question | undefined>;
   insert(question: Question): Promise<void>;
   // Only a question still running: one deleted meanwhile stays deleted.
@@ -20,11 +26,16 @@ export interface QuestionRepository {
 
 export function createQuestionRepository(db: Database): QuestionRepository {
   return {
-    list: (projectId, path) =>
+    list: (projectId, scope) =>
       db
         .select()
         .from(questions)
-        .where(and(eq(questions.projectId, projectId), path === null ? isNull(questions.path) : eq(questions.path, path)))
+        .where(
+          and(
+            eq(questions.projectId, projectId),
+            "path" in scope ? eq(questions.path, scope.path) : and(isNull(questions.path), eq(questions.targetKind, scope.kind)),
+          ),
+        )
         .orderBy(desc(questions.askedAt)),
     find: async (id) => (await db.select().from(questions).where(eq(questions.id, id)))[0],
     insert: async (question) => {

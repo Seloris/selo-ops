@@ -540,161 +540,6 @@
           "status"
         ]
       },
-      "QuestionsResponse": {
-        "type": "object",
-        "properties": {
-          "questions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Question"
-            }
-          }
-        },
-        "required": [
-          "questions"
-        ]
-      },
-      "Question": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "projectId": {
-            "type": "string"
-          },
-          "targetKind": {
-            "type": "string",
-            "enum": [
-              "blueprint",
-              "sheet",
-              "project"
-            ]
-          },
-          "path": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "preset": {
-            "$ref": "#/components/schemas/QuestionPreset"
-          },
-          "text": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "state": {
-            "$ref": "#/components/schemas/QuestionState"
-          },
-          "answer": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "error": {
-            "$ref": "#/components/schemas/QuestionError"
-          },
-          "errorDetail": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "model": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "durationMs": {
-            "type": [
-              "integer",
-              "null"
-            ]
-          },
-          "askedAt": {
-            "type": "string"
-          },
-          "answeredAt": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "projectId",
-          "targetKind",
-          "path",
-          "preset",
-          "text",
-          "state",
-          "answer",
-          "error",
-          "errorDetail",
-          "model",
-          "durationMs",
-          "askedAt",
-          "answeredAt"
-        ]
-      },
-      "QuestionPreset": {
-        "type": [
-          "string",
-          "null"
-        ],
-        "enum": [
-          "explain",
-          "summary",
-          null
-        ]
-      },
-      "QuestionState": {
-        "type": "string",
-        "enum": [
-          "running",
-          "answered",
-          "failed"
-        ]
-      },
-      "QuestionError": {
-        "type": [
-          "string",
-          "null"
-        ],
-        "enum": [
-          "interrupted",
-          "timeout",
-          "missing-binary",
-          "run-failed",
-          null
-        ]
-      },
-      "AskQuestion": {
-        "type": "object",
-        "properties": {
-          "path": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "minLength": 1
-          },
-          "preset": {
-            "$ref": "#/components/schemas/QuestionPreset"
-          },
-          "text": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 2000
-          }
-        }
-      },
       "Session": {
         "type": "object",
         "properties": {
@@ -1574,6 +1419,181 @@
           "uncommitted"
         ]
       },
+      "QuestionsResponse": {
+        "type": "object",
+        "properties": {
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Question"
+            }
+          }
+        },
+        "required": [
+          "questions"
+        ]
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "targetKind": {
+            "type": "string",
+            "enum": [
+              "blueprint",
+              "sheet",
+              "specs",
+              "project"
+            ]
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "preset": {
+            "$ref": "#/components/schemas/QuestionPreset"
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/QuestionState"
+          },
+          "answer": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error": {
+            "$ref": "#/components/schemas/QuestionError"
+          },
+          "errorDetail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "model": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "durationMs": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "tokens": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Tokens"
+              },
+              {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            ]
+          },
+          "askedAt": {
+            "type": "string"
+          },
+          "answeredAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "targetKind",
+          "path",
+          "preset",
+          "text",
+          "state",
+          "answer",
+          "error",
+          "errorDetail",
+          "model",
+          "durationMs",
+          "tokens",
+          "askedAt",
+          "answeredAt"
+        ]
+      },
+      "QuestionPreset": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "enum": [
+          "explain",
+          null
+        ]
+      },
+      "QuestionState": {
+        "type": "string",
+        "enum": [
+          "running",
+          "answered",
+          "failed"
+        ]
+      },
+      "QuestionError": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "enum": [
+          "interrupted",
+          "timeout",
+          "missing-binary",
+          "run-failed",
+          null
+        ]
+      },
+      "AskQuestion": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "specs"
+            ]
+          },
+          "preset": {
+            "$ref": "#/components/schemas/QuestionPreset"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      },
       "SeloSettings": {
         "type": "object",
         "properties": {
@@ -2010,139 +2030,6 @@
         }
       }
     },
-    "/v1/projects/{id}/questions": {
-      "get": {
-        "summary": "The questions asked on one file of the project, or on the whole project, newest first",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "required": false,
-            "name": "path",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The questions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/QuestionsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Ask a headless Claude Code run a question on a blueprint, a sheet, or the whole project",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AskQuestion"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "The question, running",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Question"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "No preset nor text, both, an empty or too long text, or a preset on the whole project",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No such project, or a file that is no blueprint nor sheet of it",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Three runs already work",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/questions/{id}": {
-      "delete": {
-        "summary": "Delete a question, stopping its run when it works",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Deleted"
-          },
-          "404": {
-            "description": "No such question",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/sessions": {
       "get": {
         "summary": "Every session of the ops export and every running session outside selo, with its derived state, and their projects",
@@ -2447,6 +2334,150 @@
           },
           "502": {
             "description": "git did not answer: timed out, missing or killed",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/projects/{id}/questions": {
+      "get": {
+        "summary": "The questions asked on one file of the project, or on the whole project, newest first",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": false,
+            "name": "path",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "specs"
+              ]
+            },
+            "required": false,
+            "name": "kind",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The questions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Ask a headless Claude Code run a question on a blueprint, a sheet, or the whole project",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskQuestion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The question, running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Question"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No preset nor text, both, an empty or too long text, a preset on all the specs or the whole project, or all the specs with a file",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such project, or a file that is no blueprint nor sheet of it",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Three runs already work",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/questions/{id}": {
+      "delete": {
+        "summary": "Delete a question, stopping its run when it works",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "description": "No such question",
             "content": {
               "application/problem+json": {
                 "schema": {

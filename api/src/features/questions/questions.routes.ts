@@ -12,7 +12,8 @@ export function questionsRoutes({ questions }: { questions: QuestionService }): 
   const router = Router();
   router.get("/v1/projects/:id/questions", validate(listInput), async (_req, res) => {
     const { params, query } = inputOf<typeof listInput>(res);
-    res.json({ questions: await questions.list(params.id, query.path ?? null) });
+    const scope = query.path !== undefined ? { path: query.path } : { kind: query.kind ?? ("project" as const) };
+    res.json({ questions: await questions.list(params.id, scope) });
   });
   router.post("/v1/projects/:id/questions", validate(askInput), async (_req, res) => {
     const { params, body } = inputOf<typeof askInput>(res);

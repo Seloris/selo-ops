@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { problemDetailsSchema } from "../../shared/errors.js";
 import { registry } from "../../shared/openapi.js";
+import { tokensSchema } from "../sessions/sessions.schema.js";
 import { PRESETS, TARGET_KINDS } from "./questions.prompt.js";
 
 export const QUESTION_TEXT_MAX = 2000;
@@ -15,7 +16,7 @@ export const questionSchema = z
     id: z.string(),
     projectId: z.string(),
     targetKind: z.enum(TARGET_KINDS),
-    // The file asked about, relative to the project's root; null for the whole project.
+    // The file asked about, relative to the project's root; null for all the specs or the whole project.
     path: z.string().nullable(),
     preset: questionPresetSchema.nullable(),
     text: z.string().nullable(),
@@ -27,6 +28,8 @@ export const questionSchema = z
     errorDetail: z.string().nullable(),
     model: z.string().nullable(),
     durationMs: z.number().int().nullable(),
+    // `question` BR-04: all the run's models together; null while running, on a failure, or for an answer kept without them.
+    tokens: tokensSchema.nullable(),
     askedAt: z.string(),
     answeredAt: z.string().nullable(),
   })
@@ -35,19 +38,24 @@ export const questionSchema = z
 export const questionsResponseSchema = z.object({ questions: z.array(questionSchema) }).meta({ id: "QuestionsResponse" });
 
 export const projectQuestionsParamsSchema = z.object({ id: z.string().min(1) });
-// No path: the questions on the whole project.
-export const questionsQuerySchema = z.object({ path: z.string().min(1).optional() });
+// No path: the questions on the whole project, or on all the specs with `kind=specs`.
+export const questionsQuerySchema = z
+  .object({ path: z.string().min(1).optional(), kind: z.literal("specs").optional() })
+  .refine((query) => query.path === undefined || query.kind === undefined, { message: "Give a path or kind=specs, not both" });
 
 // `question` BR-03: a preset on a file, or a free text.
 export const askQuestionSchema = z
   .object({
     path: z.string().min(1).nullable().optional(),
+    // All the specs of the project, with no path.
+    kind: z.literal("specs").optional(),
     preset: questionPresetSchema.optional(),
     text: z.string().trim().min(1).max(QUESTION_TEXT_MAX).optional(),
   })
   .superRefine((body, ctx) => {
     if ((body.preset === undefined) === (body.text === undefined)) ctx.addIssue({ code: "custom", path: ["text"], message: "Give a preset or a text, not both" });
     if (body.preset !== undefined && (body.path ?? null) === null) ctx.addIssue({ code: "custom", path: ["preset"], message: "A preset needs a file" });
+    if (body.kind !== undefined && (body.path ?? null) !== null) ctx.addIssue({ code: "custom", path: ["kind"], message: "All the specs take no file" });
   })
   .meta({ id: "AskQuestion" });
 
@@ -78,7 +86,7 @@ registry.registerPath({
   request: { params: projectQuestionsParamsSchema, body: { content: { "application/json": { schema: askQuestionSchema } } } },
   responses: {
     202: { description: "The question, running", content: { "application/json": { schema: questionSchema } } },
-    400: problem("No preset nor text, both, an empty or too long text, or a preset on the whole project"),
+    400: problem("No preset nor text, both, an empty or too long text, a preset on all the specs or the whole project, or all the specs with a file"),
     404: problem("No such project, or a file that is no blueprint nor sheet of it"),
     409: problem("Three runs already work"),
   },

@@ -3,8 +3,8 @@ import type { Clock } from "../../shared/clock.js";
 import { ConflictError, NotFoundError } from "../../shared/errors.js";
 import type { QuestionTarget } from "../projects/projects.service.js";
 import { promptOf } from "./questions.prompt.js";
-import type { QuestionRepository } from "./questions.repository.js";
-import { RunError, type QuestionRunner } from "./questions.runner.js";
+import type { QuestionRepository, QuestionScope } from "./questions.repository.js";
+import { RunError, type QuestionRunner, type RunResult } from "./questions.runner.js";
 import type { AskQuestion, QuestionDto } from "./questions.schema.js";
 import type { Question } from "./questions.table.js";
 
@@ -29,8 +29,19 @@ const toDto = (q: Question): QuestionDto => ({
   errorDetail: q.errorDetail,
   model: q.model,
   durationMs: q.durationMs,
+  tokens:
+    q.inputTokens === null || q.cacheReadTokens === null || q.cacheWriteTokens === null || q.outputTokens === null
+      ? null
+      : { input: q.inputTokens, cacheRead: q.cacheReadTokens, cacheWrite: q.cacheWriteTokens, output: q.outputTokens },
   askedAt: q.askedAt.toISOString(),
   answeredAt: q.answeredAt?.toISOString() ?? null,
+});
+
+const tokenColumnsOf = (tokens: RunResult["tokens"]) => ({
+  inputTokens: tokens?.input ?? null,
+  cacheReadTokens: tokens?.cacheRead ?? null,
+  cacheWriteTokens: tokens?.cacheWrite ?? null,
+  outputTokens: tokens?.output ?? null,
 });
 
 export function createQuestionService({
@@ -41,7 +52,7 @@ export function createQuestionService({
   timeoutMs = RUN_TIMEOUT_MS,
 }: {
   questions: QuestionRepository;
-  projects: { questionTarget(id: string, path: string | null): QuestionTarget };
+  projects: { questionTarget(id: string, path: string | null, isSpecs: boolean): QuestionTarget };
   runner: QuestionRunner;
   clock: Clock;
   timeoutMs?: number;
@@ -61,11 +72,28 @@ export function createQuestionService({
     try {
       const result = await runner.run({ cwd, prompt, sessionId: question.runSessionId, signal: controller.signal });
       if (controller.signal.aborted) throw new RunError("run-failed", "stopped");
-      await questions.finish(question.id, { state: "answered", answer: result.answer, error: null, errorDetail: null, model: result.model, durationMs: result.durationMs, answeredAt: clock.now() });
+      await questions.finish(question.id, {
+        state: "answered",
+        answer: result.answer,
+        error: null,
+        errorDetail: null,
+        model: result.model,
+        durationMs: result.durationMs,
+        ...tokenColumnsOf(result.tokens),
+        answeredAt: clock.now(),
+      });
     } catch (error) {
       // A deleted question has no row left to fail.
       if (controller.signal.reason === DELETED) return;
-      await questions.finish(question.id, { state: "failed", answer: null, ...failure(error, controller.signal), model: null, durationMs: null, answeredAt: clock.now() });
+      await questions.finish(question.id, {
+        state: "failed",
+        answer: null,
+        ...failure(error, controller.signal),
+        model: null,
+        durationMs: null,
+        ...tokenColumnsOf(null),
+        answeredAt: clock.now(),
+      });
     } finally {
       clearTimeout(timer);
       active.delete(question.id);
@@ -73,13 +101,13 @@ export function createQuestionService({
   };
 
   return {
-    async list(projectId: string, path: string | null): Promise<QuestionDto[]> {
-      return (await questions.list(projectId, path)).map(toDto);
+    async list(projectId: string, scope: QuestionScope): Promise<QuestionDto[]> {
+      return (await questions.list(projectId, scope)).map(toDto);
     },
 
     async ask(projectId: string, input: AskQuestion): Promise<QuestionDto> {
       const path = input.path ?? null;
-      const target = projects.questionTarget(projectId, path);
+      const target = projects.questionTarget(projectId, path, input.kind === "specs");
       if (active.size >= MAX_RUNNING) throw new ConflictError("question_limit", `${MAX_RUNNING} questions are already running`);
       const question: Question = {
         id: randomUUID(),
@@ -94,6 +122,7 @@ export function createQuestionService({
         errorDetail: null,
         model: null,
         durationMs: null,
+        ...tokenColumnsOf(null),
         runSessionId: randomUUID(),
         askedAt: clock.now(),
         answeredAt: null,

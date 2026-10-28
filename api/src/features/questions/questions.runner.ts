@@ -1,5 +1,6 @@
 import { spawn as nodeSpawn, type ChildProcessWithoutNullStreams, type SpawnOptionsWithoutStdio } from "node:child_process";
 import { z } from "zod";
+import type { tokensSchema } from "../sessions/sessions.schema.js";
 
 // `question` BR-01, BR-02: a headless Claude Code run that only reads, with no hook, skill nor MCP server, so that it is
 // no selo session (the selo plugins' hooks never see it) and leaves the project as it found it.
@@ -29,10 +30,14 @@ export interface RunInput {
   signal: AbortSignal;
 }
 
+export type Tokens = z.infer<typeof tokensSchema>;
+
 export interface RunResult {
   answer: string;
   model: string;
   durationMs: number;
+  // All the run's models together; null when the result gives no usage.
+  tokens: Tokens | null;
 }
 
 export interface QuestionRunner {
@@ -69,10 +74,20 @@ const resultSchema = z.looseObject({
   is_error: z.boolean().optional(),
   result: z.string().optional(),
   duration_ms: z.number().nonnegative().optional(),
-  modelUsage: z.record(z.string(), z.looseObject({ outputTokens: z.number().optional() })).optional(),
+  modelUsage: z
+    .record(
+      z.string(),
+      z.looseObject({
+        inputTokens: z.number().optional(),
+        outputTokens: z.number().optional(),
+        cacheReadInputTokens: z.number().optional(),
+        cacheCreationInputTokens: z.number().optional(),
+      }),
+    )
+    .optional(),
 });
 
-type ModelUsage = Record<string, { outputTokens?: number | undefined }>;
+type ModelUsage = NonNullable<z.infer<typeof resultSchema>["modelUsage"]>;
 
 // The model that wrote the most: a run may also call a small model on the side.
 function modelOf(usage: ModelUsage | undefined): string {
@@ -80,6 +95,19 @@ function modelOf(usage: ModelUsage | undefined): string {
   const [first, ...rest] = entries;
   if (first === undefined) return QUESTION_MODEL;
   return rest.reduce((best, cur) => ((cur[1].outputTokens ?? 0) > (best[1].outputTokens ?? 0) ? cur : best), first)[0];
+}
+
+// `question` BR-04: every model of the run, a small one on the side included.
+function tokensOf(usage: ModelUsage | undefined): Tokens | null {
+  const entries = Object.values(usage ?? {});
+  if (entries.length === 0) return null;
+  const sum = (pick: (u: ModelUsage[string]) => number | undefined) => Math.round(entries.reduce((total, u) => total + (pick(u) ?? 0), 0));
+  return {
+    input: sum((u) => u.inputTokens),
+    cacheRead: sum((u) => u.cacheReadInputTokens),
+    cacheWrite: sum((u) => u.cacheCreationInputTokens),
+    output: sum((u) => u.outputTokens),
+  };
 }
 
 export function parseResult(stdout: string, elapsedMs: number): RunResult {
@@ -92,7 +120,12 @@ export function parseResult(stdout: string, elapsedMs: number): RunResult {
   const parsed = resultSchema.safeParse(value);
   if (!parsed.success || parsed.data.result === undefined) throw new RunError("run-failed", "Claude Code's output holds no result");
   if (parsed.data.is_error === true) throw new RunError("run-failed", parsed.data.result);
-  return { answer: parsed.data.result, model: modelOf(parsed.data.modelUsage), durationMs: Math.round(parsed.data.duration_ms ?? elapsedMs) };
+  return {
+    answer: parsed.data.result,
+    model: modelOf(parsed.data.modelUsage),
+    durationMs: Math.round(parsed.data.duration_ms ?? elapsedMs),
+    tokens: tokensOf(parsed.data.modelUsage),
+  };
 }
 
 const OUTPUT_CAP = 4 * 1024 * 1024;
