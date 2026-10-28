@@ -18,6 +18,10 @@ The person's ideas for this project, not yet specified. Grouped by scope: one `#
 - 2026-10-24 — **Daily delivery journal:** A page listing what was delivered per day and per project: the commits of the JOB DONE footers and the FRs they touched.
 - 2026-10-24 — **Usage across sessions:** Token usage summed per day, per project and per type of work (free, fastlane, build), to compare what each way of working costs.
 - 2026-10-24 — **Start a session on a skill:** Buttons in the app that launch a prompt in a new session, to force a skill (fastlane, blueprint, autopilot…).
+- 2026-10-27 — **Project slots on the project card:** See and set a project's slots from its project card.
+- 2026-10-27 — **Start a slot on demand:** Start a slot by hand, on demand; each app exposes a file that runs the whole app, and if needed the web factory is updated to normalise it.
+- 2026-10-27 — **Multiple design swap:** Swap between multiple designs.
+- 2026-10-27 — **Search the specs:** A search across the specs.
 
 ## selo
 
