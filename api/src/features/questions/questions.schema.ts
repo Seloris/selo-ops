@@ -29,7 +29,8 @@ export const questionSchema = z
     model: z.string().nullable(),
     durationMs: z.number().int().nullable(),
     // `question` BR-04: all the run's models together; null while running, on a failure, or for an answer kept without them.
-    tokens: tokensSchema.nullable(),
+    // Its shape inline: a nullable reference to a component also used non-null types as `Tokens & Record<string, never>` in the web.
+    tokens: z.object(tokensSchema.shape).nullable(),
     askedAt: z.string(),
     answeredAt: z.string().nullable(),
   })

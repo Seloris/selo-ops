@@ -1497,16 +1497,29 @@
             ]
           },
           "tokens": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Tokens"
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "input": {
+                "type": "integer"
               },
-              {
-                "type": [
-                  "object",
-                  "null"
-                ]
+              "cacheRead": {
+                "type": "integer"
+              },
+              "cacheWrite": {
+                "type": "integer"
+              },
+              "output": {
+                "type": "integer"
               }
+            },
+            "required": [
+              "input",
+              "cacheRead",
+              "cacheWrite",
+              "output"
             ]
           },
           "askedAt": {
