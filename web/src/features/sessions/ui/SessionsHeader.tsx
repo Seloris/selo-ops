@@ -12,6 +12,7 @@ export function SessionsHeader({
   updatedSeconds,
   isRefreshing,
   plugins,
+  isNewSessionOff,
   onNewSession,
 }: {
   counts: Counts | null;
@@ -19,6 +20,8 @@ export function SessionsHeader({
   isRefreshing: boolean;
   // The installed selo plugins' versions, already worded; null when unknown.
   plugins: string | null;
+  // FR-60: « Lancer les sessions en CLI » is off.
+  isNewSessionOff: boolean;
   onNewSession(): void;
 }) {
   return (
@@ -52,7 +55,13 @@ export function SessionsHeader({
         </span>
       )}
       {/* sessions-live FR-43: below 640 px, its icon alone. */}
-      <Button size="sm" aria-label={t("sessions.new.open")} title={t("sessions.new.open")} onClick={onNewSession}>
+      <Button
+        size="sm"
+        aria-label={t("sessions.new.open")}
+        title={isNewSessionOff ? t("sessions.new.cliOff") : t("sessions.new.open")}
+        disabled={isNewSessionOff}
+        onClick={onNewSession}
+      >
         <PlusIcon />
         <span className={styles.newLabel}>{t("sessions.new.open")}</span>
       </Button>

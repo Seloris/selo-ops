@@ -75,7 +75,7 @@ export function SettingsDialog({
   // The choices start from the file once it is read; the same window shows the reading, then the settings.
   const [form, setForm] = useState<{ initial: SettingsChoices; choices: SettingsChoices } | null>(null);
   if (settings !== null && form === null) {
-    const initial = choicesOf(settings.values, settings.catalog);
+    const initial = choicesOf(settings.values, settings.catalog, settings.seloOps);
     setForm({ initial, choices: initial });
   }
   if (settings === null || form === null) {
@@ -91,11 +91,13 @@ export function SettingsDialog({
   const isUnreadable = settings.state === "unreadable";
   const changes = changesOf(initial, choices, catalog);
   const count = Object.keys(changes).length;
+  // app FR-13: « Lancer les sessions en CLI » is no `env` key.
+  const hasEnvChanges = Object.keys(changes).some((key) => key !== "seloOps");
   const setRole = (role: Role, model: string) => setChoices((c) => ({ ...c, roles: { ...c.roles, [role]: model } }));
 
   const footer = (
     <div className={styles.foot}>
-      {count > 0 && (
+      {hasEnvChanges && (
         <div className={styles.preview}>
           <span className={styles.previewTitle}>{withCode(t("settings.preview.title"), "env", "env")}</span>
           <Preview settings={settings} changes={changes} />
@@ -103,11 +105,12 @@ export function SettingsDialog({
       )}
       {saveError !== null && <ErrorMessage>{t("settings.saveError", { message: saveError })}</ErrorMessage>}
       <div className={styles.actions}>
-        <span className={styles.hint}>{isUnreadable ? null : count > 0 ? tn("settings.foot.pending", count) : t("settings.foot.hint")}</span>
+        <span className={styles.hint}>{count > 0 ? tn("settings.foot.pending", count) : isUnreadable ? null : t("settings.foot.hint")}</span>
         <Button variant="quiet" disabled={isSaving} onClick={onClose}>
           {isUnreadable ? t("settings.foot.close") : t("settings.foot.cancel")}
         </Button>
-        <Button variant="primary" disabled={isUnreadable || count === 0 || isSaving} onClick={() => onSave(changes)}>
+        {/* app FR-12, FR-13: an unreadable file still saves Selo Ops' own settings. */}
+        <Button variant="primary" disabled={count === 0 || isSaving} onClick={() => onSave(changes)}>
           {isSaving ? t("settings.foot.saving") : t("settings.foot.save")}
         </Button>
       </div>
@@ -219,6 +222,16 @@ export function SettingsDialog({
               SELO_COMMIT = <b>{choices.isAutoCommit ? "auto" : "ask"}</b>
             </span>
             <span className={styles.desc}>{t("settings.commit.desc")}</span>
+          </div>
+        </fieldset>
+        <fieldset className={styles.section}>
+          <legend className={styles.sectionHead}>
+            <span className={styles.label}>{t("settings.seloOps.label")}</span>
+          </legend>
+          <div className={styles.option}>
+            <Switch label={t("settings.cliLaunch.label")} checked={choices.isCliLaunch} onChange={(isCliLaunch) => setChoices((c) => ({ ...c, isCliLaunch }))} />
+            <span className={styles.flag}>{t("settings.cliLaunch.where")}</span>
+            <span className={styles.desc}>{t("settings.cliLaunch.desc")}</span>
           </div>
         </fieldset>
       </div>

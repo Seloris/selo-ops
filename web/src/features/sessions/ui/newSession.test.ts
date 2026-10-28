@@ -5,7 +5,7 @@ import {
   canOpen,
   commandOf,
   folderOf,
-  newSessionLink,
+  launchTitleOf,
   parsePrefs,
   projectOfFolder,
   type Blueprint,
@@ -173,11 +173,21 @@ describe("canOpen (sessions-live FR-47)", () => {
   });
 });
 
-describe("newSessionLink (sessions-live FR-47)", () => {
-  it("opens the desktop app's new session with the command and the folder, encoded", () => {
-    expect(newSessionLink("/selo-flow:fastlane a & b — no browser", "C:/WS/my app")).toBe(
-      "claude://code/new?q=%2Fselo-flow%3Afastlane%20a%20%26%20b%20%E2%80%94%20no%20browser&folder=C%3A%2FWS%2Fmy%20app",
-    );
+describe("launchTitleOf (sessions-live FR-61, `session` BR-24)", () => {
+  const inWorktree = { ...blueprint("2026-01-02-tags", "ready"), title: "Tags", worktreeBranch: "wt" };
+  const p = project("p", "C:/p", ["C:/p/.claude/worktrees/x"], [inWorktree]);
+
+  it("names the session after the request", () => {
+    expect(launchTitleOf(p, simple({ request: "  Ajoute un tag " }))).toBe("Ajoute un tag");
+  });
+
+  it("names it after the chosen blueprint's title", () => {
+    expect(launchTitleOf(p, simple({ resume: { kind: "blueprint", file: inWorktree.file } }))).toBe("Tags");
+    expect(launchTitleOf(p, form({ skill: "build", blueprintFile: inWorktree.file }))).toBe("Tags");
+  });
+
+  it("names a review with no request after its command", () => {
+    expect(launchTitleOf(p, form({ skill: "review" }))).toBe("/selo-flow:review");
   });
 });
 
@@ -221,6 +231,10 @@ describe("folderOf (sessions-live FR-47)", () => {
     expect(folderOf(q, form({ skill: "fastlane", request: "x", mockupFile: mockup("m").file }))).toBe("C:/q");
   });
 
+  it("starts the recap's session in the worktree that alone holds the chosen blueprint (sessions-live FR-61)", () => {
+    expect(folderOf(p, simple({ presence: "leave", resume: { kind: "blueprint", file: inWorktree.file } }))).toBe("C:/p/.claude/worktrees/x");
+  });
+
   it("opens « Simple » on a chosen blueprint in the worktree that alone holds it", () => {
     expect(folderOf(p, simple({ resume: { kind: "blueprint", file: inWorktree.file } }))).toBe("C:/p/.claude/worktrees/x");
   });
@@ -239,15 +253,19 @@ describe("buildableBlueprints (sessions-live FR-45, FR-46)", () => {
 
 describe("parsePrefs (sessions-live FR-49)", () => {
   it("opens « Simple » and « Je reste là » the first time", () => {
-    expect(parsePrefs(null)).toEqual({ mode: "simple", presence: "stay" });
+    expect(parsePrefs(null)).toEqual({ mode: "simple", presence: "stay", isAutoMode: false });
   });
 
   it("keeps the mode and the choice made last", () => {
-    expect(parsePrefs({ mode: "advanced", presence: "leave" })).toEqual({ mode: "advanced", presence: "leave" });
+    expect(parsePrefs({ mode: "advanced", presence: "leave" })).toEqual({ mode: "advanced", presence: "leave", isAutoMode: false });
+  });
+
+  it("keeps « Mode auto » on once chosen (sessions-live FR-61)", () => {
+    expect(parsePrefs({ mode: "simple", presence: "stay", isAutoMode: true })).toEqual({ mode: "simple", presence: "stay", isAutoMode: true });
   });
 
   it("falls back on each value it does not know", () => {
-    expect(parsePrefs({ mode: "expert", presence: 3 })).toEqual({ mode: "simple", presence: "stay" });
-    expect(parsePrefs("advanced")).toEqual({ mode: "simple", presence: "stay" });
+    expect(parsePrefs({ mode: "expert", presence: 3, isAutoMode: "yes" })).toEqual({ mode: "simple", presence: "stay", isAutoMode: false });
+    expect(parsePrefs("advanced")).toEqual({ mode: "simple", presence: "stay", isAutoMode: false });
   });
 });

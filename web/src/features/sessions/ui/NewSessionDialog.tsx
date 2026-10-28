@@ -5,7 +5,7 @@ import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { DropdownCheck, DropdownNote } from "../../../shared/ui/Dropdown.tsx";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage.tsx";
 import { Field } from "../../../shared/ui/Field.tsx";
-import { BlueprintIcon, CloseIcon, DomainIcon, ImageIcon, OpenIcon, PageIcon, PlusIcon, PromptIcon, RobotIcon } from "../../../shared/ui/icons.tsx";
+import { BackIcon, BlueprintIcon, CloseIcon, DomainIcon, ImageIcon, PageIcon, PlusIcon, PromptIcon, RobotIcon, TerminalIcon } from "../../../shared/ui/icons.tsx";
 import { LoadingState } from "../../../shared/ui/LoadingState.tsx";
 import { Modal } from "../../../shared/ui/Modal.tsx";
 import { SearchInput } from "../../../shared/ui/SearchInput.tsx";
@@ -25,10 +25,11 @@ import {
   hasMockupOption,
   hasNoBrowser,
   isRequestOptional,
+  launchTitleOf,
   projectOfFolder,
   usesBlueprint,
-  type Mode,
   type NewSessionForm,
+  type NewSessionPrefs,
   type PilotLane,
   type Presence,
   type ProjectOverview,
@@ -51,8 +52,29 @@ const isPage = (s: SpecSheet) => s.kind === "page";
 const sheetColor = (s: SpecSheet) => (isPage(s) ? "var(--spec-page)" : "var(--spec-domain)");
 const sheetIcon = (s: SpecSheet) => (isPage(s) ? <PageIcon /> : <DomainIcon />);
 
-// sessions-live FR-44 to FR-50: what to do, in which project, as the selo command a new session of the Claude app opens
-// with, in « Simple » or « Avancé ». `folder` points at the project to open on (FR-43): a session's folder.
+export interface LaunchRequest {
+  project: ProjectOverview;
+  folder: string;
+  command: string;
+  title: string;
+  isAutoMode: boolean;
+}
+
+export interface LaunchState {
+  isPending: boolean;
+  // Why the last start failed: the problem's code and its message.
+  error: { code: string | null; message: string } | null;
+}
+
+// sessions-live FR-62: why a start failed, from the problem's code.
+const LAUNCH_ERRORS: Record<string, MessageKey> = {
+  cli_launch_off: "sessions.recap.error.off",
+  claude_not_found: "sessions.recap.error.notFound",
+  launch_timeout: "sessions.recap.error.timeout",
+};
+
+// sessions-live FR-44 to FR-50, FR-61: what to do, in which project, as the selo command a new session starts with, in
+// « Simple » or « Avancé », then the launch recap. `folder` points at the project to open on (FR-43): a session's folder.
 export function NewSessionDialog({
   projects,
   error,
@@ -60,22 +82,30 @@ export function NewSessionDialog({
   prefs,
   onPrefs,
   onCopy,
-  onOpen,
+  launch,
+  onRecapOpen,
+  onLaunch,
   onClose,
 }: {
   // null while the projects are read.
   projects: ProjectOverview[] | null;
   error: string | null;
   folder: string | null;
-  // FR-49: the mode and the choice made last.
-  prefs: { mode: Mode; presence: Presence };
-  onPrefs(prefs: { mode: Mode; presence: Presence }): void;
+  // FR-49, FR-61: the mode, the choice and « Mode auto » made last.
+  prefs: NewSessionPrefs;
+  onPrefs(prefs: NewSessionPrefs): void;
   onCopy(command: string): Promise<boolean>;
-  onOpen(command: string, project: ProjectOverview, folder: string): void;
+  launch: LaunchState;
+  // The recap opens: the last start's error no longer holds.
+  onRecapOpen(): void;
+  onLaunch(request: LaunchRequest): void;
   onClose(): void;
 }) {
   const [projectId, setProjectId] = useState<string | null>(null);
-  const [form, setForm] = useState<NewSessionForm>({ ...EMPTY_FORM, ...prefs });
+  const [form, setForm] = useState<NewSessionForm>({ ...EMPTY_FORM, mode: prefs.mode, presence: prefs.presence });
+  const [isAutoMode, setAutoMode] = useState(prefs.isAutoMode);
+  // FR-61: the recap stands in for the form, which keeps its state behind it for « Retour ».
+  const [isRecap, setRecap] = useState(false);
   const [copied, setCopied] = useState<boolean | null>(null);
   const [isPickerOpen, setPickerOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -92,10 +122,19 @@ export function NewSessionDialog({
     const next = { ...form, ...patch };
     setForm(next);
     setCopied(null);
-    if (next.mode !== form.mode || next.presence !== form.presence) onPrefs({ mode: next.mode, presence: next.presence });
+    if (next.mode !== form.mode || next.presence !== form.presence) onPrefs({ mode: next.mode, presence: next.presence, isAutoMode });
   };
-  const open = () => {
-    if (project && target && isReady) onOpen(command, project, target);
+  const openRecap = () => {
+    if (!isReady) return;
+    onRecapOpen();
+    setRecap(true);
+  };
+  const changeAutoMode = (on: boolean) => {
+    setAutoMode(on);
+    onPrefs({ mode: form.mode, presence: form.presence, isAutoMode: on });
+  };
+  const start = () => {
+    if (project && target && isReady && !launch.isPending) onLaunch({ project, folder: target, command, title: launchTitleOf(project, form), isAutoMode });
   };
 
   const requestArea = (label: string, placeholder: string, isBig = false) => (
@@ -428,69 +467,155 @@ export function NewSessionDialog({
         <div
           className={styles.window}
           onKeyDown={(event) => {
-            if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+            // FR-47: the shortcut opens the recap; only « Lancer » starts the session.
+            if (event.key === "Enter" && (event.ctrlKey || event.metaKey) && !isRecap) {
               event.preventDefault();
-              open();
+              openRecap();
             }
           }}
         >
-          <div className={styles.top}>
-            <span className={styles.in}>{t("sessions.new.in")}</span>
-            <span className={styles.project}>
-              <Select
-                aria-label={t("sessions.new.project")}
-                value={project.id}
-                onChange={(event) => {
-                  setProjectId(event.target.value);
-                  // Files of the other project are picked again.
-                  update({ resume: null, blueprintFile: null, mockupFile: null, touches: [] });
-                }}
-              >
-                {list.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </Select>
-            </span>
-            <span className={styles.path}>{target}</span>
-            <span className={styles.mode}>
-              <Segmented
-                label={t("sessions.new.mode")}
-                options={[
-                  { value: "simple", label: t("sessions.new.mode.simple") },
-                  { value: "advanced", label: t("sessions.new.mode.advanced") },
-                ]}
-                value={form.mode}
-                onChange={(mode) => update({ mode })}
-              />
-            </span>
-          </div>
-          {/* FR-44: the window is to be reworked, said where it is used. */}
-          <p className={styles.wip} role="note">
-            <Tag>{t("sessions.new.wipTag")}</Tag>
-            {t("sessions.new.wip")}
-          </p>
-          <div className={styles.body}>{form.mode === "simple" ? simple : advanced}</div>
-          <div className={styles.foot}>
-            <CommandBox
-              command={command || " "}
-              copyLabel={t(copied === null ? "sessions.new.copy" : copied ? "sessions.new.copied" : "sessions.new.copyBlocked")}
-              onCopy={() => void onCopy(command).then(setCopied)}
+          {/* FR-61: the recap shows what starts; the project and the mode change only from the form, behind « Retour ». */}
+          {!isRecap && (
+            <>
+              <div className={styles.top}>
+                <span className={styles.in}>{t("sessions.new.in")}</span>
+                <span className={styles.project}>
+                  <Select
+                    aria-label={t("sessions.new.project")}
+                    value={project.id}
+                    onChange={(event) => {
+                      setProjectId(event.target.value);
+                      // Files of the other project are picked again.
+                      update({ resume: null, blueprintFile: null, mockupFile: null, touches: [] });
+                    }}
+                  >
+                    {list.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </Select>
+                </span>
+                <span className={styles.path}>{target}</span>
+                <span className={styles.mode}>
+                  <Segmented
+                    label={t("sessions.new.mode")}
+                    options={[
+                      { value: "simple", label: t("sessions.new.mode.simple") },
+                      { value: "advanced", label: t("sessions.new.mode.advanced") },
+                    ]}
+                    value={form.mode}
+                    onChange={(mode) => update({ mode })}
+                  />
+                </span>
+              </div>
+              {/* FR-44: the window is to be reworked, said where it is used. */}
+              <p className={styles.wip} role="note">
+                <Tag>{t("sessions.new.wipTag")}</Tag>
+                {t("sessions.new.wip")}
+              </p>
+            </>
+          )}
+          {isRecap ? (
+            <Recap
+              projectName={project.name}
+              folder={target ?? project.root}
+              command={command}
+              isAutoMode={isAutoMode}
+              launch={launch}
+              onAutoMode={changeAutoMode}
+              onBack={() => setRecap(false)}
+              onStart={start}
             />
-            <div className={styles.footRow}>
-              <span className={styles.footHint}>
-                {isReady ? t("sessions.new.goHint", { project: project.name }) : t(needHint)}
-                <kbd className={styles.kbd}>{t("sessions.new.shortcut")}</kbd>
-              </span>
-              <Button variant="primary" disabled={!isReady} onClick={open}>
-                <OpenIcon />
-                {t("sessions.new.go")}
-              </Button>
-            </div>
-          </div>
+          ) : (
+            <>
+              <div className={styles.body}>{form.mode === "simple" ? simple : advanced}</div>
+              <div className={styles.foot}>
+                <CommandBox
+                  command={command || " "}
+                  copyLabel={t(copied === null ? "sessions.new.copy" : copied ? "sessions.new.copied" : "sessions.new.copyBlocked")}
+                  onCopy={() => void onCopy(command).then(setCopied)}
+                />
+                <div className={styles.footRow}>
+                  <span className={styles.footHint}>
+                    {isReady ? t("sessions.new.goHint", { project: project.name }) : t(needHint)}
+                    <kbd className={styles.kbd}>{t("sessions.new.shortcut")}</kbd>
+                  </span>
+                  <Button variant="primary" disabled={!isReady} onClick={openRecap}>
+                    <TerminalIcon />
+                    {t("sessions.new.go")}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </Modal>
+  );
+}
+
+// sessions-live FR-61, FR-62: what will start, where and how, before it starts.
+function Recap({
+  projectName,
+  folder,
+  command,
+  isAutoMode,
+  launch,
+  onAutoMode,
+  onBack,
+  onStart,
+}: {
+  projectName: string;
+  folder: string;
+  command: string;
+  isAutoMode: boolean;
+  launch: LaunchState;
+  onAutoMode(on: boolean): void;
+  onBack(): void;
+  onStart(): void;
+}) {
+  const errorKey = launch.error === null ? null : (LAUNCH_ERRORS[launch.error.code ?? ""] ?? "sessions.recap.error.failed");
+  return (
+    <section className={styles.recap} aria-label={t("sessions.recap.title")}>
+      <h3 className={styles.recapTitle}>{t("sessions.recap.title")}</h3>
+      <dl className={styles.facts}>
+        <dt>{t("sessions.recap.project")}</dt>
+        <dd>{projectName}</dd>
+        <dt>{t("sessions.recap.folder")}</dt>
+        <dd className={styles.mono}>{folder}</dd>
+        <dt>{t("sessions.recap.command")}</dt>
+        <dd>
+          <code className={styles.recapCommand}>{command}</code>
+        </dd>
+      </dl>
+      <p className={styles.how}>
+        <RobotIcon />
+        {t("sessions.recap.how")}
+      </p>
+      <div className={styles.option}>
+        <Switch label={t("sessions.recap.autoMode")} checked={isAutoMode} disabled={launch.isPending} onChange={onAutoMode} />
+        <code className={styles.flag}>--permission-mode auto</code>
+        <span className={styles.hint}>{t("sessions.recap.autoModeHint")}</span>
+      </div>
+      <div className={styles.foot}>
+        {launch.error !== null && errorKey !== null && (
+          <ErrorMessage>
+            {t(errorKey)}
+            {launch.error.message !== "" && <span className={styles.errorDetail}>{launch.error.message}</span>}
+          </ErrorMessage>
+        )}
+        <div className={styles.footRow}>
+          <Button variant="quiet" disabled={launch.isPending} onClick={onBack}>
+            <BackIcon />
+            {t("sessions.recap.back")}
+          </Button>
+          <Button variant="primary" disabled={launch.isPending} onClick={onStart}>
+            <TerminalIcon />
+            {t(launch.isPending ? "sessions.recap.starting" : "sessions.recap.start")}
+          </Button>
+        </div>
+      </div>
+    </section>
   );
 }

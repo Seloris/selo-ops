@@ -19,6 +19,7 @@ export function ZenStrip({
   pills,
   updatedSeconds,
   isRefreshing,
+  isNewSessionOff,
   onNewSession,
   onLeave,
 }: {
@@ -26,6 +27,8 @@ export function ZenStrip({
   pills: ZenPill[];
   updatedSeconds: number | null;
   isRefreshing: boolean;
+  // FR-60: « Lancer les sessions en CLI » is off.
+  isNewSessionOff: boolean;
   onNewSession(): void;
   onLeave(): void;
 }) {
@@ -60,7 +63,7 @@ export function ZenStrip({
             {t("sessions.updated.text", { seconds: updatedSeconds })}
           </span>
         )}
-        <IconButton label={t("sessions.new.open")} onClick={onNewSession}>
+        <IconButton label={t("sessions.new.open")} tooltip={isNewSessionOff ? t("sessions.new.cliOff") : undefined} disabled={isNewSessionOff} onClick={onNewSession}>
           <PlusIcon />
         </IconButton>
         <IconButton label={t("sessions.zen.leave")} tone="accent" aria-pressed={true} onClick={onLeave}>

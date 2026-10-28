@@ -66,11 +66,16 @@ export const EMPTY_FORM: NewSessionForm = {
   mockupFile: null,
 };
 
-// sessions-live FR-49: the mode and the choice made last, as the browser keeps them.
+// sessions-live FR-49, FR-61: the mode, the choice and « Mode auto » made last, as the browser keeps them.
+export interface NewSessionPrefs {
+  mode: Mode;
+  presence: Presence;
+  isAutoMode: boolean;
+}
 export const PREFS_KEY = "selo-ops/new-session";
-export function parsePrefs(raw: unknown): { mode: Mode; presence: Presence } {
+export function parsePrefs(raw: unknown): NewSessionPrefs {
   const r = typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>) : {};
-  return { mode: r.mode === "advanced" ? "advanced" : "simple", presence: r.presence === "leave" ? "leave" : "stay" };
+  return { mode: r.mode === "advanced" ? "advanced" : "simple", presence: r.presence === "leave" ? "leave" : "stay", isAutoMode: r.isAutoMode === true };
 }
 
 export const usesBlueprint = (f: NewSessionForm) => f.skill === "build" || (f.skill === "autonomous" && f.fromBlueprint);
@@ -119,10 +124,6 @@ export function canOpen(f: NewSessionForm): boolean {
   return isRequestOptional(f.skill) || f.request.trim() !== "";
 }
 
-// sessions-live FR-47: the desktop app's own link for a new Claude Code session, its prompt typed in, not sent.
-export const newSessionLink = (command: string, folder: string) =>
-  `claude://code/new?q=${encodeURIComponent(command)}&folder=${encodeURIComponent(folder)}`;
-
 // sessions-live FR-45, FR-46: the blueprints a build can take.
 export const buildableBlueprints = (p: ProjectOverview) => p.blueprints.filter((b) => b.state === "ready" || b.state === "building");
 
@@ -131,6 +132,16 @@ function chosenFile(f: NewSessionForm): string | null {
   if (f.mode === "simple") return f.resume?.file ?? null;
   if (usesBlueprint(f)) return f.blueprintFile;
   return hasMockupOption(f.skill) ? f.mockupFile : null;
+}
+
+// `session` BR-24: what the Remote Control name says after the project: the request, else the chosen blueprint's
+// title, else the command (a review or a test of the current work).
+export function launchTitleOf(project: ProjectOverview, f: NewSessionForm): string {
+  const request = f.request.trim();
+  const file = chosenFile(f);
+  const blueprint = usesBlueprint(f) || f.resume?.kind === "blueprint" ? project.blueprints.find((b) => b.file === file) : undefined;
+  if (blueprint !== undefined) return blueprint.title;
+  return request !== "" ? request : commandOf(f);
 }
 
 // sessions-live FR-47: the project's folder, or the worktree holding the chosen blueprint or mockup when only a

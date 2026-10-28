@@ -12,6 +12,9 @@ export function useSaveSettingsMutation() {
       if (error !== undefined) throw new Error(problemMessage(error));
       return data;
     },
-    onSuccess: () => queryClient.removeQueries({ queryKey: settingsKeys.all }),
+    onSuccess: async () => {
+      queryClient.removeQueries({ queryKey: settingsKeys.all });
+      await queryClient.invalidateQueries({ queryKey: settingsKeys.cliLaunch });
+    },
   });
 }

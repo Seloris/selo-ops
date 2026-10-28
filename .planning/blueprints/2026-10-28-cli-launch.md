@@ -4,6 +4,7 @@ Pages: `sessions-live` · Domain: `session`, `settings`, `app` · Components: `a
 
 ## Spec delta
 - settings + BR-05 — « Lancer les sessions en CLI » is a setting of Selo Ops itself, off by default, kept in its own data and never in Claude Code's settings file (BR-01), the same for every browser that opens this Selo Ops.
+- app ~ FR-12 — « … the settings disabled, « Enregistrer » disabled and « Annuler » reading « Fermer ». » → « … the `SELO_` settings disabled, « Enregistrer » disabled until « Lancer les sessions en CLI » changes (FR-13), and « Annuler » reading « Fermer ». »
 - app + FR-13 — « Réglages » ends with a « Selo Ops » section holding the switch « Lancer les sessions en CLI » and « Nouvelle session démarre Claude Code en arrière-plan, Remote Control activé » (`settings` BR-05), saved with the others by « Enregistrer » (FR-11) and usable even when the settings file is unreadable (FR-12).
 - session + BR-24 — Selo Ops starts a session only on « Lancer » of the launch recap (`sessions-live` FR-61) while « Lancer les sessions en CLI » is on (`settings` BR-05), and only in a project's checkout or one of its worktrees (`project` BR-01): a Claude Code session in the background, its command as its first prompt, Remote Control on and named « {projet} · {demande} », with the person's own permission settings unless « Mode auto » asks for Claude Code's auto mode; it is then read from the export like any other session.
 - sessions-live + FR-60 — While « Lancer les sessions en CLI » is off (`settings` BR-05), every « Nouvelle session » button (FR-43, FR-12, FR-59) is disabled, « Active le mode CLI dans Réglages » on hover.
@@ -19,6 +20,11 @@ Pages: `sessions-live` · Domain: `session`, `settings`, `app` · Components: `a
 - Permissions → the person's own by default, a « Mode auto » switch in the recap, remembered (the person's answer: auto must be one click away).
 - How it starts → in the background with Remote Control (the request: headless, `--rc`), so the person follows it here and in the Claude apps.
 
+### Decided during build
+- An unreadable settings file → « Enregistrer » saves « Lancer les sessions en CLI » alone, the `SELO_` settings staying disabled (FR-13 asks the switch to work then: `app` FR-12 refined in the delta).
+- Ctrl+Entrée → opens the recap, never starts the session: only « Lancer » does, so that no session starts unseen.
+- The failed start's error → in French by cause (the CLI mode turned off meanwhile, Claude Code not found, a failed start with Claude Code's own words below).
+
 ## Technical defaults
 - The start → `claude --bg --remote-control "{projet} · {demande cut to 40}" [--permission-mode auto] "{command}"` in the folder, no shell, `CLAUDE_BIN` as the question runner uses it; awaited until `--bg` returns its id (30 s at most).
 - Safety → the API refuses a launch when the CLI mode is off (409) or a folder that is no project checkout nor worktree of the export (400): it never runs a command elsewhere.
@@ -31,7 +37,14 @@ Pages: `sessions-live` · Domain: `session`, `settings`, `app` · Components: `a
 - A command starting with a dash → refused, 400 (Claude Code would read it as an option; no selo command nor request starts so).
 - The Remote Control name → the request on one line, 40 characters at most with « … » (`{projet} · {demande}`).
 - `--bg`'s id → the last non-empty line it prints, none when it prints nothing; awaited on the process's exit, not on its pipes, which the background session may keep open.
-- Saving « Lancer les sessions en CLI » → after the settings file is written, so a refused `SELO_` save saves nothing; a save that changes no `SELO_` key never checks the file, so the switch saves beside an unreadable one (`app` FR-12).
+- The CLI mode on the sessions page → `GET /v1/settings` read once and again when the window regains the focus, and after a save of « Réglages »; off until read.
+- A disabled « + » icon button → its hint as the icon button's hover card, a disabled button showing no browser tooltip everywhere; the header's button keeps its `title`.
+- The Remote Control name's request → the chosen blueprint's title, else the request, else the command (a review or a test with no request): a request typed before choosing a blueprint is stale.
+- « Mode auto » → remembered with the window's mode and choice (FR-49's browser key).
+- The Claude Desktop link and its « Rouvrir » → removed with « Copier et ouvrir » (Business decisions: the link is dropped).
+- Saving « Lancer les sessions en CLI » → after the settings file is written, so a refused `SELO_` save saves nothing; a save that changes no `SELO_` key never checks the file, so the switch saves beside an unreadable one (`app` FR-12). Its limit: a file the system refuses to read (rights, a folder) fails the whole read, the switch with it.
+- A start Claude Code does not answer within 30 s → `504 launch_timeout`, its process tree ended; Claude Code's own words only as a failure's detail, the page giving the cause in French.
+- Closing the window while a start is under way → refused until it answers, so that its toast or its error is seen and no second start goes beside it.
 
 ## Stages
 1. api — `feat(cli-launch): api — CLI mode setting and background session launch`
@@ -44,7 +57,7 @@ Pages: `sessions-live` · Domain: `session`, `settings`, `app` · Components: `a
 
 ## Progress
 - [x] Stage 1 — api
-- [ ] Stage 2 — web
-- [ ] Review
+- [x] Stage 2 — web
+- [x] Review
 - [ ] Browser test
 - [ ] Spec merged

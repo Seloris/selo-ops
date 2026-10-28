@@ -7,12 +7,16 @@ export type SettingKey = keyof SettingValues;
 export type Catalog = SeloSettings["catalog"];
 export type Role = Catalog["roles"][number];
 
-// The window's choices: the preset, each role's model ("" follows the preset), the two switches.
+export type SeloOpsSettings = SeloSettings["seloOps"];
+
+// The window's choices: the preset, each role's model ("" follows the preset), the two switches, then Selo Ops' own.
 export interface SettingsChoices {
   preset: string;
   roles: Record<Role, string>;
   isRouting: boolean;
   isAutoCommit: boolean;
+  // app FR-13: « Lancer les sessions en CLI » (`settings` BR-05).
+  isCliLaunch: boolean;
 }
 
 export const roleKey = (role: Role) => `SELO_MODEL_${role.toUpperCase()}` as SettingKey;
@@ -26,14 +30,18 @@ export function presetOf(value: string | null, catalog: Catalog): string {
   return preset !== null && catalog.presets.some((p) => p.id === preset) ? preset : catalog.defaultPreset;
 }
 
-export function choicesOf(values: SettingValues, catalog: Catalog): SettingsChoices {
+export function choicesOf(values: SettingValues, catalog: Catalog, seloOps: SeloOpsSettings): SettingsChoices {
   return {
     preset: presetOf(values.SELO_MODELS, catalog),
     roles: Object.fromEntries(catalog.roles.map((role) => [role, set(values[roleKey(role)]) ?? ""])) as Record<Role, string>,
     isRouting: values.SELO_ROUTING === "on",
     isAutoCommit: values.SELO_COMMIT === "auto",
+    isCliLaunch: seloOps.cliLaunch,
   };
 }
+
+// sessions-live FR-60: off until the settings are read and say it is on.
+export const isCliLaunchOn = (settings: SeloSettings | undefined) => settings?.seloOps.cliLaunch === true;
 
 // The model a preset gives a role.
 export function presetModel(preset: string, role: Role, catalog: Catalog): string {
@@ -49,13 +57,15 @@ export function roleModel(choices: SettingsChoices, role: Role, catalog: Catalog
 
 // `settings` BR-03: only the settings whose choice moved; a default choice removes its key (null).
 export function changesOf(initial: SettingsChoices, current: SettingsChoices, catalog: Catalog): SettingChanges {
-  const changes: Record<string, string | null> = {};
+  const changes: Record<string, string | null | SettingChanges["seloOps"]> = {};
   if (current.preset !== initial.preset) changes.SELO_MODELS = current.preset === catalog.defaultPreset ? null : current.preset;
   for (const role of catalog.roles) {
     if (current.roles[role] !== initial.roles[role]) changes[roleKey(role)] = current.roles[role] === "" ? null : current.roles[role];
   }
   if (current.isRouting !== initial.isRouting) changes.SELO_ROUTING = current.isRouting ? "on" : null;
   if (current.isAutoCommit !== initial.isAutoCommit) changes.SELO_COMMIT = current.isAutoCommit ? "auto" : null;
+  // `settings` BR-05: kept in Selo Ops' data, not in `env`.
+  if (current.isCliLaunch !== initial.isCliLaunch) changes.seloOps = { cliLaunch: current.isCliLaunch };
   return changes as SettingChanges;
 }
 

@@ -39,8 +39,11 @@ import { useSaveNoteMutation } from "../data/useSaveNoteMutation.ts";
 import { useUnarchiveSessionMutation } from "../data/useUnarchiveSessionMutation.ts";
 import { useProjectsQuery } from "../../projects/data/useProjectsQuery.ts";
 import { BlockedCommand } from "../ui/BlockedCommand.tsx";
-import { NewSessionDialog } from "../ui/NewSessionDialog.tsx";
-import { PREFS_KEY, newSessionLink, parsePrefs, type ProjectOverview } from "../ui/newSession.ts";
+import { NewSessionDialog, type LaunchRequest } from "../ui/NewSessionDialog.tsx";
+import { LaunchFailure, useLaunchSessionMutation } from "../data/useLaunchSessionMutation.ts";
+import { useCliLaunchQuery } from "../../settings/data/useCliLaunchQuery.ts";
+import { isCliLaunchOn } from "../../settings/ui/settingsForm.ts";
+import { PREFS_KEY, parsePrefs } from "../ui/newSession.ts";
 import { SessionCards } from "../ui/SessionCards.tsx";
 import { parseFoldedSections, toggleSection, type FoldedSections } from "../ui/detailSections.ts";
 import { SessionDetail } from "../ui/SessionDetail.tsx";
@@ -92,11 +95,9 @@ interface ToastState {
   hint?: string;
   // A command the browser refused to copy: shown selected, to copy by hand.
   blockedCommand?: string;
-  // sessions-live FR-47: the new session's link, opened again by « Rouvrir ».
-  reopenLink?: string;
 }
 
-// sessions-live FR-20 and FR-47: a link click, not a page navigation, so a browser with no handler for `claude://`
+// sessions-live FR-20: a link click, not a page navigation, so a browser with no handler for `claude://`
 // keeps the dashboard.
 function openLink(link: string) {
   const anchor = document.createElement("a");
@@ -128,6 +129,9 @@ export function SessionsLivePage() {
   // sessions-live FR-43: the « Nouvelle session » window, open on the project holding this folder (null: the first).
   const [newSession, setNewSession] = useState<{ folder: string | null } | null>(null);
   const projectsQuery = useProjectsQuery({ enabled: newSession !== null });
+  // sessions-live FR-60: the « Nouvelle session » buttons wait on « Lancer les sessions en CLI ».
+  const isNewSessionOff = !isCliLaunchOn(useCliLaunchQuery().data);
+  const launch = useLaunchSessionMutation();
   // sessions-live FR-55: the « Fichiers modifiés » window, open on a session, and the file it shows (null: none).
   const [filesOpen, setFilesOpen] = useState<{ sessionId: string; file: string | null; isFromExplorer: boolean } | null>(null);
   const isDialogOpen = noteFor !== null || archiveAsked !== null || newSession !== null || (filesOpen !== null && filesOpen.sessionId === selectedId);
@@ -349,18 +353,20 @@ export function SessionsLivePage() {
       <SessionCards sessions={list} showProject={showProject} projectName={projectName} now={now} selectedId={selectedId} nextShown={nextShown} outdatedIds={outdatedIds} actions={actions} />
     );
 
-  // sessions-live FR-47: the command copied as well, in case the desktop app opens with an empty field.
-  const openNewSession = async (command: string, project: ProjectOverview, folder: string) => {
-    const isCopied = await copyText(command);
-    const link = newSessionLink(command, folder);
-    setNewSession(null);
-    openLink(link);
-    showToast({
-      title: t("sessions.toast.newOpening", { project: project.name }),
-      hint: t(isCopied ? "sessions.toast.newOpeningHint" : "sessions.toast.newOpeningNoCopy"),
-      isOpened: true,
-      reopenLink: link,
-    });
+  // sessions-live FR-62: a session started closes the window; a failed start keeps the recap open with its error.
+  const startSession = ({ project, folder, command, title, isAutoMode }: LaunchRequest) =>
+    launch.mutate(
+      { projectId: project.id, body: { folder, command, title, isAutoMode } },
+      {
+        onSuccess: () => {
+          setNewSession(null);
+          showToast({ title: t("sessions.toast.launched", { project: project.name }), hint: t("sessions.toast.launchedHint") });
+        },
+      },
+    );
+  const openNewSessionDialog = (folder: string | null) => {
+    launch.reset();
+    setNewSession({ folder });
   };
 
   // sessions-live FR-43: the header's button opens on the project of the most recently updated open session; one
@@ -376,7 +382,8 @@ export function SessionsLivePage() {
           project={project}
           count={b.sessions.length}
           todoCount={b.todoCount}
-          onNewSession={selo ? () => setNewSession({ folder: selo.folder }) : undefined}
+          isNewSessionOff={isNewSessionOff}
+          onNewSession={selo ? () => openNewSessionDialog(selo.folder) : undefined}
         />
       );
     }
@@ -429,7 +436,8 @@ export function SessionsLivePage() {
           pills={zenPills}
           updatedSeconds={updatedSeconds}
           isRefreshing={query.isFetching}
-          onNewSession={() => setNewSession({ folder: latestFolder })}
+          isNewSessionOff={isNewSessionOff}
+          onNewSession={() => openNewSessionDialog(latestFolder)}
           onLeave={toggleZen}
         />
       )}
@@ -439,7 +447,8 @@ export function SessionsLivePage() {
           updatedSeconds={updatedSeconds}
           isRefreshing={query.isFetching}
           plugins={pluginsText(query.data?.plugins ?? [])}
-          onNewSession={() => setNewSession({ folder: latestFolder })}
+          isNewSessionOff={isNewSessionOff}
+          onNewSession={() => openNewSessionDialog(latestFolder)}
         />
       )}
       {!isOnlyDetail && !settings.isZen && <SettingsBar
@@ -581,8 +590,16 @@ export function SessionsLivePage() {
           prefs={parsePrefs(readStored(PREFS_KEY))}
           onPrefs={(prefs) => writeStored(PREFS_KEY, prefs)}
           onCopy={copyText}
-          onOpen={(command, project, folder) => void openNewSession(command, project, folder)}
-          onClose={() => setNewSession(null)}
+          launch={{
+            isPending: launch.isPending,
+            error: launch.error === null ? null : { code: launch.error instanceof LaunchFailure ? launch.error.code : null, message: launch.error.message },
+          }}
+          onRecapOpen={() => launch.reset()}
+          onLaunch={startSession}
+          // A start under way finishes in the window: its toast or its error stays seen.
+          onClose={() => {
+            if (!launch.isPending) setNewSession(null);
+          }}
         />
       )}
       {toast && (
@@ -597,13 +614,6 @@ export function SessionsLivePage() {
         >
           {toast.blockedCommand && <BlockedCommand command={toast.blockedCommand} />}
           {toast.hint && <span className={styles.hint}>{toast.hint}</span>}
-          {toast.reopenLink && (
-            <span>
-              <Button size="sm" onClick={() => toast.reopenLink && openLink(toast.reopenLink)}>
-                {t("sessions.toast.reopen")}
-              </Button>
-            </span>
-          )}
         </Toast>
       )}
     </div>

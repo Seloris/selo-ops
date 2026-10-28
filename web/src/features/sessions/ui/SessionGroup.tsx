@@ -18,7 +18,20 @@ export function SessionGroup({ header, isFlat = false, children }: { header: Rea
 }
 
 // sessions-live FR-12.
-export function ProjectHeader({ project, count, todoCount, onNewSession }: { project: Project; count: number; todoCount: number; onNewSession?: () => void }) {
+// FR-60: `isNewSessionOff` while « Lancer les sessions en CLI » is off.
+export function ProjectHeader({
+  project,
+  count,
+  todoCount,
+  isNewSessionOff,
+  onNewSession,
+}: {
+  project: Project;
+  count: number;
+  todoCount: number;
+  isNewSessionOff: boolean;
+  onNewSession?: () => void;
+}) {
   const changed = changedText(project);
   return (
     <div className={styles.head}>
@@ -32,7 +45,12 @@ export function ProjectHeader({ project, count, todoCount, onNewSession }: { pro
         {todoCount > 0 && <b>{t("sessions.group.todo", { count: todoCount })}</b>}
         <span>{tn("sessions.group.sessions", count)}</span>
         {onNewSession && (
-          <IconButton label={t("sessions.new.openIn", { project: project.name })} onClick={onNewSession}>
+          <IconButton
+            label={t("sessions.new.openIn", { project: project.name })}
+            tooltip={isNewSessionOff ? t("sessions.new.cliOff") : undefined}
+            disabled={isNewSessionOff}
+            onClick={onNewSession}
+          >
             <PlusIcon />
           </IconButton>
         )}

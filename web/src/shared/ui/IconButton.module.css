@@ -16,7 +16,12 @@
   color: var(--text-muted);
 }
 
-.muted:hover {
+.icon:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.muted:hover:not(:disabled) {
   color: var(--text);
   background: var(--surface-2);
 }
@@ -25,7 +30,7 @@
   color: var(--accent);
 }
 
-.accent:hover {
+.accent:hover:not(:disabled) {
   background: var(--accent-soft);
 }
 
@@ -33,7 +38,7 @@
   color: var(--mark);
 }
 
-.mark:hover {
+.mark:hover:not(:disabled) {
   background: var(--surface-2);
 }
 
@@ -44,7 +49,7 @@
   box-shadow: inset 0 0 0 var(--border-width) color-mix(in srgb, var(--flag) 50%, transparent);
 }
 
-.flag:hover {
+.flag:hover:not(:disabled) {
   background: color-mix(in srgb, var(--flag) 28%, transparent);
 }
 

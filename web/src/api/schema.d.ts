@@ -45,6 +45,93 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/projects/{id}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start a Claude Code session in the background, Remote Control on, the command as its first prompt */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["LaunchSession"];
+                };
+            };
+            responses: {
+                /** @description The session started */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LaunchedSession"];
+                    };
+                };
+                /** @description A folder that is no checkout nor worktree of the project, or an empty or invalid command */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description No such project */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description « Lancer les sessions en CLI » is off */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Claude Code was not found, or failed to start the session: its own words as the detail */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Claude Code did not return within 30 s */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/projects": {
         parameters: {
             query?: never;
@@ -629,7 +716,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The person's selo settings: the SELO_ keys of the env block of Claude Code's user settings file */
+        /** The person's selo settings (the SELO_ keys of the env block of Claude Code's user settings file) and Selo Ops' own */
         get: {
             parameters: {
                 query?: never;
@@ -655,7 +742,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Save the changed settings: the file read again, only these keys of its env block written */
+        /** Save the changed settings: the file read again, only these keys of its env block written; Selo Ops' own in its database */
         patch: {
             parameters: {
                 query?: never;
@@ -687,7 +774,7 @@ export interface paths {
                         "application/problem+json": components["schemas"]["ProblemDetails"];
                     };
                 };
-                /** @description The file is unreadable: nothing written */
+                /** @description The file is unreadable and a SELO_ key changed: nothing written */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -762,6 +849,27 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        LaunchedSession: {
+            id: string | null;
+            name: string;
+            folder: string;
+        };
+        ProblemDetails: {
+            type: string;
+            title: string;
+            status: number;
+            detail?: string;
+            code?: string;
+            errors?: {
+                [key: string]: string[];
+            };
+        };
+        LaunchSession: {
+            folder: string;
+            command: string;
+            title: string;
+            isAutoMode: boolean;
+        };
         ProjectsResponse: {
             projects: components["schemas"]["ProjectOverview"][];
         };
@@ -861,16 +969,6 @@ export interface components {
         ProjectFile: {
             path: string;
             text: string;
-        };
-        ProblemDetails: {
-            type: string;
-            title: string;
-            status: number;
-            detail?: string;
-            code?: string;
-            errors?: {
-                [key: string]: string[];
-            };
         };
         Session: {
             id: string;
@@ -1128,6 +1226,7 @@ export interface components {
                 roles: ("planner" | "implementer" | "reviewer" | "runner" | "explorer")[];
                 models: ("opus" | "sonnet" | "haiku" | "fable")[];
             };
+            seloOps: components["schemas"]["SeloOpsSettings"];
         };
         SeloSettingValues: {
             SELO_MODELS: string | null;
@@ -1138,6 +1237,9 @@ export interface components {
             SELO_MODEL_EXPLORER: string | null;
             SELO_ROUTING: string | null;
             SELO_COMMIT: string | null;
+        };
+        SeloOpsSettings: {
+            cliLaunch: boolean;
         };
         SeloSettingChanges: {
             /** @enum {string|null} */
@@ -1156,6 +1258,9 @@ export interface components {
             SELO_ROUTING?: "on" | null;
             /** @enum {string|null} */
             SELO_COMMIT?: "auto" | null;
+            seloOps?: {
+                cliLaunch?: boolean;
+            };
         };
         StatsResponse: {
             period: components["schemas"]["StatsPeriod"];
