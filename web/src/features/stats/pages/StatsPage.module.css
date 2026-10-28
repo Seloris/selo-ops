@@ -1,0 +1,112 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  padding: 18px 32px 10px;
+}
+
+.brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  min-width: 0;
+}
+
+.sub {
+  margin: 0;
+  font-size: 0.93em;
+  color: var(--text-muted);
+}
+
+.sub b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.grow {
+  flex: 1;
+}
+
+.updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.87em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.updated svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.spin {
+  animation: spin 0.9s ease-in-out 1;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 0 32px 14px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 0 32px 48px;
+}
+
+/* stats FR-11: two columns on a wide screen, stacked on a narrow one. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 12px;
+}
+
+.note {
+  margin: 0;
+  font-size: 0.82em;
+  color: var(--text-muted);
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 28px 16px;
+}
+
+@media (max-width: 900px) {
+  .top {
+    padding: 14px 16px 8px;
+  }
+
+  .filters {
+    padding: 0 16px 12px;
+  }
+
+  .content {
+    padding: 0 16px 32px;
+  }
+}

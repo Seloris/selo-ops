@@ -9,6 +9,7 @@ import { projectFileResponseSchema, projectsResponseSchema } from "../../src/fea
 import { questionsResponseSchema } from "../../src/features/questions/questions.schema.js";
 import { fileDiffSchema, sessionsResponseSchema } from "../../src/features/sessions/sessions.schema.js";
 import { settingsSchema } from "../../src/features/settings/settings.schema.js";
+import { statsResponseSchema } from "../../src/features/stats/stats.schema.js";
 import { seedDemo } from "../../src/seed/demo.js";
 import { createDemoQuestionRunner } from "../../src/seed/demo.questions.js";
 import { createTestClock } from "../setup.js";
@@ -179,5 +180,23 @@ describe("demo", { timeout: 30_000 }, () => {
       const after = questionsResponseSchema.parse((await request(app).get(`/v1/projects/${project?.id ?? ""}/questions`).query({ path: file })).body);
       expect(after.questions[0]?.state).toBe("answered");
     });
+  });
+
+  it("gives the stats every flow, two models, an undated part and weeks under all", async () => {
+    // Arrange
+    const app = await demoApp();
+
+    // Act
+    const all = statsResponseSchema.parse((await request(app).get("/v1/stats").query({ period: "all", tz: "Europe/Paris" })).body);
+    const week = statsResponseSchema.parse((await request(app).get("/v1/stats").query({ tz: "Europe/Paris" })).body);
+
+    // Assert
+    expect(all.granularity).toBe("week");
+    expect(all.undated).not.toBeNull();
+    expect(new Set(all.flows.map((f) => f.flow))).toEqual(new Set(["free", "fastlane", "blueprint", "pilot", "questions", "undated"]));
+    expect(all.models.length).toBeGreaterThanOrEqual(3);
+    expect(all.projects.length).toBeGreaterThanOrEqual(3);
+    expect(week.totals.questions).toBeGreaterThan(0);
+    expect(week.topSessions.length).toBeGreaterThan(0);
   });
 });

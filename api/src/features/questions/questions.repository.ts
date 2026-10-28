@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { questions, type Question } from "./questions.table.js";
 
@@ -22,7 +22,13 @@ export interface QuestionRepository {
   runSessionIds(): Promise<Set<string>>;
   // At start-up: a run cut by Selo Ops stopping (`question` BR-04).
   interruptRunning(at: Date): Promise<void>;
+  // stats FR-03: the answered questions that kept their tokens.
+  listWithTokens(): Promise<QuestionTokens[]>;
 }
+
+export type QuestionTokens = Pick<Question, "projectId" | "model" | "askedAt"> & {
+  tokens: { input: number; cacheRead: number; cacheWrite: number; output: number };
+};
 
 export function createQuestionRepository(db: Database): QuestionRepository {
   return {
@@ -53,6 +59,26 @@ export function createQuestionRepository(db: Database): QuestionRepository {
     runSessionIds: async () => new Set((await db.select({ id: questions.runSessionId }).from(questions)).map((r) => r.id)),
     interruptRunning: async (at) => {
       await db.update(questions).set({ state: "failed", error: "interrupted", answeredAt: at }).where(eq(questions.state, "running"));
+    },
+    listWithTokens: async () => {
+      const rows = await db
+        .select({
+          projectId: questions.projectId,
+          model: questions.model,
+          askedAt: questions.askedAt,
+          input: questions.inputTokens,
+          cacheRead: questions.cacheReadTokens,
+          cacheWrite: questions.cacheWriteTokens,
+          output: questions.outputTokens,
+        })
+        .from(questions)
+        .where(and(eq(questions.state, "answered"), isNotNull(questions.inputTokens), isNotNull(questions.cacheReadTokens), isNotNull(questions.cacheWriteTokens), isNotNull(questions.outputTokens)));
+      return rows.map(({ projectId, model, askedAt, input, cacheRead, cacheWrite, output }) => ({
+        projectId,
+        model,
+        askedAt,
+        tokens: { input: input ?? 0, cacheRead: cacheRead ?? 0, cacheWrite: cacheWrite ?? 0, output: output ?? 0 },
+      }));
     },
   };
 }

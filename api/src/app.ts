@@ -20,6 +20,8 @@ import { createSessionService } from "./features/sessions/sessions.service.js";
 import { createSettingsFile } from "./features/settings/settings.file.js";
 import { settingsRoutes } from "./features/settings/settings.routes.js";
 import { createSettingsService } from "./features/settings/settings.service.js";
+import { statsRoutes } from "./features/stats/stats.routes.js";
+import { createStatsService } from "./features/stats/stats.service.js";
 import type { Clock } from "./shared/clock.js";
 import { errorHandler } from "./shared/errors.js";
 
@@ -69,6 +71,7 @@ export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjects
       questions: createQuestionService({ questions: questionRepository, projects, runner: questionRunner, clock, ...(questionTimeoutMs === undefined ? {} : { timeoutMs: questionTimeoutMs }) }),
     }),
   );
+  app.use(statsRoutes({ stats: createStatsService({ opsExport, questions: questionRepository, clock }) }));
   app.use(settingsRoutes({ settings: createSettingsService({ file: createSettingsFile(claudeSettingsFile) }) }));
   app.use(errorHandler);
   return app;

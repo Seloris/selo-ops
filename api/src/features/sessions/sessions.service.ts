@@ -42,7 +42,7 @@ const mainRootOf = (repo: string) => repo.replace(/\/\.git\/?$/i, "");
 
 // A session file may lack its repository (its first hook was not a SessionStart, or git timed out): its
 // folder's project file names it then, so a worktree never shows as a project of its own (`session` BR-05).
-const projectIdOf = (file: SessionFile, projectFiles: ProjectFile[]) =>
+export const projectIdOf = (file: SessionFile, projectFiles: ProjectFile[]) =>
   file.repo ?? projectFiles.find((p) => norm(p.root) === norm(file.root))?.repo ?? file.root;
 
 // `outsideGit`: the repository read from the folder of the sessions outside selo, by project id; a project only they show
@@ -99,7 +99,7 @@ const topModelOf = (run: ExportRun) => run.usage?.byModel[0]?.model ?? null;
 
 // `session` BR-20: the export's model is null before its first Stop; the latest main run that has usage then tells it,
 // never a subagent's, which may run on another model.
-function modelOf(file: SessionFile): string | null {
+export function modelOf(file: SessionFile): string | null {
   if (file.model) return file.model;
   const latest = file.runs
     .filter((r) => !r.agentId && topModelOf(r) !== null)

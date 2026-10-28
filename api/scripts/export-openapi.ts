@@ -4,6 +4,7 @@ import "../src/features/projects/projects.schema.js";
 import "../src/features/questions/questions.schema.js";
 import "../src/features/sessions/sessions.schema.js";
 import "../src/features/settings/settings.schema.js";
+import "../src/features/stats/stats.schema.js";
 import { buildOpenApiDocument } from "../src/shared/openapi.js";
 
 const target = process.argv[2];

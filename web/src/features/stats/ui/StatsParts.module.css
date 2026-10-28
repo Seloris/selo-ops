@@ -1,0 +1,370 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px 14px;
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--radius);
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: calc(var(--radius-control) / 2);
+  color: var(--hue-stats);
+  background: color-mix(in srgb, var(--hue-stats) 16%, transparent);
+}
+
+.chip svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* stats FR-03, FR-11: the tiles wrap at phone width. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 14px;
+  background: var(--item-bg);
+  border: var(--item-border);
+  border-radius: var(--radius);
+}
+
+.tileLabel {
+  font-size: 0.8em;
+  color: var(--text-muted);
+}
+
+.tileValue {
+  margin: 0;
+  font-size: 1.45em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82em;
+  color: var(--text-muted);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: calc(var(--radius-control) / 4);
+}
+
+.kindInput { background: var(--kind-input); }
+.kindCacheRead { background: var(--kind-cache-read); }
+.kindCacheWrite { background: var(--kind-cache-write); }
+.kindOutput { background: var(--kind-output); }
+
+/* stats FR-11: the chart scrolls sideways inside its section, never the page. */
+.chartScroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+}
+
+.chart {
+  display: grid;
+  grid-template-columns: repeat(var(--bars), minmax(14px, 1fr));
+  gap: 3px;
+  min-width: calc(var(--bars) * 17px);
+  height: 240px;
+  padding-top: 4px;
+}
+
+.column {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.barHit {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: calc(var(--radius-control) / 3) calc(var(--radius-control) / 3) 0 0;
+  border-bottom: var(--border-width) solid var(--border);
+  cursor: default;
+}
+
+.barHit:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.bar {
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: calc(var(--radius-control) / 3) calc(var(--radius-control) / 3) 0 0;
+}
+
+.bar > span {
+  flex-basis: 0;
+}
+
+.barActive .bar {
+  outline: 2px solid var(--hue-stats);
+  outline-offset: 1px;
+}
+
+.axis {
+  height: 18px;
+  font-size: 0.72em;
+  line-height: 18px;
+  text-align: center;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tip {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 170px;
+  padding: 8px 10px;
+  font-size: 0.8em;
+  white-space: nowrap;
+  color: var(--text);
+  background: var(--pop-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-pop);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.tipStart {
+  left: 0;
+  transform: none;
+}
+
+.tipEnd {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.tipRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tipValue {
+  margin-left: auto;
+  padding-left: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Name, bar, tokens, share; the calls and sessions under the bar. */
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 11em) minmax(60px, 1fr) auto 3.5em;
+  grid-template-areas:
+    "name track figure share"
+    ". meta meta meta";
+  align-items: center;
+  gap: 2px 10px;
+  font-size: 0.9em;
+}
+
+.rowName {
+  grid-area: name;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowPick {
+  grid-area: name;
+  min-width: 0;
+  padding: 0;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.rowPick:hover .rowName,
+.rowPick:focus-visible .rowName {
+  text-decoration: underline;
+}
+
+.track {
+  grid-area: track;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--hue-stats);
+}
+
+.figure {
+  grid-area: figure;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.share {
+  grid-area: share;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.meta {
+  grid-area: meta;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.topRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "request figures"
+    "meta figures";
+  gap: 2px 14px;
+  width: 100%;
+  padding: 6px 10px;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.topRow:hover,
+.topRow:focus-visible {
+  background: var(--surface-2);
+}
+
+.topRequest {
+  grid-area: request;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topMeta {
+  grid-area: meta;
+  font-size: 0.85em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.topFigures {
+  grid-area: figures;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.topFigures b {
+  font-size: 1.1em;
+  color: var(--text);
+}
+
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto 3.5em;
+    grid-template-areas:
+      "name figure share"
+      "track track track"
+      "meta meta meta";
+  }
+}

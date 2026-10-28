@@ -1931,6 +1931,298 @@
           }
         },
         "additionalProperties": false
+      },
+      "StatsResponse": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/StatsPeriod"
+          },
+          "granularity": {
+            "type": "string",
+            "enum": [
+              "day",
+              "week"
+            ]
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "totals": {
+            "type": "object",
+            "properties": {
+              "calls": {
+                "type": "integer"
+              },
+              "tokens": {
+                "$ref": "#/components/schemas/Tokens"
+              },
+              "sessions": {
+                "type": "integer"
+              },
+              "questions": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "calls",
+              "tokens",
+              "sessions",
+              "questions"
+            ]
+          },
+          "undated": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "calls": {
+                "type": "integer"
+              },
+              "tokens": {
+                "$ref": "#/components/schemas/Tokens"
+              }
+            },
+            "required": [
+              "calls",
+              "tokens"
+            ]
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatsBucket"
+            }
+          },
+          "project": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          },
+          "projectOptions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ]
+            }
+          },
+          "projects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "sessions": {
+                  "type": "integer"
+                },
+                "calls": {
+                  "type": "integer"
+                },
+                "tokens": {
+                  "$ref": "#/components/schemas/Tokens"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "sessions",
+                "calls",
+                "tokens"
+              ]
+            }
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string"
+                },
+                "calls": {
+                  "type": "integer"
+                },
+                "tokens": {
+                  "$ref": "#/components/schemas/Tokens"
+                }
+              },
+              "required": [
+                "model",
+                "calls",
+                "tokens"
+              ]
+            }
+          },
+          "flows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "flow": {
+                  "type": "string"
+                },
+                "calls": {
+                  "type": "integer"
+                },
+                "tokens": {
+                  "$ref": "#/components/schemas/Tokens"
+                }
+              },
+              "required": [
+                "flow",
+                "calls",
+                "tokens"
+              ]
+            }
+          },
+          "topSessions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "isRequestCut": {
+                  "type": "boolean"
+                },
+                "isRequestImage": {
+                  "type": "boolean"
+                },
+                "projectId": {
+                  "type": "string"
+                },
+                "projectName": {
+                  "type": "string"
+                },
+                "flow": {
+                  "type": "string"
+                },
+                "skill": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "mode": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "calls": {
+                  "type": "integer"
+                },
+                "tokens": {
+                  "$ref": "#/components/schemas/Tokens"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "request",
+                "isRequestCut",
+                "isRequestImage",
+                "projectId",
+                "projectName",
+                "flow",
+                "skill",
+                "mode",
+                "model",
+                "calls",
+                "tokens",
+                "updatedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "period",
+          "granularity",
+          "from",
+          "to",
+          "totals",
+          "undated",
+          "buckets",
+          "project",
+          "projectOptions",
+          "projects",
+          "models",
+          "flows",
+          "topSessions"
+        ]
+      },
+      "StatsPeriod": {
+        "type": "string",
+        "enum": [
+          "7d",
+          "30d",
+          "90d",
+          "all"
+        ]
+      },
+      "StatsBucket": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string"
+          },
+          "calls": {
+            "type": "integer"
+          },
+          "tokens": {
+            "$ref": "#/components/schemas/Tokens"
+          }
+        },
+        "required": [
+          "start",
+          "calls",
+          "tokens"
+        ]
       }
     },
     "parameters": {}
@@ -2562,6 +2854,62 @@
           },
           "500": {
             "description": "The file could not be written",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/stats": {
+      "get": {
+        "summary": "Tokens and calls of the period per day, project, model and type of work, and the top sessions",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/StatsPeriod"
+            },
+            "required": false,
+            "name": "period",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": false,
+            "name": "project",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "default": "UTC"
+            },
+            "required": false,
+            "name": "tz",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A bad period or time zone",
             "content": {
               "application/problem+json": {
                 "schema": {

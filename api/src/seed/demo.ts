@@ -7,6 +7,7 @@ import type { ExportRun, ExportRunUsage, ExportUsage, ProjectFileInput, SessionF
 import { normRoot, type RunningStatusFile } from "../features/sessions/sessions.outside.js";
 import { seedPlanning } from "./demo.planning.js";
 import { seedQuestions } from "./demo.questions.js";
+import { historySessions } from "./demo.stats.js";
 import { createDesktopSessionLinkRepository, createSessionArchiveRepository, createSessionNoteRepository } from "../features/sessions/sessions.repository.js";
 import type { Clock } from "../shared/clock.js";
 
@@ -503,6 +504,10 @@ export async function seedDemo(db: Database, clock: Clock, folders: DemoFolders)
     if (s.permission !== undefined) seedPermissionWait(folders, file, s.permission, now - s.age * 1000);
     if (s.archivedAge !== undefined) await archives.save({ sessionId: s.id, runId: current.id, archivedAt: new Date(now - s.archivedAge * 1000) });
     if (s.note !== undefined) await notes.save({ sessionId: s.id, text: s.note, updatedAt: new Date(now - s.age * 1000) });
+  }
+  for (const h of historySessions({ now, rootOf: (project) => `${ROOT}/${project}`, repoOf, writtenBy: DEMO_SELO_FEED_VERSION })) {
+    writeJson(join(opsDir, "sessions"), `${h.file.sessionId}.json`, h.file);
+    await archives.save({ sessionId: h.file.sessionId, runId: h.runId, archivedAt: h.archivedAt });
   }
   seedOutside(folders, ROOT, now);
   await seedQuestions(db, now, keyOf(`${ROOT}/ledger-api`));

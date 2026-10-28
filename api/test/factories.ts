@@ -1,3 +1,4 @@
+import type { Question } from "../src/features/questions/questions.table.js";
 import type { ClaudeStatusFile } from "../src/features/sessions/sessions.desktop.js";
 import type { ExportBlueprint, ExportMockup, ExportRun, ExportRunUsage, ExportSheet, ExportUsage, ProjectFileInput, SessionFile } from "../src/features/sessions/sessions.export.js";
 import type { RunningStatusFile } from "../src/features/sessions/sessions.outside.js";
@@ -182,6 +183,33 @@ export function buildExportMockup(overrides: Partial<ExportMockup> = {}): Export
     title: "Due date",
     validated: true,
     committed: false,
+    ...overrides,
+  };
+}
+
+// A question answered with its tokens, as the questions table keeps it (`question` BR-04).
+export function buildQuestion(overrides: Partial<Question> = {}): Question {
+  counter += 1;
+  return {
+    id: `question-${counter}`,
+    projectId: keyOf("C:/code/ledger-api"),
+    targetKind: "project",
+    path: null,
+    preset: null,
+    text: "Quelles pages restent sans spec ?",
+    state: "answered",
+    answer: "Aucune.",
+    error: null,
+    errorDetail: null,
+    model: "claude-sonnet-5-5",
+    durationMs: 30_000,
+    inputTokens: 10,
+    cacheReadTokens: 20_000,
+    cacheWriteTokens: 3_000,
+    outputTokens: 500,
+    runSessionId: `00000000-0000-4000-a000-${String(counter).padStart(12, "0")}`,
+    askedAt: new Date(EPOCH),
+    answeredAt: new Date(EPOCH),
     ...overrides,
   };
 }
