@@ -23,6 +23,8 @@
    --log-added, --log-changed, --log-fixed, --log-other   a changelog entry’s kind, in its tag and its dot on the timeline: emerald, cornflower blue, purple, slate (projects FR-18); no state colour
    --spec-page, --spec-domain, --spec-blueprint   a page spec, a domain sheet, a blueprint, wherever one shows (app FR-04): indigo, pink, teal like the blueprint lane
    --brand-tile, --brand-ring, --brand-dot   the Selo Ops mark in the header (app FR-03), the colours of public/icon.svg: night tile, teal ring, lime dot; the same in both themes, so set once here
+   --brand-glow          the filter that lifts the mark off the page: a soft teal glow, stronger in dark, where the night tile meets the night page
+   --brand-suffix        « OPS » of the header's wordmark (app FR-03): the accent's teal, its darker text shade in light for contrast
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
    of that scheme, so the choice wins over the system's prefers-color-scheme. */
 :root {
@@ -37,6 +39,8 @@
   --brand-tile: #070b14;
   --brand-ring: #5eead4;
   --brand-dot: #84cc16;
+  --brand-glow: drop-shadow(0 3px 10px rgba(15,148,136,.12));
+  --brand-suffix: #0b6b62;
   --lane-fastlane: #4d7c0f;
   --lane-pilot: #7c3aed;
   --lane-blueprint: #0f766e;
@@ -89,6 +93,8 @@
     --flag-soft: rgba(250,204,21,.16);
     --working: #38bdf8;
     --mark: #93c5fd;
+    --brand-glow: drop-shadow(0 0 1px rgba(94,234,212,.5)) drop-shadow(0 3px 10px rgba(94,234,212,.14));
+    --brand-suffix: #5eead4;
     --lane-fastlane: #a3e635;
     --lane-pilot: #c4b5fd;
     --lane-blueprint: #2dd4bf;
@@ -160,6 +166,8 @@
   --flag-soft: rgba(202,138,4,.16);
   --working: #0284c7;
   --mark: #2563eb;
+  --brand-glow: drop-shadow(0 3px 10px rgba(15,148,136,.12));
+  --brand-suffix: #0b6b62;
   --lane-fastlane: #4d7c0f;
   --lane-pilot: #7c3aed;
   --lane-blueprint: #0f766e;
@@ -231,6 +239,8 @@
   --flag-soft: rgba(250,204,21,.16);
   --working: #38bdf8;
   --mark: #93c5fd;
+  --brand-glow: drop-shadow(0 0 1px rgba(94,234,212,.5)) drop-shadow(0 3px 10px rgba(94,234,212,.14));
+  --brand-suffix: #5eead4;
   --lane-fastlane: #a3e635;
   --lane-pilot: #c4b5fd;
   --lane-blueprint: #2dd4bf;

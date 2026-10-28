@@ -73,6 +73,7 @@ The skin named in the `component` block above: its fonts in `src/shared/ui/theme
 - The projects page's « Journal des changements » (projects FR-18): its heading's icon on `--hue-changelog` (plum), its timeline's line and day nodes in that hue, the newest node filled, with a soft ring; each entry's kind in its own token (`--log-added` emerald, `--log-changed` cornflower blue, `--log-fixed` purple, `--log-other` slate), in its tag and its dot, never a state colour.
 - The stats page (stats FR-05): its section icons and the hovered bar's outline on `--hue-stats` (sky), the four kinds of tokens in `--kind-*` as in the session detail, a type of work in its lane's colour; the chart is drawn by hand in CSS, no chart library.
 - A file's diff in the session detail (sessions-live FR-51): added lines in `--delta-add`, removed lines in `--delta-remove`, each on a soft tint of its colour, hunk headers in `--hue-files`, the rest neutral.
+- The header's Selo Ops mark and wordmark (app FR-03) take their own `--brand-*` tokens (tile, ring, dot, glow, « OPS » suffix), in overrides.css, never `--accent`.
 - Mint (`--accent`) only for the active setting, checked boxes and the « Ouvrir » action.
 - Theme: Clair / Sombre chosen in the header, Sombre by default; overrides.css restates both palettes under `:root[data-theme]`, so a new token needs its light and dark values there.
 - Commands, branches and commit subjects in `--font-mono` (added in overrides.css).
