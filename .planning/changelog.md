@@ -4,6 +4,7 @@ What changed in the application, for someone who reads no spec. One entry per pi
 
 ## 2026-10-28
 
+- Fixed — A session whose turn ended while selo's end-of-turn hook failed to record it no longer stays « En cours » for ever: it shows « Tour terminé » as soon as Claude Code goes idle, and its detail stops counting time there.
 - Added — A « Stats » tab shows the tokens your sessions and questions consumed over 7, 30 or 90 days or all time, for every project or one: tiles, a chart per day (per week beyond 90 days) stacked by kind, the split per project, per model and per type of work, and the 10 sessions that consumed the most, each opening its detail on Live. ([blueprint](blueprints/2026-10-28-usage-stats.md))
 - Added — On a project, « Demander à Claude » in the « Specs » section asks one question about all the specs at once; every answer now shows the tokens it consumed, each kind on hover; « Résume » is gone, « Explique-moi vite » stays. ([blueprint](blueprints/2026-10-28-ask-claude-specs.md))
 - Added — A project's « Blueprints » list is grouped by period (« Cette semaine », « La semaine dernière », the rest of the month, then one folded group per earlier month), and can be filtered by a search on the title and by chips of the pages and domain sheets each blueprint touches; the filters stay in the address.

@@ -77,6 +77,8 @@ export interface ClaudeSessionsRead {
   permissionWaits: Map<string, PermissionWait>;
   // The open sessions of the export whose process awaits an answer (`session` BR-17).
   answerWaits: Set<string>;
+  // By session id: since when the process of an open session of the export is idle, epoch milliseconds (`session` BR-23).
+  idleSince: Map<string, number>;
 }
 
 export interface OutsideSessionReader {
@@ -370,17 +372,19 @@ export function createOutsideSessionReader(statusDir: string, projectsDir: strin
           const permissionWait = permissionWaitOf(status, now, () => path);
           return { status, folder: normRoot(status.cwd), state: stateOf(status), permissionWait, git: gitPlaceOf(status.cwd), transcript };
         });
-      // `session` BR-16, BR-17: the export's open sessions, by the same status files; a closed one is never asked for.
+      // `session` BR-16, BR-17, BR-23: the export's open sessions, by the same status files; a closed one is never asked for.
       const permissionWaits = new Map<string, PermissionWait>();
       const answerWaits = new Set<string>();
+      const idleSince = new Map<string, number>();
       for (const session of open) {
         const status = bySession.get(session.sessionId);
         if (status === undefined) continue;
         const wait = permissionWaitOf(status, now, () => exportTranscriptOf(projectsDir, session));
         if (wait !== null) permissionWaits.set(session.sessionId, wait);
         if (stateOf(status) === "awaiting-answer") answerWaits.add(session.sessionId);
+        if (status.status === "idle") idleSince.set(session.sessionId, status.statusUpdatedAt ?? updatedAtOf(status));
       }
-      return { outside, permissionWaits, answerWaits };
+      return { outside, permissionWaits, answerWaits, idleSince };
     },
   };
 }

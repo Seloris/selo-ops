@@ -129,6 +129,7 @@ function toSession(
   transcriptStart: number | undefined,
   permissionWait: PermissionWait | undefined,
   isAnswerWait: boolean,
+  idleSince: number | undefined,
   imageRequestRunIds: Set<string>,
 ): Omit<Session, "note"> {
   // An archive covers the run it was made on: a new run brings the session back (`session` BR-09).
@@ -138,9 +139,18 @@ function toSession(
   const since = Date.parse(current.since);
   const subagents = file.runs.filter((r) => r.agentId && Date.parse(r.since) >= since);
   const isClosed = file.status === "ended";
+  // A stop hook that timed out never wrote the turn's end: a process idle since after the run's last update tells it
+  // (`session` BR-23).
+  const isMissedEnd = !isClosed && current.phase === "working" && idleSince !== undefined && idleSince > Date.parse(current.updatedAt);
+  const runPhase = isMissedEnd ? "turn-ended" : current.phase;
+  // The trail ends where the turn did, so the detail stops its clock there.
+  const lastEntry = current.trail[current.trail.length - 1];
+  const trail = isMissedEnd
+    ? [...current.trail, { at: new Date(idleSince).toISOString(), skill: lastEntry?.skill ?? null, step: lastEntry?.step ?? null, substep: lastEntry?.substep ?? null, phase: runPhase }]
+    : current.trail;
   // A turn that ends with subagents in the background has not finished its work (`session` BR-02).
-  const isCalm = current.phase === "turn-ended" || current.phase === "job-done";
-  const phase = !isClosed && isCalm && subagents.some((r) => r.phase === "working") ? "working" : current.phase;
+  const isCalm = runPhase === "turn-ended" || runPhase === "job-done";
+  const phase = !isClosed && isCalm && subagents.some((r) => r.phase === "working") ? "working" : runPhase;
   // A permission dialog holds the run whatever its phase (`session` BR-16); a question the export missed holds a
   // working one (`session` BR-17).
   const isMissedQuestion = !permissionWait && isAnswerWait && phase === "working";
@@ -156,7 +166,7 @@ function toSession(
     flow: current.flow ?? "free",
     skill: current.skill ?? null,
     mode: current.mode ?? null,
-    trail: current.trail,
+    trail,
     isTrailCut: current.trailCut ?? false,
     request: text,
     isRequestCut: isCut,
@@ -331,7 +341,7 @@ export function createSessionService({
       });
       // Every file of the export, run or not, keeps its session out of those outside selo (`session` BR-12).
       const open = withRun.filter(({ file }) => file.status !== "ended").map(({ file: { sessionId, root, rootKey } }) => ({ sessionId, root, rootKey }));
-      const { outside, permissionWaits, answerWaits } = outsideSessions.read({ exported: await exportedIds(sessions, deletedSessionIds), open, now: clock.now().getTime() });
+      const { outside, permissionWaits, answerWaits, idleSince } = outsideSessions.read({ exported: await exportedIds(sessions, deletedSessionIds), open, now: clock.now().getTime() });
       const byId = new Map((await archives.list()).map((a) => [a.sessionId, a]));
       const noteOf = new Map((await notes.list()).map((n) => [n.sessionId, n.text]));
       const withNote = (session: Omit<Session, "note">): Session => ({ ...session, note: noteOf.get(session.id) ?? null });
@@ -351,6 +361,7 @@ export function createSessionService({
               transcriptStarts.get(file.sessionId),
               permissionWaits.get(file.sessionId),
               answerWaits.has(file.sessionId),
+              idleSince.get(file.sessionId),
               imageRequestRunIds,
             )),
           ),

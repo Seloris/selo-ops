@@ -178,9 +178,88 @@ describe("sessions waiting on a permission or an answer", () => {
       },
     );
 
-    it.each([["busy"], ["idle"]] as const)("keeps a working run « working » while the process is %s", async (status) => {
+    it("keeps a working run « working » while the process is busy", async () => {
       // Arrange
-      exported({ phase: "working", status, waitingFor: "input needed" });
+      exported({ phase: "working", status: "busy", waitingFor: "input needed" });
+      ctx.clock.set(at(60_000));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("working");
+    });
+
+    // `session` BR-23: a stop hook that timed out leaves the export « working »; the status file says the turn ended.
+    it("gives a working run « turn-ended » once its process went idle after the run's last update", async () => {
+      // Arrange
+      exported({ status: "idle", waitingFor: null, statusUpdatedAt: EPOCH + 13_000 }, undefined, buildSessionFile({ current: buildRun({ phase: "working", updatedAt: at(0) }) }));
+      ctx.clock.set(at(60_000));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("turn-ended");
+    });
+
+    it("ends the trail of a run whose turn the export missed when its process went idle", async () => {
+      // Arrange
+      const trail = [{ at: at(0), skill: "fastlane", step: null, substep: "code", phase: "working" as const }];
+      exported({ status: "idle", waitingFor: null, statusUpdatedAt: EPOCH + 13_000 }, undefined, buildSessionFile({ current: buildRun({ phase: "working", updatedAt: at(0), trail }) }));
+      ctx.clock.set(at(60_000));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.trail).toEqual([...trail, { at: at(13_000), skill: "fastlane", step: null, substep: "code", phase: "turn-ended" }]);
+    });
+
+    it.each([
+      ["before", -1_000],
+      ["at", 0],
+    ] as const)("keeps a working run « working » when its process went idle %s the run's last update", async (_when, offset) => {
+      // Arrange
+      exported({ status: "idle", waitingFor: null, statusUpdatedAt: EPOCH + 10_000 + offset }, undefined, buildSessionFile({ current: buildRun({ phase: "working", updatedAt: at(10_000) }) }));
+      ctx.clock.set(at(60_000));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("working");
+    });
+
+    it("dates an idle process whose status file gives no status date by its last update", async () => {
+      // Arrange
+      exported({ status: "idle", waitingFor: null, statusUpdatedAt: null, updatedAt: EPOCH + 13_000 }, undefined, buildSessionFile({ current: buildRun({ phase: "working", updatedAt: at(0) }) }));
+      ctx.clock.set(at(60_000));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("turn-ended");
+    });
+
+    it("keeps a run whose turn the export missed « working » while its subagents work", async () => {
+      // Arrange
+      const main = buildRun({ phase: "working", since: at(0), updatedAt: at(0) });
+      const file = buildSessionFile({ current: main, runs: [main, buildRun({ agentId: "a-1", phase: "working", since: at(1) })] });
+      exported({ status: "idle", waitingFor: null, statusUpdatedAt: EPOCH + 13_000 }, undefined, file);
+      ctx.clock.set(at(60_000));
+
+      // Act
+      const session = await only();
+
+      // Assert
+      expect(session.state).toBe("working");
+    });
+
+    it("keeps a closed session « working » whatever its process says", async () => {
+      // Arrange
+      exported({ status: "idle", waitingFor: null, statusUpdatedAt: EPOCH + 13_000 }, undefined, buildSessionFile({ status: "ended", current: buildRun({ phase: "working", updatedAt: at(0) }) }));
       ctx.clock.set(at(60_000));
 
       // Act
