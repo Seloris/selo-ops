@@ -28,6 +28,8 @@ Pages: `projects` · Domain: `question` · Components: `api`, `web`
 - Contract → `kind: "specs"` in the ask's body and the list's query; `kind` with a path `400` on both.
 - Migrations → one generated (the four token columns), one custom deleting the `summary` rows, so the generated ones stay untouched.
 - Tokens type → the sessions' `Tokens` schema reused, so the web reads one shape for a session's and an answer's tokens.
+- Tokens in the contract → the `Tokens` shape inline, not a reference (a nullable reference to a component also used non-null reaches the web typed `Tokens & Record<string, never>`).
+- Panel → the questions on all the specs wear « Questions sur les specs », the project's keep « Questions sur le projet ».
 
 ## Stages
 1. api — `feat(ask-claude-specs): api — questions on all specs, tokens kept, « Résume » dropped`
@@ -40,7 +42,7 @@ Pages: `projects` · Domain: `question` · Components: `api`, `web`
 
 ## Progress
 - [x] Stage 1 — api
-- [ ] Stage 2 — web
-- [ ] Review
-- [ ] Browser test
+- [x] Stage 2 — web
+- [x] Review
+- [x] Browser test
 - [ ] Spec merged

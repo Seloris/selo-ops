@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Question } from "../data/useQuestions.ts";
-import { answerMeta, askErrorText, failureText, questionTitle, stateText, textCheck } from "./questions.ts";
+import { answerMeta, askErrorText, failureText, questionTitle, stateText, textCheck, tokensText } from "./questions.ts";
 
 const question = (overrides: Partial<Question> = {}): Question => ({
   id: "q1",
@@ -15,6 +15,7 @@ const question = (overrides: Partial<Question> = {}): Question => ({
   errorDetail: null,
   model: null,
   durationMs: null,
+  tokens: null,
   askedAt: "2026-01-01T00:00:00.000Z",
   answeredAt: null,
   ...overrides,
@@ -37,7 +38,6 @@ describe("textCheck", () => {
 describe("questionTitle", () => {
   it("gives a preset's name, else the text", () => {
     expect(questionTitle(question({ preset: "explain", text: null }))).toBe("Explique-moi vite");
-    expect(questionTitle(question({ preset: "summary", text: null }))).toBe("Résume");
     expect(questionTitle(question())).toBe("Pourquoi ?");
   });
 });
@@ -68,6 +68,26 @@ describe("askErrorText", () => {
     expect(askErrorText(409)).toBe("3 questions sont déjà en cours : réessayez dans un moment.");
     expect(askErrorText(404)).toBe("Ce fichier n’est plus dans le projet.");
     expect(askErrorText(null)).toBe("Selo Ops ne répond pas.");
+  });
+});
+
+describe("tokensText", () => {
+  it("gives the four kinds summed, abbreviated, with each kind's exact count in the tooltip", () => {
+    // Arrange
+    const answered = question({ state: "answered", tokens: { input: 18, cacheRead: 38_400, cacheWrite: 6_150, output: 912 } });
+
+    // Act
+    const text = tokensText(answered);
+
+    // Assert
+    // French typography: a narrow no-break space before the unit and between thousands.
+    const n = " ";
+    expect(text?.label).toBe(`45${n}k tokens`);
+    expect(text?.hint).toBe(`45${n}480 tokens : Entrée 18 · Cache lu 38${n}400 · Cache écrit 6${n}150 · Sortie 912`);
+  });
+
+  it("gives nothing for an answer kept without its tokens", () => {
+    expect(tokensText(question({ state: "answered" }))).toBeNull();
   });
 });
 

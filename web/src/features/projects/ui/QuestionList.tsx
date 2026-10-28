@@ -6,8 +6,20 @@ import { EmptyState } from "../../../shared/ui/EmptyState.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import type { Question } from "../data/useQuestions.ts";
 import { Markdown } from "./Markdown.tsx";
-import { answerMeta, failureText, questionTitle, stateText } from "./questions.ts";
+import { answerMeta, failureText, questionTitle, stateText, tokensText } from "./questions.ts";
 import styles from "./Questions.module.css";
+
+// projects FR-21: an answer's total tokens, each kind's count on hover.
+function Tokens({ question }: { question: Question }) {
+  const text = tokensText(question);
+  if (text === null) return null;
+  return (
+    <span className={styles.mono} title={text.hint}>
+      <span aria-hidden="true">{text.label}</span>
+      <span className={styles.srOnly}>{text.hint}</span>
+    </span>
+  );
+}
 
 // projects FR-21: newest first, each with its text, its age and its state; « Supprimer » after a confirmation.
 export function QuestionList({
@@ -46,6 +58,7 @@ export function QuestionList({
               </span>
               <span>{t("projects.questions.age", { age: age(now - Date.parse(q.askedAt)) })}</span>
               {q.state === "answered" && <span className={styles.mono}>{answerMeta(q, age)}</span>}
+              {q.state === "answered" && <Tokens question={q} />}
             </div>
             {q.state === "answered" && (
               <div className={styles.answer}>

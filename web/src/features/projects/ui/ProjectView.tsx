@@ -48,6 +48,7 @@ export function ProjectView({
   onBack,
   onOpenFile,
   onAsk,
+  onAskSpecs,
   onCopy,
 }: {
   project: ProjectOverview;
@@ -66,6 +67,8 @@ export function ProjectView({
   onOpenFile: (path: string) => void;
   // projects FR-19: opens the questions on the whole project in the panel.
   onAsk: () => void;
+  // projects FR-23: opens the questions on all the specs in the panel.
+  onAskSpecs: () => void;
   onCopy: (prompt: string) => void;
 }) {
   const open = p.blueprints.filter(isOpenBlueprint);
@@ -415,7 +418,12 @@ export function ProjectView({
       </section>
 
       <section className={styles.section}>
-        <SectionTitle icon={<TextFileIcon />} hue="specs" title={t("projects.specs.title")} count={p.sheets.length} />
+        <div className={styles.sectionHead}>
+          <SectionTitle icon={<TextFileIcon />} hue="specs" title={t("projects.specs.title")} count={p.sheets.length} />
+          <Button size="sm" aria-label={t("projects.ask.specsLabel")} onClick={onAskSpecs}>
+            {t("projects.ask.open")}
+          </Button>
+        </div>
         {p.sheets.length === 0 && <EmptyState>{t("projects.empty.specs")}</EmptyState>}
         {p.sheets.length > 0 && headRow(["projects.columns.sheet", "projects.columns.counts", "projects.columns.questions", "projects.columns.lastCommit"], styles.sheetRow)}
         {pages.length > 0 && (

@@ -127,3 +127,13 @@
   color: var(--text-muted);
   overflow-wrap: anywhere;
 }
+
+/* Said by assistive tech only: an answer's tokens by kind, shown on hover. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

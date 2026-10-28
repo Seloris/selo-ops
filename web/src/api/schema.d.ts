@@ -139,144 +139,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/projects/{id}/questions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** The questions asked on one file of the project, or on the whole project, newest first */
-        get: {
-            parameters: {
-                query?: {
-                    path?: string;
-                };
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description The questions */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["QuestionsResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        /** Ask a headless Claude Code run a question on a blueprint, a sheet, or the whole project */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["AskQuestion"];
-                };
-            };
-            responses: {
-                /** @description The question, running */
-                202: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Question"];
-                    };
-                };
-                /** @description No preset nor text, both, an empty or too long text, or a preset on the whole project */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description No such project, or a file that is no blueprint nor sheet of it */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Three runs already work */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/questions/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a question, stopping its run when it works */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Deleted */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description No such question */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/sessions": {
         parameters: {
             query?: never;
@@ -621,6 +483,145 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/projects/{id}/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The questions asked on one file of the project, or on the whole project, newest first */
+        get: {
+            parameters: {
+                query?: {
+                    path?: string;
+                    kind?: "specs";
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The questions */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["QuestionsResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Ask a headless Claude Code run a question on a blueprint, a sheet, or the whole project */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["AskQuestion"];
+                };
+            };
+            responses: {
+                /** @description The question, running */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Question"];
+                    };
+                };
+                /** @description No preset nor text, both, an empty or too long text, a preset on all the specs or the whole project, or all the specs with a file */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description No such project, or a file that is no blueprint nor sheet of it */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Three runs already work */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/questions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a question, stopping its run when it works */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No such question */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/settings": {
         parameters: {
             query?: never;
@@ -822,37 +823,6 @@ export interface components {
                 [key: string]: string[];
             };
         };
-        QuestionsResponse: {
-            questions: components["schemas"]["Question"][];
-        };
-        Question: {
-            id: string;
-            projectId: string;
-            /** @enum {string} */
-            targetKind: "blueprint" | "sheet" | "project";
-            path: string | null;
-            preset: components["schemas"]["QuestionPreset"];
-            text: string | null;
-            state: components["schemas"]["QuestionState"];
-            answer: string | null;
-            error: components["schemas"]["QuestionError"];
-            errorDetail: string | null;
-            model: string | null;
-            durationMs: number | null;
-            askedAt: string;
-            answeredAt: string | null;
-        };
-        /** @enum {string|null} */
-        QuestionPreset: "explain" | "summary" | null;
-        /** @enum {string} */
-        QuestionState: "running" | "answered" | "failed";
-        /** @enum {string|null} */
-        QuestionError: "interrupted" | "timeout" | "missing-binary" | "run-failed" | null;
-        AskQuestion: {
-            path?: string | null;
-            preset?: components["schemas"]["QuestionPreset"];
-            text?: string;
-        };
         Session: {
             id: string;
             projectId: string;
@@ -1038,6 +1008,45 @@ export interface components {
                 diff: string;
                 isCut: boolean;
             } | null;
+        };
+        QuestionsResponse: {
+            questions: components["schemas"]["Question"][];
+        };
+        Question: {
+            id: string;
+            projectId: string;
+            /** @enum {string} */
+            targetKind: "blueprint" | "sheet" | "specs" | "project";
+            path: string | null;
+            preset: components["schemas"]["QuestionPreset"];
+            text: string | null;
+            state: components["schemas"]["QuestionState"];
+            answer: string | null;
+            error: components["schemas"]["QuestionError"];
+            errorDetail: string | null;
+            model: string | null;
+            durationMs: number | null;
+            tokens: {
+                input: number;
+                cacheRead: number;
+                cacheWrite: number;
+                output: number;
+            } | null;
+            askedAt: string;
+            answeredAt: string | null;
+        };
+        /** @enum {string|null} */
+        QuestionPreset: "explain" | null;
+        /** @enum {string} */
+        QuestionState: "running" | "answered" | "failed";
+        /** @enum {string|null} */
+        QuestionError: "interrupted" | "timeout" | "missing-binary" | "run-failed" | null;
+        AskQuestion: {
+            path?: string | null;
+            /** @enum {string} */
+            kind?: "specs";
+            preset?: components["schemas"]["QuestionPreset"];
+            text?: string;
         };
         SeloSettings: {
             path: string;

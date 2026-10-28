@@ -32,7 +32,7 @@ export function AskForm({
     <div className={styles.form}>
       {hasPresets && (
         <div className={styles.presets} role="group" aria-label={t("projects.questions.presets")}>
-          {(["explain", "summary"] as const).map((preset) => (
+          {(["explain"] as const).map((preset) => (
             <Button key={preset} size="sm" disabled={isPending} onClick={() => void onAsk({ preset })}>
               {presetLabel(preset)}
             </Button>

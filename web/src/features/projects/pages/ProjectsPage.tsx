@@ -59,8 +59,10 @@ export function ProjectsPage() {
   const [params, setParams] = useSearchParams();
   const projectId = params.get("project");
   const path = params.get("file");
-  // projects FR-19: the questions on the whole project, in the panel.
-  const isAsking = params.get("ask") === "project";
+  // projects FR-19, FR-23: the questions on the whole project, or on all its specs, in the panel.
+  const askParam = params.get("ask");
+  const askScope = askParam === "project" || askParam === "specs" ? askParam : null;
+  const isAsking = askScope !== null;
   // projects FR-24: the filters of the blueprints' list.
   const blueprintFilter = parseFilter(params);
 
@@ -73,14 +75,14 @@ export function ProjectsPage() {
   const projects = useMemo(() => sortProjects(query.data?.projects ?? []), [query.data]);
   // projects FR-03: a project with no selo planning does not open, even from its address.
   const project = projectId === null ? null : (projects.find((p) => p.id === projectId && p.hasPlanning) ?? null);
-  const subject: PanelSubject | null = project && isAsking ? { kind: "ask", title: t("projects.ask.title") } : project && path ? subjectOf(project, path) : null;
+  const subject: PanelSubject | null = project && askScope !== null ? { kind: "ask", scope: askScope, title: t(askScope === "specs" ? "projects.ask.specsTitle" : "projects.ask.title") } : project && path ? subjectOf(project, path) : null;
   const isPanelOpen = subject !== null;
   const isFilePanel = subject !== null && subject.kind !== "ask";
   const changelog = useProjectChangelogQuery(project?.id ?? null);
   const file = useProjectFileQuery(isFilePanel ? (project?.id ?? null) : null, isFilePanel ? path : null);
   // projects FR-19 to FR-22: a blueprint's or a sheet's questions, or the project's; the ideas and the debt have none.
   const hasQuestions = subject !== null && (subject.kind === "ask" || subject.kind === "blueprint" || subject.kind === "sheet");
-  const questionsOf = useQuestions(hasQuestions ? (project?.id ?? null) : null, subject?.kind === "ask" ? null : path);
+  const questionsOf = useQuestions(hasQuestions ? (project?.id ?? null) : null, subject?.kind === "ask" ? { kind: subject.scope } : { path: path ?? "" });
   const questions: QuestionsState | null = hasQuestions
     ? {
         questions: questionsOf.query.data ?? null,
@@ -261,6 +263,7 @@ export function ProjectsPage() {
                     onBack={() => setAddress({ project: null, file: null, ask: null, q: null, sheets: null })}
                     onOpenFile={(p) => setAddress({ file: p, ask: null })}
                     onAsk={() => setAddress({ file: null, ask: "project" })}
+                    onAskSpecs={() => setAddress({ file: null, ask: "specs" })}
                     onCopy={(prompt) => void copy(prompt)}
                   />
                 ) : (
@@ -282,7 +285,7 @@ export function ProjectsPage() {
         <Drawer isOpen={isPanelOpen} label={t("projects.panel.label")} resize={isFullscreen ? undefined : panelResize}>
           {subject && (
             <ProjectPanel
-              key={subject.kind === "ask" ? "ask" : path}
+              key={subject.kind === "ask" ? `ask-${subject.scope}` : path}
               subject={subject}
               file={{ isPending: file.isPending, error: file.isError ? file.error.message : null, text: file.data?.text ?? null }}
               questions={questions}

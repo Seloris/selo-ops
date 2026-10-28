@@ -18,14 +18,19 @@ export class AskError extends Error {
 // projects FR-21: refreshed every 2 s while one of them runs.
 export const QUESTIONS_REFRESH_MS = 2000;
 
-// The questions on one file of the project, or on the whole project (`path` null), with the asking and the deleting.
-export function useQuestions(projectId: string | null, path: string | null) {
+// What a list of questions is about: one file, all the specs, or the whole project (`question` BR-01).
+export type QuestionTarget = { path: string } | { kind: "specs" | "project" };
+
+// The questions on one target of the project, with the asking and the deleting.
+export function useQuestions(projectId: string | null, target: QuestionTarget) {
   const queryClient = useQueryClient();
-  const key = projectsKeys.questions(projectId ?? "", path ?? "");
+  const path = "path" in target ? target.path : null;
+  const isSpecs = "kind" in target && target.kind === "specs";
+  const key = projectsKeys.questions(projectId ?? "", path ?? `:${isSpecs ? "specs" : "project"}`);
   const query = useQuery({
     queryKey: key,
     queryFn: async () => {
-      const { data, error } = await api.GET("/v1/projects/{id}/questions", { params: { path: { id: projectId ?? "" }, query: path === null ? {} : { path } } });
+      const { data, error } = await api.GET("/v1/projects/{id}/questions", { params: { path: { id: projectId ?? "" }, query: path !== null ? { path } : isSpecs ? { kind: "specs" } : {} } });
       if (error !== undefined) throw new Error(problemMessage(error));
       return data.questions;
     },
@@ -36,8 +41,11 @@ export function useQuestions(projectId: string | null, path: string | null) {
     retry: false,
   });
   const ask = useMutation({
-    mutationFn: async (body: Omit<AskQuestion, "path">) => {
-      const { data, error, response } = await api.POST("/v1/projects/{id}/questions", { params: { path: { id: projectId ?? "" } }, body: { ...body, path } });
+    mutationFn: async (body: Omit<AskQuestion, "path" | "kind">) => {
+      const { data, error, response } = await api.POST("/v1/projects/{id}/questions", {
+        params: { path: { id: projectId ?? "" } },
+        body: { ...body, path, ...(isSpecs ? { kind: "specs" as const } : {}) },
+      });
       // The status says why in French (projects FR-22); the API's own words are English.
       if (error !== undefined) throw new AskError(response.status, problemMessage(error));
       return data;
@@ -57,6 +65,6 @@ export function useQuestions(projectId: string | null, path: string | null) {
   useEffect(() => {
     resetAsk();
     resetRemove();
-  }, [projectId, path, resetAsk, resetRemove]);
+  }, [projectId, path, isSpecs, resetAsk, resetRemove]);
   return { query, ask, remove };
 }

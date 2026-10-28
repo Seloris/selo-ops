@@ -20,8 +20,8 @@ export type PanelSubject =
   | { kind: "blueprint"; blueprint: Blueprint }
   | { kind: "sheet"; sheet: SpecSheet; touching: { blueprint: Blueprint; lines: DeltaLine[] }[] }
   | { kind: "ideas" | "debt"; title: string }
-  // projects FR-19: the questions on the whole project.
-  | { kind: "ask"; title: string };
+  // projects FR-19, FR-23: the questions on the whole project, or on all its specs.
+  | { kind: "ask"; scope: "project" | "specs"; title: string };
 
 export interface FileText {
   isPending: boolean;
@@ -83,7 +83,11 @@ export function ProjectPanel({
 }) {
   const title = subject.kind === "blueprint" ? subject.blueprint.title : subject.kind === "sheet" ? subject.sheet.title : subject.title;
   const kindLabel =
-    subject.kind === "blueprint" ? null : subject.kind === "sheet" ? t(`projects.panel.kind.${subject.sheet.kind}` as MessageKey) : t(`projects.panel.kind.${subject.kind}`);
+    subject.kind === "blueprint" ? null : subject.kind === "sheet"
+        ? t(`projects.panel.kind.${subject.sheet.kind}` as MessageKey)
+        : subject.kind === "ask" && subject.scope === "specs"
+          ? t("projects.panel.kind.askSpecs")
+          : t(`projects.panel.kind.${subject.kind}`);
   const sheetKind = subject.kind === "sheet" && subject.sheet.kind === "page" ? "page" : "domain";
   const none = t("projects.panel.none");
   // The summary, the whole text and the questions in three tabs, so the delta and the decisions never show twice; the panel is keyed on its file.

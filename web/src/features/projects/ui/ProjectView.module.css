@@ -96,6 +96,14 @@
   border-radius: var(--radius);
 }
 
+/* projects FR-23: the section's title, its « Demander à Claude » at the end of the line. */
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .group {
   display: flex;
   align-items: center;
