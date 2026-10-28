@@ -22,6 +22,7 @@ import { useProjectFileQuery } from "../data/useProjectFileQuery.ts";
 import { useProjectsQuery } from "../data/useProjectsQuery.ts";
 import { AskError, useQuestions } from "../data/useQuestions.ts";
 import { localDay } from "../ui/changelog.ts";
+import { parseFilter, writeFilter } from "../ui/blueprintList.ts";
 import { askErrorText } from "../ui/questions.ts";
 import { ProjectCards } from "../ui/ProjectCards.tsx";
 import { ProjectPanel, type PanelSubject } from "../ui/ProjectPanel.tsx";
@@ -60,6 +61,8 @@ export function ProjectsPage() {
   const path = params.get("file");
   // projects FR-19: the questions on the whole project, in the panel.
   const isAsking = params.get("ask") === "project";
+  // projects FR-24: the filters of the blueprints' list.
+  const blueprintFilter = parseFilter(params);
 
   const [panelWidth, setPanelWidth] = useState(() => parsePanelWidth(readStored(PANEL_WIDTH_KEY)));
   const [isResizing, setResizing] = useState(false);
@@ -112,16 +115,20 @@ export function ProjectsPage() {
   );
   const ageOf = (iso: string) => age(now - Date.parse(iso));
 
+  // `replace` for a change that should not stack up in the history, such as each key typed in a search.
   const setAddress = useCallback(
-    (patch: Record<string, string | null>) =>
-      setParams((p) => {
-        const next = new URLSearchParams(p);
-        for (const [key, value] of Object.entries(patch)) {
-          if (value === null) next.delete(key);
-          else next.set(key, value);
-        }
-        return next;
-      }),
+    (patch: Record<string, string | null>, { replace = false }: { replace?: boolean } = {}) =>
+      setParams(
+        (p) => {
+          const next = new URLSearchParams(p);
+          for (const [key, value] of Object.entries(patch)) {
+            if (value === null) next.delete(key);
+            else next.set(key, value);
+          }
+          return next;
+        },
+        { replace },
+      ),
     [setParams],
   );
 
@@ -249,14 +256,16 @@ export function ProjectsPage() {
                     today={localDay(now)}
                     liveOf={liveOf}
                     ageOf={ageOf}
-                    onBack={() => setAddress({ project: null, file: null, ask: null })}
+                    filter={blueprintFilter}
+                    onFilter={(f) => setAddress(writeFilter(f), { replace: true })}
+                    onBack={() => setAddress({ project: null, file: null, ask: null, q: null, sheets: null })}
                     onOpenFile={(p) => setAddress({ file: p, ask: null })}
                     onAsk={() => setAddress({ file: null, ask: "project" })}
                     onCopy={(prompt) => void copy(prompt)}
                   />
                 ) : (
                   <>
-                    <Button size="sm" onClick={() => setAddress({ project: null, file: null, ask: null })}>
+                    <Button size="sm" onClick={() => setAddress({ project: null, file: null, ask: null, q: null, sheets: null })}>
                       ← {t("projects.view.back")}
                     </Button>
                     <EmptyState>{t("projects.empty.notFound")}</EmptyState>
@@ -265,7 +274,7 @@ export function ProjectsPage() {
               ) : projects.length === 0 ? (
                 <EmptyState>{t("projects.empty.none")}</EmptyState>
               ) : (
-                <ProjectCards projects={projects} liveOf={(p) => liveOf(p.sessionIds)} onOpen={(id) => setAddress({ project: id, file: null, ask: null })} />
+                <ProjectCards projects={projects} liveOf={(p) => liveOf(p.sessionIds)} onOpen={(id) => setAddress({ project: id, file: null, ask: null, q: null, sheets: null })} />
               )}
             </>
           )}

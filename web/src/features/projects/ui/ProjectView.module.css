@@ -330,6 +330,140 @@
   cursor: pointer;
 }
 
+/* projects FR-24: the search and the sheets' chips above the list. */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.searchLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.search {
+  flex: 0 1 22em;
+  min-width: 12em;
+}
+
+.matches {
+  font-size: 0.86em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* A sheet to filter on: its kind's icon and colour (app FR-04), its edge in that colour once chosen. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: calc(var(--control-h) - 8px);
+  padding: 0 10px;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  white-space: nowrap;
+  color: var(--text);
+  background: var(--item-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: background-color 0.12s;
+}
+
+.chip svg {
+  width: 13px;
+  height: 13px;
+  color: var(--spec);
+}
+
+.chip:hover {
+  background: var(--surface-2);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.chip[aria-pressed="true"] {
+  font-weight: 600;
+  background: color-mix(in srgb, var(--spec) 14%, transparent);
+  border-color: var(--spec);
+  box-shadow: inset 0 0 0 var(--border-width) var(--spec);
+}
+
+.chipCount {
+  padding: 0 6px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+}
+
+/* projects FR-08: one period of the list, folded or open. */
+.period + .period {
+  margin-top: 2px;
+}
+
+.periodHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 4px;
+  list-style: none;
+  font-size: 0.86em;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.periodHead::-webkit-details-marker {
+  display: none;
+}
+
+.periodHead > svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  transition: transform 0.12s;
+}
+
+.period[open] > .periodHead > svg {
+  transform: rotate(90deg);
+}
+
+.periodHead:hover .periodName {
+  color: var(--text);
+}
+
+.periodHead:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+  border-radius: var(--radius-control);
+}
+
+.periodCount {
+  padding: 0 7px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+}
+
+
 /* The column narrows when the panel is open: follow its width, not the window's. */
 @container (max-width: 760px) {
   .headRow {

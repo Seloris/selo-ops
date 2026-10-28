@@ -4,6 +4,7 @@ What changed in the application, for someone who reads no spec. One entry per pi
 
 ## 2026-10-28
 
+- Added — A project's « Blueprints » list is grouped by period (« Cette semaine », « La semaine dernière », the rest of the month, then one folded group per earlier month), and can be filtered by a search on the title and by chips of the pages and domain sheets each blueprint touches; the filters stay in the address.
 - Changed — A project's view now counts its closed blueprints (« Terminé » or « Legacy ») out of all in its first tile, « Blueprints fermés », instead of the open ones.
 
 ## 2026-10-27

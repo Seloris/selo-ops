@@ -19,6 +19,21 @@
   background: var(--surface-2);
 }
 
+/* projects FR-08: a period's bar in its heading, short. */
+.inlineBar {
+  flex: 0 1 140px;
+}
+
+/* Said by assistive tech only. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .segment {
   flex-basis: 0;
   min-width: 6px;

@@ -43,6 +43,24 @@ export function StateBar({ blueprints, withLegend = false }: { blueprints: Bluep
   );
 }
 
+// A short bar split by state, as phrasing content (inside a <summary>, whose children assistive tech does not read apart):
+// hidden from it, its counts said in words instead.
+export function InlineStateBar({ blueprints }: { blueprints: Blueprint[] }) {
+  const counts = stateCounts(blueprints);
+  if (counts.length === 0) return null;
+  const label = counts.map((c) => `${stateLabel(c.state)} ${c.count}`).join(", ");
+  return (
+    <>
+      <span className={`${styles.bar} ${styles.inlineBar}`} aria-hidden="true" title={label}>
+        {counts.map((c) => (
+          <span key={c.state} className={styles.segment} style={{ ...colorStyle(c.state), flexGrow: c.count }} />
+        ))}
+      </span>
+      <span className={styles.srOnly}>{label}</span>
+    </>
+  );
+}
+
 // `project` BR-03: one pip per stage, filled once ticked, then the review and the merge; `large` lists each stage with its
 // commit (projects FR-11).
 export function ProgressTrack({ blueprint, isLarge = false }: { blueprint: Blueprint; isLarge?: boolean }) {

@@ -77,9 +77,12 @@ export function sheetLists(sheets: SpecSheet[]) {
   };
 }
 
+// A sheet as a blueprint names it: `{component}/{slug}` with several fronts, else its slug.
+export const sheetKey = (sheet: SpecSheet) => (sheet.component ? `${sheet.component}/${sheet.slug}` : sheet.slug);
+
 // The open blueprints touching a sheet, each with its delta lines for that sheet (projects FR-12).
 export function blueprintsTouching(blueprints: Blueprint[], sheet: SpecSheet) {
-  const key = sheet.component ? `${sheet.component}/${sheet.slug}` : sheet.slug;
+  const key = sheetKey(sheet);
   return blueprints
     .filter((b) => isOpenBlueprint(b) && sheet.openBlueprints.includes(b.name))
     .map((b) => ({ blueprint: b, lines: b.delta.filter((d) => d.sheet === key) }));

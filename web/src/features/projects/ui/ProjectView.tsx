@@ -1,11 +1,12 @@
-import type { ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { t, tn, type MessageKey } from "../../../shared/lib/i18n/index.ts";
 import { Button } from "../../../shared/ui/Button.tsx";
 import { CommandBox } from "../../../shared/ui/CommandBox.tsx";
 import { EmptyState } from "../../../shared/ui/EmptyState.tsx";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage.tsx";
-import { BlueprintIcon, BranchIcon, GaugeIcon, HistoryIcon, NoteIcon, TextFileIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
-import { SpecChip } from "../../../shared/ui/SpecKind.tsx";
+import { BlueprintIcon, BranchIcon, ChevronRightIcon, GaugeIcon, HistoryIcon, NoteIcon, TextFileIcon, WarningIcon } from "../../../shared/ui/icons.tsx";
+import { SearchInput } from "../../../shared/ui/SearchInput.tsx";
+import { SpecChip, SpecIcon, specColor } from "../../../shared/ui/SpecKind.tsx";
 import { StatusDot } from "../../../shared/ui/StatusDot.tsx";
 import { Tag } from "../../../shared/ui/Tag.tsx";
 import {
@@ -17,14 +18,24 @@ import {
   type ProjectOverview,
   type SpecSheet,
 } from "../data/projectView.ts";
+import { filterBlueprints, hasFilter, monthLabel, periodGroups, sheetChips, type BlueprintFilter, type Period } from "./blueprintList.ts";
 import { ChangelogTimeline, type ChangelogState } from "./ChangelogTimeline.tsx";
-import { DeltaFigures, DoneSummary, HueChip, LiveSessions, ProgressTrack, SectionTitle, StateBar, StateTag, Tiles, type Hue, type LiveItem } from "./ProjectParts.tsx";
+import { DeltaFigures, DoneSummary, HueChip, InlineStateBar, LiveSessions, ProgressTrack, SectionTitle, StateBar, StateTag, Tiles, type Hue, type LiveItem } from "./ProjectParts.tsx";
 import styles from "./ProjectView.module.css";
 
 export const IDEAS_FILE = ".planning/ideas.md";
 export const DEBT_FILE = ".planning/technical-debt.md";
 
-// projects FR-05 to FR-09 and FR-18: one project's view, in place of the cards.
+// projects FR-08: a group's heading.
+function periodLabel(p: Period): string {
+  if (p.kind === "thisWeek") return t("projects.blueprints.period.thisWeek");
+  if (p.kind === "lastWeek") return t("projects.blueprints.period.lastWeek");
+  if (p.kind === "earlierThisMonth") return t("projects.blueprints.period.earlierThisMonth", { month: monthLabel(p.month, { isBare: true }) });
+  if (p.kind === "month") return monthLabel(p.month);
+  return t("projects.blueprints.period.undated");
+}
+
+// projects FR-05 to FR-09, FR-18 and FR-24: one project's view, in place of the cards.
 export function ProjectView({
   project: p,
   openPath,
@@ -32,6 +43,8 @@ export function ProjectView({
   today,
   liveOf,
   ageOf,
+  filter,
+  onFilter,
   onBack,
   onOpenFile,
   onAsk,
@@ -46,6 +59,9 @@ export function ProjectView({
   liveOf: (ids: string[]) => LiveItem[];
   // « 3 h 05 » since an ISO date.
   ageOf: (iso: string) => string;
+  // projects FR-24: the filters of the blueprints' list, kept in the address.
+  filter: BlueprintFilter;
+  onFilter: (filter: BlueprintFilter) => void;
   onBack: () => void;
   onOpenFile: (path: string) => void;
   // projects FR-19: opens the questions on the whole project in the panel.
@@ -54,6 +70,24 @@ export function ProjectView({
 }) {
   const open = p.blueprints.filter(isOpenBlueprint);
   const { listed, legacy } = blueprintLists(p.blueprints);
+  // projects FR-08 and FR-24: the list filtered, then grouped by period. The search's text lives here as it is typed, the
+  // address following it: a field fed back from the address loses keys and its caret.
+  const [text, setText] = useState(filter.text);
+  const current: BlueprintFilter = { ...filter, text };
+  const isFiltering = hasFilter(current);
+  const shown = filterBlueprints(listed, current);
+  const shownLegacy = filterBlueprints(legacy, current);
+  const matchCount = shown.length + shownLegacy.length;
+  const groups = periodGroups(shown, today);
+  const chips = sheetChips(p.sheets, p.blueprints);
+  // While a filter holds, each change of it opens every group again.
+  const filterKey = isFiltering ? `|${text}|${current.sheets.join(",")}` : "";
+  const changeFilter = (next: BlueprintFilter) => {
+    setText(next.text);
+    onFilter(next);
+  };
+  const toggleSheet = (key: string) =>
+    changeFilter({ ...current, sheets: current.sheets.includes(key) ? current.sheets.filter((k) => k !== key) : [...current.sheets, key] });
   const { pages, domains } = sheetLists(p.sheets);
   const frs = p.sheets.reduce((n, s) => n + s.frCount, 0);
   const brs = p.sheets.reduce((n, s) => n + s.brCount, 0);
@@ -295,16 +329,74 @@ export function ProjectView({
           <EmptyState>{t("projects.empty.blueprints")}</EmptyState>
         ) : (
           <>
-            {headRow(
-              ["projects.columns.date", "projects.columns.blueprint", "projects.columns.state", "projects.columns.sheets", "projects.columns.delta", "projects.columns.progress"],
-              styles.bpRow,
-              ["projects.columns.delta"],
+            <div className={styles.filters}>
+              <div className={styles.searchLine}>
+                <div className={styles.search}>
+                  <SearchInput
+                    aria-label={t("projects.blueprints.search")}
+                    placeholder={t("projects.blueprints.search")}
+                    value={text}
+                    onChange={(event) => changeFilter({ ...current, text: event.target.value })}
+                  />
+                </div>
+                {/* Mounted even when empty, so that its first count is read out. */}
+                <span className={styles.matches} aria-live="polite">
+                  {isFiltering && t("projects.blueprints.matches", { count: matchCount, total: p.blueprints.length })}
+                </span>
+                {isFiltering && (
+                  <Button size="sm" variant="ghost" onClick={() => changeFilter({ text: "", sheets: [] })}>
+                    {t("projects.blueprints.clear")}
+                  </Button>
+                )}
+              </div>
+              {chips.length > 0 && (
+                <div className={styles.chips} role="group" aria-label={t("projects.blueprints.sheetFilter")}>
+                  {chips.map((c) => {
+                    const kind = c.sheet.kind === "page" ? "page" : "domain";
+                    return (
+                      <button
+                        key={c.key}
+                        type="button"
+                        className={styles.chip}
+                        style={{ "--spec": specColor(kind) } as CSSProperties}
+                        aria-pressed={current.sheets.includes(c.key)}
+                        title={tn("projects.blueprints.chipCount", c.count, { title: c.sheet.title })}
+                        onClick={() => toggleSheet(c.key)}
+                      >
+                        <SpecIcon kind={kind} />
+                        {c.key}
+                        <span className={styles.chipCount}>{c.count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            {matchCount === 0 ? (
+              <EmptyState>{t("projects.blueprints.noMatch")}</EmptyState>
+            ) : (
+              headRow(
+                ["projects.columns.date", "projects.columns.blueprint", "projects.columns.state", "projects.columns.sheets", "projects.columns.delta", "projects.columns.progress"],
+                styles.bpRow,
+                ["projects.columns.delta"],
+              )
             )}
-            <ul className={styles.rows}>{listed.map(blueprintRow)}</ul>
-            {legacy.length > 0 && (
-              <details className={styles.legacy}>
-                <summary>{tn("projects.blueprints.legacy", legacy.length)}</summary>
-                <ul className={styles.rows}>{legacy.map(blueprintRow)}</ul>
+            {groups.map((g) => (
+              // While a filter holds, every group left opens: its key changes with the filter, so each one starts again from `open`.
+              <details key={`${g.key}${filterKey}`} className={styles.period} open={isFiltering || g.isOpen}>
+                <summary className={styles.periodHead}>
+                  <ChevronRightIcon />
+                  <span className={styles.periodName}>{periodLabel(g.period)}</span>
+                  <span className={styles.periodCount}>{g.blueprints.length}</span>
+                  <InlineStateBar blueprints={g.blueprints} />
+                </summary>
+                <ul className={styles.rows}>{g.blueprints.map(blueprintRow)}</ul>
+              </details>
+            ))}
+            {shownLegacy.length > 0 && (
+              <details key={`legacy${filterKey}`} className={styles.legacy} open={isFiltering}>
+                <summary>{tn("projects.blueprints.legacy", shownLegacy.length)}</summary>
+                <ul className={styles.rows}>{shownLegacy.map(blueprintRow)}</ul>
               </details>
             )}
           </>
