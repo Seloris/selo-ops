@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { sql } from "drizzle-orm";
 import { createApp } from "../src/app.js";
 import { migrateDatabase, openDatabase, type Database } from "../src/db/client.js";
+import type { LaunchInput, SessionLauncher } from "../src/features/launches/launches.launcher.js";
 import type { QuestionRunner, RunInput, RunResult } from "../src/features/questions/questions.runner.js";
 import type { ClaudeStatusFile } from "../src/features/sessions/sessions.desktop.js";
 import type { ProjectFileInput, SessionFile } from "../src/features/sessions/sessions.export.js";
@@ -165,6 +166,26 @@ function createFakeRunner() {
   return { runner, runs, clear };
 }
 
+// Never the real `claude`: each launch is recorded and answers what the test set, a success by default.
+function createFakeLauncher() {
+  const launches: LaunchInput[] = [];
+  let outcome: () => Promise<{ id: string | null }> = () => Promise.resolve({ id: "bg-1234" });
+  const launcher: SessionLauncher = {
+    launch: (input) => {
+      launches.push(input);
+      return outcome();
+    },
+  };
+  const answer = (next: () => Promise<{ id: string | null }>) => {
+    outcome = next;
+  };
+  const clear = () => {
+    launches.length = 0;
+    outcome = () => Promise.resolve({ id: "bg-1234" });
+  };
+  return { launcher, launches, answer, clear };
+}
+
 export async function createTestContext({ questionTimeoutMs }: { questionTimeoutMs?: number } = {}) {
   const db: Database = openDatabase();
   await migrateDatabase(db);
@@ -176,6 +197,7 @@ export async function createTestContext({ questionTimeoutMs }: { questionTimeout
   const plugins = createPluginsFile();
   const settings = createSettingsFile();
   const questions = createFakeRunner();
+  const launcher = createFakeLauncher();
   const app = createApp({
     db,
     clock,
@@ -185,6 +207,7 @@ export async function createTestContext({ questionTimeoutMs }: { questionTimeout
     claudePluginsFile: plugins.file,
     claudeSettingsFile: settings.file,
     questionRunner: questions.runner,
+    sessionLauncher: launcher.launcher,
     ...(questionTimeoutMs === undefined ? {} : { questionTimeoutMs }),
   });
   const seed = {
@@ -197,6 +220,7 @@ export async function createTestContext({ questionTimeoutMs }: { questionTimeout
   };
   const reset = async () => {
     await questions.clear();
+    launcher.clear();
     const tables = await db.execute<{ table_name: string }>(sql`
       select table_name from information_schema.tables
       where table_schema = 'public' and table_name <> '__drizzle_migrations'
@@ -212,5 +236,5 @@ export async function createTestContext({ questionTimeoutMs }: { questionTimeout
     settings.clear();
     clock.set(EPOCH);
   };
-  return { app, db, clock, seed, code, settings, runs: questions.runs, reset, clearStatus: statuses.clear };
+  return { app, db, clock, seed, code, settings, runs: questions.runs, launches: launcher.launches, answerLaunch: launcher.answer, reset, clearStatus: statuses.clear };
 }

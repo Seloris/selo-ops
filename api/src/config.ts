@@ -9,7 +9,7 @@ const envSchema = z.object({
   PGLITE_DIR: z.string().default(".data/pglite"),
   SELO_OPS_DIR: z.string().optional(),
   CLAUDE_CONFIG_DIR: z.string().optional(),
-  // The Claude Code executable that answers questions (`question` BR-01): `claude` on the PATH by default.
+  // The Claude Code executable that answers questions (`question` BR-01) and starts sessions (`session` BR-24): `claude` on the PATH by default.
   CLAUDE_BIN: z.string().min(1).default("claude"),
 });
 

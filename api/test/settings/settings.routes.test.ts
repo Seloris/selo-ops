@@ -261,4 +261,73 @@ describe("settings routes", () => {
       expect(ctx.settings.read()).toBe('{"env":{}}');
     });
   });
+
+  // `settings` BR-05: Selo Ops' own settings, in its database, never in the file.
+  describe("seloOps.cliLaunch", () => {
+    it("is off by default", async () => {
+      // Act
+      const settings = await read();
+
+      // Assert
+      expect(settings.seloOps).toEqual({ cliLaunch: false });
+    });
+
+    it("is saved in Selo Ops' data and read back, the file left untouched", async () => {
+      // Arrange
+      ctx.settings.write('{"env":{}}');
+
+      // Act
+      const res = await save({ seloOps: { cliLaunch: true } });
+
+      // Assert
+      expect(res.status).toBe(200);
+      expect(settingsSchema.parse(res.body).seloOps.cliLaunch).toBe(true);
+      expect((await read()).seloOps.cliLaunch).toBe(true);
+      expect(ctx.settings.read()).toBe('{"env":{}}');
+    });
+
+    it("is turned off again", async () => {
+      // Arrange
+      await save({ seloOps: { cliLaunch: true } });
+
+      // Act
+      await save({ seloOps: { cliLaunch: false } });
+
+      // Assert
+      expect((await read()).seloOps.cliLaunch).toBe(false);
+    });
+
+    it("is saved beside an unreadable file", async () => {
+      // Arrange
+      ctx.settings.write("{ broken");
+
+      // Act
+      const res = await save({ seloOps: { cliLaunch: true } });
+
+      // Assert
+      expect(res.status).toBe(200);
+      expect(settingsSchema.parse(res.body)).toMatchObject({ state: "unreadable", seloOps: { cliLaunch: true } });
+      expect(ctx.settings.read()).toBe("{ broken");
+    });
+
+    it("is not saved when the SELO_ keys saved with it are refused", async () => {
+      // Arrange
+      ctx.settings.write("{ broken");
+
+      // Act
+      const res = await save({ SELO_ROUTING: "on", seloOps: { cliLaunch: true } });
+
+      // Assert
+      expect(res.status).toBe(409);
+      expect((await read()).seloOps.cliLaunch).toBe(false);
+    });
+
+    it("returns 400 for an unknown key of seloOps", async () => {
+      // Act
+      const res = await save({ seloOps: { other: true } });
+
+      // Assert
+      expect(res.status).toBe(400);
+    });
+  });
 });

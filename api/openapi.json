@@ -1760,6 +1760,9 @@
               "roles",
               "models"
             ]
+          },
+          "seloOps": {
+            "$ref": "#/components/schemas/SeloOpsSettings"
           }
         },
         "required": [
@@ -1767,7 +1770,8 @@
           "state",
           "error",
           "values",
-          "catalog"
+          "catalog",
+          "seloOps"
         ]
       },
       "SeloSettingValues": {
@@ -1831,6 +1835,17 @@
           "SELO_MODEL_EXPLORER",
           "SELO_ROUTING",
           "SELO_COMMIT"
+        ]
+      },
+      "SeloOpsSettings": {
+        "type": "object",
+        "properties": {
+          "cliLaunch": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "cliLaunch"
         ]
       },
       "SeloSettingChanges": {
@@ -1928,6 +1943,15 @@
             "enum": [
               "auto"
             ]
+          },
+          "seloOps": {
+            "type": "object",
+            "properties": {
+              "cliLaunch": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "additionalProperties": false
@@ -2796,7 +2820,7 @@
     },
     "/v1/settings": {
       "get": {
-        "summary": "The person's selo settings: the SELO_ keys of the env block of Claude Code's user settings file",
+        "summary": "The person's selo settings (the SELO_ keys of the env block of Claude Code's user settings file) and Selo Ops' own",
         "responses": {
           "200": {
             "description": "The settings, as the file holds them",
@@ -2811,7 +2835,7 @@
         }
       },
       "patch": {
-        "summary": "Save the changed settings: the file read again, only these keys of its env block written",
+        "summary": "Save the changed settings: the file read again, only these keys of its env block written; Selo Ops' own in its database",
         "requestBody": {
           "content": {
             "application/json": {
@@ -2843,7 +2867,7 @@
             }
           },
           "409": {
-            "description": "The file is unreadable: nothing written",
+            "description": "The file is unreadable and a SELO_ key changed: nothing written",
             "content": {
               "application/problem+json": {
                 "schema": {

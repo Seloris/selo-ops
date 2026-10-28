@@ -42,6 +42,9 @@ export const settingValuesSchema = z
   })
   .meta({ id: "SeloSettingValues" });
 
+// `settings` BR-05: Selo Ops' own settings, in its database, readable and saved even when the file is unreadable.
+export const seloOpsSettingsSchema = z.object({ cliLaunch: z.boolean() }).meta({ id: "SeloOpsSettings" });
+
 export const settingsSchema = z
   .object({
     path: z.string(),
@@ -56,6 +59,7 @@ export const settingsSchema = z
       roles: z.array(roleSchema),
       models: z.array(modelSchema),
     }),
+    seloOps: seloOpsSettingsSchema,
   })
   .meta({ id: "SeloSettings" });
 
@@ -72,6 +76,7 @@ export const settingChangesSchema = z
     SELO_MODEL_EXPLORER: change(modelSchema),
     SELO_ROUTING: change(z.literal("on")),
     SELO_COMMIT: change(z.literal("auto")),
+    seloOps: z.strictObject({ cliLaunch: z.boolean().optional() }).optional(),
   })
   .meta({ id: "SeloSettingChanges" });
 
@@ -88,19 +93,19 @@ const settingsResponse = { description: "The settings, as the file holds them", 
 registry.registerPath({
   method: "get",
   path: "/v1/settings",
-  summary: "The person's selo settings: the SELO_ keys of the env block of Claude Code's user settings file",
+  summary: "The person's selo settings (the SELO_ keys of the env block of Claude Code's user settings file) and Selo Ops' own",
   responses: { 200: settingsResponse },
 });
 
 registry.registerPath({
   method: "patch",
   path: "/v1/settings",
-  summary: "Save the changed settings: the file read again, only these keys of its env block written",
+  summary: "Save the changed settings: the file read again, only these keys of its env block written; Selo Ops' own in its database",
   request: { body: { content: { "application/json": { schema: settingChangesSchema } } } },
   responses: {
     200: settingsResponse,
     400: problem("An unknown key, or a value not allowed"),
-    409: problem("The file is unreadable: nothing written"),
+    409: problem("The file is unreadable and a SELO_ key changed: nothing written"),
     500: problem("The file could not be written"),
   },
 });

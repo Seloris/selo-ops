@@ -1,6 +1,9 @@
 import express from "express";
 import type { Database } from "./db/client.js";
 import { healthRoutes } from "./features/health/health.routes.js";
+import type { SessionLauncher } from "./features/launches/launches.launcher.js";
+import { launchesRoutes } from "./features/launches/launches.routes.js";
+import { createLaunchService } from "./features/launches/launches.service.js";
 import { createPlanningReader } from "./features/projects/projects.planning.js";
 import { projectsRoutes } from "./features/projects/projects.routes.js";
 import { createProjectService } from "./features/projects/projects.service.js";
@@ -18,6 +21,7 @@ import { createDesktopSessionLinkRepository, createSessionArchiveRepository, cre
 import { sessionsRoutes } from "./features/sessions/sessions.routes.js";
 import { createSessionService } from "./features/sessions/sessions.service.js";
 import { createSettingsFile } from "./features/settings/settings.file.js";
+import { createAppSettingsRepository } from "./features/settings/settings.repository.js";
 import { settingsRoutes } from "./features/settings/settings.routes.js";
 import { createSettingsService } from "./features/settings/settings.service.js";
 import { statsRoutes } from "./features/stats/stats.routes.js";
@@ -40,12 +44,14 @@ export interface AppContext {
   claudeSettingsFile: string;
   // Answers the questions (`question` BR-01): Claude Code in the server, a fake in the tests and the demo.
   questionRunner: QuestionRunner;
+  // Starts a session in the background (`session` BR-24): Claude Code in the server, a fake in the tests and the demo.
+  sessionLauncher: SessionLauncher;
   // `question` BR-04: 5 minutes unless a test says otherwise.
   questionTimeoutMs?: number;
 }
 
 // No sign-in: a local dashboard of the developer's own sessions, every route is public.
-export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile, questionRunner, questionTimeoutMs }: AppContext) {
+export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjectsDir, claudePluginsFile, claudeSettingsFile, questionRunner, sessionLauncher, questionTimeoutMs }: AppContext) {
   const app = express();
   app.use(express.json());
   app.use(healthRoutes({ clock }));
@@ -72,7 +78,9 @@ export function createApp({ db, clock, opsDir, claudeSessionsDir, claudeProjects
     }),
   );
   app.use(statsRoutes({ stats: createStatsService({ opsExport, questions: questionRepository, clock }) }));
-  app.use(settingsRoutes({ settings: createSettingsService({ file: createSettingsFile(claudeSettingsFile) }) }));
+  const appSettings = createAppSettingsRepository(db);
+  app.use(settingsRoutes({ settings: createSettingsService({ file: createSettingsFile(claudeSettingsFile), appSettings }) }));
+  app.use(launchesRoutes({ launches: createLaunchService({ projects, appSettings, launcher: sessionLauncher }) }));
   app.use(errorHandler);
   return app;
 }

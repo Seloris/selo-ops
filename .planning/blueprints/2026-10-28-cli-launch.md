@@ -25,6 +25,14 @@ Pages: `sessions-live` · Domain: `session`, `settings`, `app` · Components: `a
 - Storage → one `app_settings` key–value table with a migration; `GET`/`PATCH /v1/settings` carry `seloOps.cliLaunch` beside the `SELO_` settings.
 - Demo → a fake launcher answering success, so the demo never starts Claude Code.
 
+### Decided during build
+- The launch route → `POST /v1/projects/{id}/sessions` with the folder, the command, the request (`title`) and « Mode auto », answering 201 with the Remote Control name, the folder and the id `--bg` printed (the project's own resource, as its questions).
+- The folder the session starts in → the export's spelling of the checkout the given folder matches, case and slashes aside (never the body's own string).
+- A command starting with a dash → refused, 400 (Claude Code would read it as an option; no selo command nor request starts so).
+- The Remote Control name → the request on one line, 40 characters at most with « … » (`{projet} · {demande}`).
+- `--bg`'s id → the last non-empty line it prints, none when it prints nothing; awaited on the process's exit, not on its pipes, which the background session may keep open.
+- Saving « Lancer les sessions en CLI » → after the settings file is written, so a refused `SELO_` save saves nothing; a save that changes no `SELO_` key never checks the file, so the switch saves beside an unreadable one (`app` FR-12).
+
 ## Stages
 1. api — `feat(cli-launch): api — CLI mode setting and background session launch`
 2. web — `feat(cli-launch): web — « Lancer la session » with its recap, buttons off without the CLI mode`
@@ -35,7 +43,7 @@ Pages: `sessions-live` · Domain: `session`, `settings`, `app` · Components: `a
 - browser (demo, 1280 and 375 px): CLI off, the three « Nouvelle session » buttons disabled with the hint; turn it on in « Réglages »; the window's « Lancer la session » opens the recap, « Retour » keeps the form, « Mode auto » stays on at the next window, « Lancer » closes with the toast.
 
 ## Progress
-- [ ] Stage 1 — api
+- [x] Stage 1 — api
 - [ ] Stage 2 — web
 - [ ] Review
 - [ ] Browser test

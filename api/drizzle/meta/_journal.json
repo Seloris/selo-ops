@@ -43,6 +43,13 @@
       "when": 1793177721080,
       "tag": "0005_drop_summary_questions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793196611884,
+      "tag": "0006_app_settings",
+      "breakpoints": true
     }
   ]
 }

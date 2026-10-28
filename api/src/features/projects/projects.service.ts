@@ -1,4 +1,4 @@
-import { NotFoundError } from "../../shared/errors.js";
+import { NotFoundError, ValidationError } from "../../shared/errors.js";
 import type { ExportBlueprint, ExportSheet, OpsExportReader, ProjectFile, SessionFile } from "../sessions/sessions.export.js";
 import type { PlanningReader } from "./projects.planning.js";
 import type { SlotReader } from "./projects.slots.js";
@@ -172,6 +172,13 @@ export interface QuestionTarget {
   root: string;
 }
 
+export interface LaunchTarget {
+  // The project's name, as the list gives it.
+  name: string;
+  // The checkout the session starts in, as the export spells it.
+  root: string;
+}
+
 export function createProjectService({ opsExport, planning, slots }: { opsExport: OpsExportReader; planning: PlanningReader; slots: SlotReader }) {
   const checkoutsOf = () => {
     const { projects, sessions } = opsExport.read();
@@ -204,6 +211,14 @@ export function createProjectService({ opsExport, planning, slots }: { opsExport
       const isBlueprint = [group.base, ...group.worktrees].some((c) => c.blueprints.some((b) => b.file === path));
       if (root === undefined || !isBlueprint) throw new NotFoundError("File", path);
       return { kind: "blueprint", root };
+    },
+    // `session` BR-24: the project's base checkout or one of its worktrees, as the export lists them, never another folder.
+    launchTarget: (id: string, folder: string): LaunchTarget => {
+      const group = checkoutsOf().groups.find((g) => keyOf(g.base.root) === id);
+      if (group === undefined) throw new NotFoundError("Project", id);
+      const checkout = [group.base, ...group.worktrees].find((c) => norm(c.root) === norm(folder));
+      if (checkout === undefined) throw new ValidationError({ "body.folder": ["Not a checkout nor a worktree of the project"] });
+      return { name: group.base.manifest?.name ?? lastSegment(group.base.root), root: checkout.root };
     },
   };
 }

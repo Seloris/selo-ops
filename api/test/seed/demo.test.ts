@@ -12,6 +12,7 @@ import { settingsSchema } from "../../src/features/settings/settings.schema.js";
 import { statsResponseSchema } from "../../src/features/stats/stats.schema.js";
 import { seedDemo } from "../../src/seed/demo.js";
 import { createDemoQuestionRunner } from "../../src/seed/demo.questions.js";
+import { createDemoLauncher } from "../../src/seed/demo.launcher.js";
 import { createTestClock } from "../setup.js";
 
 async function demoApp() {
@@ -29,7 +30,7 @@ async function demoApp() {
   await migrateDatabase(db);
   const clock = createTestClock();
   await seedDemo(db, clock, folders);
-  return createApp({ db, clock, ...folders, questionRunner: createDemoQuestionRunner(10) });
+  return createApp({ db, clock, ...folders, questionRunner: createDemoQuestionRunner(10), sessionLauncher: createDemoLauncher(0) });
 }
 
 // Each test seeds a fresh demo, its real repository included (git processes): slower than a route test.
