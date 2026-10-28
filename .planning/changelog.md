@@ -4,6 +4,7 @@ What changed in the application, for someone who reads no spec. One entry per pi
 
 ## 2026-10-28
 
+- Changed — The header now shows the Selo Ops logo, the app's icon beside a « SELO OPS » wordmark with « OPS » in the accent colour, in both themes.
 - Fixed — The pulsing dot of a session « En cours » now pulses in steps, so an open Selo Ops tab no longer keeps the graphics card busy.
 - Fixed — A session whose work a background subagent carries on no longer shows « Tour terminé » after each short exchange you have with it: it stays « En cours » until that subagent finishes.
 - Fixed — A session whose turn ended while selo's end-of-turn hook failed to record it no longer stays « En cours » for ever: it shows « Tour terminé » as soon as Claude Code goes idle, and its detail stops counting time there.

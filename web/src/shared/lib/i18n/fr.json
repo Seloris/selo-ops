@@ -1,5 +1,6 @@
 {
-  "app.wordmark": "SELO OPS",
+  "app.brand.name": "SELO",
+  "app.brand.suffix": "OPS",
   "app.nav.label": "Navigation principale",
   "app.nav.live": "Live",
   "app.nav.projects": "Projets",

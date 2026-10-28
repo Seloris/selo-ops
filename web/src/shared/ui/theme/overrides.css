@@ -22,6 +22,7 @@
    --hue-stats           the stats page's section icons and its active bar outline (stats FR-05): sky; the four kinds keep --kind-*
    --log-added, --log-changed, --log-fixed, --log-other   a changelog entry’s kind, in its tag and its dot on the timeline: emerald, cornflower blue, purple, slate (projects FR-18); no state colour
    --spec-page, --spec-domain, --spec-blueprint   a page spec, a domain sheet, a blueprint, wherever one shows (app FR-04): indigo, pink, teal like the blueprint lane
+   --brand-tile, --brand-ring, --brand-dot   the Selo Ops mark in the header (app FR-03), the colours of public/icon.svg: night tile, teal ring, lime dot; the same in both themes, so set once here
    The theme switch (app FR-02) sets data-theme on the root: each block below restates the skin's palette
    of that scheme, so the choice wins over the system's prefers-color-scheme. */
 :root {
@@ -33,6 +34,9 @@
   --flag-soft: rgba(202,138,4,.16);
   --working: #0284c7;
   --mark: #2563eb;
+  --brand-tile: #070b14;
+  --brand-ring: #5eead4;
+  --brand-dot: #84cc16;
   --lane-fastlane: #4d7c0f;
   --lane-pilot: #7c3aed;
   --lane-blueprint: #0f766e;

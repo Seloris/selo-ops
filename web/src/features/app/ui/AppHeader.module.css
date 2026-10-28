@@ -7,11 +7,47 @@
   padding: 14px 32px 0;
 }
 
+/* app FR-03: the mark and the wordmark, side by side. */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mark {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  /* The tile's own rounded corners carry the glow: no box to round. */
+  filter: drop-shadow(0 3px 10px var(--accent-soft));
+}
+
+.tile {
+  fill: var(--brand-tile);
+}
+
+.ring {
+  fill: none;
+  stroke: var(--brand-ring);
+  stroke-width: 36;
+}
+
+.dot {
+  fill: var(--brand-dot);
+}
+
 .wordmark {
-  font-size: 0.87em;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.93em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.suffix {
+  font-weight: 500;
+  color: var(--accent);
 }
 
 .grow {

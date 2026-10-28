@@ -26,7 +26,17 @@ export function AppHeader({
 }) {
   return (
     <header className={styles.bar}>
-      <span className={styles.wordmark}>{t("app.wordmark")}</span>
+      <span className={styles.brand}>
+        {/* The mark of public/icon.svg: a ring around a dot on a night tile. */}
+        <svg className={styles.mark} viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+          <rect className={styles.tile} width="512" height="512" rx="112" />
+          <circle className={styles.ring} cx="256" cy="256" r="150" />
+          <circle className={styles.dot} cx="256" cy="256" r="58" />
+        </svg>
+        <span className={styles.wordmark}>
+          {t("app.brand.name")} <span className={styles.suffix}>{t("app.brand.suffix")}</span>
+        </span>
+      </span>
       <NavTabs
         label={t("app.nav.label")}
         tabs={[
