@@ -2,6 +2,10 @@
 
 What changed in the application, for someone who reads no spec. One entry per piece of work that reaches the base branch, written by the work's last commit; never edited afterwards. Newest day first, newest entry first under its day. Format: `- {Added|Changed|Fixed} — {one or two sentences from the user's side: what they can now see or do}.`, then ` ([blueprint](blueprints/{file}))` for a blueprint's work.
 
+## 2026-10-28
+
+- Changed — A project's view now counts its closed blueprints (« Terminé » or « Legacy ») out of all in its first tile, « Blueprints fermés », instead of the open ones.
+
 ## 2026-10-27
 
 - Added — The projects page can ask Claude about a blueprint, a spec or the whole project: a « Questions » tab on a blueprint's or a sheet's panel offers « Explique-moi vite », « Résume » or a free question, and « Demander à Claude » asks about the whole project; Claude only reads the project, answers in French within a few minutes, and the answers stay until deleted. ([blueprint](blueprints/2026-10-27-ask-claude.md))

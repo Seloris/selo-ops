@@ -803,7 +803,7 @@
   "projects.view.slotRunningFor": "En cours depuis {age}",
   "projects.view.slotStopped": "Arrêté",
   "projects.view.unknown": "—",
-  "projects.tiles.open": "Blueprints ouverts",
+  "projects.tiles.closed": "Blueprints fermés",
   "projects.tiles.pages": "Pages",
   "projects.tiles.domains": "Fiches de domaine",
   "projects.tiles.frs": "FR",

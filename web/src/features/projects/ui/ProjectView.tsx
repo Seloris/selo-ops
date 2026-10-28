@@ -245,7 +245,7 @@ export function ProjectView({
 
       <Tiles
         tiles={[
-          { label: t("projects.tiles.open"), value: `${open.length} / ${p.blueprints.length}`, kind: "blueprint" },
+          { label: t("projects.tiles.closed"), value: `${p.blueprints.length - open.length} / ${p.blueprints.length}`, kind: "blueprint" },
           { label: t("projects.tiles.pages"), value: pages.length, kind: "page" },
           { label: t("projects.tiles.domains"), value: domains.length, kind: "domain" },
           { label: t("projects.tiles.frs"), value: frs },
