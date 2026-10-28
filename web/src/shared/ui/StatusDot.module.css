@@ -15,7 +15,9 @@
 
 .pulse {
   background: var(--working);
-  animation: pulse 1.6s ease-in-out infinite;
+  /* Stepped, not smooth: four repaints per cycle instead of one per frame, since the dot sits
+     in blurred panels whose backdrop-filter is recomputed on every change. */
+  animation: pulse 1.6s steps(1, end) infinite;
 }
 
 /* Hollow: a ring, the centre transparent. */
@@ -37,5 +39,6 @@
 
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
+  25%, 75% { opacity: 0.65; transform: scale(0.85); }
   50% { opacity: 0.3; transform: scale(0.7); }
 }
